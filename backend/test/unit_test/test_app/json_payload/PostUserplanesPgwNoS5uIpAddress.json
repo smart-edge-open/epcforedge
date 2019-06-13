@@ -1,0 +1,17 @@
+{"id":"5",
+ "uuid":"hello",
+ "function":"SAEGWU",
+ "config":{
+    "s5u_pgw":{"uxp_ip_address":"192.168.120.122"},
+    "s1u":{"up_ip_address":"192.190.120.122"},
+    "s5u_sgw":{"up_ip_address":"192.168.120.122"}
+ },
+ "selectors":[
+    {
+        "id":"select0",
+        "network":{"mcc":"466","mnc":"92"},
+        "uli":{"tai":{"tac":"55"}},
+        "pdn":{"apns":["test5"]}
+    }
+  ]
+}

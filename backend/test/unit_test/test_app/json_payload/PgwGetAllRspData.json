@@ -1,0 +1,13 @@
+{"totalCount":10,
+"items":[
+{"id":"2","uuid":"2","tac":"52","apn_ni":"public.mnc092.mcc466.gprs","s5u_ip":"192.168.120.119","proxy_ip":"192.168.120.119"},
+{"id":"3","uuid":"3","tac":"53","apn_ni":"test3.mnc092.mcc466.gprs","s5u_ip":"192.168.120.120","proxy_ip":"192.168.120.120"},
+{"id":"4","uuid":"4","tac":"54","apn_ni":"test4.mnc092.mcc466.gprs","s5u_ip":"192.168.120.121","proxy_ip":"192.168.120.121"},
+{"id":"5","uuid":"5","tac":"55","apn_ni":"test5.mnc092.mcc466.gprs","s5u_ip":"192.168.120.122","proxy_ip":"192.168.120.122"},
+{"id":"6","uuid":"6","tac":"56","apn_ni":"test6.mnc092.mcc466.gprs","s5u_ip":"192.168.120.123","proxy_ip":"192.168.120.123"},
+{"id":"7","uuid":"7","tac":"57","apn_ni":"test7.mnc092.mcc466.gprs","s5u_ip":"192.168.120.124","proxy_ip":"192.168.120.124"},
+{"id":"8","uuid":"8","tac":"58","apn_ni":"test8.mnc092.mcc466.gprs","s5u_ip":"192.168.120.125","proxy_ip":"192.168.120.125"},
+{"id":"9","uuid":"9","tac":"59","apn_ni":"test9.mnc092.mcc466.gprs","s5u_ip":"192.168.120.126","proxy_ip":"192.168.120.126"},
+{"id":"10","uuid":"10","tac":"5a","apn_ni":"test10.mnc092.mcc466.gprs","s5u_ip":"192.168.120.127","proxy_ip":"192.168.120.127"},
+{"id":"1","uuid":"1","tac":"97","apn_ni":"default.mnc092.mcc466.gprs","s5u_ip":"192.168.100.100","proxy_ip":"192.168.100.100"}],
+"success":true,"msg":""}
