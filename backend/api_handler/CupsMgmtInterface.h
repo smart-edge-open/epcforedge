@@ -1,3 +1,8 @@
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
+
 #ifndef __OAMAGENT__CUPSMGMTINTERFACE__
 #define __OAMAGENT__CUPSMGMTINTERFACE__
 

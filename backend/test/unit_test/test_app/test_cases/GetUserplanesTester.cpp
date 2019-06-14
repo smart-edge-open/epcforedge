@@ -1,3 +1,7 @@
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
 /*******************************************************************************
 * Integration Tests for AppLiveIndicator, which is a handler for POST requests
 * with a payload in JSON.
@@ -32,8 +36,7 @@ int GetUserplanesTester::execute(string& additionalMessage) {
         status_code = "";
         resp_body.clear();		
         connect(TesterBase::host_ip_addr, TesterBase::host_port_num);
-
-		sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL, "" );
+        sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL, "" );
         disconnect();
 		reportTestResult("GetUserPlanesTest_GETALL_SUCCESS",
                            HTTP_SC_OK, "OK",
@@ -44,20 +47,18 @@ int GetUserplanesTester::execute(string& additionalMessage) {
         status_code = "";
         resp_body.clear();		
         connect(TesterBase::host_ip_addr, TesterBase::host_port_num);
-
-		sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL_ID5, "" );
+        sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL_ID5, "" );
         disconnect();
 		reportTestResult("GetUserPlanesTest_GETONE_SUCCESS",
                            HTTP_SC_OK, "OK",
                            status_code, resp_body["result"]);
 
         
-		// GET User plane ID INVALID (DEC format)
+	// GET User plane ID INVALID (DEC format)
         status_code = "";
         resp_body.clear();		
         connect(TesterBase::host_ip_addr, TesterBase::host_port_num);
-
-		sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL_INVALIDID, "" );
+        sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL_INVALIDID, "" );
         disconnect();
 		reportTestResult("GetUserPlanesTest_ID_NOTFOUND",
                            HTTP_SC_USERPLANE_NOT_FOUND, "OK",
@@ -166,8 +167,7 @@ int GetUserplanesTester::execute(string& additionalMessage) {
         status_code = "";
         resp_body.clear();		
         connect(TesterBase::host_ip_addr, TesterBase::host_port_num);
-
-		sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL_INVALID_URI, "" );
+        sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL_INVALID_URI, "" );
         disconnect();
 		reportTestResult("GetUserPlanesTest_INVALIDURI",
                            HTTP_SC_NOT_FOUND, "OK",

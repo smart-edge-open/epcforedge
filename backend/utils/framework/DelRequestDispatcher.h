@@ -1,10 +1,11 @@
-/************************************************************************************
- * <COPYRIGHT_TAG>
- ************************************************************************************/
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
 /**
  * @file  DelRequestDispatcher.h
  * @brief Header file for DelRequestDispatcher
- */
+ ********************************************************************/
 
 #ifndef __MECFCGI__DELREQUESTDISPATCHER__
 #define __MECFCGI__DELREQUESTDISPATCHER__

@@ -1,8 +1,12 @@
-
+/************************************************************ 
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2019 Intel Corporation
+ *************************************************************/
 /**
  * @file    cpfInterface.cpp
- * @brief   Implementation of ControlPlane Function interface between  EPC OAMAgent and EPC control plane
- */
+ * @brief   Implementation of ControlPlane Function interface 
+ *          between EPC OAMAgent and EPC control plane
+ **************************************************************/
 
 #include <cstdint>
 #include <iostream>
@@ -98,16 +102,13 @@ int cpfCurlGetIdByItemIndex(int itemIndex, stringstream &responseData, string &u
     jsonReader.parse(responseData.str().c_str(), jsonData);
     if(jsonData["items"][itemIndex]["id"].isString()){
         OAMAGENT_LOG(INFO, "Userplanes id %s\n",jsonData["items"][itemIndex]["id"].asString().c_str());		
-		upId = jsonData["items"][itemIndex]["id"].asString();
-		return 0;
+        upId = jsonData["items"][itemIndex]["id"].asString();
+        return 0;
     }
     else {
         OAMAGENT_LOG(ERR, "Userplanes id not exist for index %d.\n", itemIndex);	
         return -1;
     }
-
-	
-
     return 0;	 
 }
 
@@ -127,16 +128,13 @@ int cpfCurlGetTacByItemIndex(int itemIndex, stringstream &responseData, string &
     jsonReader.parse(responseData.str().c_str(), jsonData);
     if(jsonData["items"][itemIndex]["tac"].isString()){
         OAMAGENT_LOG(INFO, "Userplanes tac %s\n",jsonData["items"][itemIndex]["tac"].asString().c_str());		
-		tac = jsonData["items"][itemIndex]["tac"].asString();
-		return 0;
-	}
-	else {
+        tac = jsonData["items"][itemIndex]["tac"].asString();
+        return 0;
+    }
+    else {
         OAMAGENT_LOG(ERR, "Userplanes tac not exist for index %d.\n", itemIndex);	
         return -1;
-	}
-
-	
-
+    }
     return 0;	 
 }
 
@@ -149,11 +147,11 @@ int cpfCurlGetTacByItemIndex(int itemIndex, stringstream &responseData, string &
 int cpfCurlGetTotalCount(stringstream &responseData)
 {
     Json::Value  jsonData;
-	Json::Reader jsonReader;
+    Json::Reader jsonReader;
     jsonReader.parse(responseData.str().c_str(), jsonData);
-	if(!jsonData["totalCount"].isInt()){
+    if(!jsonData["totalCount"].isInt()){
 		return -1;
-	}
+    }
 
     OAMAGENT_LOG(INFO, "Response: totalCount %d\n",jsonData["totalCount"].asInt());
     return jsonData["totalCount"].asInt();	 
@@ -198,29 +196,28 @@ int cpfCurlPost(string &url, string &postData, stringstream &responseData)
     // Logging
     OAMAGENT_LOG(INFO, "Starting HTTP POST for url: %s\n", url.c_str());
 
-	#ifdef UNIT_TEST
-	static int postTestCaseNum = 0;
-	if (postTestCaseNum == 7){
-		// last test is negtive test
-		// for post, mocked rsp data actually not enter
-		return -1;
-	}	
-	const char *postTestCaseRspData[7] = { 
-		"{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // PGW ADD
-		"{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // SGW ADD
-		"{\"id\": \"-1\",\"success\": false,\"msg\": \"\"}",  // PGW ADD Failed
-		"{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // PGW ADD		
-		"{\"id\": \"-1\",\"success\": false,\"msg\": \"\"}",	 // SGW ADD Failed	
-		"{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // PGW ADD with error ID response
-		"{\"id\": \"6\",\"success\": true,\"msg\": \"\"}"	 // SGW ADD with error ID response		
-		     };
+#ifdef UNIT_TEST
+    static int postTestCaseNum = 0;
+    if (postTestCaseNum == 7){
+       // last test is negtive test
+       // for post, mocked rsp data actually not enter
+       return -1;
+    }	
+    const char *postTestCaseRspData[7] = { 
+         "{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // PGW ADD
+	 "{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // SGW ADD
+	 "{\"id\": \"-1\",\"success\": false,\"msg\": \"\"}",  // PGW ADD Failed
+	 "{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // PGW ADD		
+	 "{\"id\": \"-1\",\"success\": false,\"msg\": \"\"}",	 // SGW ADD Failed	
+	 "{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // PGW ADD with error ID response
+	 "{\"id\": \"6\",\"success\": true,\"msg\": \"\"}"	 // SGW ADD with error ID response		
+         };
 		
     //UT - direclty return
     responseData << postTestCaseRspData[postTestCaseNum];
-	postTestCaseNum++;
-
+    postTestCaseNum++;
     return 0;
-	#endif
+    #endif
 	
     // curl init
     curl = curl_easy_init();
@@ -301,11 +298,11 @@ int cpfCurlGet(string &url, stringstream &responseData)
     OAMAGENT_LOG(INFO, "Starting HTTP GET for url: %s\n", url.c_str());
 
 #ifdef UNIT_TEST
-	static int getTestCaseNum = 0;
-	if (getTestCaseNum  == 20) {
-		// last test is negtive test
-		return -1;
-	}	
+    static int getTestCaseNum = 0;
+    if (getTestCaseNum  == 20) {
+       // last test is negtive test
+       return -1;
+    }	
     const char *getTestCaseRspData[20] = { 
 		"PgwGetAllRspData",   // PGW GET ALL
 		"SgwGetAllRspData",   // SGW GET ALL
@@ -330,10 +327,8 @@ int cpfCurlGet(string &url, stringstream &responseData)
 		};
 
     //UT - direclty return
-    responseData << JSONFileToString(getTestCaseRspData[getTestCaseNum]);
-	
-	getTestCaseNum++;
-	
+    responseData << JSONFileToString(getTestCaseRspData[getTestCaseNum]);	
+    getTestCaseNum++;	
     return 0;
 #endif
 
@@ -411,24 +406,23 @@ int cpfCurlDelete(string &url, bool &successFlg)
     // Logging
     OAMAGENT_LOG(INFO, "Starting HTTP DELETE for url: %s\n", url.c_str());
 
-	#ifdef UNIT_TEST
-	static int delTestCaseNum = 0;
-	if (delTestCaseNum == 4) {
-		// last test is negtive test
-		return -1;
-	}	
-	const char *delTestCaseRspData[4] = { 
+    #ifdef UNIT_TEST
+    static int delTestCaseNum = 0;
+    if (delTestCaseNum == 4) {
+       // last test is negtive test
+       return -1;
+    }	
+    const char *delTestCaseRspData[4] = { 
 		"{\"success\":true,\"msg\":\"\"}",   //PGW respose for test 1
 		"{\"success\":true,\"msg\":\"\"}",   //SGW respose for test 1		
 		"{\"success\":false,\"msg\":\"\"}",  //PGW respose for test 2
 		"{\"success\":false,\"msg\":\"\"}"};  //SGW respose for test 2
-	static bool delTestCaseSucFlag[4] = {true, true, false, false};	
+    static bool delTestCaseSucFlag[4] = {true, true, false, false};	
     //UT - direclty return
     successFlg   = delTestCaseSucFlag[delTestCaseNum];
-	delTestCaseNum++;
-	
+    delTestCaseNum++;	
     return 0;
-	#endif
+    #endif // END UT TEST
 
 	
     // curl init
@@ -506,14 +500,14 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
 
 
 #ifdef UNIT_TEST
-	static int patchTestCaseNum = 0;
-	if (patchTestCaseNum == 3) {
-		// last test is negtive test
-			// for post, mocked rsp data actually not enter
-		return -1;
-	}
+    static int patchTestCaseNum = 0;
+    if (patchTestCaseNum == 3) {
+        // last test is negtive test
+	// for post, mocked rsp data actually not enter
+	return -1;
+    }
 
-	const char *patchTestCaseRspData[4] = { 
+    const char *patchTestCaseRspData[4] = { 
 		"{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // PGW ADD
 		"{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // SGW ADD
 		"{\"id\": \"-1\",\"success\": false,\"msg\": \"\"}",  // PGW ADD Failed
@@ -522,8 +516,7 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
 		
     //UT - direclty return
     responseData << patchTestCaseRspData[patchTestCaseNum];
-	patchTestCaseNum++;
-
+    patchTestCaseNum++;
     return 0;
 #endif
 

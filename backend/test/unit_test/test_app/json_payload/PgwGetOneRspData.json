@@ -1,1 +1,1 @@
-{"totalCount":1,"items":[{"id":"5","nodeid":"2","tac":"55","apn_ni":"test5.mnc092.mcc466.gprs","s5u_ip":"192.168.120.122","proxy_ip":"192.168.120.122"}],"success":true,"msg":""}
+{"totalCount":1,"items":[{"id":"5","uuid":"2","tac":"55","apn_ni":"test5.mnc092.mcc466.gprs","s5u_ip":"192.168.120.122","proxy_ip":"192.168.120.122"}],"success":true,"msg":""}

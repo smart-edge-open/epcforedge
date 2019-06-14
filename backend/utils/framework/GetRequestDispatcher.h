@@ -1,13 +1,14 @@
-/************************************************************************************
- * <COPYRIGHT_TAG>
- ************************************************************************************/
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
 /**
  * @file  GetRequestDispatcher.h
  * @brief Header file for GetRequestDispatcher
- */
+ ********************************************************************/
 
-#ifndef __MECFCGI__GETREQUESTDISPATCHER__
-#define __MECFCGI__GETREQUESTDISPATCHER__
+#ifndef __OAMAGENT__GETREQUESTDISPATCHER__
+#define __OAMAGENT__GETREQUESTDISPATCHER__
 
 #include "GetRequestHandler.h"
 #include <stdio.h>
@@ -40,4 +41,4 @@ public:
     void registerHandler(const string &action, GetRequestHandler &handler);
 };
 
-#endif /* defined(__MECFCGI__GETREQUESTDISPATCHER__) */
+#endif /* defined(__OAMAGENT__GETREQUESTDISPATCHER__) */

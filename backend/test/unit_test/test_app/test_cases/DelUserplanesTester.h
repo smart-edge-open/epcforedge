@@ -1,3 +1,7 @@
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
 /*******************************************************************************
 * Integration Tests for AppLiveIndicator, which is a handler for POST requests
 * with a payload in JSON.
@@ -18,4 +22,4 @@ class DelUserplanesTester: public TesterBase
     	int execute(string &additionalMessage);
 };
 
-#endif // #ifndef MECFCGI_APPLIVEINDICATORTESTER_H
+#endif // #ifndef DEL

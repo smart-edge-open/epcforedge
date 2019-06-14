@@ -1,7 +1,12 @@
+/****************************************************************
+ * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2019 Intel Corporation
+ ****************************************************************/
 /**
  * @file    cpfInterface.h
- * @brief   Header file of ControlPlane Function interface between  EPC OAMAgent and EPC control plane
- */
+ * @brief   Header file of ControlPlane Function interface between 
+ *          EPC OAMAgent and EPC control plane
+ ****************************************************************/
 
 #ifndef __OAMAGENT__CPFINTERFACE__
 #define __OAMAGENT__CPFINTERFACE__

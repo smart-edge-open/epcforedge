@@ -1,10 +1,11 @@
-/************************************************************************************
- * <COPYRIGHT_TAG>
- ************************************************************************************/
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
 /**
  * @file  DelRequestDispatcher.cpp
  * @brief DELETE method requests dispatcher
- */
+ *********************************************************************/
 
 #include "DelRequestDispatcher.h"
 #include "Exception.h"
@@ -19,7 +20,7 @@ void DelRequestDispatcher::dispatchRequest(const string &action,
                                             map<string, string> &cookies)
 {
 
-	OAMAGENT_LOG(INFO, "DelRequestDispatcher with action %s.\n", action.c_str()); 	
+    OAMAGENT_LOG(INFO, "DelRequestDispatcher with action %s.\n", action.c_str()); 	
 
     if (!action.length()) {
         OAMAGENT_LOG(ERR, "Dispatch failed.\n");

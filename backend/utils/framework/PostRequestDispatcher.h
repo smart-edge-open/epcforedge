@@ -1,13 +1,14 @@
-/************************************************************************************
- * <COPYRIGHT_TAG>
- ************************************************************************************/
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
 /**
  * @file  PostRequestDispatcher.h
  * @brief Header file for PostRequestDispatcher
- */
+ ********************************************************************/
 
-#ifndef __MECFCGI__JSONREQUESTDISPATCHER__
-#define __MECFCGI__JSONREQUESTDISPATCHER__
+#ifndef __OAMAGENT__JSONREQUESTDISPATCHER__
+#define __OAMAGENT__JSONREQUESTDISPATCHER__
 
 #include "PostRequestHandler.h"
 #include <stdio.h>
@@ -40,4 +41,4 @@ public:
     void registerHandler(const string &action, PostRequestHandler &handler);
 };
 
-#endif /* defined(__MECFCGI__JSONREQUESTDISPATCHER__) */
+#endif /* defined(__OAMAGENT__JSONREQUESTDISPATCHER__) */

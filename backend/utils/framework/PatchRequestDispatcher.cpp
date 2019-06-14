@@ -1,10 +1,11 @@
-/************************************************************************************
- * <COPYRIGHT_TAG>
- ************************************************************************************/
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
 /**
  * @file  PatchRequestDispatcher.cpp
  * @brief PATCH method and JSON formatted request dispatcher.
- */
+ ********************************************************************/
 
 #include "PatchRequestDispatcher.h"
 #include "Exception.h"
@@ -52,10 +53,10 @@ void PatchRequestDispatcher::dispatchRequest(const string &action,
 }
 
 /**
- * @brief		 Links a handler to a URL.
+ * @brief        Links a handler to a URL.
  * @param[in]	 action 	 A designation to assign to a handler, so that requests may be dispatched to the handler using that designation as a part of requests' URL.
  * @param[in]	 handler	 An handler to be linked to the action.
- * @return		 void
+ * @return       void
  */
 void PatchRequestDispatcher::registerHandler(const string &action, PatchRequestHandler &handler)
 {

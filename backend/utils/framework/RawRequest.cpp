@@ -1,22 +1,11 @@
-/************************************************************************************
- Copyright 2019 Intel Corporation. All rights reserved.
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- 
-	 http://www.apache.org/licenses/LICENSE-2.0
- 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
-
- ************************************************************************************/
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
 /**
  * @file RawRequest.cpp
  * @brief Implementation of RawRequest
-*/
+ ********************************************************************/
 
 #include "RawRequest.h"
 #include "Exception.h"
@@ -179,32 +168,31 @@ void RawRequest::dispatch(FCGX_Request &request)
         trim(key);
         cookieParams[key] = val;
     }
-	OAMAGENT_LOG(INFO, "Get cookie with key (%s) and val (%s) .\n", key.c_str(), val.c_str());
+    OAMAGENT_LOG(INFO, "Get cookie with key (%s) and val (%s) .\n", key.c_str(), val.c_str());
 
 
     if ((0 == requestMethod.compare("POST")) && (0 == contentType.compare("application/json"))) {
-		OAMAGENT_LOG(INFO, "Calling PostRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());
+        OAMAGENT_LOG(INFO, "Calling PostRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());
         RawRequest::postRequest(documentURI.substr(baseURI.length()), request, cookieParams, postDispatcher);
 		
     } else if (0 == requestMethod.compare("GET")) {
-		OAMAGENT_LOG(INFO, "Calling GetRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());    
+        OAMAGENT_LOG(INFO, "Calling GetRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());    
         RawRequest::getRequest(documentURI.substr(baseURI.length()), request, cookieParams, getDispatcher);
 		
     } 
 #ifdef PUT_SUPPORT
-
 	else if ((0 == requestMethod.compare("PUT")) && (0 == contentType.compare("application/json"))) {
-		OAMAGENT_LOG(INFO, "Calling PutRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());    
+	OAMAGENT_LOG(INFO, "Calling PutRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());    
         RawRequest::putRequest(documentURI.substr(baseURI.length()), request, cookieParams, putDispatcher);
 		
     } 
 #endif
 	else if (0 == requestMethod.compare("DELETE")) {
-		OAMAGENT_LOG(INFO, "Calling DeleRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());   
+        OAMAGENT_LOG(INFO, "Calling DeleRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());   
         RawRequest::delRequest(documentURI.substr(baseURI.length()), request, cookieParams, delDispatcher);
     
     } else if (0 == requestMethod.compare("PATCH")) {
-		OAMAGENT_LOG(INFO, "Calling DeleRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());   
+        OAMAGENT_LOG(INFO, "Calling DeleRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());   
         RawRequest::patchRequest(documentURI.substr(baseURI.length()), request, cookieParams, patchDispatcher);	
     } else {
         stringstream ss;

@@ -1,10 +1,11 @@
-/************************************************************************************
- * <COPYRIGHT_TAG>
- ************************************************************************************/
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
 /**
  * @file  GetRequestDispatcher.cpp
  * @brief GET method requests dispatcher
- */
+ ********************************************************************/
 
 #include "GetRequestDispatcher.h"
 #include "Exception.h"
@@ -18,7 +19,7 @@ void GetRequestDispatcher::dispatchRequest(const string &action,
                                             map<string, string> &headers,
                                             map<string, string> &cookies)
 {
-	OAMAGENT_LOG(INFO, "GetRequestDispatcher with xxx action %s.\n", action.c_str()); 	
+    OAMAGENT_LOG(INFO, "GetRequestDispatcher with xxx action %s.\n", action.c_str()); 	
 
     if (!action.length()) {
         OAMAGENT_LOG(ERR, "Dispatch failed.\n");
@@ -35,20 +36,12 @@ void GetRequestDispatcher::dispatchRequest(const string &action,
         string newAction = action.substr(0, pos) + "/UUID";
         if (requestHandlers.find(newAction) != requestHandlers.end()) {
     	    //OAMAGENT_LOG(INFO, "GetRequestDispatcher substr(%d,%d) with pos =%d, actlen=%d\n",
-			//	pos + REQUEST_SPLIT_MARK_LENGTH, action.length() - pos + REQUEST_SPLIT_MARK_LENGTH, pos, action.length());			
             params["UUID"] = action.substr(pos + REQUEST_SPLIT_MARK_LENGTH, action.length() - pos + REQUEST_SPLIT_MARK_LENGTH);
     	    OAMAGENT_LOG(INFO, "GetRequestDispatcher Find UUID (%s) for the newaction (%s)\n",params["UUID"].c_str(), newAction.c_str());
-			if (0 == strlen(params["UUID"].c_str())) {
-				throw Exception(Exception::DISPATCH_NOTARGET, "Dispatch failed");
-			}
-			//if (0 == strlen(params["UUID"].c_str())) {
-			  // no UUID for the URL. so use old action
-		    //OAMAGENT_LOG(INFO, "len: (%d) \n", params["UUID"].length());	  
-			  //static_cast<GetRequestHandler *>(requestHandlers[newAction])->execute(params, response, headers, cookies);
-			//}
-			//else {
-              static_cast<GetRequestHandler *>(requestHandlers[newAction])->execute(params, response, headers, cookies);
-			//}
+	    if (0 == strlen(params["UUID"].c_str())) {
+                throw Exception(Exception::DISPATCH_NOTARGET, "Dispatch failed");
+            }
+            static_cast<GetRequestHandler *>(requestHandlers[newAction])->execute(params, response, headers, cookies);
             return;
 			
         }

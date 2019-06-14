@@ -1,3 +1,7 @@
+/********************************************************************
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright(c) 2010-2014 Intel Corporation
+ ********************************************************************/
 /*******************************************************************************
 * Integration Tests for AppLiveIndicator, which is a handler for POST requests
 * with a payload in JSON.
@@ -32,29 +36,26 @@ int DelUserplanesTester::execute(string& additionalMessage) {
         status_code = "";
         resp_body.clear();		
         connect(TesterBase::host_ip_addr, TesterBase::host_port_num);
-		sendDELRequest(status_code, resp_body,discarded_cookie, DEL_URL_ID5, "");
+        sendDELRequest(status_code, resp_body,discarded_cookie, DEL_URL_ID5, "");
         disconnect();
-		reportTestResult("DelUserPlanesTest_SUCCESS", 
-			               HTTP_SC_OK, "OK",
-                           status_code, resp_body["result"]);
+        reportTestResult("DelUserPlanesTest_SUCCESS", 
+             HTTP_SC_OK, "OK", status_code, resp_body["result"]);
 
         status_code = "";
         resp_body.clear();		
         connect(TesterBase::host_ip_addr, TesterBase::host_port_num);
-		sendDELRequest(status_code, resp_body,discarded_cookie, DEL_URL_INVALIDID, "");
+        sendDELRequest(status_code, resp_body,discarded_cookie, DEL_URL_INVALIDID, "");
         disconnect();
-		reportTestResult("DelUserPlanesTest_IDNOTFOUND", 
-			               HTTP_SC_USERPLANE_NOT_FOUND, "OK",
-                           status_code, resp_body["result"]);
+        reportTestResult("DelUserPlanesTest_IDNOTFOUND", 
+               HTTP_SC_USERPLANE_NOT_FOUND, "OK",status_code, resp_body["result"]);
 
         status_code = "";
         resp_body.clear();		
         connect(TesterBase::host_ip_addr, TesterBase::host_port_num);
-		sendDELRequest(status_code, resp_body,discarded_cookie, DEL_URL_ID5, "");
+	sendDELRequest(status_code, resp_body,discarded_cookie, DEL_URL_ID5, "");
         disconnect();
-		reportTestResult("DelUserPlanesTest_EPC_CONN_ERROR", 
-			               HTTP_SC_USERPLANE_NOT_FOUND, "OK",
-                           status_code, resp_body["result"]);
+	reportTestResult("DelUserPlanesTest_EPC_CONN_ERROR", 
+              HTTP_SC_USERPLANE_NOT_FOUND, "OK", status_code, resp_body["result"]);
 
 
         /////////////////////FcgiBackend::run return////////////////////////////////////////
@@ -63,23 +64,23 @@ int DelUserplanesTester::execute(string& additionalMessage) {
         status_code = "";
         resp_body.clear();		
         connect(TesterBase::host_ip_addr, TesterBase::host_port_num);
-		sendDELRequest(status_code, resp_body, discarded_cookie, DEL_URL_INVALIDURI, "" );
+	sendDELRequest(status_code, resp_body, discarded_cookie, DEL_URL_INVALIDURI, "" );
         disconnect();
-		reportTestResult("DelUserPlanesTest_INVALIDURI",
+	reportTestResult("DelUserPlanesTest_INVALIDURI",
                            HTTP_SC_NOT_FOUND, "OK",
                            status_code, resp_body["result"]);
 		
 
-		#if 0
+	#if 0
         printf("report 1\n");
         // DEL User plane NOTFOUND
         status_code = "";
         resp_body.clear();	        
-		sendDELRequest(status_code, resp_body,discarded_cookie, DEL_URL_INVALIDID, "");
+	sendDELRequest(status_code, resp_body,discarded_cookie, DEL_URL_INVALIDID, "");
         printf("report 1.1\n");		
         disconnect();
-		        printf("report 1.2\n");
-		reportTestResult("DelUserPlanesTest_ID_NOFOUND", 
+	printf("report 1.2\n");
+        reportTestResult("DelUserPlanesTest_ID_NOFOUND", 
 			               HTTP_SC_USERPLANE_NOT_FOUND, "USERPLANE_NOT_FOUND",
                            status_code, resp_body["result"]);
         printf("report 2\n");		
