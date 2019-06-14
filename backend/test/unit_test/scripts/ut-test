@@ -1,0 +1,165 @@
+#!/bin/sh
+
+
+export CURRENT_DIR=${PWD}
+export TEST_DIR=${PWD}/..
+export OAM_DIR=${PWD}/../../..
+export NGINX_CONF=/etc/nginx/nginx.conf
+export NGINX_SSL=/etc/nginx/
+
+# make oamagent : MAKE_DIR = /unit_test/tmp/oamagent
+make_oamagent() {
+    echo "[starting] making oamagent ..."
+    MAKE_MODULE=${1}
+    MAKE_DIR=${TEST_DIR}/tmp/${MAKE_MODULE}
+    MAKE_FILE_NAME=CMakeLists_${MAKE_MODULE}.txt
+
+    test -d ${MAKE_DIR} && rm -rf ${MAKE_DIR}
+    mkdir -p ${MAKE_DIR}
+    cp -a ${TEST_DIR}/scripts/${MAKE_FILE_NAME} ${MAKE_DIR}/CMakeLists.txt
+    cp -a ${OAM_DIR}/api_handler ${MAKE_DIR}/
+    cp -a ${OAM_DIR}/utils ${MAKE_DIR}/    
+    cp -a ${OAM_DIR}/localcfg.json ${MAKE_DIR}/
+    cd ${MAKE_DIR}
+    test -d build && rm -rf build
+    mkdir build
+    cd build
+    cmake ../ -DCMAKE_BUILD_TYPE=Debug -DENABLE_GCOV=1
+    make
+    cp -a oamagent ../
+    cp -a ${TEST_DIR}/test_app/json_payload ../ 
+    echo "${MAKE_MODULE} compile completed."
+}
+
+# make test_app: mecfcgi-test
+make_ut_test_app() {
+    echo "[starting] making ut testapp ..."
+    cd ${TEST_DIR}/test_app
+    test -d build && rm -rf build
+    mkdir build
+    cd build
+    cmake ../ -DCMAKE_BUILD_TYPE=Debug -DENABLE_GCOV=1
+    make
+    cp -a oamagent-test ../
+    echo "oamagent-test compilation completed"
+}
+
+stop_pf() {
+    echo "[starting] kill all ..."
+    killall -s TERM oamagent
+    sleep 1
+    killall -s TERM nginx
+    sleep 2
+}
+start_pf() {
+    stop_pf
+
+    #start nginx
+    echo "[starting] nginx ..."
+    test -f ${NGINX_CONF} && cp -a ${NGINX_CONF} ${NGINX_CONF}-bk
+    cp -a ${CURRENT_DIR}/ut_http.conf ${NGINX_CONF}
+    cp -a ${CURRENT_DIR}/ssl ${NGINX_SSL}
+    #nginx start -c $NGINX_CONF;
+    nginx
+    sleep 1
+    cp -a ${NGINX_CONF}-bk ${NGINX_CONF}
+    echo "Start nginx completed"
+    
+    #start oamagent
+    cd ${CURRENT_DIR}/../tmp/oamagent/
+    export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/usr/local/lib/
+    ./oamagent &
+    sleep 2
+}
+getResult() {
+    echo "[starting] getResult ..."
+    MAKE_MODULE=${1}
+    if [ "${MAKE_MODULE}"x = "all"x ]; then
+        MAKE_DIR=${TEST_DIR}/tmp/
+    else
+        MAKE_DIR=${TEST_DIR}/tmp/${MAKE_MODULE}/build
+    fi
+    RESULT_DIR=${TEST_DIR}/result/${MAKE_MODULE}
+    RESULT_FILE_NAME=result_${MAKE_MODULE}.info
+
+    test -d ${MAKE_DIR} || {
+        echo "Error: no result."
+        exit 1
+    }
+    test -f ${MAKE_DIR}/${RESULT_FILE_NAME} && rm -rf ${MAKE_DIR}/${RESULT_FILE_NAME}
+    test -d ${RESULT_DIR} && rm -rf ${RESULT_DIR}
+
+    cd ${MAKE_DIR}
+    #lcov --directory . --capture --output-file ${RESULT_FILE_NAME}
+    lcov --rc lcov_branch_coverage=1 --directory . --capture --output-file ${RESULT_FILE_NAME}
+    lcov --remove ${RESULT_FILE_NAME} '/usr/include/*' '/usr/local/include/*' '/opt/*' --output-file ${RESULT_FILE_NAME}
+    test -d ${RESULT_DIR} && rm -rf ${RESULT_DIR}
+    mkdir -p ${RESULT_DIR}
+    genhtml --branch-coverage --rc lcov_branch_coverage=1 -o ${RESULT_DIR} ${RESULT_FILE_NAME}
+
+    echo "Result dir = ${RESULT_DIR}"
+}
+run_ut() {
+    echo "[starting] runUT"
+    echo "TEST_DIR:= ${TEST_DIR}"
+    test -d ${TEST_DIR}/result || mkdir -p ${TEST_DIR}/result
+    test -f ${TEST_DIR}/result/utlog.txt && rm -rf ${TEST_DIR}/result/utlog.txt
+
+    cd ${TEST_DIR}/test_app
+    ./oamagent-test | tee ${TEST_DIR}/result/utlog.txt
+}
+clean_ut() {
+    echo "[starting] cleanUT"
+    rm -rf ../tmp
+    rm -rf ../result   
+}
+case "$1" in
+    all)
+        make_oamagent oamagent && \
+        make_ut_test_app && \
+        start_pf && \
+        run_ut && \
+        stop_pf && \
+        getResult all
+        ;;
+    mk-all)
+        make_oamagent oamagent && \
+        make_ut_test_app 
+        ;;
+    mk-oam)
+        make_oamagent oamagent
+        ;;
+    mk-ut)
+        make_ut_test_app
+        ;;
+    start-all)
+        stop_pf && \
+        start_pf && \
+        run_ut
+        ;;
+    start-pf)
+        start_pf
+        ;;
+    start-ut)
+        run_ut
+        ;;
+    stop-pf)
+        stop_pf
+        ;;
+    clean)
+        clean_ut
+        ;;
+    get-oamagent-result)
+        getResult oamagent
+        ;;
+    get-all-result)
+        getResult all
+        ;;
+    *)
+    echo "Usage: $0 "
+    echo "all"
+    echo "clean"
+    echo "mk-all | mk-oam | mk-ut"
+    echo "start-all | start-pf | start-ut | stop-pf"
+    echo "get-all-result | get-oamagent-result "
+esac

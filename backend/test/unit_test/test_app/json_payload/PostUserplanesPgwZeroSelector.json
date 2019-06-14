@@ -1,0 +1,11 @@
+{"id":"5",
+ "uuid":"hello",
+ "function":"SAEGWU",
+ "config":{
+    "s5u_pgw":{"up_ip_address":"192.168.120.122"},
+    "s1u":{"up_ip_address":"192.190.120.122"},
+    "s5u_sgw":{"up_ip_address":"192.168.120.122"}
+ },
+ "selectors":[
+  ]
+}
