@@ -1,3 +1,8 @@
+``text
+SPDX-License-Identifier: Apache-2.0
+Copyright © 2019 Intel Corporation and Smart-Edge.com, Inc.
+```
+
 # backend
 
 This is the HTTPS backend processing implementation for oamagent.
@@ -25,6 +30,18 @@ This is the HTTPS backend processing implementation for oamagent.
    ./oamagent &  
 ```
 - The debug log will be in the /var/log/message
+
+### Expected result
+
+The expected result of running oamagent will show as below in the /var/log/message
+```
+Func:main(Line:115)OAMAgent Backend MgmtAPI registering ....
+Func:main(Line:120)OAMAgent Backend running ...
+```
+### Unexpected result
+
+- script set_env.sh failed - probably due to network connectivity.
+- running oamagent failed - check whether localconfig.json format correctness and it should be same folder with oamagent.
 
 ## Test
 

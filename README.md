@@ -1,18 +1,10 @@
-```text
-Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+``text
+SPDX-License-Identifier: Apache-2.0
+Copyright © 2019 Intel Corporation and Smart-Edge.com, Inc.
 ```
+# Purpose
+
+This document is intended for EPC OAMAgent setup and serves as a guide on setting up agent that will play as interface between controller and EPC control plane,
 
 # EPC OAMAgent Community Edition
 
@@ -30,3 +22,20 @@ The EPC OAMAgent supports EPC-Cplane configuration from MEC controller. So provi
 - Setup, Generate Self-signed certification files and Run NGINX according to readme in sub-directory: http
 - Setup, Build and Run HTTPS based backend according to readme in the sub-directory: backend
 - Notice: It is running on CentOS 7.6 x86_64 operating system.
+
+# Troubleshooting
+
+* Script stops/freezes at fetching packages
+
+  Make sure that proxy is configured properly in operating system.
+
+* Controller not able to communicate with OAMAgent
+
+  Make sure that it is not caused by HTTPS proxy setting for the operating system that OAMAgent is running on.
+  If finding "Permission denied" in the nginx log, can use command: setenforce=0
+
+* Log files
+
+  EPC OAMAgen uses syslog as logging tool. So can find debug information from /var/log/message.
+
+
