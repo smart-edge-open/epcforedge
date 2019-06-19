@@ -6,9 +6,10 @@ This is the guide how to bringup  nginx as HTTPS server with reference configura
 
 ## Overview
 
-1/ Run install_nginx.sh to install nginx and fcgi.
-2/ After installation, use below reference configuration to replace the defaut configuration: /etc/nginx/nginx.conf 
-   Examples:
+- Run install_nginx.sh to install nginx and fcgi.
+- After installation, use below reference configuration to replace the defaut configuration: /etc/nginx/nginx.conf 
+  Examples:
+```text
    worker_processes 1;
    worker_cpu_affinity 0100000000;
    error_log  /var/log/nginx.log  debug;
@@ -38,14 +39,17 @@ This is the guide how to bringup  nginx as HTTPS server with reference configura
         }
       }
    }
+```
 
-3/ To generate the certificate and key, use below commands:
+-  To generate the certificate and key, use below commands:
+```text
    mkdir /etc/nginx/ssl/
    sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/epc.key -out /etc/nginx/ssl/epc.crt -subj "/C=US/ST=Epc/L=Epc/O=Epc/OU=Epc/CN=epc.oam"
+```
 
 ## Run Guide
-1/ Type nginx directly to run it.
-2/ If you want to change /etc/nginx/nginx.conf , type: nginx-t  and then nginx -s reload. Thus nginx will reload configuration and re-start.
+- Type nginx directly to run it.
+- If you want to change /etc/nginx/nginx.conf , type: nginx-t  and then nginx -s reload. Thus nginx will reload configuration and re-start.
 
 
 
