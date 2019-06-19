@@ -18,7 +18,9 @@ This is the HTTPS backend processing implementation for oamagent.
 
 1/ Run nginx according to README.md in the  http folder
 2/ Before run oamagent, need to set envionment varible as: export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/usr/local/lib/
-3/ Enter into build directory, copy localconfig.json , then run oamagent
+3/ Enter into build directory where oamagent locates, copy localconfig.json into build directory, then run oamagent directly such as
+   ./oamagent &  
+   The output log will be in the /var/log/message
 
 
 ## Test

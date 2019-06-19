@@ -32,7 +32,7 @@ extern "C" {
 }
 
 
-//    printf("Func:%s(Line:%d)%s",  __FUNCTION__, __LINE__, _fpt_log_buf);\
+//    printf("Func:%s(Line:%d)%s",  __FUNCTION__, __LINE__, _fpt_log_buf);
 
 void oamagentLogInit();
 

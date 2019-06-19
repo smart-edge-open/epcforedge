@@ -14,9 +14,11 @@ log()
         echo -e "${green}$1${reset}"
 }
 
-
+##### 
 log "Install dependency package with yum"
-yum install -y cmake
+yum -y install git 
+yum -y install gcc-c++
+yum -y install cmake
 yum -y install boost-devel.x86_64
 yum -y install curl-devel
 
@@ -52,6 +54,7 @@ pkg_url=https://github.com/open-source-parsers/jsoncpp.git
 pkg_version=1.6.5
 pkg_name=jsoncpp
 log "Download $pkg_name"
+rm -rf $setup_dir/$pkg_name*
 cd $setup_dir
 git clone -b $pkg_version $pkg_url
 if [ $? -ne 0 ]; then

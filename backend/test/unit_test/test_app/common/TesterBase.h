@@ -15,7 +15,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include <hiredis/hiredis.h>
+//#include <hiredis/hiredis.h>
 #include <json/json.h>
 
 

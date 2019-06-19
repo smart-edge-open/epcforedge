@@ -7,4 +7,4 @@ setup_dir=${PWD}
 
 set -e
 
-curl -v --cacert mec.crt https://mec.local:8080/userplanes/666
+curl -v --cacert epc.crt https://epc.oam:8080/userplanes/666

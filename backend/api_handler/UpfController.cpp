@@ -443,7 +443,7 @@ void UserplaneDelByID::execute(map<string, string> params,
                      "/api/v1/sgwprofile?entity-type=sgw-dpf&id=" + params["UUID"];
 
         // Delete PGW information from CP
-        bool sucFlag;
+        bool sucFlag = false;
         if (0 != cpfCurlDelete(pgwGetUrl, sucFlag)) {
             OAMAGENT_LOG(ERR, "DeletePGW failed.\n");
             throw Exception(Exception::USERPLANE_NOT_FOUND);

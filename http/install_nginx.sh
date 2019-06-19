@@ -16,6 +16,7 @@ log()
 
 
 log "Install dependency package with yum"
+yum -y install gcc
 yum -y install openssl-devel.x86_64
 yum -y install pcre-devel.x86_64
 
