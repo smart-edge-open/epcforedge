@@ -27,6 +27,6 @@ The EPC OAMAgent supports EPC-Cplane configuration from MEC controller. So provi
 
 ## Installation, Build and Run
 
-- Setup and Run NGINX according to readme in sub-directory: http
-- Setup, Build and Run HTTP(S) backend according to readme in the sub-directory: backend
+- Setup, Generate Self-signed certification files and Run NGINX according to readme in sub-directory: http
+- Setup, Build and Run HTTPS based backend according to readme in the sub-directory: backend
 - Notice: It is running on CentOS 7.6 x86_64 operating system.

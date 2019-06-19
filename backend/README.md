@@ -16,17 +16,19 @@ This is the HTTPS backend processing implementation for oamagent.
 
 ## Run
 
-- Run nginx according to README.md in the  http folder
+- Run nginx according to README.md in the  http folder.
+- To communcate with oamagent from remote server, need to use generated certification crt file and add hostname "mec.oam" into the /etc/hosts file. The IP Address should be oamagent IP Address. 
 - Before run oamagent, need to set envionment varible as: export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/usr/local/lib/
 - Enter into build directory where oamagent locates, copy localconfig.json into build directory, then run oamagent directly such as:
 ```text
+   export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/usr/local/lib/
    ./oamagent &  
-   The output log will be in the /var/log/message
 ```
+- The debug log will be in the /var/log/message
 
 ## Test
 
 In the test directory , there two types of tests:
 - API Test: Provides CURL based test scripts for MEC Controller  API testing
 - Unit Test: Provides unit test and code coverage  
-- The details refer to README.md in the folder: api_test and unit_test. 
+- The details refer to README.md in the folders: api_test and unit_test. 
