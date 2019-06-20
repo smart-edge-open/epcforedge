@@ -537,6 +537,7 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
     hd_src = fopen("put_data.json", "rb");
     if (NULL == hd_src) {
        OAMAGENT_LOG(ERR, "open json file failed.\n"); 
+       fclose(hd_src);
        return -1;  
     }    
     curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
@@ -556,12 +557,13 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
     ret = curl_easy_perform(curl);
     if(ret != CURLE_OK) {
         OAMAGENT_LOG(ERR, "curl perform failed: %s\n",curl_easy_strerror(ret));
+        fclose(hd_src);
         return -1;        
     }
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &resCode);
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
-
+    fclose(hd_src);
 
 #if CPF_CURL_DEBUG
     // Print Response
