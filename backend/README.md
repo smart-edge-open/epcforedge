@@ -22,7 +22,7 @@ This is the HTTPS backend processing implementation for oamagent.
 ## Run
 
 - Run nginx according to README.md in the  http folder.
-- To communcate with oamagent from remote server, need to use generated certification crt file and add hostname "mec.oam" into the /etc/hosts file. The IP Address should be oamagent IP Address. 
+- To communcate with oamagent from remote server, need to use generated certification crt file and add hostname "epc.oam" into the /etc/hosts file. The IP Address should be oamagent IP Address. 
 - Before run oamagent, need to set envionment varible as: export LD_LIBRARY_PATH=LD_LIBRARY_PATH:/usr/local/lib/
 - Enter into build directory where oamagent locates, copy localconfig.json into build directory, then run oamagent directly such as:
 ```text

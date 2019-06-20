@@ -17,13 +17,26 @@ The EPC OAMAgent supports EPC-Cplane configuration from MEC controller. So provi
 - backend: CGI backend source files to handle HTTP(S) commmunciation with controller
 - http: only provide guide about how to configure and start NGINX , also including how to generate self-signed certification files for HTTPS
 
+## Architecture Overview
+
+Figure 1. OAMAgent Architecture.
+
+![](oamagent_arch.png)
+
+- OAMAgent receive configuration API from OpenNESS controller with APN, TAC, S1u-IP ...etc. And return uuid for further API transaction.
+- After processing configuration API, OAMAgent will use HTTP protocal to communicate with LTE Control Plane for configuration. Currently this interface is for demo purpose. 
+
 ## Installation, Build and Run
 
 - Setup, Generate Self-signed certification files and Run NGINX according to readme in sub-directory: http
 - Setup, Build and Run HTTPS based backend according to readme in the sub-directory: backend
-- Notice: It is running on CentOS 7.6 x86_64 operating system.
+- Notice: All installation scripts are based and verified on CentOS 7.6 x86_64 operating system. 
 
 # Troubleshooting
+
+* Script Failed on no-CentOS operating system
+
+  Change "yum" in the script to other installation command, for example: apt-get install for ubuntu.
 
 * Script stops/freezes at fetching packages
 
