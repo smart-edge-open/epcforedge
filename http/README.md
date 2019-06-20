@@ -1,3 +1,7 @@
+```text
+SPDX-License-Identifier: Apache-2.0
+Copyright © 2019 Intel Corporation and Smart-Edge.com, Inc.
+```
 
 # http
 
@@ -6,9 +10,10 @@ This is the guide how to bringup  nginx as HTTPS server with reference configura
 
 ## Overview
 
-1/ Run install_nginx.sh to install nginx and fcgi.
-2/ After installation, use below reference configuration to replace the defaut configuration: /etc/nginx/nginx.conf 
-   Examples:
+- Run install_nginx.sh to install nginx and fcgi.
+- After installation, use below reference configuration to replace the defaut configuration: /etc/nginx/nginx.conf 
+  Examples:
+```text
    worker_processes 1;
    worker_cpu_affinity 0100000000;
    error_log  /var/log/nginx.log  debug;
@@ -24,8 +29,8 @@ This is the guide how to bringup  nginx as HTTPS server with reference configura
       keepalive_timeout               65;
       server {
         listen       8080 ssl;
-        ssl_certificate /etc/nginx/ssl/mec.crt;
-        ssl_certificate_key /etc/nginx/ssl/mec.key;
+        ssl_certificate /etc/nginx/ssl/epc.crt;
+        ssl_certificate_key /etc/nginx/ssl/epc.key;
         server_name  localhost;
         location /userplanes {
                 fastcgi_pass  127.0.0.1:9999;
@@ -38,14 +43,17 @@ This is the guide how to bringup  nginx as HTTPS server with reference configura
         }
       }
    }
+```
 
-3/ To generate the certificate and key, use below commands:
+-  To generate the certificate and key, use below commands:
+```text
    mkdir /etc/nginx/ssl/
-   sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/mec.key -out /etc/nginx/ssl/mec.crt -subj "/C=US/ST=Mec/L=Mec/O=Mec/OU=Mec/CN=mec.local"
+   sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/epc.key -out /etc/nginx/ssl/epc.crt -subj "/C=US/ST=Epc/L=Epc/O=Epc/OU=Epc/CN=epc.oam"
+```
 
 ## Run Guide
-1/ Type nginx directly to run it.
-2/ If you want to change /etc/nginx/nginx.conf , type: nginx-t  and then nginx -s reload. Thus nginx will reload configuration and re-start.
+- Type nginx directly to run it.
+- If you want to change /etc/nginx/nginx.conf , type: nginx-t  and then nginx -s reload. Thus nginx will reload configuration and re-start.
 
 
 

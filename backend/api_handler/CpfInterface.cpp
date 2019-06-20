@@ -455,19 +455,19 @@ int cpfCurlDelete(string &url, bool &successFlg)
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &resCode);
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
-
+    successFlg = true; 
     printf("HTTP DELETE Response: code = %ld\n", resCode);
     OAMAGENT_LOG(INFO, "Completed HTTP DELETE...\n");    
     return 0;
 }
 
 /**
-* @brief			The inteface function will send PUT to EPC and receive the response 
+* @brief The inteface function will send PUT to EPC and receive the response 
 *					
-* @param[in]		url 	      The URL for CURL put
-* @param[in]		putData 	  The data to put
-* @param[out]		responseData  The reponse
-* @return			0:success; 1:failure
+* @param[in]    url 	      The URL for CURL put
+* @param[in]    putData       The data to put
+* @param[out]   responseData  The reponse
+* @return       0:success; 1:failure
 */
 int cpfCurlPut(string &url, string &putData, stringstream &responseData)
 {
@@ -482,11 +482,11 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
 
     // Logging
     OAMAGENT_LOG(INFO, "Starting HTTP PUT for url: %s\n", url.c_str());
-    //OAMAGENT_LOG(INFO, "Data Len(%d): %s\n",strlen(putData.c_str()), putData.c_str());
     // Generate json file for uploading
     hd_src = fopen("put_data.json", "wb");
     if (NULL == hd_src) {
-       OAMAGENT_LOG(ERR, "open json file failed.\n");    
+       OAMAGENT_LOG(ERR, "open json file failed.\n");
+       return -1; 
     }
     
     // write data into json file
@@ -536,7 +536,8 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
     curl_easy_setopt(curl, CURLOPT_PUT, 1L);
     hd_src = fopen("put_data.json", "rb");
     if (NULL == hd_src) {
-       OAMAGENT_LOG(ERR, "open json file failed.\n");    
+       OAMAGENT_LOG(ERR, "open json file failed.\n"); 
+       return -1;  
     }    
     curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,

@@ -31,10 +31,18 @@ void RawRequest::printHeaders(map<string, string> &headers)
     } else {
         cout <<"Content-type: application/json\r\n";
     }
-
+    #if 0
     if (headers.size() > 0) {
-        for (pair<string, string> header : headers) {
+        pair<string, string> header("",""); 
+        for (header : headers) {
            cout << header.first << ": " << header.second << "\r\n";
+        }
+    }
+    #endif
+    if (headers.size() > 0) {
+        //pair<string, string> header("",""); 
+        for (const auto &entry : headers) {
+           cout << entry.first << ": " << entry.second << "\r\n";
         }
     }
     cout << "\r\n";

@@ -7,6 +7,6 @@ setup_dir=${PWD}
 
 set -e
 
-curl --cacert mec.crt -X POST -H "Content-Type: application/json" --data @post_userplanes.json https://mec.local:8080/userplanes | json_reformat
+curl --cacert epc.crt -X POST -H "Content-Type: application/json" --data @post_userplanes.json https://epc.oam:8080/userplanes | json_reformat
 
 exit 0
