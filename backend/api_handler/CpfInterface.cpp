@@ -1,7 +1,19 @@
-/************************************************************ 
- * SPDX-License-Identifier: Apache-2.0
- * Copyright (c) 2019 Intel Corporation
- *************************************************************/
+/*******************************************************************************
+* Copyright 2019 Intel Corporation. All rights reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*******************************************************************************/
+
 /**
  * @file    cpfInterface.cpp
  * @brief   Implementation of ControlPlane Function interface 
@@ -537,7 +549,6 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
     hd_src = fopen("put_data.json", "rb");
     if (NULL == hd_src) {
        OAMAGENT_LOG(ERR, "open json file failed.\n"); 
-       fclose(hd_src);
        return -1;  
     }    
     curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);

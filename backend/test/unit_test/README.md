@@ -1,3 +1,8 @@
+```text
+SPDX-License-Identifier: Apache-2.0
+Copyright © 2019 Intel Corporation.
+```
+
 This directory contains unit test source files and scripts, also provides code coverage support.
 
 # Before run unit test, 

@@ -1,3 +1,8 @@
+```text
+SPDX-License-Identifier: Apache-2.0
+Copyright © 2019 Intel Corporation.
+```
+
 # api_test
 
 This is the CURL based test scripts for HTTPS API testing

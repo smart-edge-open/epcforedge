@@ -1,6 +1,6 @@
 ```text
 SPDX-License-Identifier: Apache-2.0
-Copyright © 2019 Intel Corporation and Smart-Edge.com, Inc.
+Copyright © 2019 Intel Corporation.
 ```
 # Purpose
 
@@ -34,9 +34,10 @@ Figure 1. OAMAgent Architecture.
 
 # Troubleshooting
 
-* Script Failed on no-CentOS operating system
-
-  Change "yum" in the script to other installation command, for example: apt-get install for ubuntu.
+* Script Failed on non-CentOS operating system
+  
+  As notice above, OAMAgent installation, build are based on CentOS. 
+  If you want to use other operating system, you have to use other install commands rather than "yum" in the script, for example: apt-get install for ubuntu.
 
 * Script stops/freezes at fetching packages
 
