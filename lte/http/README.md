@@ -55,5 +55,34 @@ This is the guide how to bringup  nginx as HTTPS server with reference configura
 - Type nginx directly to run it.
 - If you want to change /etc/nginx/nginx.conf , type: nginx-t  and then nginx -s reload. Thus nginx will reload configuration and re-start.
 
+## Disable HTTPS communciation with controller
+- If test with HTTP rather than HTTPS, you just need to configure NGINX as below:
+```text
+   worker_processes 1;
+   worker_cpu_affinity 0100000000;
+   error_log  /var/log/nginx.log  debug;
+   pid        /var/log/nginx.pid;
+   events {
+      worker_connections  1024;
+   }
 
-
+   http {
+      include                         mime.types;
+      default_type                    application/octet-stream;
+      sendfile                        on;
+      keepalive_timeout               65;
+      server {
+        listen       8080;
+        server_name  localhost;
+        location /userplanes {
+                fastcgi_pass  127.0.0.1:9999;
+                include       fastcgi_params;
+                fastcgi_param HTTPS off;
+        }
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+      }
+   }
+```

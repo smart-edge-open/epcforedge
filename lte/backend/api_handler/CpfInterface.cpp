@@ -35,9 +35,9 @@
 #include "Log.h"
 
 #define CPF_CURL_DEBUG 1
+#define INT_TEST 1
 
-
-#ifdef UNIT_TEST
+#if defined(UNIT_TEST) || defined(INT_TEST)
 #include <string>
 #include <fstream>
 #include <streambuf>
@@ -207,6 +207,19 @@ int cpfCurlPost(string &url, string &postData, stringstream &responseData)
 
     // Logging
     OAMAGENT_LOG(INFO, "Starting HTTP POST for url: %s\n", url.c_str());
+#ifdef INT_TEST
+    static int postTestCaseNum = 0;
+    const char *postTestCaseRspData[2] = { 
+         "{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // PGW ADD
+         "{\"id\": \"5\",\"success\": true,\"msg\": \"\"}"  // PGW ADD
+    };
+
+    //UT - direclty return
+    responseData << postTestCaseRspData[postTestCaseNum];
+    postTestCaseNum++;
+    if (postTestCaseNum >= 2) postTestCaseNum = 0;
+    return 0;
+#endif
 
 #ifdef UNIT_TEST
     static int postTestCaseNum = 0;
@@ -308,6 +321,25 @@ int cpfCurlGet(string &url, stringstream &responseData)
 
     // Logging
     OAMAGENT_LOG(INFO, "Starting HTTP GET for url: %s\n", url.c_str());
+
+#ifdef INT_TEST
+    static int getTestCaseNum = 0;
+    if (getTestCaseNum  == 20) {
+       // last test is negtive test
+       return -1;
+    }	
+    const char *getTestCaseRspData[2] = { 
+		"PgwGetAllRspData",   // PGW GET ALL
+		"SgwGetAllRspData"   // SGW GET ALL
+    };
+
+    //UT - direclty return
+    responseData << JSONFileToString(getTestCaseRspData[getTestCaseNum]);	
+    getTestCaseNum++;
+    if (getTestCaseNum >= 2) getTestCaseNum = 0;	
+    return 0;
+
+#endif
 
 #ifdef UNIT_TEST
     static int getTestCaseNum = 0;
@@ -418,6 +450,19 @@ int cpfCurlDelete(string &url, bool &successFlg)
     // Logging
     OAMAGENT_LOG(INFO, "Starting HTTP DELETE for url: %s\n", url.c_str());
 
+    #ifdef INT_TEST
+    static int delTestCaseNum = 0;
+    const char *delTestCaseRspData[2] = { 
+		"{\"success\":true,\"msg\":\"\"}",   //PGW respose for test 1
+		"{\"success\":true,\"msg\":\"\"}"};   //SGW respose for test 1		
+    static bool delTestCaseSucFlag[2] = {true, true};	
+    //UT - direclty return
+    successFlg   = delTestCaseSucFlag[delTestCaseNum];
+    delTestCaseNum++;	
+    if (delTestCaseNum >=2) delTestCaseNum = 0;
+    return 0;
+    #endif
+
     #ifdef UNIT_TEST
     static int delTestCaseNum = 0;
     if (delTestCaseNum == 4) {
@@ -510,6 +555,20 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
     stat("put_data.json", &file_info);
     OAMAGENT_LOG(INFO, "Prepared json file size = %d\n",(int)file_info.st_size );   
 
+#ifdef INT_TEST
+    static int patchTestCaseNum = 0;
+    const char *patchTestCaseRspData[2] = { 
+		"{\"id\": \"5\",\"success\": true,\"msg\": \"\"}",  // PGW ADD
+		"{\"id\": \"5\",\"success\": true,\"msg\": \"\"}"  // SGW ADD
+		     };
+		
+    //UT - direclty return
+    responseData << patchTestCaseRspData[patchTestCaseNum];
+
+    patchTestCaseNum++;
+    if (patchTestCaseNum >= 2) patchTestCaseNum = 0;
+    return 0;
+#endif
 
 #ifdef UNIT_TEST
     static int patchTestCaseNum = 0;

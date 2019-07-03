@@ -49,3 +49,11 @@ In the test directory , there two types of tests:
 - API Test: Provides CURL based test scripts for MEC Controller  API testing
 - Unit Test: Provides unit test and code coverage  
 - The details refer to README.md in the folders: api_test and unit_test. 
+
+## Controller Integration Test without EPC
+
+- Macro INT_TEST is flag to enable oamagent run without EPC, and respond with controller with pre-defined message in json format
+- Enable INT_TEST in Makefile or directly in CpfInterface.cpp file. Then make 
+- Copy json_payload folder (backend/test/unit_test/test_app/json_payload) into the same folder with oamagent
+- Run oamagent as guide
+ 
