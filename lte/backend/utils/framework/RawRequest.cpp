@@ -172,14 +172,6 @@ void RawRequest::dispatch(FCGX_Request &request)
     OAMAGENT_LOG(INFO, "Processing FCGX_Request with REMOTE_ADDR %s DocumentURI %s requestMethod %s.\n", 
 		 source_ip.c_str(), documentURI.c_str(), requestMethod.c_str());
 	
-    /* disable the usage of memanager from outside */
-    /* We need to disable this check for containers. The nginx server is on different ip and this statement disable memanager ability to work from NES container. */
-    /*if (source_ip != me_manager_client_ip &&
-        std::find(me_manager_uris.begin(), me_manager_uris.end(), documentURI) != std::end(me_manager_uris)) {
-            OAMAGENT_LOG(ERR, "Not allowed to use MeManager from %s\n", source_ip.c_str());
-            throw Exception(Exception::DISPATCH_NOTYPE, "Unauthorized MeManager usage");
-    }*/
-
     string key, val;
     map<string, string> cookieParams;
     while (getline(cookies, key, '=') && getline(cookies, val, ';')) {
@@ -190,7 +182,7 @@ void RawRequest::dispatch(FCGX_Request &request)
     OAMAGENT_LOG(INFO, "Get cookie with key (%s) and val (%s) .\n", key.c_str(), val.c_str());
 
 
-    if ((0 == requestMethod.compare("POST")) && (0 == contentType.compare("application/json"))) {
+    if (0 == requestMethod.compare("POST")) {
         OAMAGENT_LOG(INFO, "Calling PostRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());
         RawRequest::postRequest(documentURI.substr(baseURI.length()), request, cookieParams, postDispatcher);
 		
@@ -200,7 +192,7 @@ void RawRequest::dispatch(FCGX_Request &request)
 		
     } 
 #ifdef PUT_SUPPORT
-	else if ((0 == requestMethod.compare("PUT")) && (0 == contentType.compare("application/json"))) {
+	else if ((0 == requestMethod.compare("PUT")) {
 	OAMAGENT_LOG(INFO, "Calling PutRequest with baseURI (%s) length (%lu).\n", baseURI.c_str(), baseURI.length());    
         RawRequest::putRequest(documentURI.substr(baseURI.length()), request, cookieParams, putDispatcher);
 		
@@ -215,7 +207,7 @@ void RawRequest::dispatch(FCGX_Request &request)
         RawRequest::patchRequest(documentURI.substr(baseURI.length()), request, cookieParams, patchDispatcher);	
     } else {
         stringstream ss;
-        ss << "Method: " << requestMethod << "Content type: " << contentType << " not supported";
+        ss << "Method: " << requestMethod << " Content type: " << contentType << " not supported";
         OAMAGENT_LOG(ERR, "%s .\n", ss.str().c_str());
         throw Exception(Exception::DISPATCH_NOTYPE, ss.str());
     }

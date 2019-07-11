@@ -241,10 +241,9 @@ int CupsMgmtMessage::fillPostPgwRequest(Json::Value &request, string &pgwPostDat
    //stringstream jsonStr;
    string userplaneID = request.get("id", "Nil").asString();
    if (0 == userplaneID.compare("Nil")) {
-      OAMAGENT_LOG(ERR, "[id] is not found in request.\n");
-      return -1;
+      OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
    }
-   OAMAGENT_LOG(INFO, "UserplaneAdd userplaneID (%s).\n", userplaneID.c_str());
+   //OAMAGENT_LOG(INFO, "UserplaneAdd userplaneID (%s).\n", userplaneID.c_str());
 
    // get uuid and put into POST to EPC
    Json::Value uuid = request.get("uuid","Nil");
@@ -293,11 +292,12 @@ int CupsMgmtMessage::fillPostPgwRequest(Json::Value &request, string &pgwPostDat
    for (int i = 0; i < size; i++){
        string selectors_id = selectors[i].get ("id","Nil").asString();
        if (0 == selectors_id.compare("Nil")){
-           OAMAGENT_LOG(ERR, "[selectors_id] is not found in breakout.\n");
-           return -1;
+           OAMAGENT_LOG(WARN, "[selectors_id] is not found in breakout.\n");
+           //return -1;
        }
-       OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] id (%s).\n", i, selectors_id.c_str());
-   
+       else {
+           OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] id (%s).\n", i, selectors_id.c_str());
+       }
        /////// network
        Json::Value network = selectors[i].get ("network","Nil");
        string network_mcc = network.get ("mcc","Nil").asString();
@@ -361,10 +361,9 @@ int CupsMgmtMessage::fillPostSgwRequest(Json::Value &request, string &sgwPostDat
 
     string userplaneID = request.get("id", "Nil").asString();
     if (0 == userplaneID.compare("Nil")) {
-        OAMAGENT_LOG(ERR, "[id] is not found in request.\n");
-        return -1;
+        OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
     }
-    OAMAGENT_LOG(INFO, "UserplaneAdd userplaneID (%s).\n", userplaneID.c_str());
+    //OAMAGENT_LOG(INFO, "UserplaneAdd userplaneID (%s).\n", userplaneID.c_str());
 	
     // get uuid and put into POST to EPC
     Json::Value uuid = request.get("uuid","Nil");
@@ -426,10 +425,12 @@ int CupsMgmtMessage::fillPostSgwRequest(Json::Value &request, string &sgwPostDat
     for (int i = 0; i < size; i++){
         string selectors_id = selectors[i].get ("id","Nil").asString();
         if (0 == selectors_id.compare("Nil")){
-           OAMAGENT_LOG(ERR, "[selectors_id] is not found in breakout.\n");
-           return -1;
+           OAMAGENT_LOG(WARN, "[selectors_id] is not found in breakout.\n");
+           //return -1;
         }
-        OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] id (%s).\n", i, selectors_id.c_str());
+        else {
+           OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] id (%s).\n", i, selectors_id.c_str());
+        }
 
         /////// uli
         Json::Value uli = selectors[i].get ("uli","Nil");
@@ -466,10 +467,9 @@ int CupsMgmtMessage::fillPutPgwRequest(Json::Value &request, string &pgwPutData)
    //stringstream jsonStr;
    string userplaneID = request.get("id", "Nil").asString();
    if (0 == userplaneID.compare("Nil")) {
-       OAMAGENT_LOG(ERR, "[id] is not found in request.\n");
-       return -1;
+       OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
    }
-   OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
+   //OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
 
    // get uuid and put into POST to EPC
    Json::Value uuid = request.get("uuid","Nil");
@@ -579,10 +579,10 @@ int CupsMgmtMessage::fillPutSgwRequest(Json::Value &request, string &sgwPutData)
     //stringstream jsonStr;		
     string userplaneID = request.get("id", "Nil").asString();
     if (0 == userplaneID.compare("Nil")) {
-       OAMAGENT_LOG(ERR, "[id] is not found in request.\n");
-       return -1;
+       OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
+       //return -1;
     }
-    OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
+    //OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
     // get uuid and put into POST to EPC
     Json::Value uuid = request.get("uuid","Nil");
     if (0 == uuid.compare("Nil")) {

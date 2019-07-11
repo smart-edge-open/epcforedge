@@ -86,3 +86,24 @@ This is the guide how to bringup  nginx as HTTPS server with reference configura
       }
    }
 ```
+
+## Enable CORS for HTTP communication with controller
+
+- Add lines into nginx.conf as below
+```text
+location /userplanes {
+            if ($request_method = "OPTIONS") {
+               add_header "Access-Control-Allow-Origin" "*";
+               add_header "Access-Control-Allow-Headers" "Content-Type";
+               return 200;
+            }
+
+            if ($request_method = "GET") {
+               add_header "Access-Control-Allow-Origin" "*";
+               add_header "Content-Type" "application/json";
+            }
+            if ($request_method = "POST") {
+               add_header "Access-Control-Allow-Origin" "*";
+               add_header "Content-Type" "application/json";
+            }
+```	    
