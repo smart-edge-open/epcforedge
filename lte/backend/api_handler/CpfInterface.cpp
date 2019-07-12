@@ -35,13 +35,13 @@
 #include "Log.h"
 
 #define CPF_CURL_DEBUG 1
-#define INT_TEST 1
 
 #if defined(UNIT_TEST) || defined(INT_TEST)
 #include <string>
 #include <fstream>
 #include <streambuf>
 
+int testUserplanesStart = 0;
 const string PATH_PREFIX = "./json_payload/";
 string JSONFileToString(const string& file_name) {
     ifstream t{PATH_PREFIX + file_name + ".json"};
@@ -216,8 +216,7 @@ int cpfCurlPost(string &url, string &postData, stringstream &responseData)
 
     //UT - direclty return
     responseData << postTestCaseRspData[postTestCaseNum];
-    postTestCaseNum++;
-    if (postTestCaseNum >= 2) postTestCaseNum = 0;
+    postTestCaseNum = (++postTestCaseNum)%2;
     return 0;
 #endif
 
@@ -324,19 +323,18 @@ int cpfCurlGet(string &url, stringstream &responseData)
 
 #ifdef INT_TEST
     static int getTestCaseNum = 0;
-    if (getTestCaseNum  == 20) {
-       // last test is negtive test
-       return -1;
-    }	
-    const char *getTestCaseRspData[2] = { 
+    const char *getTestCaseRspData[4] = { 
 		"PgwGetAllRspData",   // PGW GET ALL
-		"SgwGetAllRspData"   // SGW GET ALL
+		"SgwGetAllRspData",    // SGW GET ALL
+		"PgwGetOneRspData",   // PGW GET ONE
+		"SgwGetOneRspData"   // SGW GET ONE		
     };
 
     //UT - direclty return
+    getTestCaseNum += testUserplanesStart; // get start index for the test cases
     responseData << JSONFileToString(getTestCaseRspData[getTestCaseNum]);	
-    getTestCaseNum++;
-    if (getTestCaseNum >= 2) getTestCaseNum = 0;	
+    getTestCaseNum = (++getTestCaseNum)%2;
+    //if (getTestCaseNum >= 2) getTestCaseNum = 0;	
     return 0;
 
 #endif
@@ -458,8 +456,7 @@ int cpfCurlDelete(string &url, bool &successFlg)
     static bool delTestCaseSucFlag[2] = {true, true};	
     //UT - direclty return
     successFlg   = delTestCaseSucFlag[delTestCaseNum];
-    delTestCaseNum++;	
-    if (delTestCaseNum >=2) delTestCaseNum = 0;
+    delTestCaseNum = (++delTestCaseNum)%2;	
     return 0;
     #endif
 
@@ -564,9 +561,7 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
 		
     //UT - direclty return
     responseData << patchTestCaseRspData[patchTestCaseNum];
-
-    patchTestCaseNum++;
-    if (patchTestCaseNum >= 2) patchTestCaseNum = 0;
+    patchTestCaseNum = (++patchTestCaseNum)%2;	
     return 0;
 #endif
 

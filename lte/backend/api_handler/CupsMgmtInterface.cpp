@@ -141,13 +141,16 @@ int CupsMgmtMessage::fillGetPgwResponse(Json::Value &pgwData, int pgwItemIndex, 
 	
     response["uuid"] = pgwData["items"][pgwItemIndex]["uuid"];
     response["id"] = pgwData["items"][pgwItemIndex]["id"];
-    //STEP1: fill config
+    response["function"] = "SAEGWU";
+
+     //STEP1: fill config
     Json::Value config;
     config["s5u_pgw"]["up_ip_address"] = pgwData["items"][pgwItemIndex]["s5u_ip"];		
     
     //STEP2: fill selectors
     Json::Value selectors;
     Json::Value network;
+	//STEP2.1 selectors->network
     string apn_ni,apn,mnc,mcc;
     apn_ni = pgwData["items"][pgwItemIndex]["apn_ni"].asString();
     if (0 != utilsParseApnNi( apn_ni,apn,mnc,mcc)) {
@@ -156,25 +159,30 @@ int CupsMgmtMessage::fillGetPgwResponse(Json::Value &pgwData, int pgwItemIndex, 
     network["mcc"] = mcc;
     network["mnc"] = mnc;		
     selectors["network"] = network; 	
+	//STEP2.1 selectors->uli	
     Json::Value uli;
     Json::Value tai;
-    #ifdef CUPS_API_INT64_TYPE
+	#ifdef CUPS_API_INT64_TYPE
     // convert into int64 type (JSON not support HEX, so need to convert into DEC)
     // BUT TAC only has 16 bit. so int type will be enough
     tai["tac"] = utilsConvertStringToInt64(pgwData["items"][pgwItemIndex]["tac"].asString());
-    #else
-    // default should be string type.
+	#else
+	// default should be string type.
     tai["tac"] = pgwData["items"][pgwItemIndex]["tac"];
-    #endif
+	#endif
     uli["tai"] = tai;
+	selectors["uli"] = uli;
+	//STEP2.3 selectors->pdn
     Json::Value pdn;	 
     pdn["apns"].append(apn.c_str());	
-    uli["pdn"] = pdn;		
-    selectors["uli"] = uli;
+    selectors["pdn"] = pdn;		
+    
     // Finally, put all into reponse
     response["config"] = config;		
     response["selectors"] = selectors;
-    return 0;
+
+	return 0;
+     
 }
 
 /**

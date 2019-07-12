@@ -25,6 +25,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -z noexecstack -z relro -z
 
 add_definitions(-g -Wall)
 add_definitions(-O3)
+add_definitions(-DINT_TEST)
+add_definitions(-DCUPS_API_INT64_TYPE)
+
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 

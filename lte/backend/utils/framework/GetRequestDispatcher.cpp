@@ -30,7 +30,7 @@ void GetRequestDispatcher::dispatchRequest(const string &action,
                                             map<string, string> &headers,
                                             map<string, string> &cookies)
 {
-    OAMAGENT_LOG(INFO, "GetRequestDispatcher with xxx action %s.\n", action.c_str()); 	
+    OAMAGENT_LOG(INFO, "GetRequestDispatcher with action: %s.\n", action.c_str()); 	
 
     if (!action.length()) {
         OAMAGENT_LOG(ERR, "Dispatch failed.\n");
@@ -48,7 +48,7 @@ void GetRequestDispatcher::dispatchRequest(const string &action,
         if (requestHandlers.find(newAction) != requestHandlers.end()) {
     	    //OAMAGENT_LOG(INFO, "GetRequestDispatcher substr(%d,%d) with pos =%d, actlen=%d\n",
             params["UUID"] = action.substr(pos + REQUEST_SPLIT_MARK_LENGTH, action.length() - pos + REQUEST_SPLIT_MARK_LENGTH);
-    	    OAMAGENT_LOG(INFO, "GetRequestDispatcher Find UUID (%s) for the newaction (%s)\n",params["UUID"].c_str(), newAction.c_str());
+    	    OAMAGENT_LOG(INFO, "GetRequestDispatcher Find id (%s) for the newaction (%s)\n",params["UUID"].c_str(), newAction.c_str());
 	    if (0 == strlen(params["UUID"].c_str())) {
                 throw Exception(Exception::DISPATCH_NOTARGET, "Dispatch failed");
             }
