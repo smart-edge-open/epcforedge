@@ -148,8 +148,12 @@ int CupsMgmtMessage::fillGetPgwResponse(Json::Value &pgwData, int pgwItemIndex, 
     config["s5u_pgw"]["up_ip_address"] = pgwData["items"][pgwItemIndex]["s5u_ip"];		
     
     //STEP2: fill selectors
+    Json::Value selectors_array;    
     Json::Value selectors;
     Json::Value network;
+	//STEP2.0 selectors->id
+	selectors["id"] = pgwData["items"][pgwItemIndex]["id"];	
+	
 	//STEP2.1 selectors->network
     string apn_ni,apn,mnc,mcc;
     apn_ni = pgwData["items"][pgwItemIndex]["apn_ni"].asString();
@@ -176,10 +180,11 @@ int CupsMgmtMessage::fillGetPgwResponse(Json::Value &pgwData, int pgwItemIndex, 
     Json::Value pdn;	 
     pdn["apns"].append(apn.c_str());	
     selectors["pdn"] = pdn;		
-    
+
     // Finally, put all into reponse
     response["config"] = config;		
-    response["selectors"] = selectors;
+    selectors_array.append(selectors);	
+    response["selectors"] = selectors_array;
 
 	return 0;
      

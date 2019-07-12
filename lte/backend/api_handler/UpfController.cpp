@@ -493,6 +493,7 @@ void UserplaneDelByID::execute(map<string, string> params,
 	        OAMAGENT_LOG(ERR, "DeletePGW failed.\n");
             throw Exception(Exception::USERPLANE_NOT_FOUND);			
         }		
+		OAMAGENT_LOG(INFO, "UserplaneDelByID(%s) Success.\n",params["UUID"].c_str());
 
         headers["Status"] = HTTP_SC_OK;
         response["result"] = "OK";
@@ -501,6 +502,7 @@ void UserplaneDelByID::execute(map<string, string> params,
         string res;
         string statusCode;
         Exception::handlerException(e, res, statusCode);
+		OAMAGENT_LOG(ERR, "UserplaneDelByID(%s) Failed.\n",params["UUID"].c_str());		
         headers["Status"] = statusCode;
         response["result"] = res;
     }
