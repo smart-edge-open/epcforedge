@@ -13,12 +13,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-//
-// Created by david on 16-2-1.
-//
 
-#ifndef MECFCGI_TESTERFRAMEWORK_H
-#define MECFCGI_TESTERFRAMEWORK_H
+#ifndef TESTERFRAMEWORK_H
+#define TESTERFRAMEWORK_H
 
 #include "TesterBase.h"
 #include <deque>
@@ -34,4 +31,4 @@ public:
 };
 
 
-#endif //MECFCGI_TESTERFRAMEWORK_H
+#endif //TESTERFRAMEWORK_H

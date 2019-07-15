@@ -13,8 +13,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 *******************************************************************************/
-#ifndef MECFCGI_TESTUTILITY_H
-#define MECFCGI_TESTUTILITY_H
+#ifndef TESTUTILITY_H
+#define TESTUTILITY_H
 #include <string>
 
 using std::string;
@@ -27,4 +27,4 @@ const string PATH_PREFIX = "./json_payload/";
 // reads a .json file in the path defined by PATH_PREFIX into a string
 string JSONFileToString(const string& file_name);
 
-#endif // MECFCGI_TESTUTILITY_H
+#endif // TESTUTILITY_H

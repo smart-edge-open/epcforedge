@@ -80,7 +80,7 @@ int GetUserplanesTester::execute(string& additionalMessage) {
 		sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL_ID5, "" );
         disconnect();
 		reportTestResult("GetUserPlanesTest_ID_NOTMATCH",
-                           HTTP_SC_INTERNAL_SOFTWARE_ERROR, "OK",
+                           HTTP_SC_USERPLANE_NOT_FOUND, "OK",
                            status_code, resp_body["result"]);
 
         // GET User plane ID 5 (TAC_NOTMATCH)
@@ -115,7 +115,7 @@ int GetUserplanesTester::execute(string& additionalMessage) {
 		sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL_ID5, "" );
         disconnect();
 		reportTestResult("GetUserPlanesTest_APNI_WRONG",
-                           HTTP_SC_INTERNAL_SOFTWARE_ERROR, "OK",
+                           HTTP_SC_USERPLANE_NOT_FOUND, "OK",
                            status_code, resp_body["result"]);
 
 
@@ -127,7 +127,7 @@ int GetUserplanesTester::execute(string& additionalMessage) {
 		sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL_ID5, "" );
         disconnect();
 		reportTestResult("GetUserPlanesTest_NOSGWS5U",
-                           HTTP_SC_INTERNAL_SOFTWARE_ERROR, "OK",
+                           HTTP_SC_USERPLANE_NOT_FOUND, "OK",
                            status_code, resp_body["result"]);
 
 
@@ -150,7 +150,7 @@ int GetUserplanesTester::execute(string& additionalMessage) {
 		sendGETRequest(status_code, resp_body, TesterBase::cookies["null"], GET_URL_ID5, "" );
         disconnect();
 		reportTestResult("GetUserPlanesTest_NOSGWS1U",
-                           HTTP_SC_INTERNAL_SOFTWARE_ERROR, "OK",
+                           HTTP_SC_USERPLANE_NOT_FOUND, "OK",
                            status_code, resp_body["result"]);
 
 
