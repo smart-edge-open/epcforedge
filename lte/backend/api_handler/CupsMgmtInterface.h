@@ -38,7 +38,8 @@ public:
     vector<string> utilsSplitStr( string inputStr, char delimiter);
     int utilsParseApnNi(string apn_ni, string &apn, string &mnc, string &mcc);
 	#ifdef CUPS_API_INT64_TYPE
-	int utilsConvertStringToInt64(string value_hex);
+	int utilsConvertHexStringToDecInt(string value_hex);
+    std::string  utilsConvertDecIntToHexString(int value_dec);
 	#endif
     int fillGetPgwResponse(Json::Value &pgwData, int pgwItemIndex,  Json::Value &response);
     int fillGetSgwResponse(Json::Value &sgwData, int sgwItemIndex,  Json::Value &response);	
