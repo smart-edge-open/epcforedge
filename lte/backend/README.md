@@ -53,7 +53,23 @@ In the test directory , there two types of tests:
 ## Controller Integration Test without EPC
 
 - Macro INT_TEST is flag to enable oamagent run without EPC, and respond with controller with pre-defined message in json format
-- Enable INT_TEST in Makefile or directly in CpfInterface.cpp file. Then make 
+- Enable INT_TEST in CMakeLists.txt as below:
+```text
+add_definitions(-g -Wall)
+add_definitions(-O3)
+add_definitions(-DCUPS_API_INT64_TYPE)
+#add_definitions(-DINT_TEST)
+```
+- Then make 
 - Copy json_payload folder (backend/test/unit_test/test_app/json_payload) into the same folder with oamagent
 - Run oamagent as guide
+- Limitation: Actually on INT_TEST mode, all the user planes are pre-configured by json files in json_payload. 
+  So it is not flexible and just for some basic interface testing as below:
+  GET ALL:       user planes configuration are from PgwGetAllRspData.json and SgwGetAllRspData.json. And they can be changed according to test requirements.
+  GET by ID:     must comply with : PgwGetOneRspData.json and SgwGetOneRspData.json。And they can be changed according to test requirements.
+  Delete by ID:  hardcoded success response . No corresponding json file
+  POST:  hardcoded success only for user plane id 5. No corresponding json file
+  PATCH:  hardcoded success only for user plane id 5. No corresponding json file
+
+  
  

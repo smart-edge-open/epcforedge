@@ -14,8 +14,8 @@ This repository contains the project for the EPC OAMAgent Community Edition.
 
 The EPC OAMAgent supports EPC-Cplane configuration from MEC controller. So provides two basic components as below:
 
-- backend: CGI backend source files to handle HTTP(S) commmunciation with controller
-- http: only provide guide about how to configure and start NGINX , also including how to generate self-signed certification files for HTTPS
+- backend: CGI backend source files to handle HTTP commmunciation with controller
+- http: only provide guide about how to configure and start NGINX 
 
 ## Architecture Overview
 

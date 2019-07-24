@@ -462,16 +462,18 @@ int cpfCurlDelete(string &url, bool &successFlg)
 
     #ifdef UNIT_TEST
     static int delTestCaseNum = 0;
-    if (delTestCaseNum == 4) {
+    if (delTestCaseNum == 6) {
        // last test is negtive test
        return -1;
     }	
-    const char *delTestCaseRspData[4] = { 
+    const char *delTestCaseRspData[6] = { 
+		"{\"success\":true,\"msg\":\"\"}",   //PGW respose for test 1
+		"{\"success\":true,\"msg\":\"\"}",   //SGW respose for test 1			
 		"{\"success\":true,\"msg\":\"\"}",   //PGW respose for test 1
 		"{\"success\":true,\"msg\":\"\"}",   //SGW respose for test 1		
 		"{\"success\":false,\"msg\":\"\"}",  //PGW respose for test 2
 		"{\"success\":false,\"msg\":\"\"}"};  //SGW respose for test 2
-    static bool delTestCaseSucFlag[4] = {true, true, false, false};	
+    static bool delTestCaseSucFlag[6] = {true, true, true, true, false, false};	
     //UT - direclty return
     successFlg   = delTestCaseSucFlag[delTestCaseNum];
     delTestCaseNum++;	

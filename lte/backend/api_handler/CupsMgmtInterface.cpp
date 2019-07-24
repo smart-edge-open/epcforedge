@@ -498,16 +498,14 @@ int CupsMgmtMessage::fillPutPgwRequest(Json::Value &request, string &pgwPutData)
    if (0 == userplaneID.compare("Nil")) {
        OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
    }
-   else {
-      OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
-   }
+   //OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
+
    // get uuid and put into POST to EPC
    Json::Value uuid = request.get("uuid","Nil");
    if (0 == uuid.compare("Nil")) {
        OAMAGENT_LOG(ERR, "[uuid] is not found in request.\n");   	
        return -1;
    }
-   pgwPutJson["id"] = userplaneID;
    pgwPutJson["uuid"] = uuid.asString();
 
    /////////////////start read config configuration ////////////////////////////////////////		
@@ -613,9 +611,7 @@ int CupsMgmtMessage::fillPutSgwRequest(Json::Value &request, string &sgwPutData)
        OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
        //return -1;
     }
-    else {
-    OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
-    }
+    //OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
     // get uuid and put into POST to EPC
     Json::Value uuid = request.get("uuid","Nil");
     if (0 == uuid.compare("Nil")) {
@@ -623,7 +619,6 @@ int CupsMgmtMessage::fillPutSgwRequest(Json::Value &request, string &sgwPutData)
        return -1;
     }
     sgwPutJson["uuid"] = uuid.asString();
-    sgwPutJson["id"] = userplaneID;
 
     /////////////////start read config configuration ////////////////////////////////////////		
     Json::Value config = request.get("config","Nil");
