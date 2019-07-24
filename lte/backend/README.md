@@ -5,7 +5,7 @@ Copyright © 2019 Intel Corporation.
 
 # backend
 
-This is the HTTPS backend processing implementation for oamagent.
+This is the HTTP backend processing implementation for oamagent.
 
 ## Directory Structure
 

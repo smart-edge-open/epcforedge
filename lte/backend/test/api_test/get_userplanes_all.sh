@@ -18,4 +18,4 @@ setup_dir=${PWD}
 
 set -e
 
-curl -v --cacert epc.crt https://epc.oam:8080/userplanes
+curl -v http://epc.oam:8080/userplanes

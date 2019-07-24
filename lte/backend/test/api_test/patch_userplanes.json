@@ -10,7 +10,7 @@
     {
         "id":"select0",
         "network":{"mcc":"466","mnc":"92"},
-        "uli":{"tai":{"tac":"55"}},
+        "uli":{"tai":{"tac":55}},
         "pdn":{"apns":["test5"]}
     }
   ]
