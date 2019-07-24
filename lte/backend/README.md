@@ -46,7 +46,7 @@ Func:main(Line:120)OAMAgent Backend running ...
 ## Test
 
 In the test directory , there two types of tests:
-- API Test: Provides CURL based test scripts for MEC Controller  API testing
+- API Test: Provides CURL based test scripts for MEC Controller CUPS  API testing
 - Unit Test: Provides unit test and code coverage  
 - The details refer to README.md in the folders: api_test and unit_test. 
 
@@ -65,11 +65,11 @@ add_definitions(-DCUPS_API_INT64_TYPE)
 - Run oamagent as guide
 - Limitation: Actually on INT_TEST mode, all the user planes are pre-configured by json files in json_payload. 
   So it is not flexible and just for some basic interface testing as below:
-  GET ALL:       user planes configuration are from PgwGetAllRspData.json and SgwGetAllRspData.json. And they can be changed according to test requirements.
-  GET by ID:     must comply with : PgwGetOneRspData.json and SgwGetOneRspData.json。And they can be changed according to test requirements.
-  Delete by ID:  hardcoded success response . No corresponding json file
-  POST:  hardcoded success only for user plane id 5. No corresponding json file
-  PATCH:  hardcoded success only for user plane id 5. No corresponding json file
+  - GET ALL:       user planes configuration are from PgwGetAllRspData.json and SgwGetAllRspData.json. And they can be changed according to test requirements.
+  - GET by ID:     must comply with : PgwGetOneRspData.json and SgwGetOneRspData.json。And they can be changed according to test requirements.
+  - Delete by ID:  hardcoded success response . No corresponding json file
+  - POST:  hardcoded success only for user plane id 5. No corresponding json file
+  - PATCH:  hardcoded success only for user plane id 5. No corresponding json file
 
   
  

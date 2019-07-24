@@ -28,7 +28,7 @@ Figure 1. OAMAgent Architecture.
 
 ## Installation, Build and Run
 
-- Setup, Generate Self-signed certification files and Run NGINX according to readme in sub-directory: http
+- Setup, Configure and Run NGINX according to readme in sub-directory: http
 - Setup, Build and Run HTTP based backend according to readme in the sub-directory: backend
 - Notice: All installation scripts are based and verified on CentOS 7.6 x86_64 operating system. 
 
