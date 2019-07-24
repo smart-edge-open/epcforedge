@@ -88,15 +88,31 @@ int CupsMgmtMessage::utilsParseApnNi(string apn_ni, string &apn, string &mnc, st
 * @brief        The utility function will convert string with hex format to int64 
 *					
 * @param[in]	value_hex 	The string with value as HEX format
-* @return	int64
+* @return	int
 */
 
-int  CupsMgmtMessage::utilsConvertStringToInt64(string value_hex)
+int  CupsMgmtMessage::utilsConvertHexStringToDecInt(string value_hex)
 {
     int res = std::stoi (value_hex,0,16);
     OAMAGENT_LOG(INFO, "Convert (%s) to (%d) \n", value_hex.c_str(), res);
     return res;
 }
+/**
+* @brief        The utility function will convert decimal int to hex string 
+*					
+* @param[in]	value_dec 	The decimal value
+* @return	hex base string
+*/
+
+std::string  CupsMgmtMessage::utilsConvertDecIntToHexString(int value_dec)
+{
+    std::string ret;
+	std::stringstream temp;
+	temp << std::hex << value_dec;
+    temp >> ret;
+    return ret;
+}
+
 #endif
 
 /**
@@ -141,13 +157,20 @@ int CupsMgmtMessage::fillGetPgwResponse(Json::Value &pgwData, int pgwItemIndex, 
 	
     response["uuid"] = pgwData["items"][pgwItemIndex]["uuid"];
     response["id"] = pgwData["items"][pgwItemIndex]["id"];
-    //STEP1: fill config
+    response["function"] = "SAEGWU";
+
+     //STEP1: fill config
     Json::Value config;
     config["s5u_pgw"]["up_ip_address"] = pgwData["items"][pgwItemIndex]["s5u_ip"];		
     
     //STEP2: fill selectors
+    Json::Value selectors_array;    
     Json::Value selectors;
     Json::Value network;
+	//STEP2.0 selectors->id
+	selectors["id"] = pgwData["items"][pgwItemIndex]["id"];	
+	
+	//STEP2.1 selectors->network
     string apn_ni,apn,mnc,mcc;
     apn_ni = pgwData["items"][pgwItemIndex]["apn_ni"].asString();
     if (0 != utilsParseApnNi( apn_ni,apn,mnc,mcc)) {
@@ -156,25 +179,31 @@ int CupsMgmtMessage::fillGetPgwResponse(Json::Value &pgwData, int pgwItemIndex, 
     network["mcc"] = mcc;
     network["mnc"] = mnc;		
     selectors["network"] = network; 	
+	//STEP2.1 selectors->uli	
     Json::Value uli;
     Json::Value tai;
-    #ifdef CUPS_API_INT64_TYPE
+	#ifdef CUPS_API_INT64_TYPE
     // convert into int64 type (JSON not support HEX, so need to convert into DEC)
     // BUT TAC only has 16 bit. so int type will be enough
-    tai["tac"] = utilsConvertStringToInt64(pgwData["items"][pgwItemIndex]["tac"].asString());
-    #else
-    // default should be string type.
+    tai["tac"] = utilsConvertHexStringToDecInt(pgwData["items"][pgwItemIndex]["tac"].asString());
+	#else
+	// default should be string type.
     tai["tac"] = pgwData["items"][pgwItemIndex]["tac"];
-    #endif
+	#endif
     uli["tai"] = tai;
+	selectors["uli"] = uli;
+	//STEP2.3 selectors->pdn
     Json::Value pdn;	 
     pdn["apns"].append(apn.c_str());	
-    uli["pdn"] = pdn;		
-    selectors["uli"] = uli;
+    selectors["pdn"] = pdn;		
+
     // Finally, put all into reponse
     response["config"] = config;		
-    response["selectors"] = selectors;
-    return 0;
+    selectors_array.append(selectors);	
+    response["selectors"] = selectors_array;
+
+	return 0;
+     
 }
 
 /**
@@ -241,10 +270,9 @@ int CupsMgmtMessage::fillPostPgwRequest(Json::Value &request, string &pgwPostDat
    //stringstream jsonStr;
    string userplaneID = request.get("id", "Nil").asString();
    if (0 == userplaneID.compare("Nil")) {
-      OAMAGENT_LOG(ERR, "[id] is not found in request.\n");
-      return -1;
+      OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
    }
-   OAMAGENT_LOG(INFO, "UserplaneAdd userplaneID (%s).\n", userplaneID.c_str());
+   //OAMAGENT_LOG(INFO, "UserplaneAdd userplaneID (%s).\n", userplaneID.c_str());
 
    // get uuid and put into POST to EPC
    Json::Value uuid = request.get("uuid","Nil");
@@ -293,11 +321,12 @@ int CupsMgmtMessage::fillPostPgwRequest(Json::Value &request, string &pgwPostDat
    for (int i = 0; i < size; i++){
        string selectors_id = selectors[i].get ("id","Nil").asString();
        if (0 == selectors_id.compare("Nil")){
-           OAMAGENT_LOG(ERR, "[selectors_id] is not found in breakout.\n");
-           return -1;
+           OAMAGENT_LOG(WARN, "[selectors_id] is not found in breakout.\n");
+           //return -1;
        }
-       OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] id (%s).\n", i, selectors_id.c_str());
-   
+       else {
+           OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] id (%s).\n", i, selectors_id.c_str());
+       }
        /////// network
        Json::Value network = selectors[i].get ("network","Nil");
        string network_mcc = network.get ("mcc","Nil").asString();
@@ -313,7 +342,7 @@ int CupsMgmtMessage::fillPostPgwRequest(Json::Value &request, string &pgwPostDat
        Json::Value tai = uli.get ("tai","Nil");
        #ifdef CUPS_API_INT64_TYPE
        int tac = tai.get ("tac","Nil").asInt();
-       pgwPostJson["tac"] = std::to_string(tac);
+       pgwPostJson["tac"] = utilsConvertDecIntToHexString(tac);
        OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] uli (tac %d).\n", i, tac);
        #else
        string tac = tai.get ("tac","Nil").asString();
@@ -361,10 +390,9 @@ int CupsMgmtMessage::fillPostSgwRequest(Json::Value &request, string &sgwPostDat
 
     string userplaneID = request.get("id", "Nil").asString();
     if (0 == userplaneID.compare("Nil")) {
-        OAMAGENT_LOG(ERR, "[id] is not found in request.\n");
-        return -1;
+        OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
     }
-    OAMAGENT_LOG(INFO, "UserplaneAdd userplaneID (%s).\n", userplaneID.c_str());
+    //OAMAGENT_LOG(INFO, "UserplaneAdd userplaneID (%s).\n", userplaneID.c_str());
 	
     // get uuid and put into POST to EPC
     Json::Value uuid = request.get("uuid","Nil");
@@ -426,17 +454,19 @@ int CupsMgmtMessage::fillPostSgwRequest(Json::Value &request, string &sgwPostDat
     for (int i = 0; i < size; i++){
         string selectors_id = selectors[i].get ("id","Nil").asString();
         if (0 == selectors_id.compare("Nil")){
-           OAMAGENT_LOG(ERR, "[selectors_id] is not found in breakout.\n");
-           return -1;
+           OAMAGENT_LOG(WARN, "[selectors_id] is not found in breakout.\n");
+           //return -1;
         }
-        OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] id (%s).\n", i, selectors_id.c_str());
+        else {
+           OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] id (%s).\n", i, selectors_id.c_str());
+        }
 
         /////// uli
         Json::Value uli = selectors[i].get ("uli","Nil");
         Json::Value tai = uli.get ("tai","Nil");
 #ifdef CUPS_API_INT64_TYPE
         int tac = tai.get ("tac","Nil").asInt();
-        sgwPostJson["tac"] = std::to_string(tac);
+        sgwPostJson["tac"] = utilsConvertDecIntToHexString(tac);
         OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] uli (tac %d).\n", i, tac);
 #else
         string tac = tai.get ("tac","Nil").asString();
@@ -466,10 +496,9 @@ int CupsMgmtMessage::fillPutPgwRequest(Json::Value &request, string &pgwPutData)
    //stringstream jsonStr;
    string userplaneID = request.get("id", "Nil").asString();
    if (0 == userplaneID.compare("Nil")) {
-       OAMAGENT_LOG(ERR, "[id] is not found in request.\n");
-       return -1;
+       OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
    }
-   OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
+   //OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
 
    // get uuid and put into POST to EPC
    Json::Value uuid = request.get("uuid","Nil");
@@ -519,7 +548,7 @@ int CupsMgmtMessage::fillPutPgwRequest(Json::Value &request, string &pgwPutData)
               Json::Value tai = uli.get ("tai","Nil");
 #ifdef CUPS_API_INT64_TYPE			  
               int tac = tai.get ("tac","Nil").asInt();
-              pgwPutJson["tac"] = std::to_string(tac);
+              pgwPutJson["tac"] = utilsConvertDecIntToHexString(tac);
               OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] uli (tac %d).\n", i, tac);
 #else
               string tac = tai.get ("tac","Nil").asString();
@@ -579,10 +608,10 @@ int CupsMgmtMessage::fillPutSgwRequest(Json::Value &request, string &sgwPutData)
     //stringstream jsonStr;		
     string userplaneID = request.get("id", "Nil").asString();
     if (0 == userplaneID.compare("Nil")) {
-       OAMAGENT_LOG(ERR, "[id] is not found in request.\n");
-       return -1;
+       OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
+       //return -1;
     }
-    OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
+    //OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
     // get uuid and put into POST to EPC
     Json::Value uuid = request.get("uuid","Nil");
     if (0 == uuid.compare("Nil")) {
@@ -652,7 +681,7 @@ int CupsMgmtMessage::fillPutSgwRequest(Json::Value &request, string &sgwPutData)
            Json::Value tai = uli.get ("tai","Nil");
            #ifdef CUPS_API_INT64_TYPE
            int tac = tai.get ("tac","Nil").asInt();
-           sgwPutJson["tac"] = std::to_string(tac);
+           sgwPutJson["tac"] = utilsConvertDecIntToHexString(tac);
            OAMAGENT_LOG(INFO, "UserplaneAdd selectors[%d] uli (tac %d).\n", i, tac);
            #else
            string tac = tai.get ("tac","Nil").asString();

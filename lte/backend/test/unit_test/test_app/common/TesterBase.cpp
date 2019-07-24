@@ -14,10 +14,7 @@
 * limitations under the License.
 *******************************************************************************/
 
-//
-// Created by david on 16-2-1.
-// Modified by Yuan on 02-14-2017
-//
+
 
 // library include
 #include <boost/algorithm/string.hpp>

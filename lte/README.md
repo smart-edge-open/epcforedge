@@ -14,8 +14,8 @@ This repository contains the project for the EPC OAMAgent Community Edition.
 
 The EPC OAMAgent supports EPC-Cplane configuration from MEC controller. So provides two basic components as below:
 
-- backend: CGI backend source files to handle HTTP(S) commmunciation with controller
-- http: only provide guide about how to configure and start NGINX , also including how to generate self-signed certification files for HTTPS
+- backend: CGI backend source files to handle HTTP commmunciation with controller
+- http: only provide guide about how to configure and start NGINX 
 
 ## Architecture Overview
 
@@ -28,8 +28,8 @@ Figure 1. OAMAgent Architecture.
 
 ## Installation, Build and Run
 
-- Setup, Generate Self-signed certification files and Run NGINX according to readme in sub-directory: http
-- Setup, Build and Run HTTPS based backend according to readme in the sub-directory: backend
+- Setup, Configure and Run NGINX according to readme in sub-directory: http
+- Setup, Build and Run HTTP based backend according to readme in the sub-directory: backend
 - Notice: All installation scripts are based and verified on CentOS 7.6 x86_64 operating system. 
 
 # Troubleshooting
@@ -45,7 +45,7 @@ Figure 1. OAMAgent Architecture.
 
 * Controller not able to communicate with OAMAgent
 
-  Make sure that it is not caused by HTTPS proxy setting for the operating system that OAMAgent is running on.
+  Make sure that it is not caused by HTTP proxy setting for the operating system that OAMAgent is running on.
   If finding "Permission denied" in the nginx log, can use command: setenforce=0
 
 * Log files

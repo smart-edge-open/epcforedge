@@ -14,13 +14,9 @@
 * limitations under the License.
 *******************************************************************************/
 
-//
-// Created by david on 16-2-1.
-// Modified by Yuan on 2-16-2017.
-//
 
-#ifndef MECFCGI_TESTERBASE_H
-#define MECFCGI_TESTERBASE_H
+#ifndef TESTERBASE_H
+#define TESTERBASE_H
 
 /*******************************************************************************
 * include declarations
@@ -31,7 +27,6 @@
 
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-//#include <hiredis/hiredis.h>
 #include <json/json.h>
 
 
@@ -165,4 +160,4 @@ public:
 };
 
 
-#endif //MECFCGI_TESTERBASE_H
+#endif //TESTERBASE_H

@@ -28,6 +28,9 @@
 #include "CupsMgmtInterface.h"
 
 
+#ifdef INT_TEST
+extern int testUserplanesStart;
+#endif
 /**
 * @brief                Post new user plane configuration
 * @param[in]		request 	JSON-formatted request data.
@@ -43,24 +46,24 @@ void UserplaneAdd::execute(Json::Value &request, Json::Value &response,
                     map<string, string> &headers, map<string, string> &cookies)
 {
     try {
-        string pgwGetUrl, sgwGetUrl;
+        string pgwPostUrl, sgwPostUrl;
         string pgwPostData,sgwPostData;
-	stringstream pgwPostResponse,sgwPostResponse;
+        stringstream pgwPostResponse,sgwPostResponse;
         string pgwId, sgwId;
 		
-	// Prepare PGW and SGW URL
-        pgwGetUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
+        // Prepare PGW and SGW URL
+        pgwPostUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
 				 "/api/v1/pgwprofile?entity-type=pgw-dpf";
-        sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
+        sgwPostUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
 				 "/api/v1/sgwprofile?entity-type=sgw-dpf";
 			
         // Check function exist
-	string function = request.get("function", "Nil").asString();
-	if (0 == function.compare("Nil") || 
-	  ((0 != function.compare("SAEGWU")) && (0 != function.compare("PGWU")) && (0 != function.compare("SGWU")))) {
+        string function = request.get("function", "Nil").asString();
+        if (0 == function.compare("Nil") || 
+          ((0 != function.compare("SAEGWU")) && (0 != function.compare("PGWU")) && (0 != function.compare("SGWU")))) {
             OAMAGENT_LOG(ERR, "[function] is not found in request.\n");
             throw Exception(Exception::INVALID_UERPLANE_FUNCTION);
-	}
+        }
         OAMAGENT_LOG(INFO, "UserplaneAdd execute with function (%s).\n", function.c_str());	        
 
         // POST PGW
@@ -73,7 +76,7 @@ void UserplaneAdd::execute(Json::Value &request, Json::Value &response,
             }
 			
             // Post PGW config 
-            if (0 != cpfCurlPost(pgwGetUrl,pgwPostData,pgwPostResponse)) {
+            if (0 != cpfCurlPost(pgwPostUrl,pgwPostData,pgwPostResponse)) {
                 OAMAGENT_LOG(ERR, "curl POST failed.\n");				
                 throw Exception(Exception::CONNECT_EPC_ERROR);
             }
@@ -96,14 +99,24 @@ void UserplaneAdd::execute(Json::Value &request, Json::Value &response,
             // Prepare postdata
             if (0 != cupsMgmtMsg.fillPostSgwRequest(request, sgwPostData)) {
                  OAMAGENT_LOG(ERR, "filling message falied.\n");
+
+				 // delete PGW
+				 string pgwUrl_toDelete = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" + pgwId.c_str();
+                 OAMAGENT_LOG(INFO, "starting delete old pgw cfg with id %s.\n",pgwId.c_str());
+                 bool delSucFlag = false;
+				 cpfCurlDelete(pgwUrl_toDelete, delSucFlag);
+
+				 // exception
                  throw Exception(Exception::INVALID_UERPLANE_FUNCTION);
+				 
             }
 
             // Post SGW config 
-            if (0 != cpfCurlPost(sgwGetUrl,sgwPostData,sgwPostResponse)) {
+            if (0 != cpfCurlPost(sgwPostUrl,sgwPostData,sgwPostResponse)) {
                 OAMAGENT_LOG(ERR, "curl POST failed.\n");				
                 throw Exception(Exception::CONNECT_EPC_ERROR);
             }
+			
             // Check Operation Success Flag
             if (false == cpfCurlGetSuccessFlag(sgwPostResponse)) {
                 OAMAGENT_LOG(ERR," PgwPostResponse Success Flag is False \n");
@@ -156,41 +169,40 @@ void UserplanePatchByID::execute(Json::Value &request, Json::Value &response,
         
         OAMAGENT_LOG(INFO, "UserplanePatchByID(%s) Executing.\n", request["UUID"].asString().c_str());
 
-        string pgwGetUrl, sgwGetUrl;
-        string pgwPostData,sgwPostData;
-        string pgwId,sgwId;
+        string pgwPatchUrl, sgwPatchUrl;
+        string pgwPatchData,sgwPatchData;
         stringstream pgwPostResponse,sgwPostResponse;
  
         // Prepare PGW and SGW URL
-	pgwGetUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
+        pgwPatchUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
 			 "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" + request["UUID"].asString();
-	sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
+        sgwPatchUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
 			 "/api/v1/sgwprofile?entity-type=sgw-dpf&id=" + request["UUID"].asString();
 		 				
-	// Check function exist
-	string function = request.get("function", "Nil").asString();
-	if (0 == function.compare("Nil")) {
-	   OAMAGENT_LOG(ERR, "[function] is not found in request.\n");
-           throw Exception(Exception::INVALID_UERPLANE_FUNCTION);
-	}
+        // Check function exist
+        string function = request.get("function", "Nil").asString();
+        if (0 == function.compare("Nil")) {
+            OAMAGENT_LOG(ERR, "[function] is not found in request.\n");
+            throw Exception(Exception::INVALID_UERPLANE_FUNCTION);
+        }
 
-	// Check function value		
-	OAMAGENT_LOG(INFO, "UserplaneAdd execute with function (%s).\n", function.c_str()); 	
-	if (0 == function.compare("NONE")) {
-           OAMAGENT_LOG(ERR, "[function] is not found in request.\n");
-           throw Exception(Exception::INVALID_UERPLANE_FUNCTION);
-	}
+        // Check function value		
+        OAMAGENT_LOG(INFO, "UserplaneAdd execute with function (%s).\n", function.c_str()); 	
+        if (0 == function.compare("NONE")) {
+            OAMAGENT_LOG(ERR, "[function] is not found in request.\n");
+            throw Exception(Exception::INVALID_UERPLANE_FUNCTION);
+        }
 
-	// Combined PGWU and SGW
-	if ((0 == function.compare("SAEGWU")) || (0 == function.compare("PGWU"))) {	
+        // Combined PGWU and SGW
+        if ((0 == function.compare("SAEGWU")) || (0 == function.compare("PGWU"))) {	
            // Prepare postdata
-           if (0 != cupsMgmtMsg.fillPutPgwRequest(request, pgwPostData)) {
+           if (0 != cupsMgmtMsg.fillPutPgwRequest(request, pgwPatchData)) {
               OAMAGENT_LOG(ERR, "filling message falied.\n");
               throw Exception(Exception::INTERNAL_SOFTWARE_ERROR);
            }
 
            // PUT PGW config 
-           if (0 != cpfCurlPut(pgwGetUrl,pgwPostData,pgwPostResponse)) {
+           if (0 != cpfCurlPut(pgwPatchUrl,pgwPatchData,pgwPostResponse)) {
               OAMAGENT_LOG(ERR, "curl PUT failed.\n");				
               throw Exception(Exception::CONNECT_EPC_ERROR);
            }
@@ -206,13 +218,21 @@ void UserplanePatchByID::execute(Json::Value &request, Json::Value &response,
         // SGWU only
         if ((0 == function.compare("SAEGWU")) || (0 == function.compare("SGWU"))) {		
            // Prepare postdata
-           if (0 != cupsMgmtMsg.fillPutSgwRequest(request, sgwPostData)) {
+           if (0 != cupsMgmtMsg.fillPutSgwRequest(request, sgwPatchData)) {
               OAMAGENT_LOG(ERR, "filling message falied.\n");
+
+              // delete PGW
+             string pgwUrl_toDelete = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" +  request["UUID"].asString().c_str();
+             OAMAGENT_LOG(INFO, "starting delete old pgw cfg with id %s.\n", request["UUID"].asString().c_str());
+             bool delSucFlag = false;
+			 cpfCurlDelete(pgwUrl_toDelete, delSucFlag);
+
+			  // exception 
               throw Exception(Exception::INTERNAL_SOFTWARE_ERROR);
            }
 
            // Post SGW config 
-           if (0 != cpfCurlPut(sgwGetUrl,sgwPostData,sgwPostResponse)) {							
+           if (0 != cpfCurlPut(sgwPatchUrl,sgwPatchData,sgwPostResponse)) {							
               OAMAGENT_LOG(ERR, "curl PUT failed.\n");				
               throw Exception(Exception::CONNECT_EPC_ERROR);
            }
@@ -262,6 +282,11 @@ void UserplanesListGet::execute(map<string, string> params, Json::Value &respons
                      "/api/v1/pgwprofile?action=list&entity-type=pgw-dpf";		
         string sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
                      "/api/v1/sgwprofile?action=list&entity-type=sgw-dpf";       
+
+        #ifdef INT_TEST
+        testUserplanesStart = 0; // start index for the user plane mock json data
+        #endif
+
         // Get PGW information from CP
         if (0 != cpfCurlGet(pgwGetUrl, pgwGetData)) {
             throw Exception(Exception::CONNECT_EPC_ERROR);
@@ -275,22 +300,23 @@ void UserplanesListGet::execute(map<string, string> params, Json::Value &respons
         Json::Value jsonSgwData;
         Json::Reader jsonReader;
         Json::Value  responseItem[MAX_USERPLANES_NUM];
+		
         // Check Total Account
-        if (0 >= (pgwCount = cpfCurlGetTotalCount(pgwGetData))) {
+        if (0 > (pgwCount = cpfCurlGetTotalCount(pgwGetData))) {
             OAMAGENT_LOG(ERR, "Wrong PGW totalCount %d.\n", pgwCount);
             throw Exception(Exception::USERPLANE_NOT_FOUND);
         }
 		
         // Check Total Account
-        if (0 >= (sgwCount = cpfCurlGetTotalCount(sgwGetData))) {
+        if (0 > (sgwCount = cpfCurlGetTotalCount(sgwGetData))) {
             OAMAGENT_LOG(ERR, "Wrong SGW totalCount %d.\n", sgwCount);
             throw Exception(Exception::USERPLANE_NOT_FOUND);
         }	   
 
-	if (pgwCount != sgwCount) {
+        if (pgwCount != sgwCount) {
             OAMAGENT_LOG(ERR, "Wrong SGW PGW totalCount %d - %d.\n", sgwCount, pgwCount);
-            throw Exception(Exception::USERPLANE_NOT_FOUND);			
-	}
+            throw Exception(Exception::INTERNAL_SOFTWARE_ERROR);			
+        }
         OAMAGENT_LOG(INFO, "Preparing response.\n");
         jsonReader.parse(pgwGetData.str().c_str(), jsonPgwData);
         jsonReader.parse(sgwGetData.str().c_str(), jsonSgwData);
@@ -306,7 +332,7 @@ void UserplanesListGet::execute(map<string, string> params, Json::Value &respons
            response["userplanes"].append(responseItem[itemIndex]);
         }
 	
-        OAMAGENT_LOG(INFO, "Completed UserplanesListGet.\n");
+        OAMAGENT_LOG(INFO, "UserplanesListGet Success With count (%d).\n", pgwCount);
         headers["Status"] = HTTP_SC_OK;
         response["result"] = "OK";
 
@@ -315,6 +341,7 @@ void UserplanesListGet::execute(map<string, string> params, Json::Value &respons
         string res;
         string statusCode;
         Exception::handlerException(e, res, statusCode);
+		OAMAGENT_LOG(ERR, "UserplanesListGet Failed (%s).\n", statusCode.c_str());				
         headers["Status"] = statusCode;
         response["result"] = res;
     }
@@ -345,6 +372,12 @@ void UserplaneGetByID::execute(map<string, string> params, Json::Value &response
                     "/api/v1/pgwprofile?action=list&entity-type=pgw-dpf&id=" + params["UUID"];
         string sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
                     "/api/v1/sgwprofile?action=list&entity-type=sgw-dpf&id=" + params["UUID"]; 
+
+        #ifdef INT_TEST
+        testUserplanesStart = 2; // start index for the user plane mock json data
+        #endif
+
+
 
         Json::Value jsonPgwData;     		
         Json::Value jsonSgwData;
@@ -384,16 +417,16 @@ void UserplaneGetByID::execute(map<string, string> params, Json::Value &response
 		
         OAMAGENT_LOG(INFO, "PGW id(%s) or SGW Id (%s) for GetID (%s).\n",
 				pgwId.c_str(),sgwId.c_str(),params["UUID"].c_str());		
-	#if 1 // need check when value is "09", return ID = "9". 
+        #if 1 // need check when value is "09", return ID = "9". 
         if (0 != strcmp(sgwId.c_str(), params["UUID"].c_str())
 		 || 0 != strcmp(pgwId.c_str(), params["UUID"].c_str())) { // check result
             OAMAGENT_LOG(ERR, "Not valid PGW id(%s) or SGW Id (%s) for GetID (%s).\n",
 				pgwId.c_str(),sgwId.c_str(),params["UUID"].c_str());
-            throw Exception(Exception::INTERNAL_SOFTWARE_ERROR);;
+            throw Exception(Exception::USERPLANE_NOT_FOUND);;
     	}
-	#endif
+        #endif
 
-	// Get TAC, then check TAC validation
+        // Get TAC, then check TAC validation
         if (0 != cpfCurlGetTacByItemIndex(itemIndex,pgwGetData,pgwTac)
          || 0 != cpfCurlGetTacByItemIndex(itemIndex,sgwGetData,sgwTac)) {
             throw Exception(Exception::INTERNAL_SOFTWARE_ERROR);
@@ -410,20 +443,22 @@ void UserplaneGetByID::execute(map<string, string> params, Json::Value &response
         jsonReader.parse(pgwGetData.str().c_str(), jsonPgwData);
         jsonReader.parse(sgwGetData.str().c_str(), jsonSgwData);
         if (0!= cupsMgmtMsg.fillGetPgwResponse(jsonPgwData, itemIndex, response)){
-            throw Exception(Exception::INTERNAL_SOFTWARE_ERROR);
+            throw Exception(Exception::USERPLANE_NOT_FOUND);
         }
         if (0 != cupsMgmtMsg.fillGetSgwResponse(jsonSgwData, itemIndex, response)){
-            throw Exception(Exception::INTERNAL_SOFTWARE_ERROR);
+            throw Exception(Exception::USERPLANE_NOT_FOUND);
         }
-		
+		OAMAGENT_LOG(INFO, "UserplanesGet For (%s) Success.\n",params["UUID"].c_str());
         headers["Status"] = HTTP_SC_OK;
         response["result"] = "OK";
 
     }
     catch (Exception &e) {
+		
         string res;
         string statusCode;
         Exception::handlerException(e, res, statusCode);
+		OAMAGENT_LOG(ERR, "UserplanesGet For (%s) Failed (%s).\n", params["UUID"].c_str(),statusCode.c_str());		
         headers["Status"] = statusCode;
         response["result"] = res;
     }
@@ -448,31 +483,34 @@ void UserplaneDelByID::execute(map<string, string> params,
     try {
 
         OAMAGENT_LOG(INFO, "UserplaneDelByID(%s) Executing.\n",params["UUID"].c_str());
-        string pgwGetUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
+        string pgwDelUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
                      "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" + params["UUID"];
-        string sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
+        string sgwDelUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
                      "/api/v1/sgwprofile?entity-type=sgw-dpf&id=" + params["UUID"];
 
         // Delete PGW information from CP
         bool sucFlag = false;
-        if (0 != cpfCurlDelete(pgwGetUrl, sucFlag)) {
+        if (0 != cpfCurlDelete(pgwDelUrl, sucFlag)) {
             OAMAGENT_LOG(ERR, "DeletePGW failed.\n");
             throw Exception(Exception::USERPLANE_NOT_FOUND);
         }
-	if (sucFlag == false) {
-	    OAMAGENT_LOG(ERR, "DeletePGW failed.\n");
+		
+        if (sucFlag == false) {
+	        OAMAGENT_LOG(ERR, "DeletePGW failed.\n");
             throw Exception(Exception::USERPLANE_NOT_FOUND);			
-	}
+        }
 		
         // Delete SGW information from CP
-        if (0 != cpfCurlDelete(sgwGetUrl, sucFlag)) {
+        if (0 != cpfCurlDelete(sgwDelUrl, sucFlag)) {
             OAMAGENT_LOG(ERR, "DeleteSGW failed.\n");
             throw Exception(Exception::USERPLANE_NOT_FOUND);
         }
-	if (sucFlag == false) {
-	    OAMAGENT_LOG(ERR, "DeletePGW failed.\n");
+		
+        if (sucFlag == false) {
+	        OAMAGENT_LOG(ERR, "DeletePGW failed.\n");
             throw Exception(Exception::USERPLANE_NOT_FOUND);			
-	}		
+        }		
+		OAMAGENT_LOG(INFO, "UserplaneDelByID(%s) Success.\n",params["UUID"].c_str());
 
         headers["Status"] = HTTP_SC_OK;
         response["result"] = "OK";
@@ -481,6 +519,7 @@ void UserplaneDelByID::execute(map<string, string> params,
         string res;
         string statusCode;
         Exception::handlerException(e, res, statusCode);
+		OAMAGENT_LOG(ERR, "UserplaneDelByID(%s) Failed.\n",params["UUID"].c_str());		
         headers["Status"] = statusCode;
         response["result"] = res;
     }
