@@ -39,10 +39,10 @@ extern "C" {
     char _fpt_log_buf[OUTPUT_MAX]; \
     snprintf(_fpt_log_buf, OUTPUT_MAX, __VA_ARGS__); \
     _fpt_log_buf[OUTPUT_MAX - 1] = 0; \
-    printf("Func:%s(Line:%d)%s",  __FUNCTION__, __LINE__, _fpt_log_buf); \
+    syslog(level, "Func:%s(Line:%d)%s",  __FUNCTION__, __LINE__, _fpt_log_buf); \
 }
 
-
+// printf("Func:%s(Line:%d)%s",  __FUNCTION__, __LINE__, _fpt_log_buf);
 
 void oamagentLogInit();
 

@@ -270,7 +270,7 @@ int CupsMgmtMessage::fillPostPgwRequest(Json::Value &request, string &pgwPostDat
    //stringstream jsonStr;
    string userplaneID = request.get("id", "Nil").asString();
    if (0 == userplaneID.compare("Nil")) {
-      OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
+      OAMAGENT_LOG(WARNING, "[id] is not found in request.\n");
    }
    //OAMAGENT_LOG(INFO, "UserplaneAdd userplaneID (%s).\n", userplaneID.c_str());
 
@@ -321,7 +321,7 @@ int CupsMgmtMessage::fillPostPgwRequest(Json::Value &request, string &pgwPostDat
    for (int i = 0; i < size; i++){
        string selectors_id = selectors[i].get ("id","Nil").asString();
        if (0 == selectors_id.compare("Nil")){
-           OAMAGENT_LOG(WARN, "[selectors_id] is not found in breakout.\n");
+           OAMAGENT_LOG(WARNING, "[selectors_id] is not found in breakout.\n");
            //return -1;
        }
        else {
@@ -390,7 +390,7 @@ int CupsMgmtMessage::fillPostSgwRequest(Json::Value &request, string &sgwPostDat
 
     string userplaneID = request.get("id", "Nil").asString();
     if (0 == userplaneID.compare("Nil")) {
-        OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
+        OAMAGENT_LOG(WARNING, "[id] is not found in request.\n");
     }
     //OAMAGENT_LOG(INFO, "UserplaneAdd userplaneID (%s).\n", userplaneID.c_str());
 	
@@ -454,7 +454,7 @@ int CupsMgmtMessage::fillPostSgwRequest(Json::Value &request, string &sgwPostDat
     for (int i = 0; i < size; i++){
         string selectors_id = selectors[i].get ("id","Nil").asString();
         if (0 == selectors_id.compare("Nil")){
-           OAMAGENT_LOG(WARN, "[selectors_id] is not found in breakout.\n");
+           OAMAGENT_LOG(WARNING, "[selectors_id] is not found in breakout.\n");
            //return -1;
         }
         else {
@@ -496,7 +496,7 @@ int CupsMgmtMessage::fillPutPgwRequest(Json::Value &request, string &pgwPutData)
    //stringstream jsonStr;
    string userplaneID = request.get("id", "Nil").asString();
    if (0 == userplaneID.compare("Nil")) {
-       OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
+       OAMAGENT_LOG(WARNING, "[id] is not found in request.\n");
    }
    //OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
 
@@ -608,7 +608,7 @@ int CupsMgmtMessage::fillPutSgwRequest(Json::Value &request, string &sgwPutData)
     //stringstream jsonStr;		
     string userplaneID = request.get("id", "Nil").asString();
     if (0 == userplaneID.compare("Nil")) {
-       OAMAGENT_LOG(WARN, "[id] is not found in request.\n");
+       OAMAGENT_LOG(WARNING, "[id] is not found in request.\n");
        //return -1;
     }
     //OAMAGENT_LOG(INFO, "UserplanePatch userplaneID (%s).\n", userplaneID.c_str());
