@@ -1,0 +1,4 @@
+{
+    "Endpoint": ":60055",
+    "HeartbeatInterval": "60s"
+}
