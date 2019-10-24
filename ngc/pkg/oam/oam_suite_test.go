@@ -1,4 +1,4 @@
-package edgeoam_test
+package main_test
 
 import (
 	"testing"

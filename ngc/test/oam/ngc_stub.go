@@ -1,4 +1,4 @@
-package edgeoam 
+package main 
 
 import (
 )

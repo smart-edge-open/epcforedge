@@ -31,6 +31,11 @@ af:
 	GOOS=linux go build -o "${BUILD_DIR}/af" ./pkg/af
 
 oam:
+	mkdir -p "${BUILD_DIR}"
+	rm -f ./pkg/oam/oam_backend.go
+	ln -s ../../internal/flexcore/oam_flexcore_backend.go ./pkg/oam/oam_backend.go
+	GOOS=linux go build -o "${BUILD_DIR}/oam-stub" ./pkg/oam
+
 oam-test-stub:
 	mkdir -p "${BUILD_DIR}"
 	rm -f ./pkg/oam/oam_backend.go

@@ -1,1 +1,1 @@
-../../test/oam/ngc_stub.go
+../../internal/flexcore/oam_flexcore_backend.go
