@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pod-af
+  name: pod-nef
 spec:
   containers:
   - securityContext:
       privileged: false
-    name: af-container 
-    image: af-image:1.0
+    name: nef-container 
+    image: nef-image:1.0
     imagePullPolicy: Never
     command: [ "/bin/bash", "-c", "--" ]
     args: [ "while true; do sleep 300000; done;" ]
@@ -19,8 +19,8 @@ spec:
 
   - securityContext:
       privileged: false
-    name: nef-stub-container
-    image: nef_stub-image:1.0
+    name: af-stub-container
+    image: af_stub-image:1.0
     imagePullPolicy: Never
     command: [ "/bin/bash", "-c", "--" ]
     args: [ "while true; do sleep 300000; done;" ]
@@ -29,19 +29,5 @@ spec:
         memory: 1Gi
       limits:
         memory: 1Gi
-
-  - securityContext:
-      privileged: false
-    name: cnca-stub-for_af-container
-    image: cnca-stub-for-af-image:1.0
-    imagePullPolicy: Never
-    command: [ "/bin/bash", "-c", "--" ]
-    args: [ "while true; do sleep 300000; done;" ]
-    resources:
-      requests:
-        memory: 1Gi
-      limits:
-        memory: 1Gi
-
 
 
