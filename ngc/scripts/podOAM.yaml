@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-oam
+spec:
+  containers:
+  - securityContext:
+      privileged: false
+    name: oam-container 
+    image: oam-image:1.0
+    imagePullPolicy: Never
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "while true; do sleep 300000; done;" ]
+    resources:
+      requests:
+        memory: 1Gi
+      limits:
+        memory: 1Gi
+
+  - securityContext:
+      privileged: false
+    name: cnca-stub-for-oam-container
+    image: cnca_stub_for_oam-image:1.0
+    imagePullPolicy: Never
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "while true; do sleep 300000; done;" ]
+    resources:
+      requests:
+        memory: 1Gi
+      limits:
+        memory: 1Gi
+
