@@ -12,3 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package main
+
+import (
+	"log"
+	"net/http"
+	"time"
+)
+
+// Connectivity constants
+const (
+	NEFServerPort = "80"
+)
+
+func main() {
+
+	NEFRouter := NewNEFRouter()
+	s := &http.Server{
+		Addr:           ":"+NEFServerPort,
+		Handler:        NEFRouter,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+	log.Println("NEF listening on", s.Addr)
+	log.Fatal(s.ListenAndServe())
+}
