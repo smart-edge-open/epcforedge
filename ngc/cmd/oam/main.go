@@ -24,7 +24,7 @@ func main() {
 	log.Printf("Server started")
         
         var cfg oamCfg
-        err := oam.LoadJSONConfig("./oam.json", &cfg)
+        err := oam.LoadJSONConfig("./configs/oam.json", &cfg)
         if err != nil {
                 log.Printf("Failed to load config: %#v", err)
                 os.Exit(1)
