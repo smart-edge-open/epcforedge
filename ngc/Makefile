@@ -16,7 +16,7 @@
 
 #GOOS=linux go build -o "${BUILD_DIR}/oam-flexcore" ./pkg/oam ./internal/flexcore/oam_backend.go
 
-export GO111MODULE = on
+#export GO111MODULE = on
 
 .PHONY: build af oam oam-test oam-test-flexcore lint test-unit
 TMP_DIR:=$(shell mktemp -d)
@@ -32,15 +32,11 @@ af:
 
 oam:
 	mkdir -p "${BUILD_DIR}"
-	rm -f ./pkg/oam/oam_backend.go
-	ln -s ../../internal/flexcore/oam_flexcore_backend.go ./pkg/oam/oam_backend.go
-	GOOS=linux go build -o "${BUILD_DIR}/oam-stub" ./pkg/oam
+	GOOS=linux go build -o "${BUILD_DIR}/oam-stub" ./cmd/oam
 
 oam-test-stub:
 	mkdir -p "${BUILD_DIR}"
-	rm -f ./pkg/oam/oam_backend.go
-	ln -s ../../internal/flexcore/oam_flexcore_backend.go ./pkg/oam/oam_backend.go
-	GOOS=linux go build -o "${BUILD_DIR}/oam-stub" ./pkg/oam
+	GOOS=linux go build -o "${BUILD_DIR}/oam-stub" ./cmd/oam
 
 oam-test-flexcore:
 	mkdir -p "${BUILD_DIR}"

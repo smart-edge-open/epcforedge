@@ -1,0 +1,10 @@
+{
+  "afInstance": "hello_ngc",
+  "locationServices": [
+    {
+      "dnai": "loc1",
+      "dnn": "ldnn1",
+      "dns": "192.168.9.9"
+    }
+  ]
+}
