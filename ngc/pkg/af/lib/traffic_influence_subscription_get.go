@@ -23,14 +23,14 @@ import (
 	"syscall"
 )
 
-func getSubscription(afCtx *afContext, subscriptionId string,
+func getSubscription(afCtx *afContext, subscriptionID string,
 	cliCtx context.Context) (TrafficInfluSub, *http.Response, error) {
 
 	cliCfg := NewConfiguration()
-	cli := NewAFClient(cliCfg)
+	cli := NewClient(cliCfg)
 
-	tsResp, resp, err := cli.TrafficInfluSubGetApi.SubscriptionGet(
-		cliCtx, afCtx.cfg.AfId, subscriptionId)
+	tsResp, resp, err := cli.TrafficInfluSubGetAPI.SubscriptionGet(
+		cliCtx, afCtx.cfg.AfId, subscriptionID)
 
 	if err != nil {
 
@@ -40,15 +40,16 @@ func getSubscription(afCtx *afContext, subscriptionId string,
 	return tsResp, resp, nil
 }
 
+// GetSubscription function
 func GetSubscription(w http.ResponseWriter, r *http.Request) {
 
 	var (
 		err            error
 		tsResp         TrafficInfluSub
 		resp           *http.Response
-		subscriptionId string
-		transId        int
-		tsRespJson     []byte
+		subscriptionID string
+		transID        int
+		tsRespJSON     []byte
 	)
 
 	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
@@ -64,7 +65,7 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	transId, err = genTransactionId(afCtx)
+	transID, err = genTransactionID(afCtx)
 	if err != nil {
 
 		log.Errf("Traffic Influance Subscription PUT %s", err.Error())
@@ -72,26 +73,27 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	subscriptionId, err = getSubsIdFromUrl(r.URL)
+	subscriptionID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription PUT: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	afCtx.transactions[transId] = TrafficInfluSub{}
-	tsResp, resp, err = getSubscription(afCtx, subscriptionId, cliCtx)
+	afCtx.transactions[transID] = TrafficInfluSub{}
+	tsResp, resp, err = getSubscription(afCtx, subscriptionID, cliCtx)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription create : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-
-	} else {
-
-		if resp != nil {
-			w.WriteHeader(resp.StatusCode)
-		}
-
-		tsRespJson, err = json.Marshal(tsResp)
-		w.Write(tsRespJson)
 	}
+
+	tsRespJSON, err = json.Marshal(tsResp)
+	if err != nil {
+		log.Errf("Traffic Influence Subscription GET : %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(resp.StatusCode)
+	w.Write(tsRespJSON)
 }

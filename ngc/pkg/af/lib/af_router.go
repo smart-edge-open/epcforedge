@@ -37,7 +37,7 @@ func NewAFRouter(afCtx *afContext) *mux.Router {
 	for _, route := range afRoutes {
 		var handler http.Handler
 		handler = route.HandlerFunc
-		handler = Logger(handler, route.Name)
+		handler = serverLog(handler, route.Name)
 
 		router.
 			Methods(route.Method).

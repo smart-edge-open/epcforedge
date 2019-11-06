@@ -29,9 +29,9 @@ func createSubscription(ts TrafficInfluSub, afCtx *afContext,
 	cliCtx context.Context) (TrafficInfluSub, *http.Response, error) {
 
 	cliCfg := NewConfiguration()
-	cli := NewAFClient(cliCfg)
+	cli := NewClient(cliCfg)
 
-	tsResp, resp, err := cli.TrafficInfluSubPostApi.SubscriptionPost(cliCtx,
+	tsResp, resp, err := cli.TrafficInfluSubPostAPI.SubscriptionPost(cliCtx,
 		afCtx.cfg.AfId, ts)
 
 	if err != nil {
@@ -42,6 +42,7 @@ func createSubscription(ts TrafficInfluSub, afCtx *afContext,
 	return tsResp, resp, nil
 }
 
+// CreateSubscription function
 func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 
 	var (
@@ -50,8 +51,8 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		tsResp         TrafficInfluSub
 		resp           *http.Response
 		url            *url.URL
-		subscriptionId string
-		transId        int
+		subscriptionID string
+		transID        int
 	)
 
 	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
@@ -73,7 +74,7 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transId, err = genTransactionId(afCtx)
+	transID, err = genTransactionID(afCtx)
 	if err != nil {
 
 		log.Errf("Traffic Influance Subscription create %s", err.Error())
@@ -81,28 +82,28 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//fmt.Printf("TransID: %s, %d. ", ts.AfTransId, afTransId )
+	//fmt.Printf("TransID: %s, %d. ", ts.AfTransID, afTransId )
 	//store transaction ID to a list of currently used transaction IDs
-	afCtx.transactions[transId] = TrafficInfluSub{}
+	afCtx.transactions[transID] = TrafficInfluSub{}
 
-	ts.AfTransId = strconv.Itoa(transId)
+	ts.AfTransID = strconv.Itoa(transID)
 	tsResp, resp, err = createSubscription(ts, afCtx, cliCtx)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription create : %s", err.Error())
-		delete(afCtx.transactions, transId)
+		delete(afCtx.transactions, transID)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	if url, err = resp.Location(); err != nil {
 		log.Errf("Traffic Influence Subscription create: %s", err.Error())
-		delete(afCtx.transactions, transId)
+		delete(afCtx.transactions, transID)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if subscriptionId, err = getSubsIdFromUrl(url); err != nil {
-		delete(afCtx.transactions, transId)
+	if subscriptionID, err = getSubsIDFromURL(url); err != nil {
+		delete(afCtx.transactions, transID)
 		log.Errf("Traffic Influence Subscription create: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -111,13 +112,13 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Location", url.String())
 
 	if len(tsResp.SubscribedEvents) == 0 {
-		delete(afCtx.transactions, transId)
+		delete(afCtx.transactions, transID)
 	} else {
-		afCtx.transactions[transId] = tsResp
+		afCtx.transactions[transID] = tsResp
 		log.Infof("Saving subscription ID : %s to local memory.",
-			subscriptionId)
-		afCtx.subscriptions[subscriptionId] =
-			map[string]TrafficInfluSub{strconv.Itoa(transId): afCtx.transactions[transId]}
+			subscriptionID)
+		afCtx.subscriptions[subscriptionID] =
+			map[string]TrafficInfluSub{strconv.Itoa(transID): afCtx.transactions[transID]}
 
 	}
 	w.WriteHeader(resp.StatusCode)

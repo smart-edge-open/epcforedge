@@ -41,52 +41,52 @@ var (
 	xmlCheck  = regexp.MustCompile("(?i:[application|text]/xml)")
 )
 
-// AFClient manages communication with the NEF Northbound API API v1.0.1
-// In most cases there should be only one, shared, AFClient.
-type AFClient struct {
+// Client manages communication with the NEF Northbound API API v1.0.1
+// In most cases there should be only one, shared, Client.
+type Client struct {
 	cfg *Configuration
 	// Reuse a single struct instead of allocating one for each service on
 	// the heap.
 	common service
 
 	// API Services
-	TrafficInfluSubGetAllApi *TrafficInfluenceSubscriptionGetAllApiService
-	TrafficInfluSubDeleteApi *TrafficInfluenceSubscriptionDeleteApiService
-	TrafficInfluSubGetApi    *TrafficInfluenceSubscriptionGetApiService
-	TrafficInfluSubPatchApi  *TrafficInfluenceSubscriptionPatchApiService
-	TrafficInfluSubPostApi   *TrafficInfluenceSubscriptionPostApiService
-	TrafficInfluSubPutApi    *TrafficInfluenceSubscriptionPutApiService
+	TrafficInfluSubGetAllAPI *TrafficInfluenceSubscriptionGetAllApiService
+	TrafficInfluSubDeleteAPI *TrafficInfluenceSubscriptionDeleteApiService
+	TrafficInfluSubGetAPI    *TrafficInfluenceSubscriptionGetApiService
+	TrafficInfluSubPatchAPI  *TrafficInfluenceSubscriptionPatchApiService
+	TrafficInfluSubPostAPI   *TrafficInfluenceSubscriptionPostApiService
+	TrafficInfluSubPutAPI    *TrafficInfluenceSubscriptionPutApiService
 }
 
 type service struct {
-	client *AFClient
+	client *Client
 }
 
-// NewAFClient creates a new API client. Requires a userAgent string describing
+// NewClient creates a new API client. Requires a userAgent string describing
 // your application.
 // optionally a custom http.Client to allow for advanced features
 // such as caching.
-func NewAFClient(cfg *Configuration) *AFClient {
+func NewClient(cfg *Configuration) *Client {
 	if cfg.HTTPClient == nil {
 		cfg.HTTPClient = http.DefaultClient
 	}
 
-	c := &AFClient{}
+	c := &Client{}
 	c.cfg = cfg
 	c.common.client = c
 
 	// API Services
-	c.TrafficInfluSubGetAllApi =
+	c.TrafficInfluSubGetAllAPI =
 		(*TrafficInfluenceSubscriptionGetAllApiService)(&c.common)
-	c.TrafficInfluSubDeleteApi =
+	c.TrafficInfluSubDeleteAPI =
 		(*TrafficInfluenceSubscriptionDeleteApiService)(&c.common)
-	c.TrafficInfluSubGetApi =
+	c.TrafficInfluSubGetAPI =
 		(*TrafficInfluenceSubscriptionGetApiService)(&c.common)
-	c.TrafficInfluSubPatchApi =
+	c.TrafficInfluSubPatchAPI =
 		(*TrafficInfluenceSubscriptionPatchApiService)(&c.common)
-	c.TrafficInfluSubPostApi =
+	c.TrafficInfluSubPostAPI =
 		(*TrafficInfluenceSubscriptionPostApiService)(&c.common)
-	c.TrafficInfluSubPutApi =
+	c.TrafficInfluSubPutAPI =
 		(*TrafficInfluenceSubscriptionPutApiService)(&c.common)
 
 	return c
@@ -171,17 +171,17 @@ func parameterToString(obj interface{}, collectionFormat string) string {
 }
 */
 // callAPI do the request.
-func (c *AFClient) callAPI(request *http.Request) (*http.Response, error) {
+func (c *Client) callAPI(request *http.Request) (*http.Response, error) {
 	return c.cfg.HTTPClient.Do(request)
 }
 
 // Change base path to allow switching to mocks
-func (c *AFClient) ChangeBasePath(path string) {
+func (c *Client) ChangeBasePath(path string) {
 	c.cfg.BasePath = path
 }
 
 // prepareRequest build the request
-func (c *AFClient) prepareRequest(
+func (c *Client) prepareRequest(
 	ctx context.Context,
 	path string, method string,
 	postBody interface{},
@@ -333,7 +333,7 @@ func (c *AFClient) prepareRequest(
 	return localVarRequest, nil
 }
 
-func (c *AFClient) decode(v interface{},
+func (c *Client) decode(v interface{},
 	b []byte, contentType string) (err error) {
 
 	if strings.Contains(contentType, "application/xml") {

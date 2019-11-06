@@ -25,14 +25,14 @@ import (
 )
 
 func modifySubscriptionByPatch(ts TrafficInfluSubPatch, afCtx *afContext,
-	subscriptionId string, cliCtx context.Context) (TrafficInfluSub,
+	subscriptionID string, cliCtx context.Context) (TrafficInfluSub,
 	*http.Response, error) {
 
 	cliCfg := NewConfiguration()
-	cli := NewAFClient(cliCfg)
+	cli := NewClient(cliCfg)
 
-	tsResp, resp, err := cli.TrafficInfluSubPatchApi.SubscriptionPatch(cliCtx,
-		afCtx.cfg.AfId, subscriptionId, ts)
+	tsResp, resp, err := cli.TrafficInfluSubPatchAPI.SubscriptionPatch(cliCtx,
+		afCtx.cfg.AfId, subscriptionID, ts)
 
 	if err != nil {
 
@@ -42,13 +42,14 @@ func modifySubscriptionByPatch(ts TrafficInfluSubPatch, afCtx *afContext,
 	return tsResp, resp, nil
 }
 
+// ModifySubscriptionPatch function
 func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 	var (
 		err            error
 		tsPatch        TrafficInfluSubPatch
 		tsResp         TrafficInfluSub
 		resp           *http.Response
-		subscriptionId string
+		subscriptionID string
 	)
 
 	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
@@ -70,7 +71,7 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	subscriptionId, err = getSubsIdFromUrl(r.URL)
+	subscriptionID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription PATCH: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -78,31 +79,22 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tsResp, resp, err = modifySubscriptionByPatch(tsPatch, afCtx,
-		subscriptionId, cliCtx)
+		subscriptionID, cliCtx)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription PATCH : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+	if interMap, ok := afCtx.subscriptions[subscriptionID]; ok {
+
+		for transID := range interMap { //there's only one entry in the map
+			afCtx.subscriptions[subscriptionID][(transID)] = tsResp
+		}
 
 	} else {
 
-		//fmt.Printf("Patch subscriptions %d, %d, s%", len(afCtx.subscriptions),
-		//len(afCtx.subscriptions[subscriptionId]))
-
-		if interMap, ok := afCtx.subscriptions[subscriptionId]; ok {
-
-			for transId := range interMap { //there's only one entry in the map
-				//fmt.Println("TransId:", transId, "Value:", ts)
-				afCtx.subscriptions[subscriptionId][(transId)] = tsResp
-			}
-		} else {
-
-			log.Info("Traffic Influence Subscription: "+
-				"subscriptionId %s not found in local memory", subscriptionId)
-		}
-		//fmt.Println(afCtx.subscriptions)
-		if resp != nil {
-			w.WriteHeader(resp.StatusCode)
-		}
+		log.Info("Traffic Influence Subscription: "+
+			"subscriptionID %s not found in local memory", subscriptionID)
 	}
+	w.WriteHeader(resp.StatusCode)
 }

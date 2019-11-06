@@ -36,18 +36,18 @@ subscription resource
 Replaces an existing subscription resource
  * @param ctx context.Context - for authentication, logging, cancellation,
  * deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param afId Identifier of the AF
+ * @param afID Identifier of the AF
  * @param subscriptionId Identifier of the subscription resource
  * @param body Parameters to replace the existing subscription
 
 @return TrafficInfluSub
 */
 func (a *TrafficInfluenceSubscriptionPutApiService) SubscriptionPut(
-	ctx context.Context, afId string, subscriptionId string,
+	ctx context.Context, afID string, subscriptionId string,
 	body TrafficInfluSub) (TrafficInfluSub, *http.Response, error) {
 
 	var (
-		localVarHttpMethod  = strings.ToUpper("Put")
+		localVarHTTPMethod  = strings.ToUpper("Put")
 		localVarPostBody    interface{}
 		localVarFileName    string
 		localVarFileBytes   []byte
@@ -58,7 +58,7 @@ func (a *TrafficInfluenceSubscriptionPutApiService) SubscriptionPut(
 	localVarPath := a.client.cfg.BasePath +
 		"/{afId}/subscriptions/{subscriptionId}"
 	localVarPath = strings.Replace(localVarPath,
-		"{"+"afId"+"}", fmt.Sprintf("%v", afId), -1)
+		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
 	localVarPath = strings.Replace(localVarPath,
 		"{"+"subscriptionId"+"}", fmt.Sprintf("%v", subscriptionId), -1)
 
@@ -67,28 +67,28 @@ func (a *TrafficInfluenceSubscriptionPutApiService) SubscriptionPut(
 	localVarFormParams := url.Values{}
 
 	// to determine the Content-Type header
-	localVarHttpContentTypes := []string{"application/json"}
+	localVarHTTPContentTypes := []string{"application/json"}
 
 	// set Content-Type header
-	localVarHttpContentType :=
-		selectHeaderContentType(localVarHttpContentTypes)
-	if localVarHttpContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	localVarHTTPContentType :=
+		selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
 	}
 
 	// to determine the Accept header
-	localVarHttpHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
-	localVarHttpHeaderAccept :=
-		selectHeaderAccept(localVarHttpHeaderAccepts)
-	if localVarHttpHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	localVarHTTPHeaderAccept :=
+		selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
 	localVarPostBody = &body
 	r, err := a.client.prepareRequest(ctx, localVarPath,
-		localVarHttpMethod, localVarPostBody, localVarHeaderParams,
+		localVarHTTPMethod, localVarPostBody, localVarHeaderParams,
 		localVarQueryParams, localVarFormParams, localVarFileName,
 		localVarFileBytes)
 
@@ -96,191 +96,191 @@ func (a *TrafficInfluenceSubscriptionPutApiService) SubscriptionPut(
 		return localVarReturnValue, nil, err
 	}
 
-	localVarHttpResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHttpResponse == nil {
-		return localVarReturnValue, localVarHttpResponse, err
+	localVarHTTPResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	localVarBody, err := ioutil.ReadAll(localVarHttpResponse.Body)
-	localVarHttpResponse.Body.Close()
+	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
 	if err != nil {
-		return localVarReturnValue, localVarHttpResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
-	if localVarHttpResponse.StatusCode < 300 {
+	if localVarHTTPResponse.StatusCode < 300 {
 		// If we succeed, return the data, otherwise pass on to
 		// decode error.
 		err = a.client.decode(&localVarReturnValue, localVarBody,
-			localVarHttpResponse.Header.Get("Content-Type"))
+			localVarHTTPResponse.Header.Get("Content-Type"))
 		if err == nil {
-			return localVarReturnValue, localVarHttpResponse, err
+			return localVarReturnValue, localVarHTTPResponse, err
 		}
 	}
 
-	if localVarHttpResponse.StatusCode >= 300 {
+	if localVarHTTPResponse.StatusCode >= 300 {
 		newErr := GenericError{
 			body:  localVarBody,
-			error: localVarHttpResponse.Status,
+			error: localVarHTTPResponse.Status,
 		}
 
-		if localVarHttpResponse.StatusCode == 200 {
+		if localVarHTTPResponse.StatusCode == 200 {
 			var v TrafficInfluSub
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 400 {
+		if localVarHTTPResponse.StatusCode == 400 {
 			var v ProblemDetails
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 401 {
+		if localVarHTTPResponse.StatusCode == 401 {
 			var v ProblemDetails
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 403 {
+		if localVarHTTPResponse.StatusCode == 403 {
 			var v ProblemDetails
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 404 {
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v ProblemDetails
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 411 {
+		if localVarHTTPResponse.StatusCode == 411 {
 			var v ProblemDetails
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 413 {
+		if localVarHTTPResponse.StatusCode == 413 {
 			var v ProblemDetails
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 415 {
+		if localVarHTTPResponse.StatusCode == 415 {
 			var v ProblemDetails
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 429 {
+		if localVarHTTPResponse.StatusCode == 429 {
 			var v ProblemDetails
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 500 {
+		if localVarHTTPResponse.StatusCode == 500 {
 			var v ProblemDetails
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 503 {
+		if localVarHTTPResponse.StatusCode == 503 {
 			var v ProblemDetails
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		if localVarHttpResponse.StatusCode == 0 {
+		if localVarHTTPResponse.StatusCode == 0 {
 			var v interface{}
 			err = a.client.decode(&v, localVarBody,
-				localVarHttpResponse.Header.Get("Content-Type"))
+				localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
 				return localVarReturnValue,
-					localVarHttpResponse, newErr
+					localVarHTTPResponse, newErr
 			}
 			newErr.model = v
-			return localVarReturnValue, localVarHttpResponse, newErr
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 
-		return localVarReturnValue, localVarHttpResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarReturnValue, localVarHttpResponse, nil
+	return localVarReturnValue, localVarHTTPResponse, nil
 }

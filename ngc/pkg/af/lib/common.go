@@ -22,7 +22,7 @@ import (
 	"strings"
 )
 
-func genAFTransId(trans AFTransactionIDs) int {
+func genAFTransID(trans AFTransactionIDs) int {
 	var (
 		num   int
 		min   = 1
@@ -45,36 +45,36 @@ func genAFTransId(trans AFTransactionIDs) int {
 	//look for a free ID until it is <= math.MaxInt64 is achieved again
 	for found && num < math.MaxInt32 {
 		//if below the max value, increment it by 1
-		num = num + 1
+		num++
 		//check if the ID is in use, if not - return the ID
 		if _, found = trans[num]; !found {
 			trans[num] = TrafficInfluSub{}
 			fmt.Printf("Num :%d", num)
 			return num
-		} else {
-			num = num + 1
 		}
+		num++
 	}
+
 	return 0
 }
 
-func getSubsIdFromUrl(url *url.URL) (string, error) {
+func getSubsIDFromURL(url *url.URL) (string, error) {
 
-	subsUrl := url.String()
+	subsURL := url.String()
 	if url == nil {
 		return "", errors.New("empty URL in the request message")
 	}
-	s := strings.Split(subsUrl, "/")
+	s := strings.Split(subsURL, "/")
 	return s[len(s)-1], nil
 }
 
-func genTransactionId(afCtx *afContext) (int, error) {
+func genTransactionID(afCtx *afContext) (int, error) {
 
-	afTransId := genAFTransId(afCtx.transactions)
-	if afTransId == 0 {
+	afTransID := genAFTransID(afCtx.transactions)
+	if afTransID == 0 {
 		return 0, errors.New("the pool of AF Transaction IDs is already used")
 	}
 
-	return afTransId, nil
+	return afTransID, nil
 
 }

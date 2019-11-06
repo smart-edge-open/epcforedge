@@ -23,14 +23,14 @@ import (
 	"syscall"
 )
 
-func deleteSubscription(afCtx *afContext, subscriptionId string,
+func deleteSubscription(afCtx *afContext, subscriptionID string,
 	cliCtx context.Context) (*http.Response, error) {
 
 	cliCfg := NewConfiguration()
-	cli := NewAFClient(cliCfg)
+	cli := NewClient(cliCfg)
 
-	resp, err := cli.TrafficInfluSubDeleteApi.SubscriptionDelete(cliCtx,
-		afCtx.cfg.AfId, subscriptionId)
+	resp, err := cli.TrafficInfluSubDeleteAPI.SubscriptionDelete(cliCtx,
+		afCtx.cfg.AfId, subscriptionID)
 
 	if err != nil {
 
@@ -42,11 +42,12 @@ func deleteSubscription(afCtx *afContext, subscriptionId string,
 
 }
 
+// DeleteSubscription function
 func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	var (
 		err            error
 		resp           *http.Response
-		subscriptionId string
+		subscriptionID string
 	)
 
 	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
@@ -62,33 +63,28 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	subscriptionId, err = getSubsIdFromUrl(r.URL)
+	subscriptionID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription PUT: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	resp, err = deleteSubscription(afCtx, subscriptionId, cliCtx)
+	resp, err = deleteSubscription(afCtx, subscriptionID, cliCtx)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription DELETE : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-
-	} else {
-
-		if interMap, ok := afCtx.subscriptions[subscriptionId]; ok {
-
-			for transId := range interMap {
-				var i int
-				if i, err = strconv.Atoi(transId); err == nil {
-					delete(afCtx.transactions, i)
-				}
-			}
-			delete(afCtx.subscriptions, subscriptionId)
-		}
-
-		if resp != nil {
-			w.WriteHeader(resp.StatusCode)
-		}
 	}
+	if interMap, ok := afCtx.subscriptions[subscriptionID]; ok {
+
+		for transID := range interMap {
+			var i int
+			if i, err = strconv.Atoi(transID); err == nil {
+				delete(afCtx.transactions, i)
+			}
+		}
+		delete(afCtx.subscriptions, subscriptionID)
+	}
+
+	w.WriteHeader(resp.StatusCode)
 }

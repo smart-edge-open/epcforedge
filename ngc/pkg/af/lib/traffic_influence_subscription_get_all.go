@@ -27,9 +27,9 @@ func getAllSubscriptions(afCtx *afContext,
 	cliCtx context.Context) ([]TrafficInfluSub, *http.Response, error) {
 
 	cliCfg := NewConfiguration()
-	cli := NewAFClient(cliCfg)
+	cli := NewClient(cliCfg)
 
-	tsResp, resp, err := cli.TrafficInfluSubGetAllApi.SubscriptionsGetAll(
+	tsResp, resp, err := cli.TrafficInfluSubGetAllAPI.SubscriptionsGetAll(
 		cliCtx, afCtx.cfg.AfId)
 
 	if err != nil {
@@ -42,15 +42,14 @@ func getAllSubscriptions(afCtx *afContext,
 
 }
 
+//GetAllSubscriptions function
 func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	var (
-		err error
-		//ts TrafficInfluSub
-		tsResp []TrafficInfluSub
-		resp   *http.Response
-		//subscriptionId string
-		transId    int
-		tsRespJson []byte
+		err        error
+		tsResp     []TrafficInfluSub
+		resp       *http.Response
+		transID    int
+		tsRespJSON []byte
 	)
 
 	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
@@ -65,14 +64,7 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	/*
-		if err = json.NewDecoder(r.Body).Decode(&ts); err != nil {
-			log.Errf("Traffic Influance Subscription PUT: %s", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	*/
-	transId, err = genTransactionId(afCtx)
+	transID, err = genTransactionID(afCtx)
 	if err != nil {
 
 		log.Errf("Traffic Influance Subscription PUT %s", err.Error())
@@ -80,32 +72,21 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//	ts.AfTransId =  strconv.Itoa(transId)
-	//	fmt.Printf("TransID: %s, %d. ", ts.AfTransId, transId )
-	//subscriptionId, err = getSubsIdFromUrl(r.URL)
-	/*if err != nil {
-		log.Errf("Traffic Influence Subscription PUT: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}*/
-	afCtx.transactions[transId] = TrafficInfluSub{}
+	afCtx.transactions[transID] = TrafficInfluSub{}
 	tsResp, resp, err = getAllSubscriptions(afCtx, cliCtx)
-	//	delete(afCtx.transactions, transId)
+	delete(afCtx.transactions, transID)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription create : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-
-	} else {
-
-		if resp != nil {
-			w.WriteHeader(resp.StatusCode)
-		}
-
-		if tsResp != nil {
-			tsRespJson, err = json.Marshal(tsResp)
-			w.Write(tsRespJson)
-		}
 	}
 
+	tsRespJSON, err = json.Marshal(tsResp)
+	if err != nil {
+		log.Errf("Traffic Influence Subscription GET : %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(resp.StatusCode)
+	w.Write(tsRespJSON)
 }
