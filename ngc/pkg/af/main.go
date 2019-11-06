@@ -15,26 +15,35 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"time"
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
+	logger "github.com/otcshare/common/log"
+
+	 af "./lib"
 )
 
-// Connectivity constants
-const (
-	AFServerPort = "80"
-)
+var log = logger.DefaultLogger.WithField("main", nil)
 
 func main() {
 
-	AFRouter := NewAFRouter()
-	s := &http.Server{
-		Addr:           ":"+AFServerPort,
-		Handler:        AFRouter,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+	lvl, err := logger.ParseLevel("info")
+	if err != nil {
+		log.Errf("Failed to parse log level: %s", err.Error())
+		os.Exit(1)
 	}
-	log.Println("AF listening on", s.Addr)
-	log.Fatal(s.ListenAndServe())
+	logger.SetLevel(lvl)
+	parenCtx, cancel := context.WithCancel(context.Background())
+	osSignals := make(chan os.Signal, 1)
+	signal.Notify(osSignals, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		sig := <-osSignals
+		log.Infof("Received signal: %#v", sig)
+		cancel()
+	}()
+
+	log.Infof("Starting server ...")
+	af.Run(parenCtx, "../../configs/af.json")
 }
