@@ -1,9 +1,9 @@
 [{
-  "afInstance": "gf-a",
+  "afInstance": "gf-c",
   "localServices": [
     {
-      "dnai": "a_dnai",
-      "dnn": "a_dnn",
+      "dnai": "c_dnai",
+      "dnn": "c_dnn",
       "dns": "192.168.9.9"
     }
   ]

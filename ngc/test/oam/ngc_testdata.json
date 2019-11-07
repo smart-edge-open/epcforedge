@@ -1,34 +1,16 @@
-{
- "afRegisters":[
-    {
-        "afInstance":"instance0",
+[{
+        "afInstance":"mike",
         "localServices":[
               {
-                   "dnai":"ins0_dnaia",
-                   "dnn":"ins0_dnna",
+                   "dnai":"mike1_dnai",
+                   "dnn":"mike1_dnn",
                    "dns":"192.168.9.9"
               },
               {
-                   "dnai":"ins0_dnaix",
-                   "dnn":"ins0_dnnx",
+                   "dnai":"mike2_dnai",
+                   "dnn":"mike2_dnn",
                    "dns":"192.168.8.8"
               }
          ]
-    },
-    {
-        "afInstance":"instance1",
-        "localServices":[
-              {
-                   "dnai":"ins1_dnaia",
-                   "dnn":"ins1_dnna",
-                   "dns":"192.168.7.7"
-              },
-              {
-                   "dnai":"ins1_dnaix",
-                   "dnn":"ins1_dnnx",
-                   "dns":"192.168.6.6"
-              }
-         ]
-    }
-  ]
 }
+]

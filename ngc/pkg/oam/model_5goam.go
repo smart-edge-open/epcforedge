@@ -19,3 +19,7 @@ type LocalService struct {
         Dns    string                   `json:"dns,omitempty"`
 }
 
+//  AfId struct
+type AfId struct {
+        AfId   string                   `json:"afid,omitempty"`
+}
