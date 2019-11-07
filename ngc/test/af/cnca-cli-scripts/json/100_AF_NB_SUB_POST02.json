@@ -1,0 +1,45 @@
+{
+  "afServiceId": "",
+  "afAppId": "app02",
+  "afTransId": "",
+  "appReloInd": false,
+  "dnn": "edgeLocation02",
+  "snssai": {
+    "sst": 0,
+    "sd": "default2"
+  },
+  "externalGroupId": "",
+  "anyUeInd": true,
+  "subscribedEvents": [],
+  "gpsi": "",
+  "ipv4Addr": "",
+  "ipv6Addr": "",
+  "macAddr": "",
+  "notificationDestination": "",
+  "requestTestNotification": true,
+  "websockNotifConfig": {
+    "websocketUri": "",
+    "requestWebsocketUri": true
+  },
+  "trafficFilters": [],
+  "ethTrafficFilters": [],
+  "trafficRoutes": [
+      {
+        "dnai" : "edgeLocation02",
+        "routeInfo" : {
+            "ipv4Addr" : "",
+            "ipv6Addr" : "",
+            "portNumber" : ""
+        },
+        "routeProfId" : "default2"
+    }
+  ],
+  "tempValidities": [
+    {
+      "startTime": "",
+      "stopTime": ""
+    }
+  ],
+  "validGeoZoneIds": [],
+  "suppFeat": ""
+}
