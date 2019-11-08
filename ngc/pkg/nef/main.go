@@ -29,7 +29,7 @@ func main() {
 
 	NEFRouter := NewNEFRouter()
 	s := &http.Server{
-		Addr:           ":"+NEFServerPort,
+		Addr:           ":" + NEFServerPort,
 		Handler:        NEFRouter,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,

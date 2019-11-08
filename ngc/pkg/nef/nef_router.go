@@ -31,40 +31,40 @@ type Route struct {
 	Handler http.HandlerFunc
 }
 
-// AFRoutes lists handlers for AF routes
+// NEFRoutes lists handlers for AF routes
 var NEFRoutes = []Route{
-	Route{
+	{
 		//Read all of the active subscriptions for the AF
 		"ReadAllTrafficInfluenceSubscription",
 		strings.ToUpper("Get"),
 		"/3gpp-traffic-influence/v1/{afId}/subscriptions",
 		ReadAllTrafficInfluenceSubscription,
 	},
-	Route{
+	{
 		"CreateTrafficInfluenceSubscription",
 		strings.ToUpper("Post"),
 		"/3gpp-traffic-influence/v1/{afId}/subscriptions",
 		CreateTrafficInfluenceSubscription,
 	},
-	Route{
+	{
 		"ReadTrafficInfluenceSubscription",
 		strings.ToUpper("Get"),
 		"/3gpp-traffic-influence/v1/{afId}/subscriptions/{subscriptionId}",
 		ReadTrafficInfluenceSubscription,
 	},
-	Route{
+	{
 		"UpdatePutTrafficInfluenceSubscription",
 		strings.ToUpper("Put"),
 		"/3gpp-traffic-influence/v1/{afId}/subscriptions/{subscriptionId}",
 		UpdatePutTrafficInfluenceSubscription,
 	},
-	Route{
+	{
 		"UpdatePatchTrafficInfluenceSubscription",
 		strings.ToUpper("Patch"),
 		"/3gpp-traffic-influence/v1/{afId}/subscriptions/{subscriptionId}",
 		UpdatePatchTrafficInfluenceSubscription,
 	},
-	Route{
+	{
 		"DeleteTrafficInfluenceSubscription",
 		strings.ToUpper("Delete"),
 		"/3gpp-traffic-influence/v1/{afId}/subscriptions/{subscriptionId}",
@@ -72,6 +72,7 @@ var NEFRoutes = []Route{
 	},
 }
 
+// ReadAllTrafficInfluenceSubscription : API to read all the subscritions created by AF
 func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("===============================================")
@@ -84,14 +85,14 @@ func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
+// CreateTrafficInfluenceSubscription : Handles the traffic influence requested by AF
 func CreateTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("===============================================")
 	log.Printf(" Method : POST ")
-	log.Printf(" URL PATH : "+ r.URL.Path[1:])
+	log.Printf(" URL PATH : " + r.URL.Path[1:])
 	vars := mux.Vars(r)
 	log.Printf(" AFID  : %s", vars["afId"])
-
 
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -100,11 +101,12 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	log.Printf(" BODY : `%s`", b)
-//	log.Printf(r.URL.Path[1:])
+	//	log.Printf(r.URL.Path[1:])
 
 	w.WriteHeader(http.StatusOK)
 }
 
+// ReadTrafficInfluenceSubscription : Read a particular subscription details
 func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("===============================================")
@@ -117,6 +119,8 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 	log.Printf(" SUBSCRIPTION ID  : %s", vars["subscriptionId"])
 	w.WriteHeader(http.StatusOK)
 }
+
+// UpdatePutTrafficInfluenceSubscription : Updates a traffic influence created earlier (PUT Req)
 func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("===============================================")
@@ -129,6 +133,8 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Reques
 	log.Printf(" SUBSCRIPTION ID  : %s", vars["subscriptionId"])
 	w.WriteHeader(http.StatusOK)
 }
+
+// UpdatePatchTrafficInfluenceSubscription : Updates a traffic influence created earlier (PATCH Req)
 func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("===============================================")
@@ -141,6 +147,8 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Requ
 	log.Printf(" SUBSCRIPTION ID  : %s", vars["subscriptionId"])
 	w.WriteHeader(http.StatusOK)
 }
+
+// DeleteTrafficInfluenceSubscription : Deletes a traffic influence created by AF
 func DeleteTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("===============================================")
@@ -156,7 +164,7 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) 
 
 // NewNEFRouter initializes NEF router
 func NewNEFRouter() *mux.Router {
-	
+
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range NEFRoutes {
 		router.

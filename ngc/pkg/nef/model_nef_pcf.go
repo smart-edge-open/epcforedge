@@ -22,11 +22,9 @@ import (
 type AfAppID string
 
 // Uint32 uint32
-// swagger:model Uint32
 type Uint32 int32
 
 // Uint32Rm uint32 rm
-// swagger:model Uint32Rm
 type Uint32Rm int32
 
 // ChargingID charging ID
@@ -44,11 +42,9 @@ const (
 type EutraCellID string
 
 // Mcc mcc
-// swagger:model Mcc
 type Mcc string
 
 // Mnc mnc
-// swagger:model Mnc
 type Mnc string
 
 // PlmnID plmn Id
@@ -202,14 +198,16 @@ type UpPathChgEvent struct {
 	// Enum: [EARLY EARLY_LATE LATE]
 	DnaiChgType string `json:"dnaiChgType,omitempty"`
 
-	// It is used to set the value of Notification Correlation ID in the notification sent by the SMF.
+	// It is used to set the value of Notification Correlation ID in the
+	// notification sent by the SMF.
 	NotifCorreID string `json:"notifCorreId,omitempty"`
 
 	// notification Uri
 	NotificationURI string `json:"notificationUri,omitempty"`
 }
 
-// AfRoutingRequirement describes the event information delivered in the subscription
+// AfRoutingRequirement describes the event information delivered in the
+// subscription
 type AfRoutingRequirement struct {
 
 	// addr preser ind
@@ -233,7 +231,8 @@ type AfRoutingRequirement struct {
 	UpPathChgSub *UpPathChgEvent `json:"upPathChgSub,omitempty"`
 }
 
-// AppSessionContext Represents an Individual Application Session Context resource.
+// AppSessionContext Represents an Individual Application Session Context
+// resource.
 type AppSessionContext struct {
 
 	// asc req data
@@ -249,7 +248,8 @@ type AppSessionContext struct {
 // AspID Contains an identity of an application service provider.
 type AspID string
 
-// BdtReferenceID string identifying a BDT Reference ID as defined in subclause 5.3.3 of 3GPP TS 29.154.
+// BdtReferenceID string identifying a BDT Reference ID as defined in subclause
+// 5.3.3 of 3GPP TS 29.154.
 type BdtReferenceID string
 
 // Dnn dnn
@@ -259,7 +259,6 @@ type Dnn string
 type AfNotifMethod string
 
 // AfEvent af event
-// swagger:model AfEvent
 type AfEvent string
 
 const (
@@ -273,7 +272,8 @@ const (
 	// AfEventCHARGINGCORRELATION captures enum value "CHARGING_CORRELATION"
 	AfEventCHARGINGCORRELATION AfEvent = "CHARGING_CORRELATION"
 
-	// AfEventFAILEDRESOURCESALLOCATION captures enum value "FAILED_RESOURCES_ALLOCATION"
+	// AfEventFAILEDRESOURCESALLOCATION captures enum value
+	// "FAILED_RESOURCES_ALLOCATION"
 	AfEventFAILEDRESOURCESALLOCATION AfEvent = "FAILED_RESOURCES_ALLOCATION"
 
 	// AfEventOUTOFCREDIT captures enum value "OUT_OF_CREDIT"
@@ -285,14 +285,16 @@ const (
 	// AfEventQOSNOTIF captures enum value "QOS_NOTIF"
 	AfEventQOSNOTIF AfEvent = "QOS_NOTIF"
 
-	// AfEventSUCCESSFULRESOURCESALLOCATION captures enum value "SUCCESSFUL_RESOURCES_ALLOCATION"
+	// AfEventSUCCESSFULRESOURCESALLOCATION captures enum value
+	// "SUCCESSFUL_RESOURCES_ALLOCATION"
 	AfEventSUCCESSFULRESOURCESALLOCATION AfEvent = "SUCCESSFUL_RESOURCES_ALLOCATION"
 
 	// AfEventUSAGEREPORT captures enum value "USAGE_REPORT"
 	AfEventUSAGEREPORT AfEvent = "USAGE_REPORT"
 )
 
-// AfEventSubscription describes the event information delivered in the subscription
+// AfEventSubscription describes the event information delivered in the
+// subscription
 type AfEventSubscription struct {
 
 	// event
@@ -312,7 +314,8 @@ type RequiredAccessInfo string
 // Volume Unsigned integer identifying a volume in units of bytes.
 type Volume int64
 
-// DurationSec Unsigned integer identifying a period of time in units of seconds.
+// DurationSec Unsigned integer identifying a period of time in units of
+// seconds.
 type DurationSec int64
 
 // UsageThreshold usage threshold
@@ -370,7 +373,10 @@ type FlowDescription string
 // FlowUsage flow usage
 type FlowUsage string
 
-// TosTrafficClass 2-octet string, where each octet is encoded in hexadecimal representation. The first octet contains the IPv4 Type-of-Service or the IPv6 Traffic-Class field and the second octet contains the ToS/Traffic Class mask field.
+// TosTrafficClass 2-octet string, where each octet is encoded in hexadecimal
+// representation. The first octet contains the IPv4 Type-of-Service or the
+// IPv6 Traffic-Class field and the second octet contains the ToS/Traffic
+// Class mask field.
 type TosTrafficClass string
 
 // AfSigProtocol af sig protocol
@@ -638,7 +644,8 @@ type IPV6Addr string
 // MacAddr48 mac addr48
 type MacAddr48 string
 
-// AppSessionContextReqData Identifies the service requirements of an Individual Application Session Context.
+// AppSessionContextReqData Identifies the service requirements of an
+// Individual Application Session Context.
 type AppSessionContextReqData struct {
 
 	// af app Id
@@ -729,7 +736,6 @@ type AppSessionContextReqData struct {
 type ServAuthInfo string
 
 // UeIdentityInfo Represents 5GS-Level UE identities.
-
 type UeIdentityInfo struct {
 
 	// gpsi
@@ -745,7 +751,8 @@ type UeIdentityInfo struct {
 	Supi string `json:"supi,omitempty"`
 }
 
-// AppSessionContextRespData Describes the authorization data of an Individual Application Session Context created by the PCF.
+// AppSessionContextRespData Describes the authorization data of an Individual
+// Application Session Context created by the PCF.
 type AppSessionContextRespData struct {
 
 	// serv auth info
@@ -799,8 +806,8 @@ type AccessNetChargingIdentifier struct {
 	Flows []*Flows `json:"flows"`
 }
 
-// AccNetChargingAddress Describes the network entity within the access network performing charging
-
+// AccNetChargingAddress Describes the network entity within the access network
+// performing charging
 type AccNetChargingAddress struct {
 
 	// an charg Ipv4 addr
@@ -820,7 +827,8 @@ type AnGwAddress struct {
 	AnGwIPV6Addr string `json:"anGwIpv6Addr,omitempty"`
 }
 
-// AfEventNotification describes the event information delivered in the notification
+// AfEventNotification describes the event information delivered in the
+// notification
 type AfEventNotification struct {
 
 	// event
@@ -844,7 +852,8 @@ const (
 	MediaComponentResourcesStatusINACTIVE MediaComponentResourcesStatus = "INACTIVE"
 )
 
-// ResourcesAllocationInfo describes the status of the PCC rule(s) related to certain media components.
+// ResourcesAllocationInfo describes the status of the PCC rule(s) related to
+// certain media components.
 type ResourcesAllocationInfo struct {
 
 	// flows
@@ -871,7 +880,8 @@ const (
 	FinalUnitActionRESTRICTACCESS FinalUnitAction = "RESTRICT_ACCESS"
 )
 
-// OutOfCreditInformation Indicates the SDFs without available credit and the corresponding termination action.
+// OutOfCreditInformation Indicates the SDFs without available credit and the
+// corresponding termination action.
 type OutOfCreditInformation struct {
 
 	// fin unit act
@@ -895,7 +905,8 @@ const (
 	QosNotifTypeNOTGUARANTEED QosNotifType = "NOT_GUARANTEED"
 )
 
-// QosNotificationControlInfo Indicates whether the QoS targets for a GRB flow are not  guaranteed or guaranteed again
+// QosNotificationControlInfo Indicates whether the QoS targets for a GRB flow
+// are not  guaranteed or guaranteed again
 type QosNotificationControlInfo struct {
 
 	// flows
@@ -981,7 +992,6 @@ type N3gaLocation struct {
 }
 
 // NrLocation nr location
-// swagger:model NrLocation
 type NrLocation struct {
 
 	// age of location information
@@ -1101,8 +1111,9 @@ type EventsNotification struct {
 	UsgRep *AccumulatedUsage `json:"usgRep,omitempty"`
 }
 
-// SpatialValidityRm this data type is defined in the same way as the SpatialValidity data type, but with the OpenAPI nullable property set to true
-// swagger:model SpatialValidityRm
+// SpatialValidityRm this data type is defined in the same way as the
+// SpatialValidity data type, but with the OpenAPI nullable property set to
+// true
 type SpatialValidityRm struct {
 
 	// presence info list
@@ -1110,7 +1121,8 @@ type SpatialValidityRm struct {
 	PresenceInfoList map[string]PresenceInfo `json:"presenceInfoList"`
 }
 
-// AfRoutingRequirementRm this data type is defined in the same way as the AfRoutingRequirement data type, but with the OpenAPI nullable property set to true and the spVal and tempVals attributes defined as removable.
+// AfRoutingRequirementRm this data type is defined in the same way as the
+// AfRoutingRequirement data type, but with the OpenAPI nullable property set to true and the spVal and tempVals attributes defined as removable.
 type AfRoutingRequirementRm struct {
 
 	// addr preser ind
@@ -1134,10 +1146,12 @@ type AfRoutingRequirementRm struct {
 	UpPathChgSub *UpPathChgEvent `json:"upPathChgSub,omitempty"`
 }
 
-// VolumeRm Unsigned integer identifying a volume in units of bytes with "nullable=true" property.
+// VolumeRm Unsigned integer identifying a volume in units of bytes with
+// "nullable=true" property.
 type VolumeRm int64
 
-// DurationSecRm Unsigned integer identifying a period of time in units of seconds with "nullable=true" property.
+// DurationSecRm Unsigned integer identifying a period of time in units of
+// seconds with "nullable=true" property.
 type DurationSecRm int64
 
 // UsageThresholdRm usage threshold rm
@@ -1156,8 +1170,9 @@ type UsageThresholdRm struct {
 	UplinkVolume VolumeRm `json:"uplinkVolume,omitempty"`
 }
 
-// EventsSubscReqDataRm this data type is defined in the same way as the EventsSubscReqData data type, but with the OpenAPI nullable property set to true.
-// swagger:model EventsSubscReqDataRm
+// EventsSubscReqDataRm this data type is defined in the same way as the
+// EventsSubscReqData data type, but with the OpenAPI nullable property set to
+// true.
 type EventsSubscReqDataRm struct {
 
 	// events
@@ -1177,10 +1192,15 @@ type EventsSubscReqDataRm struct {
 // BitRateRm bit rate rm
 type BitRateRm string
 
-// TosTrafficClassRm this data type is defined in the same way as the TosTrafficClass data type, but with the OpenAPI nullable property set to true
+// TosTrafficClassRm this data type is defined in the same way as the
+// TosTrafficClass data type, but with the OpenAPI nullable property set to
+// true
 type TosTrafficClassRm string
 
-// MediaSubComponentRm This data type is defined in the same way as the MediaSubComponent data type, but with the OpenAPI nullable property set to true. Removable attributes marBwDland marBwUl are defined with the corresponding removable data type.
+// MediaSubComponentRm This data type is defined in the same way as the
+// MediaSubComponent data type, but with the OpenAPI nullable property set to
+// true. Removable attributes marBwDland marBwUl are defined with the
+// corresponding removable data type.
 type MediaSubComponentRm struct {
 
 	// af sig protocol
@@ -1229,7 +1249,6 @@ const (
 )
 
 // PreemptionVulnerabilityRm preemption vulnerability rm
-// swagger:model PreemptionVulnerabilityRm
 type PreemptionVulnerabilityRm string
 
 const (
@@ -1241,8 +1260,8 @@ const (
 	PreemptionVulnerabilityRmPREEMPTABLE PreemptionVulnerabilityRm = "PREEMPTABLE"
 )
 
-// MediaComponentRm This data type is defined in the same way as the MediaComponent data type, but with the OpenAPI nullable property set to true
-// swagger:model MediaComponentRm
+// MediaComponentRm This data type is defined in the same way as the
+// MediaComponent data type, but with the OpenAPI nullable property set to true
 type MediaComponentRm struct {
 
 	// af app Id
@@ -1325,7 +1344,6 @@ const (
 )
 
 // SipForkingIndication sip forking indication
-// swagger:model SipForkingIndication
 type SipForkingIndication string
 
 const (
@@ -1337,7 +1355,9 @@ const (
 	SipForkingIndicationSEVERALDIALOGUES SipForkingIndication = "SEVERAL_DIALOGUES"
 )
 
-// AppSessionContextUpdateData Identifies the modifications to an Individual Application Session Context and may include the modifications to the sub-resource Events Subscription.
+// AppSessionContextUpdateData Identifies the modifications to an Individual
+// Application Session Context and may include the modifications to the
+// sub-resource Events Subscription.
 type AppSessionContextUpdateData struct {
 
 	// af app Id
@@ -1386,7 +1406,8 @@ type AppSessionContextUpdateData struct {
 	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
 }
 
-// AcceptableServiceInfo Indicates the maximum bandwidth that shall be authorized by the PCF.
+// AcceptableServiceInfo Indicates the maximum bandwidth that shall be
+// authorized by the PCF.
 type AcceptableServiceInfo struct {
 
 	// acc bw med comps
@@ -1401,7 +1422,8 @@ type AcceptableServiceInfo struct {
 	MarBwUl string `json:"marBwUl,omitempty"`
 }
 
-// ExtendedProblemDetails Extends ProblemDetails to also include the acceptable service info.
+// ExtendedProblemDetails Extends ProblemDetails to also include the acceptable
+// service info.
 type ExtendedProblemDetails struct {
 	ProblemDetails
 

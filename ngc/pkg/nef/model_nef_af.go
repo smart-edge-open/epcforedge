@@ -18,12 +18,14 @@ package main
 // be notified when the UP path changes for the PDU isession.
 type SubscribedEvent string
 
+// Link : URI identifying the referenced resource
 // URI identifying the referenced resource
 type Link string
 
 // URI string formatted accordingding to IETF RFC 3986
 
-// A string used to indicate the features supported by an API that is used
+// SupportedFeatures : A string used to indicate the features supported by an
+// API that is used
 // (subclause 6.6 in 3GPP TS 29.500).
 // The string shall contain a bitmask indicating supported features in
 // hexadecimal representation.
@@ -132,7 +134,8 @@ type TrafficInfluSubPatch struct {
 	ValidGeoZoneIDs []string `json:"validGeoZoneIds,omitempty"`
 }
 
-// TemporalValidity Indicates the time interval(s) during which the AF request is to be applied
+// TemporalValidity Indicates the time interval(s) during which the AF request
+// is to be applied
 type TemporalValidity struct {
 	// string with format \"date-time\" as defined in OpenAPI.
 	StartTime string `json:"startTime,omitempty"`
