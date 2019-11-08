@@ -1,18 +1,18 @@
 {
   "afServiceId": "",
-  "afAppId": "app001",
+  "afAppId": "app02",
   "afTransId": "",
   "appReloInd": false,
-  "dnn": "edgeLocation001",
+  "dnn": "edgeLocation02",
   "snssai": {
     "sst": 0,
-    "sd": "default"
+    "sd": "default2"
   },
   "externalGroupId": "",
-  "anyUeInd": false,
+  "anyUeInd": true,
   "subscribedEvents": [],
   "gpsi": "",
-  "ipv4Addr": "192.168.1.10",
+  "ipv4Addr": "",
   "ipv6Addr": "",
   "macAddr": "",
   "notificationDestination": "",
@@ -25,13 +25,13 @@
   "ethTrafficFilters": [],
   "trafficRoutes": [
       {
-        "dnai" : "edgeLocation001",
+        "dnai" : "edgeLocation02",
         "routeInfo" : {
             "ipv4Addr" : "",
             "ipv6Addr" : "",
             "portNumber" : ""
         },
-        "routeProfId" : "default"
+        "routeProfId" : "default2"
     }
   ],
   "tempValidities": [
@@ -43,4 +43,3 @@
   "validGeoZoneIds": [],
   "suppFeat": ""
 }
-
