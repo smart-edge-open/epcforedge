@@ -1,0 +1,10 @@
+[{
+  "afInstance": "by-a",
+  "localServices": [
+    {
+      "dnai": "by_dnai",
+      "dnn": "by_dnn",
+      "dns": "192.168.8.8"
+    }
+  ]
+}]

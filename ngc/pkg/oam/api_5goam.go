@@ -13,9 +13,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteDns(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-        //TBD ....
-	w.WriteHeader(http.StatusOK)
+        ProxyDelDnn(w, r)
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {

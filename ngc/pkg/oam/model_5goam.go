@@ -1,12 +1,12 @@
 package oam
 
 // ServiceList JSON struct
-type AfRegisterList struct {
-        AfRegisters []AfRegister      `json:"afRegisters,omitempty"`
+type AfServiceList struct {
+        AfServices []AfService      `json:"afServices,omitempty"`
 }
 
-// af register JSON struct
-type AfRegister struct {
+// AF Service JSON struct
+type AfService struct {
         AfInstance    string         `json:"afInstance,omitempty"`
         LocalServices []LocalService `json:"localServices,omitempty"`
 }

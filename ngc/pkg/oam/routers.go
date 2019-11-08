@@ -34,7 +34,7 @@ func NewRouter() *mux.Router {
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Do not steal my cake!")
+	fmt.Fprintf(w, "Hello From OpenNESS!")
 }
 
 var routes = Routes{
@@ -48,42 +48,42 @@ var routes = Routes{
 	Route{
 		"Add",
 		strings.ToUpper("Post"),
-		"/afRegisters",
+		"/oam/v1/af/services",
 		Add,
 	},
 
 	Route{
 		"Delete",
 		strings.ToUpper("Delete"),
-		"/afRegisters/{afId}",
+		"/oam/v1/af/services/{afId}",
 		Delete,
 	},
 
 	Route{
 		"DeleteDns",
 		strings.ToUpper("Delete"),
-		"/afRegisters/{afId}/locationServices/{dnai}",
+		"/oam/v1/af/services/{afId}/locationServices/{dnai}",
 		DeleteDns,
 	},
 
 	Route{
 		"Get",
 		strings.ToUpper("Get"),
-		"/afRegisters/{afId}",
+		"/oam/v1/af/services/{afId}",
 		Get,
 	},
 
 	Route{
 		"GetAll",
 		strings.ToUpper("Get"),
-		"/afRegisters",
+		"/oam/v1/af/services",
 		GetAll,
 	},
 
 	Route{
 		"Update",
 		strings.ToUpper("Patch"),
-		"/afRegisters/{afId}",
+		"/oam/v1/af/services/{afId}",
 		Update,
 	},
 }

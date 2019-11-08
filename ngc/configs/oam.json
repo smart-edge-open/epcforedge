@@ -2,6 +2,6 @@
     "TlsEndpoint": ":443",
     "OpenEndpoint": ":8080",
     "NgcEndpoint": "127.0.0.1:12345",
-    "NgcTarget": "APISTUB",
-    "APIStubPath": "./test/oam/ngc_testdata.json" 
+    "NgcType": "APISTUB",
+    "NgcTestData": "./test/oam/ngc-apistub-testdata/testdata_00.json" 
 }

@@ -8,14 +8,15 @@ import (
 	"log"
 	"net/http"
 	oam "github.com/otcshare/epcforedge/ngc/pkg/oam"
+        config "github.com/otcshare/epcforedge/ngc/pkg/config"
 )
 
 type oamCfg struct {
         TLSEndpoint        string        `json:"TlsEndpoint"`
         OpenEndpoint       string        `json:"OpenEndpoint"`
         NgcEndpoint        string        `json:"NgcEndpoint"`
-        NgcTarget          string        `json:"NgcTarget"`
-        APIStubPath        string        `json:"APIStubPath"`
+        NgcType            string        `json:"NgcType"`
+        NgcTestData        string        `json:"NgcTestData"`
 }
 
 func main() {
@@ -24,19 +25,20 @@ func main() {
 	log.Printf("Server started")
         
         var cfg oamCfg
-        err := oam.LoadJSONConfig("./configs/oam.json", &cfg)
+        err := config.LoadJSONConfig("./configs/oam.json", &cfg)
         if err != nil {
                 log.Printf("Failed to load config: %#v", err)
                 os.Exit(1)
         }
-        log.Printf("Configuration data: %s, %s, %s, %s\n", 
+        log.Printf("LocalConfig: %s, %s, %s, %s, %s\n", 
                cfg.TLSEndpoint, 
                cfg.OpenEndpoint, 
                cfg.NgcEndpoint, 
-               cfg.APIStubPath)
+               cfg.NgcType, 
+               cfg.NgcTestData)
 
         // New Http Router
-        err = oam.InitProxy(cfg.NgcEndpoint, cfg.NgcTarget, cfg.APIStubPath)
+        err = oam.InitProxy(cfg.NgcEndpoint, cfg.NgcType, cfg.NgcTestData)
         if err != nil {
                 log.Printf("Failed to init proxy: %#v", err)
                 os.Exit(1)
@@ -44,6 +46,4 @@ func main() {
 
 	router := oam.NewRouter()
 	http.ListenAndServe(cfg.OpenEndpoint, router)
-	//log.Fatal(http.ListenAndServe(":8080", router))
-	//log.Fatal(http.ListenAndServe(cfg.OpenEndpoint, router))
 }
