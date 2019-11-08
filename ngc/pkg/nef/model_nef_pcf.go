@@ -70,12 +70,12 @@ type AfAppID string
 // subscription
 type AfRoutingRequirement struct {
 	// Indication of application relocation possibility
-	appReloc bool `json:"appReloc,omitempty"`
+	AppReloc bool `json:"appReloc,omitempty"`
 	// A list of traffic routes to applications locations
 	// Min Items: 1
-	routeToLocs []RouteToLocation `json:"routeToLocs"`
+	RouteToLocs []RouteToLocation `json:"routeToLocs"`
 	// sp val
-	spVal SpatialValidity `json:"spVal,omitempty"`
+	SpVal SpatialValidity `json:"spVal,omitempty"`
 	// addr preser ind
 	AddrPreserInd bool `json:"addrPreserInd,omitempty"`
 	// temp vals
@@ -102,21 +102,21 @@ type FlowDirection string
 // EthFlowDescription :  Identifies an Ethernet flow
 type EthFlowDescription struct {
 	// destination Mac address
-	destMacAddr MacAddr48 `json:"destMacAddr,omitempty"`
+	DestMacAddr MacAddr48 `json:"destMacAddr,omitempty"`
 	// A two-octet string that represents the Ethertype, as described in IEEE 802.3 [16] and IETF RFC 7042 [18]
 	// in hexadecimal representation.  Each character in the string shall take a
 	// value of "0" to "9" or "A" to "F" and shall represent 4 bits. The most significant
 	// character representing the 4 most  significant bits of the ethType shall
 	// appear first in the string, and the character representing the 4 least
 	// significant bits of the ethType shall appear last in the string
-	ethType string `json:"ethType, omitempty"`
+	EthType string `json:"ethType,omitempty"`
 	// Contains the flow description for the Uplink or Downlink IP flow. It shall be
 	// present when the Ethertype is IP.
-	fDesc FlowDescription `json:"fDesc, omitempty"`
+	FDesc FlowDescription `json:"fDesc,omitempty"`
 	// Contains the packet filter direction.
-	fDir FlowDirection `json:"fDir, omitempty"`
+	FDir FlowDirection `json:"fDir,omitempty"`
 	// Source MAC address
-	sourceMacAddr MacAddr48 `json:"sourceMacAddr, omitempty"`
+	SourceMacAddr MacAddr48 `json:"sourceMacAddr,omitempty"`
 	//  minItems: 1, maxItems: 2
 	// Customer-VLAN and/or Service-VLAN tags containing the VID, PCP/DEI fields
 	// as defined in IEEE 802.1Q [17] and IETF RFC 7042 [18].
@@ -126,15 +126,16 @@ type EthFlowDescription struct {
 	// significant bits of the VID or PCF/DEI field shall appear first in the string, and
 	// the character representing the 4 least significant bits of the VID or PCF/DEI
 	// field shall appear last in the string
-	vlanTags []string `json:"vlanTags, omitempty"`
+	VlanTags []string `json:"vlanTags,omitempty"`
 }
 
 // UpPathChgEvent : UP path management events
+// To be moved to SMPolicy file when available
 type UpPathChgEvent struct {
 	// notification URI
-	notificationURI URI `json:"notificationUri`
+	NotificationURI URI `json:"notificationUri"`
 	// It is used to set the value of Notification Correlation ID in the notification sent by the SMF.
-	notifCorreID string `json:"notifCorreId"`
+	NotifCorreID string `json:"notifCorreId"`
 	// DNAI change type to be notified
-	dnaiChgType DnaiChangeType
+	DnaiChgType DnaiChangeType `json:"dnaiChgType"`
 }

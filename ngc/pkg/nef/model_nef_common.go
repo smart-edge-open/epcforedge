@@ -90,32 +90,32 @@ type Port uint32
 type RouteInformation struct {
 	// string identifying a Ipv4 address formatted in the \"dotted decimal\"
 	// notation as defined in IETF RFC 1166.
-	ipv4Addr Ipv4Addr `json:"ipv4Addr,omitempty"`
+	Ipv4Addr Ipv4Addr `json:"ipv4Addr,omitempty"`
 	// string identifying a Ipv6 address formatted according to clause 4 in
 	// IETF RFC 5952.
 	// The mixed Ipv4 Ipv6 notation according to clause 5 of IETF RFC 5952 shall
 	// not be used.
-	ipv6Addr Ipv6Addr `json:"ipv6Addr,omitempty"`
+	Ipv6Addr Ipv6Addr `json:"ipv6Addr,omitempty"`
 	// Port number
-	portNumber uint32 `json:"portNumber"`
+	PortNumber uint32 `json:"portNumber"`
 }
 
 // RouteToLocation : Describes the traffic routes to the locations of the application
 type RouteToLocation struct {
 	// Data network access identifier
-	dnai Dnai `json:"dnai"`
+	Dnai Dnai `json:"dnai"`
 	// Additional route information about the route to Dnai
-	routeInfo RouteInformation `json:"routeInfo,omitempty"`
+	RouteInfo RouteInformation `json:"routeInfo,omitempty"`
 	// Dnai route profile identifier
-	routeProfID string `json:"routeProfId,omitempty"`
+	RouteProfID string `json:"routeProfId,omitempty"`
 }
 
 // Snssai Network slice identifier
 type Snssai struct {
 	// minimum: 0, 	maximum: 255
-	sst uint8 `json:"sst"`
+	Sst uint8 `json:"sst"`
 	// pattern: '^[A-Fa-f0-9]{6}$'
-	sd string `json:"sd,omitempty"`
+	Sd string `json:"sd,omitempty"`
 }
 
 // SupportedFeatures : A string used to indicate the features supported by an
@@ -141,9 +141,9 @@ type SupportedFeatures string
 type WebsockNotifConfig struct {
 	// string formatted according to IETF RFC 3986 identifying a
 	// referenced resource.
-	websocketURI Link `json:"websocketUri,omitempty"`
+	WebsocketURI Link `json:"websocketUri,omitempty"`
 	// Set by the AF to indicate that the Websocket delivery is requested.
-	requestWebsocketURI bool `json:"requestWebsocketUri,omitempty"`
+	RequestWebsocketURI bool `json:"requestWebsocketUri,omitempty"`
 }
 
 // ProblemDetails Problem details struct
@@ -207,11 +207,11 @@ type PlmnID struct {
 
 	// mcc
 	// Required: true
-	mcc Mcc `json:"mcc"`
+	Mcc Mcc `json:"mcc"`
 
 	// mnc
 	// Required: true
-	mnc Mnc `json:"mnc"`
+	Mnc Mnc `json:"mnc"`
 }
 
 // Tac tac
@@ -222,11 +222,11 @@ type Tai struct {
 
 	// plmn Id
 	// Required: true
-	plmnID PlmnID `json:"plmnId"`
+	PlmnID PlmnID `json:"plmnId"`
 
 	// tac
 	// Required: true
-	tac Tac `json:"tac"`
+	Tac Tac `json:"tac"`
 }
 
 // EutraCellID eutra cell Id
@@ -236,10 +236,10 @@ type EutraCellID string
 type Ecgi struct {
 	// eutra cell Id
 	// Required: true
-	eutraCellID EutraCellID `json:"eutraCellId"`
+	EutraCellID EutraCellID `json:"eutraCellId"`
 	// plmn Id
 	// Required: true
-	plmnID PlmnID `json:"plmnId"`
+	PlmnID PlmnID `json:"plmnId"`
 }
 
 // NrCellID nr cell Id
@@ -249,10 +249,10 @@ type NrCellID string
 type Ncgi struct {
 	// nr cell Id
 	// Required: true
-	nrCellID NrCellID `json:"nrCellId"`
+	NrCellID NrCellID `json:"nrCellId"`
 	// plmn Id
 	// Required: true
-	plmnID PlmnID `json:"plmnId"`
+	PlmnID PlmnID `json:"plmnId"`
 }
 
 // GNbID g nb Id
@@ -261,11 +261,11 @@ type GNbID struct {
 	// Required: true
 	// Maximum: 32
 	// Minimum: 22
-	bitLength uint8 `json:"bitLength"`
+	BitLength uint8 `json:"bitLength"`
 	// g n b value
 	// Required: true
 	// Pattern: ^[A-Fa-f0-9]{6,8}$
-	gNBValue string `json:"gNBValue"`
+	GNBValue string `json:"gNBValue"`
 }
 
 // N3IwfID n3 iwf Id
@@ -278,11 +278,11 @@ type NgeNbID string
 type GlobalRanNodeID struct {
 	// plmn Id
 	// Required: true
-	plmnID PlmnID `json:"plmnId"`
+	PlmnID PlmnID `json:"plmnId"`
 	// n3 iwf Id
 	N3IwfID N3IwfID `json:"n3IwfId,omitempty"`
 	// g nb Id
-	gNbID GNbID `json:"gNbId,omitempty"`
+	GNbID GNbID `json:"gNbId,omitempty"`
 	// nge nb Id
 	NgeNbID NgeNbID `json:"ngeNbId,omitempty"`
 }
@@ -290,9 +290,9 @@ type GlobalRanNodeID struct {
 // PresenceInfo presence info
 type PresenceInfo struct {
 	// pra Id
-	praID string `json:"praId,omitempty"`
+	PraID string `json:"praId,omitempty"`
 	// presence state
-	presenceState PresenceState `json:"presenceState,omitempty"`
+	PresenceState PresenceState `json:"presenceState,omitempty"`
 	// ecgi list
 	// Min Items: 1
 	EcgiList []Ecgi `json:"ecgiList"`
@@ -301,12 +301,12 @@ type PresenceInfo struct {
 	NcgiList []Ncgi `json:"ncgiList"`
 	// global ran node Id list
 	// Min Items: 1
-	globalRanNodeIDList []GlobalRanNodeID `json:"globalRanNodeIdList"`
+	GlobalRanNodeIDList []GlobalRanNodeID `json:"globalRanNodeIdList"`
 }
 
 // SpatialValidity Describes the spatial validity of an AF request for influencing traffic routing
 type SpatialValidity struct {
-	presenceInfoList PresenceInfo `json:"presenceInfoList"`
+	PresenceInfoList PresenceInfo `json:"presenceInfoList"`
 }
 
 // DateTime is in the date-time format
