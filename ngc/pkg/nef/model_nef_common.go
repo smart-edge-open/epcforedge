@@ -308,3 +308,6 @@ type PresenceInfo struct {
 type SpatialValidity struct {
 	presenceInfoList PresenceInfo `json:"presenceInfoList"`
 }
+
+// DateTime is in the date-time format
+type DateTime string

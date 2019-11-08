@@ -16,125 +16,94 @@ package main
 
 // TrafficInfluData traffic influ data
 type TrafficInfluData struct {
-
-	// Identifies an application.
-	// Required: true
-	AfAppID string `json:"afAppId"`
-
+	// Contains the Notification Correlation Id allocated by the NEF for the UP path
+	// change notification. It shall be included when the NEF requests the UP path
+	// change notification
+	UpPathChgNotifURI URI `json:"upPathChgNotifUri,omitempty"`
 	// Identifies whether an application can be relocated once a location of the application has been selected.
 	AppReloInd bool `json:"appReloInd,omitempty"`
-
-	// dnn
+	// Identifies an application.
+	// Required: true
+	AfAppID string `json:"afAppId,omitempty"`
+	// Identifies a dnn
 	Dnn Dnn `json:"dnn,omitempty"`
-
 	// Identifies Ethernet packet filters. Either "trafficFilters" or "ethTrafficFilters" shall be included if applicable.
-	// Required: true
-	// Min Items: 1
-	EthTrafficFilters []*EthFlowDescription `json:"ethTrafficFilters"`
-
-	// Identifies a group of users.
-	// Required: true
-	InterGroupID string `json:"interGroupId"`
-
-	// nw area info
-	NwAreaInfo NetworkAreaInfo `json:"nwAreaInfo,omitempty"`
-
-	// snssai
+	EthTrafficFilters []EthFlowDescription `json:"ethTrafficFilters,omitempty"`
+	// The identification of slice
 	Snssai Snssai `json:"snssai,omitempty"`
-
-	// supi
-	// Required: true
+	// Identifies a group of users.
+	InterGroupID string `json:"interGroupId"`
+	// supi Identifies a suer
 	Supi Supi `json:"supi"`
-
 	// Identifies IP packet filters. Either "trafficFilters" or "ethTrafficFilters" shall be included if applicable.
 	// Required: true
 	// Min Items: 1
-	TrafficFilters []*FlowInfo `json:"trafficFilters"`
-
+	TrafficFilters []FlowInfo `json:"trafficFilters"`
 	// Identifies the N6 traffic routing requirement.
 	// Required: true
 	// Min Items: 1
-	TrafficRoutes []*RouteToLocation `json:"trafficRoutes"`
-
-	// Contains the Notification Correlation Id allocated by the NEF for the UP path change notification.
-	UpPathChgNotifCorreID string `json:"upPathChgNotifCorreId,omitempty"`
-
-	// up path chg notif Uri
-	UpPathChgNotifURI URI `json:"upPathChgNotifUri,omitempty"`
-
+	TrafficRoutes []RouteToLocation `json:"trafficRoutes"`
 	// valid end time
 	// Format: date-time
 	ValidEndTime DateTime `json:"validEndTime,omitempty"`
-
 	// valid start time
 	// Format: date-time
 	ValidStartTime DateTime `json:"validStartTime,omitempty"`
-}
-
-// NetworkAreaInfo Describes a network area information in which the NF service consumer requests the number of UEs.
-type NetworkAreaInfo struct {
-
-	// Contains a list of E-UTRA cell identities.
-	// Min Items: 1
-	Ecgis []*Ecgi `json:"ecgis"`
-
-	// Contains a list of NG RAN nodes.
-	// Min Items: 1
-	GRanNodeIds []*GlobalRanNodeID `json:"gRanNodeIds"`
-
-	// Contains a list of NR cell identities.
-	// Min Items: 1
-	Ncgis []*Ncgi `json:"ncgis"`
-
-	// Contains a list of tracking area identities.
-	// Min Items: 1
-	Tais []*Tai `json:"tais"`
+	// Identifies a network area information that the request applies only to the traffic of
+	// UE(s) located in this specific zone
+	NwAreaInfo NetworkAreaInfo `json:"nwAreaInfo,omitempty"`
+	// Contains the Notification Correlation Id allocated by the NEF for the UP path change notification.
+	UpPathChgNotifCorreID URI `json:"upPathChgNotifCorreId,omitempty"`
 }
 
 // TrafficInfluDataPatch traffic influ data patch
 type TrafficInfluDataPatch struct {
-
-	// Identifies whether an application can be relocated once a location of the application has been selected.
-	AppReloInd bool `json:"appReloInd,omitempty"`
-
-	// dnn
-	Dnn Dnn `json:"dnn,omitempty"`
-
-	// Identifies Ethernet packet filters. Either "trafficFilters" or "ethTrafficFilters" shall be included if applicable.
-	// Min Items: 1
-	EthTrafficFilters []*EthFlowDescription `json:"ethTrafficFilters"`
-
-	// Identifies a group of users.
-	InternalGroupID string `json:"internalGroupId,omitempty"`
-
-	// nw area info
-	NwAreaInfo *NetworkAreaInfo `json:"nwAreaInfo,omitempty"`
-
-	// snssai
-	Snssai *Snssai `json:"snssai,omitempty"`
-
-	// supi
-	Supi Supi `json:"supi,omitempty"`
-
-	// Identifies IP packet filters. Either "trafficFilters" or "ethTrafficFilters" shall be included if applicable.
-	// Min Items: 1
-	TrafficFilters []*FlowInfo `json:"trafficFilters"`
-
-	// Identifies the N6 traffic routing requirement.
-	// Min Items: 1
-	TrafficRoutes []*RouteToLocation `json:"trafficRoutes"`
-
 	// Contains the Notification Correlation Id allocated by the NEF for the UP path change notification.
 	UpPathChgNotifCorreID string `json:"upPathChgNotifCorreId,omitempty"`
-
-	// up path chg notif Uri
-	UpPathChgNotifURI URI `json:"upPathChgNotifUri,omitempty"`
-
+	// Identifies whether an application can be relocated once a location of the application has been selected.
+	AppReloInd bool `json:"appReloInd,omitempty"`
+	// dnn
+	Dnn Dnn `json:"dnn,omitempty"`
+	// snssai
+	Snssai Snssai `json:"snssai,omitempty"`
+	// Identifies a group of users.
+	InternalGroupID string `json:"internalGroupId,omitempty"`
+	// Identifies Ethernet packet filters. Either "trafficFilters" or "ethTrafficFilters" shall be included if applicable.
+	// Min Items: 1
+	EthTrafficFilters []EthFlowDescription `json:"ethTrafficFilters"`
+	// supi
+	Supi Supi `json:"supi,omitempty"`
+	// Identifies IP packet filters. Either "trafficFilters" or "ethTrafficFilters" shall be included if applicable.
+	// Min Items: 1
+	TrafficFilters []FlowInfo `json:"trafficFilters"`
+	// Identifies the N6 traffic routing requirement.
+	// Min Items: 1
+	TrafficRoutes []RouteToLocation `json:"trafficRoutes"`
 	// valid end time
 	// Format: date-time
 	ValidEndTime DateTime `json:"validEndTime,omitempty"`
-
 	// valid start time
 	// Format: date-time
 	ValidStartTime DateTime `json:"validStartTime,omitempty"`
+	// nw area info
+	NwAreaInfo NetworkAreaInfo `json:"nwAreaInfo,omitempty"`
+	// up path chg notif Uri
+	UpPathChgNotifURI URI `json:"upPathChgNotifUri,omitempty"`
+}
+
+// NetworkAreaInfo Describes a network area information in which the NF service consumer requests the number of UEs.
+// To be moved to the BDT policy mdoel in future
+type NetworkAreaInfo struct {
+	// Contains a list of E-UTRA cell identities.
+	// Min Items: 1
+	Ecgis []Ecgi `json:"ecgis"`
+	// Contains a list of NR cell identities.
+	// Min Items: 1
+	Ncgis []Ncgi `json:"ncgis"`
+	// Contains a list of NG RAN nodes.
+	// Min Items: 1
+	GRanNodeIds []GlobalRanNodeID `json:"gRanNodeIds"`
+	// Contains a list of tracking area identities.
+	// Min Items: 1
+	Tais []Tai `json:"tais"`
 }
