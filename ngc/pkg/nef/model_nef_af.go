@@ -45,7 +45,7 @@ type TrafficInfluSub struct {
 	// Both the local identifier and the domain identifier shall be encoded as
 	// strings that do not contain any \"@\" characters.
 	// See Clauses 4.6.2 and 4.6.3 of 3GPP TS 23.682 for more information.
-	ExternalGroupID string `json:"externalGroupId,omitempty"`
+	ExternalGroupID ExternalGroupID `json:"externalGroupId,omitempty"`
 	//Identifies whether the AF request applies to any UE. This attribute shall set to "true" if
 	// applicable for any UE, otherwise, set to "false"
 	AnyUeInd bool `json:"anyUeInd,omitempty"`
