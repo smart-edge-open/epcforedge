@@ -16,13 +16,15 @@ package af
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
 )
 
+type keyType string
+
+// Route struct
 type Route struct {
 	Name        string
 	Method      string
@@ -30,14 +32,15 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
+// Routes type
 type Routes []Route
 
+// NewAFRouter function
 func NewAFRouter(afCtx *afContext) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range afRoutes {
-		var handler http.Handler
-		handler = route.HandlerFunc
-		handler = serverLog(handler, route.Name)
+		var handler http.Handler = route.HandlerFunc
+		handler = afLogger(handler, route.Name)
 
 		router.
 			Methods(route.Method).
@@ -49,7 +52,7 @@ func NewAFRouter(afCtx *afContext) *mux.Router {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := context.WithValue(
 				r.Context(),
-				string("af-ctx"),
+				keyType("af-ctx"),
 				afCtx)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -58,17 +61,7 @@ func NewAFRouter(afCtx *afContext) *mux.Router {
 	return router
 }
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World!")
-}
-
 var afRoutes = Routes{
-	Route{
-		"Index",
-		"GET",
-		"/CNCA/1.0.1/",
-		Index,
-	},
 
 	Route{
 		"GetAllSubscriptions",

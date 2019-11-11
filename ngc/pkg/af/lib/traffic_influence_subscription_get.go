@@ -23,14 +23,14 @@ import (
 	"syscall"
 )
 
-func getSubscription(afCtx *afContext, subscriptionID string,
-	cliCtx context.Context) (TrafficInfluSub, *http.Response, error) {
+func getSubscription(cliCtx context.Context, afCtx *afContext,
+	subscriptionID string) (TrafficInfluSub, *http.Response, error) {
 
-	cliCfg := NewConfiguration()
+	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
 	tsResp, resp, err := cli.TrafficInfluSubGetAPI.SubscriptionGet(
-		cliCtx, afCtx.cfg.AfId, subscriptionID)
+		cliCtx, afCtx.cfg.AfID, subscriptionID)
 
 	if err != nil {
 
@@ -52,7 +52,7 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 		tsRespJSON     []byte
 	)
 
-	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 
 	osSignals := make(chan os.Signal, 1)
@@ -68,19 +68,19 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 	transID, err = genTransactionID(afCtx)
 	if err != nil {
 
-		log.Errf("Traffic Influance Subscription PUT %s", err.Error())
+		log.Errf("Traffic Influance Subscription GET %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	subscriptionID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription PUT: %s", err.Error())
+		log.Errf("Traffic Influence Subscription GET: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	afCtx.transactions[transID] = TrafficInfluSub{}
-	tsResp, resp, err = getSubscription(afCtx, subscriptionID, cliCtx)
+	tsResp, resp, err = getSubscription(cliCtx, afCtx, subscriptionID)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription create : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -95,5 +95,10 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(resp.StatusCode)
-	w.Write(tsRespJSON)
+
+	if _, err = w.Write(tsRespJSON); err != nil {
+		log.Errf("Traffic Influance Subscription GET %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }

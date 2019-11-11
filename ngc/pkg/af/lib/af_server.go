@@ -22,17 +22,23 @@ import (
 	"github.com/otcshare/edgenode/pkg/config"
 )
 
-type AFTransactionIDs map[int]TrafficInfluSub
+// TransactionIDs type
+type TransactionIDs map[int]TrafficInfluSub
+
+// NotifSubscryptions type
 type NotifSubscryptions map[string]map[string]TrafficInfluSub
 
+//Config structure
 type Config struct {
-	Endpoint string `json:"Endpoint"`
-	AfId     string `json:"AfId"`
+	Endpoint  string `json:"Endpoint"`
+	AfID      string `json:"AfId"`
+	BasePath  string `json:"BasePath"`
+	UserAgent string `json:"UserAgent"`
 }
 
 type afContext struct {
 	subscriptions NotifSubscryptions
-	transactions  AFTransactionIDs
+	transactions  TransactionIDs
 	cfg           Config
 }
 
@@ -42,7 +48,7 @@ func runServer(ctx context.Context, afCtx *afContext) error {
 
 	var err error
 
-	afCtx.transactions = make(AFTransactionIDs)
+	afCtx.transactions = make(TransactionIDs)
 	afCtx.subscriptions = make(NotifSubscryptions)
 	afRouter := NewAFRouter(afCtx)
 	server := &http.Server{
@@ -76,15 +82,19 @@ func runServer(ctx context.Context, afCtx *afContext) error {
 	return nil
 }
 
+// Run function
 func Run(parentCtx context.Context, cfgPath string) error {
 
 	var afCtx afContext
+
+	// load AF configuration from file
 	err := config.LoadJSONConfig(cfgPath, &afCtx.cfg)
 
 	if err != nil {
 		log.Errf("Failed to load AF configuration: %v", err)
 		return err
 	}
+
 	return runServer(parentCtx, &afCtx)
 
 }

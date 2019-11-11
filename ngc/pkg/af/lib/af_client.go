@@ -19,21 +19,14 @@ import (
 	"context"
 	"encoding/json"
 	"encoding/xml"
-	"errors"
 	"fmt"
-	"golang.org/x/oauth2"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"net/url"
-	"os"
-	"path/filepath"
 	"reflect"
 	"regexp"
-	//"strconv"
 	"strings"
 	"time"
-	//"unicode/utf8"
 )
 
 var (
@@ -50,12 +43,12 @@ type Client struct {
 	common service
 
 	// API Services
-	TrafficInfluSubGetAllAPI *TrafficInfluenceSubscriptionGetAllApiService
-	TrafficInfluSubDeleteAPI *TrafficInfluenceSubscriptionDeleteApiService
-	TrafficInfluSubGetAPI    *TrafficInfluenceSubscriptionGetApiService
-	TrafficInfluSubPatchAPI  *TrafficInfluenceSubscriptionPatchApiService
-	TrafficInfluSubPostAPI   *TrafficInfluenceSubscriptionPostApiService
-	TrafficInfluSubPutAPI    *TrafficInfluenceSubscriptionPutApiService
+	TrafficInfluSubGetAllAPI *TrafficInfluenceSubscriptionGetAllAPIService
+	TrafficInfluSubDeleteAPI *TrafficInfluenceSubscriptionDeleteAPIService
+	TrafficInfluSubGetAPI    *TrafficInfluenceSubscriptionGetAPIService
+	TrafficInfluSubPatchAPI  *TrafficInfluenceSubscriptionPatchAPIService
+	TrafficInfluSubPostAPI   *TrafficInfluenceSubscriptionPostAPIService
+	TrafficInfluSubPutAPI    *TrafficInfluenceSubscriptionPutAPIService
 }
 
 type service struct {
@@ -77,24 +70,20 @@ func NewClient(cfg *Configuration) *Client {
 
 	// API Services
 	c.TrafficInfluSubGetAllAPI =
-		(*TrafficInfluenceSubscriptionGetAllApiService)(&c.common)
+		(*TrafficInfluenceSubscriptionGetAllAPIService)(&c.common)
 	c.TrafficInfluSubDeleteAPI =
-		(*TrafficInfluenceSubscriptionDeleteApiService)(&c.common)
+		(*TrafficInfluenceSubscriptionDeleteAPIService)(&c.common)
 	c.TrafficInfluSubGetAPI =
-		(*TrafficInfluenceSubscriptionGetApiService)(&c.common)
+		(*TrafficInfluenceSubscriptionGetAPIService)(&c.common)
 	c.TrafficInfluSubPatchAPI =
-		(*TrafficInfluenceSubscriptionPatchApiService)(&c.common)
+		(*TrafficInfluenceSubscriptionPatchAPIService)(&c.common)
 	c.TrafficInfluSubPostAPI =
-		(*TrafficInfluenceSubscriptionPostApiService)(&c.common)
+		(*TrafficInfluenceSubscriptionPostAPIService)(&c.common)
 	c.TrafficInfluSubPutAPI =
-		(*TrafficInfluenceSubscriptionPutApiService)(&c.common)
+		(*TrafficInfluenceSubscriptionPutAPIService)(&c.common)
 
 	return c
 }
-
-/*func atoi(in string) (int, error) {
-	return strconv.Atoi(in)
-}*/
 
 // selectHeaderContentType select a content type from the available list.
 func selectHeaderContentType(contentTypes []string) string {
@@ -124,76 +113,44 @@ func selectHeaderAccept(accepts []string) string {
 // contains is a case insenstive match, finding needle in a haystack
 func contains(haystack []string, needle string) bool {
 	for _, a := range haystack {
-		if strings.ToLower(a) == strings.ToLower(needle) {
+		if strings.EqualFold(strings.ToLower(a), strings.ToLower(needle)) {
+			//strings.ToLower(a) == strings.ToLower(needle) {
 			return true
 		}
 	}
 	return false
 }
 
-// Verify optional parameters are of the correct type.
-/*func typeCheckParameter(obj interface{}, expected string, name string) error {
-	// Make sure there is an object.
-	if obj == nil {
-		return nil
-	}
-
-	// Check the type is as expected.
-	if reflect.TypeOf(obj).String() != expected {
-		return fmt.Errorf("Expected %s to be of type %s but received",
-			" %s.", name, expected, reflect.TypeOf(obj).String())
-	}
-	return nil
-}
-
-// parameterToString convert interface{} parameters to string,
-// using a delimiter if format is provided.
-func parameterToString(obj interface{}, collectionFormat string) string {
-	var delimiter string
-
-	switch collectionFormat {
-	case "pipes":
-		delimiter = "|"
-	case "ssv":
-		delimiter = " "
-	case "tsv":
-		delimiter = "\t"
-	case "csv":
-		delimiter = ","
-	}
-
-	if reflect.TypeOf(obj).Kind() == reflect.Slice {
-		return strings.Trim(strings.Replace(fmt.Sprint(obj), " ",
-			delimiter, -1), "[]")
-	}
-
-	return fmt.Sprintf("%v", obj)
-}
-*/
 // callAPI do the request.
 func (c *Client) callAPI(request *http.Request) (*http.Response, error) {
 	return c.cfg.HTTPClient.Do(request)
 }
 
-// Change base path to allow switching to mocks
-func (c *Client) ChangeBasePath(path string) {
-	c.cfg.BasePath = path
+func genNewRequest(body io.Reader, url string,
+	method string) (*http.Request, error) {
+
+	var (
+		localVarRequest *http.Request
+		err             error
+	)
+
+	localVarRequest, err = http.NewRequest(method, url, body)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return localVarRequest, nil
 }
 
-// prepareRequest build the request
-func (c *Client) prepareRequest(
-	ctx context.Context,
-	path string, method string,
-	postBody interface{},
-	headerParams map[string]string,
-	queryParams url.Values,
-	formParams url.Values,
-	fileName string,
-	fileBytes []byte) (localVarRequest *http.Request, err error) {
+func genBody(postBody interface{},
+	headerParams map[string]string) (*bytes.Buffer, error) {
 
-	var body *bytes.Buffer
+	var (
+		body = &bytes.Buffer{}
+		err  error
+	)
 
-	// Detect postBody type and post.
 	if postBody != nil {
 		contentType := headerParams["Content-Type"]
 		if contentType == "" {
@@ -205,48 +162,25 @@ func (c *Client) prepareRequest(
 		if err != nil {
 			return nil, err
 		}
+
 	}
+	return body, nil
+}
 
-	// add form parameters and file if available.
-	if len(formParams) > 0 || (len(fileBytes) > 0 && fileName != "") {
-		if body != nil {
-			return nil, errors.New("Cannot specify postBody and " +
-				"multipart form at the same time.")
-		}
-		body = &bytes.Buffer{}
-		w := multipart.NewWriter(body)
+// prepareRequest build the request
+func (c *Client) prepareRequest(
+	ctx context.Context,
+	path string, method string,
+	postBody interface{},
+	headerParams map[string]string,
+) (localVarRequest *http.Request, err error) {
 
-		for k, v := range formParams {
-			for _, iv := range v {
-				if strings.HasPrefix(k, "@") { // file
-					err = addFile(w, k[1:], iv)
-					if err != nil {
-						return nil, err
-					}
-				} else { // form value
-					w.WriteField(k, iv)
-				}
-			}
-		}
-		if len(fileBytes) > 0 && fileName != "" {
-			w.Boundary()
-			//_, fileNm := filepath.Split(fileName)
-			part, err := w.CreateFormFile("file",
-				filepath.Base(fileName))
-			if err != nil {
-				return nil, err
-			}
-			_, err = part.Write(fileBytes)
-			if err != nil {
-				return nil, err
-			}
-			// Set the Boundary in the Content-Type
-			headerParams["Content-Type"] = w.FormDataContentType()
-		}
+	var body *bytes.Buffer
 
-		// Set Content-Length
-		headerParams["Content-Length"] = fmt.Sprintf("%d", body.Len())
-		w.Close()
+	// Detect postBody type and post.
+	body, err = genBody(postBody, headerParams)
+	if err != nil {
+		return nil, err
 	}
 
 	// Setup path and query parameters
@@ -255,25 +189,8 @@ func (c *Client) prepareRequest(
 		return nil, err
 	}
 
-	// Adding Query Param
-	query := url.Query()
-	for k, v := range queryParams {
-		for _, iv := range v {
-			query.Add(k, iv)
-		}
-	}
-
-	// Encode the parameters.
-	url.RawQuery = query.Encode()
-
 	// Generate a new request
-	if body != nil {
-		localVarRequest, err =
-			http.NewRequest(method, url.String(), body)
-	} else {
-		localVarRequest, err =
-			http.NewRequest(method, url.String(), nil)
-	}
+	localVarRequest, err = genNewRequest(body, url.String(), method)
 	if err != nil {
 		return nil, err
 	}
@@ -287,11 +204,6 @@ func (c *Client) prepareRequest(
 		localVarRequest.Header = headers
 	}
 
-	// Override request host, if applicable
-	if c.cfg.Host != "" {
-		localVarRequest.Host = c.cfg.Host
-	}
-
 	// Add the user agent to the request.
 	localVarRequest.Header.Add("User-Agent", c.cfg.UserAgent)
 
@@ -299,78 +211,12 @@ func (c *Client) prepareRequest(
 		// add context to the request
 		localVarRequest = localVarRequest.WithContext(ctx)
 
-		// Walk through any authentication.
+		// Walk through any authentication here.
 
-		// OAuth2 authentication
-		if tok, ok :=
-			ctx.Value(ContextOAuth2).(oauth2.TokenSource); ok {
-			// We were able to grab an oauth2 token from the context
-			var latestToken *oauth2.Token
-			if latestToken, err = tok.Token(); err != nil {
-				return nil, err
-			}
-
-			latestToken.SetAuthHeader(localVarRequest)
-		}
-
-		// Basic HTTP Authentication
-		if auth, ok := ctx.Value(ContextBasicAuth).(BasicAuth); ok {
-			localVarRequest.SetBasicAuth(auth.UserName,
-				auth.Password)
-		}
-
-		// AccessToken Authentication
-		if auth, ok := ctx.Value(ContextAccessToken).(string); ok {
-			localVarRequest.Header.Add("Authorization",
-				"Bearer "+auth)
-		}
-	}
-
-	for header, value := range c.cfg.DefaultHeader {
-		localVarRequest.Header.Add(header, value)
 	}
 
 	return localVarRequest, nil
 }
-
-func (c *Client) decode(v interface{},
-	b []byte, contentType string) (err error) {
-
-	if strings.Contains(contentType, "application/xml") {
-		if err = xml.Unmarshal(b, v); err != nil {
-			return err
-		}
-		return nil
-	} else if strings.Contains(contentType, "application/json") {
-		if err = json.Unmarshal(b, v); err != nil {
-			return err
-		}
-		return nil
-	}
-	return errors.New(" ContentType undefined response type")
-}
-
-// Add a file to the multipart request
-func addFile(w *multipart.Writer, fieldName, path string) error {
-	file, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	part, err := w.CreateFormFile(fieldName, filepath.Base(path))
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(part, file)
-
-	return err
-}
-
-// Prevent trying to import "fmt"
-/*func reportError(format string, a ...interface{}) error {
-	return fmt.Errorf(format, a...)
-}*/
 
 // Set request body from an interface{}
 func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer,
@@ -391,7 +237,7 @@ func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer,
 	} else if jsonCheck.MatchString(contentType) {
 		err = json.NewEncoder(bodyBuf).Encode(body)
 	} else if xmlCheck.MatchString(contentType) {
-		xml.NewEncoder(bodyBuf).Encode(body)
+		err = xml.NewEncoder(bodyBuf).Encode(body)
 	}
 
 	if err != nil {
@@ -399,7 +245,7 @@ func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer,
 	}
 
 	if bodyBuf.Len() == 0 {
-		err = fmt.Errorf("Invalid body type %s\n", contentType)
+		err = fmt.Errorf("invalid body type %s", contentType)
 		return nil, err
 	}
 	return bodyBuf, nil
@@ -453,7 +299,10 @@ func parseCacheControl(headers http.Header) cacheControl {
 // request.
 func CacheExpires(r *http.Response) time.Time {
 	// Figure out when the cache expires.
-	var expires time.Time
+	var (
+		expires  time.Time
+		lifetime time.Duration
+	)
 	now, err := time.Parse(time.RFC1123, r.Header.Get("date"))
 	if err != nil {
 		return time.Now()
@@ -461,11 +310,13 @@ func CacheExpires(r *http.Response) time.Time {
 	respCacheControl := parseCacheControl(r.Header)
 
 	if maxAge, ok := respCacheControl["max-age"]; ok {
-		lifetime, err := time.ParseDuration(maxAge + "s")
+		lifetime, err = time.ParseDuration(maxAge + "s")
 		if err != nil {
+			log.Errf("error parsing time duration")
 			expires = now
+		} else {
+			expires = now.Add(lifetime)
 		}
-		expires = now.Add(lifetime)
 	} else {
 		expiresHeader := r.Header.Get("Expires")
 		if expiresHeader != "" {
@@ -478,11 +329,7 @@ func CacheExpires(r *http.Response) time.Time {
 	return expires
 }
 
-/*func strlen(s string) int {
-	return utf8.RuneCountInString(s)
-}*/
-
-// GenericSwaggerError Provides access to the body,
+// GenericError Provides access to the body,
 // error and model on returned errors.
 type GenericError struct {
 	body  []byte

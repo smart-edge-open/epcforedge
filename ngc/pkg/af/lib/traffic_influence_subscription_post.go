@@ -23,16 +23,17 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
+	//	"fmt"
 )
 
-func createSubscription(ts TrafficInfluSub, afCtx *afContext,
-	cliCtx context.Context) (TrafficInfluSub, *http.Response, error) {
+func createSubscription(cliCtx context.Context, ts TrafficInfluSub,
+	afCtx *afContext) (TrafficInfluSub, *http.Response, error) {
 
-	cliCfg := NewConfiguration()
+	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
 	tsResp, resp, err := cli.TrafficInfluSubPostAPI.SubscriptionPost(cliCtx,
-		afCtx.cfg.AfId, ts)
+		afCtx.cfg.AfID, ts)
 
 	if err != nil {
 
@@ -55,7 +56,7 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		transID        int
 	)
 
-	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 
 	osSignals := make(chan os.Signal, 1)
@@ -82,12 +83,12 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//fmt.Printf("TransID: %s, %d. ", ts.AfTransID, afTransId )
 	//store transaction ID to a list of currently used transaction IDs
 	afCtx.transactions[transID] = TrafficInfluSub{}
+	log.Infof("Saving transaction ID %d", transID)
 
 	ts.AfTransID = strconv.Itoa(transID)
-	tsResp, resp, err = createSubscription(ts, afCtx, cliCtx)
+	tsResp, resp, err = createSubscription(cliCtx, ts, afCtx)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription create : %s", err.Error())
 		delete(afCtx.transactions, transID)
@@ -110,15 +111,16 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Location", url.String())
-
 	if len(tsResp.SubscribedEvents) == 0 {
+		//keep in memory only subscriptions to notifications
 		delete(afCtx.transactions, transID)
 	} else {
 		afCtx.transactions[transID] = tsResp
-		log.Infof("Saving subscription ID : %s to local memory.",
+		log.Infof("Saving subscription %s to local memory.",
 			subscriptionID)
 		afCtx.subscriptions[subscriptionID] =
-			map[string]TrafficInfluSub{strconv.Itoa(transID): afCtx.transactions[transID]}
+			map[string]TrafficInfluSub{
+				strconv.Itoa(transID): afCtx.transactions[transID]}
 
 	}
 	w.WriteHeader(resp.StatusCode)

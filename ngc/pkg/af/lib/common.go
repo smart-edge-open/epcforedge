@@ -16,13 +16,12 @@ package af
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"net/url"
 	"strings"
 )
 
-func genAFTransID(trans AFTransactionIDs) int {
+func genAFTransID(trans TransactionIDs) int {
 	var (
 		num   int
 		min   = 1
@@ -42,19 +41,15 @@ func genAFTransID(trans AFTransactionIDs) int {
 	if num == math.MaxInt32 {
 		num = min
 	}
-	//look for a free ID until it is <= math.MaxInt64 is achieved again
+	//look for a free ID until it is <= math.MaxInt32 is achieved again
 	for found && num < math.MaxInt32 {
-		//if below the max value, increment it by 1
 		num++
 		//check if the ID is in use, if not - return the ID
 		if _, found = trans[num]; !found {
 			trans[num] = TrafficInfluSub{}
-			fmt.Printf("Num :%d", num)
 			return num
 		}
-		num++
 	}
-
 	return 0
 }
 

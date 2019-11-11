@@ -17,22 +17,21 @@ package af
 import (
 	"context"
 	"encoding/json"
-	//"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-func modifySubscriptionByPatch(ts TrafficInfluSubPatch, afCtx *afContext,
-	subscriptionID string, cliCtx context.Context) (TrafficInfluSub,
+func modifySubscriptionByPatch(cliCtx context.Context, ts TrafficInfluSubPatch,
+	afCtx *afContext, subscriptionID string) (TrafficInfluSub,
 	*http.Response, error) {
 
-	cliCfg := NewConfiguration()
+	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
 	tsResp, resp, err := cli.TrafficInfluSubPatchAPI.SubscriptionPatch(cliCtx,
-		afCtx.cfg.AfId, subscriptionID, ts)
+		afCtx.cfg.AfID, subscriptionID, ts)
 
 	if err != nil {
 
@@ -52,7 +51,7 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 		subscriptionID string
 	)
 
-	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 
 	osSignals := make(chan os.Signal, 1)
@@ -78,8 +77,8 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tsResp, resp, err = modifySubscriptionByPatch(tsPatch, afCtx,
-		subscriptionID, cliCtx)
+	tsResp, resp, err = modifySubscriptionByPatch(cliCtx, tsPatch, afCtx,
+		subscriptionID)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription PATCH : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

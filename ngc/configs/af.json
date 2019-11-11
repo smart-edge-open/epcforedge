@@ -1,5 +1,7 @@
 {
     "Endpoint": ":8080",
-    "AfId": "1"
+    "AfId": "1", 
+    "BasePath": "http://localhost:8081/3gpp-traffic-influence/1.0.1",
+    "UserAgent": "NGC-AF"
 }
 

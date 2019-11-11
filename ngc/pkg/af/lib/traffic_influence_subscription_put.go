@@ -17,7 +17,6 @@ package af
 import (
 	"context"
 	"encoding/json"
-	//"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,15 +24,15 @@ import (
 	"syscall"
 )
 
-func modifySubscriptionByPut(ts TrafficInfluSub, afCtx *afContext,
-	subscriptionID string, cliCtx context.Context) (TrafficInfluSub,
+func modifySubscriptionByPut(cliCtx context.Context, ts TrafficInfluSub,
+	afCtx *afContext, subscriptionID string) (TrafficInfluSub,
 	*http.Response, error) {
 
-	cliCfg := NewConfiguration()
+	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
 	tsResp, resp, err := cli.TrafficInfluSubPutAPI.SubscriptionPut(cliCtx,
-		afCtx.cfg.AfId, subscriptionID, ts)
+		afCtx.cfg.AfID, subscriptionID, ts)
 
 	if err != nil {
 
@@ -55,7 +54,7 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 		transID        int
 	)
 
-	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 
 	osSignals := make(chan os.Signal, 1)
@@ -83,7 +82,6 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ts.AfTransID = strconv.Itoa(transID)
-	//fmt.Printf("TransID: %s, %d. ", ts.AfTransID, transID)
 	subscriptionID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription PUT: %s", err.Error())
@@ -91,8 +89,9 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	afCtx.transactions[transID] = TrafficInfluSub{}
-	tsResp, resp, err = modifySubscriptionByPut(ts, afCtx, subscriptionID,
-		cliCtx)
+	tsResp, resp, err = modifySubscriptionByPut(cliCtx, ts, afCtx,
+		subscriptionID)
+
 	if err != nil {
 		log.Errf("Traffic Influence Subscription create : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -120,5 +119,4 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 	if resp != nil {
 		w.WriteHeader(resp.StatusCode)
 	}
-
 }

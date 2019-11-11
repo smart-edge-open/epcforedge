@@ -23,14 +23,14 @@ import (
 	"syscall"
 )
 
-func deleteSubscription(afCtx *afContext, subscriptionID string,
-	cliCtx context.Context) (*http.Response, error) {
+func deleteSubscription(cliCtx context.Context, afCtx *afContext,
+	subscriptionID string) (*http.Response, error) {
 
-	cliCfg := NewConfiguration()
+	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
 	resp, err := cli.TrafficInfluSubDeleteAPI.SubscriptionDelete(cliCtx,
-		afCtx.cfg.AfId, subscriptionID)
+		afCtx.cfg.AfID, subscriptionID)
 
 	if err != nil {
 
@@ -50,7 +50,7 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 		subscriptionID string
 	)
 
-	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 
 	osSignals := make(chan os.Signal, 1)
@@ -69,7 +69,7 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	resp, err = deleteSubscription(afCtx, subscriptionID, cliCtx)
+	resp, err = deleteSubscription(cliCtx, afCtx, subscriptionID)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription DELETE : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

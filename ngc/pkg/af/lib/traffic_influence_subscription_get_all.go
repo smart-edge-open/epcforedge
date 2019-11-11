@@ -23,14 +23,14 @@ import (
 	"syscall"
 )
 
-func getAllSubscriptions(afCtx *afContext,
-	cliCtx context.Context) ([]TrafficInfluSub, *http.Response, error) {
+func getAllSubscriptions(cliCtx context.Context, afCtx *afContext) (
+	[]TrafficInfluSub, *http.Response, error) {
 
-	cliCfg := NewConfiguration()
+	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
 	tsResp, resp, err := cli.TrafficInfluSubGetAllAPI.SubscriptionsGetAll(
-		cliCtx, afCtx.cfg.AfId)
+		cliCtx, afCtx.cfg.AfID)
 
 	if err != nil {
 
@@ -52,7 +52,7 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		tsRespJSON []byte
 	)
 
-	afCtx := r.Context().Value(string("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 
 	osSignals := make(chan os.Signal, 1)
@@ -67,26 +67,30 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	transID, err = genTransactionID(afCtx)
 	if err != nil {
 
-		log.Errf("Traffic Influance Subscription PUT %s", err.Error())
+		log.Errf("Traffic Influance Subscription GET ALL %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	afCtx.transactions[transID] = TrafficInfluSub{}
-	tsResp, resp, err = getAllSubscriptions(afCtx, cliCtx)
+	tsResp, resp, err = getAllSubscriptions(cliCtx, afCtx)
 	delete(afCtx.transactions, transID)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription create : %s", err.Error())
+		log.Errf("Traffic Influence Subscription GET ALL : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	tsRespJSON, err = json.Marshal(tsResp)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription GET : %s", err.Error())
+		log.Errf("Traffic Influence Subscription GET ALL: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(resp.StatusCode)
-	w.Write(tsRespJSON)
+	if _, err = w.Write(tsRespJSON); err != nil {
+		log.Errf("Traffic Influance Subscription GET ALL %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
