@@ -74,20 +74,20 @@ type AfAppID string
 // AfRoutingRequirement describes the event information delivered in the
 // subscription
 type AfRoutingRequirement struct {
-	// Indication of application relocation possibility
-	AppReloc bool `json:"appReloc,omitempty"`
 	// A list of traffic routes to applications locations
 	// Min Items: 1
 	RouteToLocs []RouteToLocation `json:"routeToLocs"`
 	// sp val
 	SpVal SpatialValidity `json:"spVal,omitempty"`
-	// addr preser ind
-	AddrPreserInd bool `json:"addrPreserInd,omitempty"`
 	// temp vals
 	// Min Items: 1
 	TempVals []TemporalValidity `json:"tempVals"`
 	// up path chg sub
 	UpPathChgSub UpPathChgEvent `json:"upPathChgSub,omitempty"`
+	// Indication of application relocation possibility
+	AppReloc bool `json:"appReloc,omitempty"`
+	// addr preser ind
+	AddrPreserInd bool `json:"addrPreserInd,omitempty"`
 }
 
 //FlowDescription : Defines a packet filter of an IP flow.
