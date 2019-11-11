@@ -72,8 +72,10 @@ var NEFRoutes = []Route{
 	},
 }
 
-// ReadAllTrafficInfluenceSubscription : API to read all the subscritions created by AF
-func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
+// ReadAllTrafficInfluenceSubscription : API to read all the subscritions
+// created by AF
+func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
+	r *http.Request) {
 
 	log.Printf("===============================================")
 	log.Printf(" Method : GET ")
@@ -85,8 +87,10 @@ func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusOK)
 }
 
-// CreateTrafficInfluenceSubscription : Handles the traffic influence requested by AF
-func CreateTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
+// CreateTrafficInfluenceSubscription : Handles the traffic influence requested
+// by AF
+func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
+	r *http.Request) {
 
 	log.Printf("===============================================")
 	log.Printf(" Method : POST ")
@@ -120,8 +124,10 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-// UpdatePutTrafficInfluenceSubscription : Updates a traffic influence created earlier (PUT Req)
-func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
+// UpdatePutTrafficInfluenceSubscription : Updates a traffic influence created
+// earlier (PUT Req)
+func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
+	r *http.Request) {
 
 	log.Printf("===============================================")
 	log.Printf(" Method : PUT ")
@@ -134,8 +140,10 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusOK)
 }
 
-// UpdatePatchTrafficInfluenceSubscription : Updates a traffic influence created earlier (PATCH Req)
-func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
+// UpdatePatchTrafficInfluenceSubscription : Updates a traffic influence created
+//  earlier (PATCH Req)
+func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
+	r *http.Request) {
 
 	log.Printf("===============================================")
 	log.Printf(" Method : PATCH ")
@@ -148,8 +156,10 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusOK)
 }
 
-// DeleteTrafficInfluenceSubscription : Deletes a traffic influence created by AF
-func DeleteTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
+// DeleteTrafficInfluenceSubscription : Deletes a traffic influence created by
+//  AF
+func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
+	r *http.Request) {
 
 	log.Printf("===============================================")
 	log.Printf(" Method : DELETE ")

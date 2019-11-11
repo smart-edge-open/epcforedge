@@ -63,4 +63,10 @@ func unusedlint() {
 	pd := ProblemDetails{}
 	_ = pd
 
+	var ipx Ipv6Prefix = " "
+	_ = ipx
+
+	var pt Port = 8080
+	_ = pt
+
 }

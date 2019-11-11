@@ -23,20 +23,25 @@ type Dnai string
 // DnaiChangeType : string identifying the DNAI change type
 // Possible values are
 // - EARLY: Early notification of UP path reconfiguration.
-// - EARLY_LATE: Early and late notification of UP path reconfiguration. This value shall only be present in the subscription to the DNAI change event.
+// - EARLY_LATE: Early and late notification of UP path reconfiguration. This
+// value shall only be present in the subscription to the DNAI change event.
 // - LATE: Late notification of UP path reconfiguration.
 type DnaiChangeType string
 
 // Dnn : string identify the Data network name
 type Dnn string
 
-// ExternalID : string containing a local identifier followed by "@" and a domain identifier. B
-// Both the local identifier and the domain identifier shall be encoded as strings that do not contain any "@" characters.
+// ExternalID : string containing a local identifier followed by "@" and a
+//  domain identifier. B
+// Both the local identifier and the domain identifier shall be encoded as
+//  strings that do not contain any "@" characters.
 // See Clause 4.6.2 of 3GPP TS 23.682 for more information
 // type ExternalID string
 
-// ExternalGroupID : string containing a local identifier followed by "@" and a domain identifier.
-// Both the local identifier and the domain identifier shall be encoded as strings that do not contain any "@" characters.
+// ExternalGroupID : string containing a local identifier followed by "@" and
+// a domain identifier.
+// Both the local identifier and the domain identifier shall be encoded as
+// strings that do not contain any "@" characters.
 // See Clauses 4.6.2 and 4.6.3 of 3GPP TS 23.682 for more information
 type ExternalGroupID string
 
@@ -44,7 +49,8 @@ type ExternalGroupID string
 type FlowInfo struct {
 	// Indicates the IP flow.
 	FlowID int32 `json:"flowId"`
-	// Indicates the packet filters of the IP flow. Refer to subclause 5.3.8 of 3GPP TS 29.214 for encoding.
+	// Indicates the packet filters of the IP flow. Refer to subclause 5.3.8 of
+	//  3GPP TS 29.214 for encoding.
 	// It shall contain UL and/or DL IP flow description.
 	// minItems : 1 maxItems : 2
 	FlowDescriptions []string `json:"flowDescriptions,omitempty"`
@@ -59,19 +65,24 @@ type Supi string
 type Gpsi string
 
 // Ipv4Addr : string representing the IPv4 address
-// pattern: '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$'
+// pattern: '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]
+//|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$'
 // example: '198.51.100.1'
 type Ipv4Addr string
 
 // Ipv6Addr : string representing the IPv6 address
-// pattern: '^((:|(0?|([1-9a-f][0-9a-f]{0,3}))):)((0?|([1-9a-f][0-9a-f]{0,3})):){0,6}(:|(0?|([1-9a-f][0-9a-f]{0,3})))$'
+// pattern: '^((:|(0?|([1-9a-f][0-9a-f]{0,3}))):)((0?|([1-9a-f][0-9a-f]{0,3}))
+// :){0,6}(:|(0?|([1-9a-f][0-9a-f]{0,3})))$'
 // pattern: '^((([^:]+:){7}([^:]+))|((([^:]+:)*[^:]+)?::(([^:]+:)*[^:]+)?))$'
 // example: '2001:db8:85a3::8a2e:370:7334'
 type Ipv6Addr string
 
 // Ipv6Prefix : string representing the Ipv6 Prefix
-// pattern: '^((:|(0?|([1-9a-f][0-9a-f]{0,3}))):)((0?|([1-9a-f][0-9a-f]{0,3})):){0,6}(:|(0?|([1-9a-f][0-9a-f]{0,3})))(\/(([0-9])|([0-9]{2})|(1[0-1][0-9])|(12[0-8])))$'
-// pattern: '^((([^:]+:){7}([^:]+))|((([^:]+:)*[^:]+)?::(([^:]+:)*[^:]+)?))(\/.+)$'
+// pattern: '^((:|(0?|([1-9a-f][0-9a-f]{0,3}))):)((0?|([1-9a-f][0-9a-f]{0,3}))
+// :){0,6}(:|(0?|([1-9a-f][0-9a-f]{0,3})))(\/(([0-9])|([0-9]{2})|(1[0-1][0-9])
+//|(12[0-8])))$'
+// pattern: '^((([^:]+:){7}([^:]+))|((([^:]+:)*[^:]+)?::(([^:]+:)*[^:]+)?))
+// (\/.+)$'
 // example: '2001:db8:abcd:12::0/64'
 type Ipv6Prefix string
 
@@ -93,14 +104,16 @@ type RouteInformation struct {
 	Ipv4Addr Ipv4Addr `json:"ipv4Addr,omitempty"`
 	// string identifying a Ipv6 address formatted according to clause 4 in
 	// IETF RFC 5952.
-	// The mixed Ipv4 Ipv6 notation according to clause 5 of IETF RFC 5952 shall
+	// The mixed Ipv4 Ipv6 notation according to clause 5 of IETF RFC 5952
+	// shall
 	// not be used.
 	Ipv6Addr Ipv6Addr `json:"ipv6Addr,omitempty"`
 	// Port number
 	PortNumber uint32 `json:"portNumber"`
 }
 
-// RouteToLocation : Describes the traffic routes to the locations of the application
+// RouteToLocation : Describes the traffic routes to the locations of the
+// application
 type RouteToLocation struct {
 	// Data network access identifier
 	Dnai Dnai `json:"dnai"`
@@ -306,7 +319,8 @@ type PresenceInfo struct {
 	GlobalRanNodeIDList []GlobalRanNodeID `json:"globalRanNodeIdList"`
 }
 
-// SpatialValidity Describes the spatial validity of an AF request for influencing traffic routing
+// SpatialValidity Describes the spatial validity of an AF request for
+// influencing traffic routing
 type SpatialValidity struct {
 	PresenceInfoList PresenceInfo `json:"presenceInfoList"`
 }
