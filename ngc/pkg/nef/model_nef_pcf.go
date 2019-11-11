@@ -31,26 +31,26 @@ type AppSessionContext struct {
 // Individual Application Session Context.
 type AppSessionContextReqData struct {
 	// AF application identifier
-	afAppID AfAppID `json:"afAppId,omitempty"`
+	AfAppID AfAppID `json:"afAppId,omitempty"`
 	// Indicates the AF traffic routing requirements. It shall be included if Influence on Traffic Routing feature is supported
-	afRoutReq AfRoutingRequirement `json:"afRoutReq,omitempty"`
+	AfRoutReq AfRoutingRequirement `json:"afRoutReq,omitempty"`
 	// dnn Data Network Name. It shall be present when the "afRoutReq" attribute is  present
-	dnn Dnn `json:"dnn,omitempty"`
+	Dnn Dnn `json:"dnn,omitempty"`
 	// slice info
-	sliceInfo Snssai `json:"sliceInfo,omitempty"`
+	SliceInfo Snssai `json:"sliceInfo,omitempty"`
 	// Subscription Permanent Identifier
-	supi Supi `json:"supi,omitempty"`
+	Supi Supi `json:"supi,omitempty"`
 	// Subscription Permanent Identifier
-	gpsi Gpsi `json:"gpsi,omitempty"`
+	Gpsi Gpsi `json:"gpsi,omitempty"`
 	// supp feat
 	// Required: true
 	SuppFeat SupportedFeatures `json:"suppFeat"`
 	// ue Ipv4
-	ueIpv4 Ipv4Addr `json:"ueIpv4,omitempty"`
+	UeIpv4 Ipv4Addr `json:"ueIpv4,omitempty"`
 	// ue Ipv6
-	ueIpv6 Ipv6Addr `json:"ueIpv6,omitempty"`
+	UeIpv6 Ipv6Addr `json:"ueIpv6,omitempty"`
 	// ue mac
-	ueMac MacAddr48 `json:"ueMac,omitempty"`
+	UeMac MacAddr48 `json:"ueMac,omitempty"`
 
 	// TBD : check if evSubsc and notifUri are required for TrafficInflu
 	// The following fields have been ommitted as they are not required for Traffic Influ feature
