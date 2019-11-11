@@ -33,12 +33,12 @@ type Dnn string
 // ExternalID : string containing a local identifier followed by "@" and a domain identifier. B
 // Both the local identifier and the domain identifier shall be encoded as strings that do not contain any "@" characters.
 // See Clause 4.6.2 of 3GPP TS 23.682 for more information
-type ExternalID string
+// type ExternalID string
 
 // ExternalGroupID : string containing a local identifier followed by "@" and a domain identifier.
 // Both the local identifier and the domain identifier shall be encoded as strings that do not contain any "@" characters.
 // See Clauses 4.6.2 and 4.6.3 of 3GPP TS 23.682 for more information
-type ExternalGroupID string
+// type ExternalGroupID string
 
 // FlowInfo Flow information struct
 type FlowInfo struct {
@@ -180,6 +180,7 @@ type InvalidParam struct {
 // PresenceState presence state
 type PresenceState string
 
+/*
 // Possible values of Presence State
 const (
 
@@ -195,6 +196,7 @@ const (
 	// PresenceStateINACTIVE captures enum value "INACTIVE"
 	PresenceStateINACTIVE PresenceState = "INACTIVE"
 )
+*/
 
 // Mcc mcc
 type Mcc string

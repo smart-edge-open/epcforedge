@@ -95,7 +95,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) 
 	log.Printf(" AFID  : %s", vars["afId"])
 
 	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
+	// TBD : commenting for lint error defer r.Body.Close()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

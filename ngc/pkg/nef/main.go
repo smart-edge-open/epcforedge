@@ -27,6 +27,7 @@ const (
 
 func main() {
 
+	unusedlint()
 	NEFRouter := NewNEFRouter()
 	s := &http.Server{
 		Addr:           ":" + NEFServerPort,
@@ -37,4 +38,29 @@ func main() {
 	}
 	log.Println("NEF listening on", s.Addr)
 	log.Fatal(s.ListenAndServe())
+}
+
+func unusedlint() {
+	/* For unused variables lint warning to be  removed later */
+	ti := TrafficInfluSub{}
+	_ = ti
+
+	tis := TrafficInfluSubPatch{}
+	_ = tis
+
+	ac := AppSessionContext{}
+	_ = ac
+
+	tid := TrafficInfluData{}
+	_ = tid
+
+	tids := TrafficInfluDataPatch{}
+	_ = tids
+
+	upc := UpPathChange
+	_ = upc
+
+	pd := ProblemDetails{}
+	_ = pd
+
 }

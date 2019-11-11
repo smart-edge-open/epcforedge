@@ -1,0 +1,256 @@
+model_nef_common.go:206:6: type `PlmnID` is unused (unused)
+type PlmnID struct {
+     ^
+model_nef_pcf.go:100:6: type `FlowDirection` is unused (unused)
+type FlowDirection string
+     ^
+model_nef_common.go:190:2: const `PresenceStateOUTOFAREA` is unused (unused)
+	PresenceStateOUTOFAREA PresenceState = "OUT_OF_AREA"
+	^
+model_nef_pcf.go:32:6: type `AppSessionContextReqData` is unused (unused)
+type AppSessionContextReqData struct {
+     ^
+model_nef_common.go:21:6: type `Dnai` is unused (unused)
+type Dnai string
+     ^
+model_nef_common.go:181:6: type `PresenceState` is unused (unused)
+type PresenceState string
+     ^
+model_nef_common.go:90:6: type `RouteInformation` is unused (unused)
+type RouteInformation struct {
+     ^
+model_nef_common.go:233:6: type `EutraCellID` is unused (unused)
+type EutraCellID string
+     ^
+model_nef_common.go:141:6: type `WebsockNotifConfig` is unused (unused)
+type WebsockNotifConfig struct {
+     ^
+model_nef_common.go:104:6: type `RouteToLocation` is unused (unused)
+type RouteToLocation struct {
+     ^
+model_nef_af.go:116:6: type `TemporalValidity` is unused (unused)
+type TemporalValidity struct {
+     ^
+model_nef_af.go:28:6: type `TrafficInfluSub` is unused (unused)
+type TrafficInfluSub struct {
+     ^
+model_nef_udr.go:60:6: type `TrafficInfluDataPatch` is unused (unused)
+type TrafficInfluDataPatch struct {
+     ^
+model_nef_pcf.go:71:6: type `AfRoutingRequirement` is unused (unused)
+type AfRoutingRequirement struct {
+     ^
+model_nef_common.go:64:6: type `Ipv4Addr` is unused (unused)
+type Ipv4Addr string
+     ^
+model_nef_common.go:83:6: type `MacAddr48` is unused (unused)
+type MacAddr48 string
+     ^
+model_nef_common.go:196:2: const `PresenceStateINACTIVE` is unused (unused)
+	PresenceStateINACTIVE PresenceState = "INACTIVE"
+	^
+model_nef_common.go:193:2: const `PresenceStateUNKNOWN` is unused (unused)
+	PresenceStateUNKNOWN PresenceState = "UNKNOWN"
+	^
+model_nef_common.go:272:6: type `N3IwfID` is unused (unused)
+type N3IwfID string
+     ^
+model_nef_pcf.go:134:6: type `UpPathChgEvent` is unused (unused)
+type UpPathChgEvent struct {
+     ^
+model_nef_common.go:187:2: const `PresenceStateINAREA` is unused (unused)
+	PresenceStateINAREA PresenceState = "IN_AREA"
+	^
+model_nef_af.go:97:6: type `TrafficInfluSubPatch` is unused (unused)
+type TrafficInfluSubPatch struct {
+     ^
+model_nef_common.go:173:6: type `InvalidParam` is unused (unused)
+type InvalidParam struct {
+     ^
+model_nef_common.go:259:6: type `GNbID` is unused (unused)
+type GNbID struct {
+     ^
+model_nef_common.go:218:6: type `Tac` is unused (unused)
+type Tac string
+     ^
+model_nef_af.go:24:2: const `UpPathChange` is unused (unused)
+	UpPathChange SubscribedEvent = "UP_PATH_CHANGE"
+	^
+model_nef_common.go:31:6: type `Dnn` is unused (unused)
+type Dnn string
+     ^
+model_nef_common.go:221:6: type `Tai` is unused (unused)
+type Tai struct {
+     ^
+model_nef_common.go:41:6: type `ExternalGroupID` is unused (unused)
+type ExternalGroupID string
+     ^
+model_nef_common.go:70:6: type `Ipv6Addr` is unused (unused)
+type Ipv6Addr string
+     ^
+model_nef_common.go:291:6: type `PresenceInfo` is unused (unused)
+type PresenceInfo struct {
+     ^
+model_nef_common.go:79:6: type `Link` is unused (unused)
+type Link URI
+     ^
+model_nef_pcf.go:67:6: type `AfAppID` is unused (unused)
+type AfAppID string
+     ^
+model_nef_common.go:138:6: type `SupportedFeatures` is unused (unused)
+type SupportedFeatures string
+     ^
+model_nef_common.go:150:6: type `ProblemDetails` is unused (unused)
+type ProblemDetails struct {
+     ^
+model_nef_udr.go:18:6: type `TrafficInfluData` is unused (unused)
+type TrafficInfluData struct {
+     ^
+model_nef_common.go:308:6: type `SpatialValidity` is unused (unused)
+type SpatialValidity struct {
+     ^
+model_nef_common.go:246:6: type `NrCellID` is unused (unused)
+type NrCellID string
+     ^
+model_nef_common.go:278:6: type `GlobalRanNodeID` is unused (unused)
+type GlobalRanNodeID struct {
+     ^
+model_nef_common.go:59:6: type `Gpsi` is unused (unused)
+type Gpsi string
+     ^
+model_nef_common.go:55:6: type `Supi` is unused (unused)
+type Supi string
+     ^
+model_nef_common.go:87:6: type `Port` is unused (unused)
+type Port uint32
+     ^
+model_nef_common.go:44:6: type `FlowInfo` is unused (unused)
+type FlowInfo struct {
+     ^
+model_nef_udr.go:96:6: type `NetworkAreaInfo` is unused (unused)
+type NetworkAreaInfo struct {
+     ^
+model_nef_common.go:236:6: type `Ecgi` is unused (unused)
+type Ecgi struct {
+     ^
+model_nef_common.go:36:6: type `ExternalID` is unused (unused)
+type ExternalID string
+     ^
+model_nef_pcf.go:103:6: type `EthFlowDescription` is unused (unused)
+type EthFlowDescription struct {
+     ^
+model_nef_common.go:313:6: type `DateTime` is unused (unused)
+type DateTime string
+     ^
+model_nef_common.go:114:6: type `Snssai` is unused (unused)
+type Snssai struct {
+     ^
+model_nef_pcf.go:89:6: type `FlowDescription` is unused (unused)
+type FlowDescription string
+     ^
+nef_router.go:98:20: Error return value of `r.Body.Close` is not checked (errcheck)
+	defer r.Body.Close()
+	                  ^
+model_nef_pcf.go:56:36: `ommitted` is a misspelling of `omitted` (misspell)
+	// The following fields have been ommitted as they are not required for Traffic Influ feature
+	                                  ^
+model_nef_af.go:36: line is 91 characters (lll)
+	// application has been selected.Set to "true" if it can be relocated; otherwise set to
+model_nef_af.go:49: line is 96 characters (lll)
+	//Identifies whether the AF request applies to any UE. This attribute shall set to "true" if
+model_nef_common.go:26: line is 151 characters (lll)
+// - EARLY_LATE: Early and late notification of UP path reconfiguration. This value shall only be present in the subscription to the DNAI change event.
+model_nef_common.go:33: line is 95 characters (lll)
+// ExternalID : string containing a local identifier followed by "@" and a domain identifier. B
+model_nef_common.go:34: line is 122 characters (lll)
+// Both the local identifier and the domain identifier shall be encoded as strings that do not contain any "@" characters.
+model_nef_common.go:38: line is 98 characters (lll)
+// ExternalGroupID : string containing a local identifier followed by "@" and a domain identifier.
+model_nef_common.go:39: line is 122 characters (lll)
+// Both the local identifier and the domain identifier shall be encoded as strings that do not contain any "@" characters.
+model_nef_common.go:47: line is 108 characters (lll)
+	// Indicates the packet filters of the IP flow. Refer to subclause 5.3.8 of 3GPP TS 29.214 for encoding.
+model_nef_common.go:62: line is 123 characters (lll)
+// pattern: '^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$'
+model_nef_common.go:67: line is 119 characters (lll)
+// pattern: '^((:|(0?|([1-9a-f][0-9a-f]{0,3}))):)((0?|([1-9a-f][0-9a-f]{0,3})):){0,6}(:|(0?|([1-9a-f][0-9a-f]{0,3})))$'
+model_nef_common.go:73: line is 167 characters (lll)
+// pattern: '^((:|(0?|([1-9a-f][0-9a-f]{0,3}))):)((0?|([1-9a-f][0-9a-f]{0,3})):){0,6}(:|(0?|([1-9a-f][0-9a-f]{0,3})))(\/(([0-9])|([0-9]{2})|(1[0-1][0-9])|(12[0-8])))$'
+model_nef_common.go:74: line is 83 characters (lll)
+// pattern: '^((([^:]+:){7}([^:]+))|((([^:]+:)*[^:]+)?::(([^:]+:)*[^:]+)?))(\/.+)$'
+model_nef_common.go:103: line is 85 characters (lll)
+// RouteToLocation : Describes the traffic routes to the locations of the application
+model_nef_common.go:307: line is 98 characters (lll)
+// SpatialValidity Describes the spatial validity of an AF request for influencing traffic routing
+model_nef_pcf.go:20: line is 88 characters (lll)
+	// Identifies the service requirements of an Individual Application Session Context.
+model_nef_pcf.go:24: line is 91 characters (lll)
+	// The following fields will not be supported as its not required for Traffic Influence
+model_nef_pcf.go:35: line is 127 characters (lll)
+	// Indicates the AF traffic routing requirements. It shall be included if Influence on Traffic Routing feature is supported
+model_nef_pcf.go:37: line is 92 characters (lll)
+	// dnn Data Network Name. It shall be present when the "afRoutReq" attribute is  present
+model_nef_pcf.go:94: line is 90 characters (lll)
+//  - BIDIRECTIONAL: The corresponding filter applies for traffic both to and from the UE.
+model_nef_pcf.go:95: line is 125 characters (lll)
+//  - UNSPECIFIED: The corresponding filter applies for traffic to the UE (downlink), but has no specific direction declared.
+model_nef_pcf.go:96: line is 128 characters (lll)
+//                 The service data flow detection shall apply the filter for uplink traffic as if the filter was bidirectional.
+model_nef_pcf.go:97: line is 124 characters (lll)
+//                 The PCF shall not use the value UNSPECIFIED in filters created by the network in NW-initiated procedures.
+model_nef_pcf.go:98: line is 149 characters (lll)
+//                 The PCF shall only include the value UNSPECIFIED in filters in UE-initiated procedures if the same value is received from the SMF.
+model_nef_pcf.go:106: line is 111 characters (lll)
+	// A two-octet string that represents the Ethertype, as described in IEEE 802.3 [16] and IETF RFC 7042 [18]
+model_nef_pcf.go:108: line is 89 characters (lll)
+	// value of "0" to "9" or "A" to "F" and shall represent 4 bits. The most significant
+model_nef_pcf.go:113: line is 84 characters (lll)
+	// Contains the flow description for the Uplink or Downlink IP flow. It shall be
+model_nef_pcf.go:123: line is 81 characters (lll)
+	// Each field is encoded as a two-octet string in hexadecimal representation.
+model_nef_pcf.go:124: line is 92 characters (lll)
+	// Each character in the string shall take a value of "0" to "9" or "A" to "F" and shall
+model_nef_pcf.go:126: line is 89 characters (lll)
+	// significant bits of the VID or PCF/DEI field shall appear first in the string, and
+model_nef_pcf.go:127: line is 84 characters (lll)
+	// the character representing the 4 least significant bits of the VID or PCF/DEI
+model_nef_pcf.go:137: line is 102 characters (lll)
+	// It is used to set the value of Notification Correlation ID in the notification sent by the SMF.
+model_nef_udr.go:19: line is 84 characters (lll)
+	// Contains the Notification Correlation Id allocated by the NEF for the UP path
+model_nef_udr.go:20: line is 82 characters (lll)
+	// change notification. It shall be included when the NEF requests the UP path
+model_nef_udr.go:23: line is 111 characters (lll)
+	// Identifies whether an application can be relocated once a location of the application has been selected.
+model_nef_udr.go:30: line is 122 characters (lll)
+	// Identifies Ethernet packet filters. Either "trafficFilters" or "ethTrafficFilters" shall be included if applicable.
+model_nef_udr.go:38: line is 116 characters (lll)
+	// Identifies IP packet filters. Either "trafficFilters" or "ethTrafficFilters" shall be included if applicable.
+model_nef_udr.go:52: line is 92 characters (lll)
+	// Identifies a network area information that the request applies only to the traffic of
+model_nef_udr.go:55: line is 105 characters (lll)
+	// Contains the Notification Correlation Id allocated by the NEF for the UP path change notification.
+model_nef_udr.go:61: line is 105 characters (lll)
+	// Contains the Notification Correlation Id allocated by the NEF for the UP path change notification.
+model_nef_udr.go:63: line is 111 characters (lll)
+	// Identifies whether an application can be relocated once a location of the application has been selected.
+model_nef_udr.go:76: line is 116 characters (lll)
+	// Identifies IP packet filters. Either "trafficFilters" or "ethTrafficFilters" shall be included if applicable.
+model_nef_udr.go:94: line is 116 characters (lll)
+// NetworkAreaInfo Describes a network area information in which the NF service consumer requests the number of UEs.
+nef_router.go:75: line is 87 characters (lll)
+// ReadAllTrafficInfluenceSubscription : API to read all the subscritions created by AF
+nef_router.go:76: line is 82 characters (lll)
+func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
+nef_router.go:88: line is 85 characters (lll)
+// CreateTrafficInfluenceSubscription : Handles the traffic influence requested by AF
+nef_router.go:89: line is 81 characters (lll)
+func CreateTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
+nef_router.go:123: line is 96 characters (lll)
+// UpdatePutTrafficInfluenceSubscription : Updates a traffic influence created earlier (PUT Req)
+nef_router.go:137: line is 100 characters (lll)
+// UpdatePatchTrafficInfluenceSubscription : Updates a traffic influence created earlier (PATCH Req)
+nef_router.go:138: line is 86 characters (lll)
+func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
+nef_router.go:151: line is 81 characters (lll)
+// DeleteTrafficInfluenceSubscription : Deletes a traffic influence created by AF
