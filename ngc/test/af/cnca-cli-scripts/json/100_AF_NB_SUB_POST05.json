@@ -29,7 +29,7 @@
         "routeInfo" : {
             "ipv4Addr" : "",
             "ipv6Addr" : "",
-            "portNumber" : ""
+            "portNumber" : 0
         },
         "routeProfId" : "default5"
     }
