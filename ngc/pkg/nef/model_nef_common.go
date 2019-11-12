@@ -327,3 +327,12 @@ type SpatialValidity struct {
 
 // DateTime is in the date-time format
 type DateTime string
+
+// AccessType defines the access type
+// supported values are
+// - 3GPP_ACCESS
+// - NON_3GPP_ACCESS
+type AccessType string
+
+// PduSessionID Valid values are 0 to 255
+type PduSessionID uint8

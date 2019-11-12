@@ -69,4 +69,9 @@ func unusedlint() {
 	var pt Port = 8080
 	_ = pt
 
+	ev := EventNotification{}
+	_ = ev
+
+	een := NsmfEventExposureNotification{}
+	_ = een
 }
