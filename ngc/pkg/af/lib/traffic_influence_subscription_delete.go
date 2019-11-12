@@ -17,10 +17,7 @@ package af
 import (
 	"context"
 	"net/http"
-	"os"
-	"os/signal"
 	"strconv"
-	"syscall"
 )
 
 func deleteSubscription(cliCtx context.Context, afCtx *afContext,
@@ -52,14 +49,7 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
-
-	osSignals := make(chan os.Signal, 1)
-	signal.Notify(osSignals, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		sig := <-osSignals
-		log.Infof("Received signal: %#v", sig)
-		cancel()
-	}()
+	defer cancel()
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 

@@ -40,10 +40,47 @@ type Link string
 // pattern: '^[A-Fa-f0-9]*$'
 type SupportedFeatures string
 
+// Gpsi type
+type Gpsi string
+
+// SrcUeIpv4Addr type
+type SrcUeIpv4Addr string
+
+// SrcUeIpv6Prefix type
+type SrcUeIpv6Prefix string
+
+// TgtUeIpv4Addr type
+type TgtUeIpv4Addr string
+
+// TgtUeIpv6Prefix type
+type TgtUeIpv6Prefix string
+
+// UeMac type
+type UeMac string
+
+// MacAddr type
+type MacAddr string
+
+// Ipv4Addr type
+type Ipv4Addr string
+
+// Ipv6Addr type
+type Ipv6Addr string
+
 // List of SubscribedEvent
 const (
 	//UP_PATH_CHANGE SubscribedEvent = "UP_PATH_CHANGE" >> causing lint error
 	UpPathChange SubscribedEvent = "UP_PATH_CHANGE"
+)
+
+// DnaiChangeType type
+type DnaiChangeType string
+
+// List of DnaiChangeType
+const (
+	Early     DnaiChangeType = "EARLY"
+	EarlyLate DnaiChangeType = "EARLY_LATE"
+	Late      DnaiChangeType = "LATE"
 )
 
 // TrafficInfluSub is Traffic Influence Subscription structure
@@ -67,15 +104,15 @@ type TrafficInfluSub struct {
 	// Identifies the requirement to be notified of the event(s).
 	SubscribedEvents []SubscribedEvent `json:"subscribedEvents,omitempty"`
 	//Generic Public Servie Identifiers asssociated wit the UE
-	Gpsi string `json:"gpsi,omitempty"`
+	Gpsi Gpsi `json:"gpsi,omitempty"`
 	// string identifying a Ipv4 address formatted in the \"dotted decimal\"
 	//notation as defined in IETF RFC 1166.
-	Ipv4Addr string `json:"ipv4Addr,omitempty"`
+	Ipv4Addr Ipv4Addr `json:"ipv4Addr,omitempty"`
 	// string identifying a Ipv6 address formatted according to clause 4
 	// in IETF RFC 5952.
-	Ipv6Addr string `json:"ipv6Addr,omitempty"`
+	Ipv6Addr Ipv6Addr `json:"ipv6Addr,omitempty"`
 	// string identifying mac address of UE
-	MacAddr string `json:"macAddr,omitempty"`
+	MacAddr MacAddr `json:"macAddr,omitempty"`
 	// Identifies the type of notification regarding UP path management event.
 	// Possible values are:
 	// EARLY - early notification of UP path reconfiguration.
@@ -83,7 +120,7 @@ type TrafficInfluSub struct {
 	// This value shall only be present in the subscription to the
 	// DNAI change event.
 	// LATE - late notification of UP path reconfiguration.
-	DnaiChgType string `json:"dnaiChgType,omitempty"`
+	DnaiChgType DnaiChangeType `json:"dnaiChgType,omitempty"`
 	// URL where notifications shall be sent
 	NotificationDestination Link `json:"notificationDestination,omitempty"`
 	// URL of created subscription resource
@@ -103,7 +140,7 @@ type TrafficInfluSub struct {
 	SuppFeat SupportedFeatures `json:"suppFeat,omitempty"`
 	// Configuration used for sending notifications though web sockets
 	WebsockNotifConfig WebsockNotifConfig `json:"websockNotifConfig,omitempty"`
-	// Set to true by the AF to request the NEF to send a test notification. //p
+	// Set to true by the AF to request the NEF to send a test notification.
 	//Set to false or omitted otherwise.
 	RequestTestNotification bool `json:"requestTestNotification,omitempty"`
 	// Identifies whether an application can be relocated once a location of
@@ -222,7 +259,7 @@ type ProblemDetails struct {
 	// invalid parameters.
 	InvalidParams []InvalidParam `json:"invalidParams,omitempty"`
 	// The HTTP status code for this occurrence of the problem.
-	Status int32 `json:"status,omitempty"`
+	Status int `json:"status,omitempty"`
 }
 
 // InvalidParam Invalid Parameters struct
@@ -241,4 +278,30 @@ type FlowInfo struct {
 	FlowDescriptions []string `json:"flowDescriptions,omitempty"`
 	// Indicates the IP flow.
 	FlowID int32 `json:"flowId"`
+}
+
+// EventNotification structure
+type EventNotification struct {
+	// AfTransID
+	AfTransID string `json:"afTransId,omitempty"`
+	// DnaiChgType
+	DnaiChgType DnaiChangeType `json:"dnaiChgType,omitempty"`
+	// SourceTrafficRoute
+	SourceTrafficRoute RouteToLocation `json:"sourceTrafficRoute,omitempty"`
+	// SubscribedEvent
+	SubscribedEvent SubscribedEvent `json:"subscribedEvent,omitempty"`
+	// TargetTrafficRoute
+	TargetTrafficRoute RouteToLocation `json:"targetTrafficRoute,omitempty"`
+	// Gpsi
+	Gpsi string `json:"gpsi,omitempty"`
+	// SrcUeIpv4Addr
+	SrcUeIpv4Addr SrcUeIpv4Addr `json:"srcUeIpv4Addr,omitempty"`
+	// SrcUeIpv6Prefix
+	SrcUeIpv6Prefix SrcUeIpv6Prefix `json:"srcUeIpv6Prefix,omitempty"`
+	// TgtUeIpv4Addr
+	TgtUeIpv4Addr TgtUeIpv4Addr `json:"tgtUeIpv4Addr,omitempty"`
+	// TgtUeIpv6Prefix
+	TgtUeIpv6Prefix TgtUeIpv6Prefix `json:"tgtUeIpv6Prefix,omitempty"`
+	// UeMac
+	UeMac UeMac `json:"ueMac,omitempty"`
 }

@@ -104,4 +104,11 @@ var afRoutes = Routes{
 		"/CNCA/1.0.1/subscriptions/{subscriptionId}",
 		ModifySubscriptionPut,
 	},
+
+	Route{
+		"NotificationPost",
+		strings.ToUpper("Post"),
+		"/CNCA/1.0.1/notifications",
+		NotificationPost,
+	},
 }
