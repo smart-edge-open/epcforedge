@@ -18,7 +18,7 @@ setup_dir=${PWD}
 
 set -e
 
-curl -X DELETE http://localhost:8080/CNCA/v1/subscriptions/{id}
+curl -X DELETE http://localhost:8080/CNCA/v1/subscriptions/{subscriptionId}
 
 exit 0
 

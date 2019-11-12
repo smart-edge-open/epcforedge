@@ -1,12 +1,12 @@
 {
   "afServiceId": "",
-  "afAppId": "app01",
+  "afAppId": "08",
   "afTransId": "",
-  "appReloInd": false,
-  "dnn": "edgeLocation01",
+  "appReloInd": true,
+  "dnn": "edgeLocation08",
   "snssai": {
     "sst": 0,
-    "sd": "default1"
+    "sd": "default"
   },
   "externalGroupId": "",
   "anyUeInd": true,
@@ -24,22 +24,18 @@
   "trafficFilters": [],
   "ethTrafficFilters": [],
   "trafficRoutes": [
-      {
-        "dnai" : "edgeLocation01",
-        "routeInfo" : {
-            "ipv4Addr" : "",
-            "ipv6Addr" : "",
-            "portNumber" : 0
-        },
-        "routeProfId" : "default1"
-    }
+    null,
+    null
   ],
   "tempValidities": [
     {
-      "startTime": "",
-      "stopTime": ""
+      "startTime": "string",
+      "stopTime": "string"
     }
   ],
-  "validGeoZoneIds": [],
-  "suppFeat": ""
+  "validGeoZoneIds": [
+    "string"
+  ],
+  "suppFeat": "string"
 }
+
