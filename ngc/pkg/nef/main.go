@@ -22,7 +22,7 @@ import (
 
 // Connectivity constants
 const (
-	NEFServerPort = "80"
+	NEFServerPort = "8091"
 )
 
 func main() {
@@ -37,6 +37,7 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	log.Println("NEF listening on", s.Addr)
+	NEFInit()
 	log.Fatal(s.ListenAndServe())
 }
 

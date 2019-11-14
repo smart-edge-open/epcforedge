@@ -1,0 +1,37 @@
+{
+    "afServiceId": "ServiceId01",
+    "afAppId": "InernetToEdge",
+    "afTransId": "Edge_txid_01",
+    "appReloInd": true,
+    "snssai": {
+        "sst": 0,
+        "sd": "string"
+    },
+    "externalGroupId": "string",
+    "anyUeInd": false,
+    "subscribedEvents": [
+        "UP_PATH_CHANGE"
+    ],
+    "gpsi": "string",
+    "ipv4Addr": "192.168.1.1",
+    "ipv6Addr": "string",
+    "macAddr": "string",
+    "dnaiChgType": "EARLY",
+    "notificationDestination": "http://example.com:80",
+    "requestTestNotification": false,
+    "websockNotifConfig": {
+        "websocketUri": "",
+        "requestWebsocketUri": false
+    },
+    "self": "",
+    "tempValidities": [
+        {
+            "startTime": "10:30:00",
+            "stopTime": "11:30:00"
+        }
+    ],
+    "validGeoZoneIds": [
+        "string"
+    ],
+    "suppFeat": ""
+}

@@ -15,8 +15,6 @@
 package main
 
 import (
-	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 
@@ -72,6 +70,7 @@ var NEFRoutes = []Route{
 	},
 }
 
+/*
 // ReadAllTrafficInfluenceSubscription : API to read all the subscritions
 // created by AF
 func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
@@ -171,7 +170,7 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	log.Printf(" SUBSCRIPTION ID  : %s", vars["subscriptionId"])
 	w.WriteHeader(http.StatusOK)
 }
-
+*/
 // NewNEFRouter initializes NEF router
 func NewNEFRouter() *mux.Router {
 
