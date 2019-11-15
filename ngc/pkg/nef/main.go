@@ -86,15 +86,6 @@ func unusedlint() {
 	tis := TrafficInfluSubPatch{}
 	_ = tis
 
-	ac := AppSessionContext{}
-	_ = ac
-
-	tid := TrafficInfluData{}
-	_ = tid
-
-	tids := TrafficInfluDataPatch{}
-	_ = tids
-
 	upc := UpPathChange
 	_ = upc
 
@@ -107,9 +98,43 @@ func unusedlint() {
 	var pt Port = 8080
 	_ = pt
 
-	ev := EventNotification{}
-	_ = ev
+	var apsd AppSessionID = "empty"
+	_ = apsd
 
 	een := NsmfEventExposureNotification{}
 	_ = een
+
+	pcfpr := PcfPolicyResponse{}
+	_ = pcfpr
+
+	udrpr := UdrInfluenceResponse{}
+	_ = udrpr
+
+	ac := AppSessionContext{}
+	acu := AppSessionContextUpdateData{}
+
+	// Avoid lint unused warning :  PCF client stub invocation
+
+	var pcfClient PcfPolicyAuthorization = NewPCFClient(nil)
+	ctx := context.Background()
+	asd := AppSessionID("dummy")
+	_, _, _ = pcfClient.PcfPolicyAuthorizationCreate(ctx, ac)
+	_, _ = pcfClient.PolicyAuthorizationDelete(ctx, asd)
+	_, _ = pcfClient.PolicyAuthorizationGet(ctx, asd)
+	_, _ = pcfClient.PolicyAuthorizationUpdate(ctx, acu, asd)
+
+	// Avoid lint unused warning :  UDR client stub invocation
+	tid := TrafficInfluData{}
+	tids := TrafficInfluDataPatch{}
+	iid := InfluenceID("empty")
+
+	var udrClient UdrInfluenceData = NewUDRClient(nil)
+	_, _ = udrClient.UdrInfluenceDataCreate(ctx, tid, iid)
+	_, _ = udrClient.UdrInfluenceDataUpdate(ctx, tids, iid)
+	_, _ = udrClient.UdrInfluenceDataDelete(ctx, iid)
+	_, _ = udrClient.UdrInfluenceDataGet(ctx)
+
+	ev := EventNotification{}
+	_ = ev
+
 }

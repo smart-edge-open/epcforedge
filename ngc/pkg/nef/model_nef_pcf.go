@@ -56,12 +56,32 @@ type AppSessionContextReqData struct {
 	// ue mac
 	UeMac MacAddr48 `json:"ueMac,omitempty"`
 
-	// TBD : check if evSubsc and notifUri are required for TrafficInflu
 	// The following fields have been omitted as they are not required for
 	// Traffic Influ feature
+	// evSubsc and notifUri - Not Required
 	// AspId - Required when Sponspored Connnectivity is supported
 	// bdtRefId - Required when BDT is supported
 	// ipDomain - Required when Qos is supported
+	// medComponents - Required when Qos is supported
+	// mpsId - Required when Multimedia Priority Service is supported
+	// sponId - Required when Sponspored Connnectivity is supported
+	// sponStatus - Required when Sponspored Connnectivity is supported
+}
+
+// AppSessionContextUpdateData Contains the modification(s) to apply to the
+// Individual Application Session Context resource
+type AppSessionContextUpdateData struct {
+	// AF application identifier
+	AfAppID AfAppID `json:"afAppId,omitempty"`
+	// Indicates the AF traffic routing requirements. It shall be included if
+	//  Influence on Traffic Routing feature is supported
+	AfRoutReq AfRoutingRequirement `json:"afRoutReq,omitempty"`
+
+	// The following fields have been omitted as they are not required for
+	// Traffic Influ feature
+	// evSubsc and notifUri - Not Required
+	// AspId - Required when Sponspored Connnectivity is supported
+	// bdtRefId - Required when BDT is supported
 	// medComponents - Required when Qos is supported
 	// mpsId - Required when Multimedia Priority Service is supported
 	// sponId - Required when Sponspored Connnectivity is supported
