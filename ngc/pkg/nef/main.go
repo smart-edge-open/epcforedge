@@ -15,30 +15,67 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"time"
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+
+	logtool "github.com/otcshare/common/log"
 )
 
-// Connectivity constants
-const (
-	NEFServerPort = "8091"
-)
+/* Log handler initialized. This is to be used throughout the nef module for
+ * logging */
+var log = logtool.DefaultLogger.WithField("NEF", nil)
 
+/* Path for NEF Configuration file */
+const cfgPath string = "../configs/nef.json"
+
+/* Function: main
+ * Description: Entry point for NEF Module Execution
+ * Input Args: None
+ * Output Args: None */
 func main() {
 
 	unusedlint()
-	NEFRouter := NewNEFRouter()
-	s := &http.Server{
-		Addr:           ":" + NEFServerPort,
-		Handler:        NEFRouter,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+
+	/* Opening a file for Logging and setting it to Logger Module */
+	file, err1 := os.OpenFile("nef.log", os.O_CREATE|os.O_WRONLY, 0644)
+	if err1 != nil {
+		log.Errf("Failed to open NEF log file: %s", err1.Error())
+		os.Exit(1)
 	}
-	log.Println("NEF listening on", s.Addr)
-	NEFInit()
-	log.Fatal(s.ListenAndServe())
+	defer file.Close()
+	logtool.SetOutput(file)
+
+	/* Reading Log Level and and set it to logger, As of now it is hardcoded to
+	 * info */
+	lvl, err := logtool.ParseLevel("info")
+	if err != nil {
+		log.Errf("Failed to parse log level: %s", err.Error())
+		os.Exit(1)
+	}
+	logtool.SetLevel(lvl)
+	log.Infof("Logger Level: %d", lvl)
+
+	/* Creating a context. This context will be used for following:
+	 * 1. To store the NEF Module Context data and other module related data.
+	 * 2. To notify in case context is cancelled. */
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	/* Subscribing to os Interrupt/Signal - SIGTERM and waiting for
+	 * notification in a separate go routine. When the notification is received
+	 * the created context will be cancelled */
+	osSignalCh := make(chan os.Signal, 1)
+	signal.Notify(osSignalCh, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		sig := <-osSignalCh
+		log.Infof("Received signal: %#v", sig)
+		cancel()
+	}()
+
+	log.Infof("Starting NEF server ...")
+	Run(ctx, cfgPath)
 }
 
 func unusedlint() {

@@ -1,1 +1,8 @@
-placeholder
+{
+    "Endpoint": ":8095",
+    "LocationPrefix": "/3gpp-traffic-influence/v1/",
+    "MaxSubSupport": 10,
+    "MaxAFSupport": 2,
+    "SubStartId": 11111
+}
+
