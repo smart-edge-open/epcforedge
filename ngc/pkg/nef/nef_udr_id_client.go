@@ -44,7 +44,7 @@ func (udr *UdrClientStub) UdrInfluenceDataCreate(ctx context.Context,
 	_ = iid
 	udrPr := UdrInfluenceResponse{}
 	err := errors.New("stub implementation")
-	log.Print("UdrInfluenceDataCreate Stub Exited")
+	log.Infof("UdrInfluenceDataCreate Stub Exited")
 	return udrPr, err
 }
 
@@ -52,13 +52,13 @@ func (udr *UdrClientStub) UdrInfluenceDataCreate(ctx context.Context,
 func (udr *UdrClientStub) UdrInfluenceDataUpdate(ctx context.Context,
 	body TrafficInfluDataPatch, iid InfluenceID) (UdrInfluenceResponse,
 	error) {
-	log.Print("UdrInfluenceDataUpdate Stub Entered")
+	log.Infof("UdrInfluenceDataUpdate Stub Entered")
 	_ = ctx
 	_ = body
 	_ = iid
 	udrPr := UdrInfluenceResponse{}
 	err := errors.New("stub implementation")
-	log.Print("UdrInfluenceDataUpdate Stub Exited")
+	log.Infof("UdrInfluenceDataUpdate Stub Exited")
 	return udrPr, err
 }
 
@@ -66,22 +66,22 @@ func (udr *UdrClientStub) UdrInfluenceDataUpdate(ctx context.Context,
 func (udr *UdrClientStub) UdrInfluenceDataDelete(ctx context.Context,
 	iid InfluenceID) (UdrInfluenceResponse, error) {
 
-	log.Print("UdrInfluenceDataDelete Stub Entered")
+	log.Infof("UdrInfluenceDataDelete Stub Entered")
 	_ = ctx
 	_ = iid
 	udrPr := UdrInfluenceResponse{}
 	err := errors.New("stub implementation")
-	log.Print("UdrInfluenceDataDelete Stub Exited")
+	log.Infof("UdrInfluenceDataDelete Stub Exited")
 	return udrPr, err
 }
 
 // UdrInfluenceDataGet is a stub implementation
 func (udr *UdrClientStub) UdrInfluenceDataGet(ctx context.Context) (
 	UdrInfluenceResponse, error) {
-	log.Print("UdrInfluenceDataGet Stub Entered")
+	log.Infof("UdrInfluenceDataGet Stub Entered")
 	_ = ctx
 	udrPr := UdrInfluenceResponse{}
 	err := errors.New("stub implementation")
-	log.Print("UdrInfluenceDataGet Stub Exited")
+	log.Infof("UdrInfluenceDataGet Stub Exited")
 	return udrPr, err
 }
