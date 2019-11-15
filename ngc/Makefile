@@ -14,9 +14,8 @@
 # limitations under the License.
 ################################################################################
 
-#GOOS=linux go build -o "${BUILD_DIR}/oam-flexcore" ./pkg/oam ./internal/flexcore/oam_backend.go
 
-#export GO111MODULE = on
+export GO111MODULE = on
 
 .PHONY: build af oam oam-test oam-test-flexcore lint test-unit
 TMP_DIR:=$(shell mktemp -d)

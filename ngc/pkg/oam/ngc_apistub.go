@@ -1,3 +1,17 @@
+// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package oam 
 
 import (
@@ -113,30 +127,21 @@ func APIStubDel(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
         
     // loop recorded AFID
-    j := -1
-    found := 0
-    for _, a := range AllRecordsAfId {
-         j++;
+    for j, a := range AllRecordsAfId {
          if a == vars["afId"] {
-               found = 1
-               break
+               AllRecords = append(AllRecords[:j], AllRecords[j+1:]...)
+               AllRecordsAfId = append(AllRecordsAfId[:j], AllRecordsAfId[j+1:]...)
+               if len(AllRecordsAfId) == 0 { NewRecordAfId = 0}
+
+               log.Printf("[APISTUB MODE] AllRecords with num: %d\n", len(AllRecords))
+               log.Println(AllRecords)
+               log.Println(AllRecordsAfId)
+               w.WriteHeader(http.StatusOK)
+               return
          }
     }
-    if found == 0 {
-         log.Printf("Not found in the AllRecords\n")
-         w.WriteHeader(404)
-         return
-    }
-
-    AllRecords = append(AllRecords[:j], AllRecords[j+1:]...)
-    AllRecordsAfId = append(AllRecordsAfId[:j], AllRecordsAfId[j+1:]...)
-    if len(AllRecordsAfId) == 0 { NewRecordAfId = 0}
-
-    log.Printf("[APISTUB MODE] AllRecords with num: %d\n", len(AllRecords))
-    log.Println(AllRecords)
-    log.Println(AllRecordsAfId)
-    w.WriteHeader(http.StatusOK)
-
+    log.Printf("Not found in the AllRecords\n")
+    w.WriteHeader(404)
 }
 
 
@@ -149,51 +154,25 @@ func APIStubDelDnn(w http.ResponseWriter, r *http.Request) {
     afId := vars["afId"]
     dnai := vars["dnai"]
     log.Printf("[APISTUB MODE] DelDnn afId %s, dnai %s\n", afId, dnai)
-
     
-    j := -1
-    found := 0
-    for _, a := range AllRecordsAfId {
-         j++;
+    for recordId, a := range AllRecordsAfId {
          if a == afId {
-               found = 1
+               record := AllRecords[recordId]
+               for servId, b := range record.LocalServices {
+                    if b.Dnai == dnai {
+                         AllRecords[recordId].LocalServices = 
+                            append(AllRecords[recordId].LocalServices[:servId],
+                                   AllRecords[recordId].LocalServices[servId+1:]...)
+                         w.WriteHeader(http.StatusOK)
+                         return
+                    }
+               }
                break
          }
     }
-    if found == 0 {
-         log.Printf("Not found afId %s in the AllRecords\n", afId)
-         w.WriteHeader(404)
-         return
-    }
-    record := AllRecords[j]
+    log.Printf("Not found afId %s dnai %s in the AllRecords\n", afId, dnai)
+    w.WriteHeader(404)
 
-    k := -1
-    found = 0
-    for _, b := range record.LocalServices {
-         k++;
-         if b.Dnai == dnai {
-               found = 1
-               break
-         }
-    }
-    if found == 0 {
-         log.Printf("Not found dnai %s in the afId %s\n", dnai, afId)
-         w.WriteHeader(404)
-         return
-    }
-
-    AllRecords[j].LocalServices = append(AllRecords[j].LocalServices[:k], AllRecords[j].LocalServices[k+1:]...)
-   
-    /*
-    AllRecords = append(AllRecords[:j], AllRecords[j+1:]...)
-    AllRecordsAfId = append(AllRecordsAfId[:j], AllRecordsAfId[j+1:]...)
-    if len(AllRecordsAfId) == 0 { NewRecordAfId = 0}
-
-    log.Printf("[APISTUB MODE] AllRecords with num: %d\n", len(AllRecords))
-    log.Println(AllRecords)
-    log.Println(AllRecordsAfId)
-    */
-    w.WriteHeader(http.StatusOK)
 
 }
 
@@ -205,35 +184,28 @@ func APIStubGet(w http.ResponseWriter, r *http.Request) {
 
     // afId check
     vars := mux.Vars(r)
-    j := -1
-    found := 0
-    for _, a := range AllRecordsAfId {
-        j++;
+    for j, a := range AllRecordsAfId {
+
         if a == vars["afId"] {
-            found = 1
-            break
+            log.Printf("[APISTUB MODE] GetRecord with index: %d\n", j)
+            log.Println(AllRecords[j])
+
+            // Respons Body.
+            jData, err := json.Marshal(AllRecords[j])
+            if err != nil {
+                w.WriteHeader(404)
+                log.Println(err)
+                return
+            }
+            w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+            w.WriteHeader(http.StatusOK)
+            w.Write(jData)
+            return
         }
     }
 
-    if found == 0 {
-        log.Printf("Not found in the AllRecords\n")
-        w.WriteHeader(404)
-        return
-    }
-
-    log.Printf("[APISTUB MODE] GetRecord with index: %d\n", j)
-    log.Println(AllRecords[j])
-   
-    // Respons Body.
-    jData, err := json.Marshal(AllRecords[j])
-    if err != nil {
-        w.WriteHeader(404)
-        log.Println(err)
-        return;
-    }
-    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-    w.WriteHeader(http.StatusOK)
-    w.Write(jData)
+    log.Printf("Not found in the AllRecords\n")
+    w.WriteHeader(404)
 }
 
 
@@ -243,36 +215,32 @@ func APIStubUpdate(w http.ResponseWriter, r *http.Request) {
 
     // afId Check
     vars := mux.Vars(r)
-    j := -1
-    found := 0
-    for _, a := range AllRecordsAfId {
-        j++;
+    
+    for j, a := range AllRecordsAfId {
+
         if a == vars["afId"] {
-             found = 1
-             break
+            log.Printf("[APISTUB MODE] GetRecord with index: %d\n", j)
+            body, _ := ioutil.ReadAll(r.Body)
+            log.Printf("HTTPRequest Body: %s\n", string(body))
+
+            //insert and delete
+            var newRecord []AfService
+            if err := json.Unmarshal(body, &newRecord); err == nil {
+                 AllRecords[j] = newRecord[0]
+                 w.WriteHeader(http.StatusOK)
+                 return
+
+            } 
+
+            log.Printf("Update Failed")
+            w.WriteHeader(404)
+             
+            return
         }
     }
-    if found == 0 {
-        log.Printf("Not found in the AllRecords\n")
-        w.WriteHeader(404)
-        return
-    }
-    log.Printf("[APISTUB MODE] GetRecord with index: %d\n", j)
-    body, _ := ioutil.ReadAll(r.Body)
-    log.Printf("HTTPRequest Body: %s\n", string(body))
-        
-    //insert and delete 
-    var newRecord []AfService
-    if err := json.Unmarshal(body, &newRecord); err == nil {
-        AllRecords[j] = newRecord[0]
-        w.WriteHeader(http.StatusOK)
-        return        
-        
-    } else {
-        log.Println(err)
-    }
     
-    log.Printf("Update Failed")
+    log.Printf("Not found in the AllRecords\n")
     w.WriteHeader(404)
+    return
 
 }
