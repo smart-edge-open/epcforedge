@@ -19,7 +19,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 )
 
 // PcfClientStub is an implementation of the Pcf Authorization
@@ -43,13 +42,13 @@ func NewPCFClient(cfg *Configuration) *PcfClientStub {
 func (pcf *PcfClientStub) PcfPolicyAuthorizationCreate(ctx context.Context,
 	body AppSessionContext) (AppSessionID, PcfPolicyResponse, error) {
 
-	log.Print("PcfPolicyAuthorizationCreate Stub Entered")
+	log.Info("PcfPolicyAuthorizationCreate Stub Entered")
 	_ = ctx
 	_ = body
 	appSessionID := AppSessionID("appSessionId")
 	pcfPr := PcfPolicyResponse{}
 	err := errors.New("stub implementation")
-	log.Print("PcfPolicyAuthorizationCreate Stub Exited")
+	log.Info("PcfPolicyAuthorizationCreate Stub Exited")
 	return appSessionID, pcfPr, err
 }
 
@@ -57,13 +56,13 @@ func (pcf *PcfClientStub) PcfPolicyAuthorizationCreate(ctx context.Context,
 func (pcf *PcfClientStub) PolicyAuthorizationUpdate(ctx context.Context,
 	body AppSessionContextUpdateData,
 	appSessionID AppSessionID) (PcfPolicyResponse, error) {
-	log.Print("PolicyAuthorizationUpdate Stub Entered")
+	log.Info("PolicyAuthorizationUpdate Stub Entered")
 	_ = ctx
 	_ = body
 	_ = appSessionID
 	pcfPr := PcfPolicyResponse{}
 	err := errors.New("stub implementation")
-	log.Print("PolicyAuthorizationUpdate Stub Exited")
+	log.Info("PolicyAuthorizationUpdate Stub Exited")
 	return pcfPr, err
 }
 
@@ -71,23 +70,23 @@ func (pcf *PcfClientStub) PolicyAuthorizationUpdate(ctx context.Context,
 func (pcf *PcfClientStub) PolicyAuthorizationDelete(ctx context.Context,
 	appSessionID AppSessionID) (PcfPolicyResponse, error) {
 
-	log.Print("PolicyAuthorizationDelete Stub Entered")
+	log.Info("PolicyAuthorizationDelete Stub Entered")
 	_ = ctx
 	_ = appSessionID
 	pcfPr := PcfPolicyResponse{}
 	err := errors.New("stub implementation")
-	log.Print("PolicyAuthorizationDelete Stub Exited")
+	log.Info("PolicyAuthorizationDelete Stub Exited")
 	return pcfPr, err
 }
 
 // PolicyAuthorizationGet is a stub implementation
 func (pcf *PcfClientStub) PolicyAuthorizationGet(ctx context.Context,
 	appSessionID AppSessionID) (PcfPolicyResponse, error) {
-	log.Print("PolicyAuthorizationGet Stub Entered")
+	log.Info("PolicyAuthorizationGet Stub Entered")
 	_ = ctx
 	_ = appSessionID
 	pcfPr := PcfPolicyResponse{}
 	err := errors.New("stub implementation")
-	log.Print("PolicyAuthorizationGet Stub Exited")
+	log.Info("PolicyAuthorizationGet Stub Exited")
 	return pcfPr, err
 }

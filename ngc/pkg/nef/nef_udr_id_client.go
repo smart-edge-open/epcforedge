@@ -19,7 +19,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 )
 
 // UdrClientStub is an implementation of the Udr Influence data
@@ -39,7 +38,7 @@ func NewUDRClient(cfg *Configuration) *UdrClientStub {
 func (udr *UdrClientStub) UdrInfluenceDataCreate(ctx context.Context,
 	body TrafficInfluData, iid InfluenceID) (UdrInfluenceResponse, error) {
 
-	log.Print("UdrInfluenceDataCreate Stub Entered")
+	log.Infof("UdrInfluenceDataCreate Stub Entered")
 	_ = ctx
 	_ = body
 	_ = iid
