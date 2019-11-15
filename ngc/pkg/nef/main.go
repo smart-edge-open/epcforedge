@@ -36,8 +36,6 @@ const cfgPath string = "../configs/nef.json"
  * Output Args: None */
 func main() {
 
-	unusedlint()
-
 	/* Opening a file for Logging and setting it to Logger Module */
 	file, err1 := os.OpenFile("nef.log", os.O_CREATE|os.O_WRONLY, 0644)
 	if err1 != nil {
@@ -56,6 +54,8 @@ func main() {
 	}
 	logtool.SetLevel(lvl)
 	log.Infof("Logger Level: %d", lvl)
+
+	unusedlint()
 
 	/* Creating a context. This context will be used for following:
 	 * 1. To store the NEF Module Context data and other module related data.
