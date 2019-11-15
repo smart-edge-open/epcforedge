@@ -1,5 +1,5 @@
 {
-    "Endpoint": ":8095",
+    "Endpoint": ":8091",
     "LocationPrefix": "/3gpp-traffic-influence/v1/",
     "MaxSubSupport": 10,
     "MaxAFSupport": 2,

@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -51,7 +50,7 @@ type afData struct {
 }
 
 //Creates a AF instance
-func (af *afData) afCreate(nefCtx nefContext, afid string) error {
+func (af *afData) afCreate(nefCtx *nefContext, afid string) error {
 
 	//Validate afid ??
 
@@ -63,13 +62,12 @@ func (af *afData) afCreate(nefCtx nefContext, afid string) error {
 }
 
 //Creates a new subscription
-func (af *afData) afAddSubscription(nefCtx nefContext, ti TrafficInfluSub) (loc string, err error) {
+func (af *afData) afAddSubscription(nefCtx *nefContext, ti TrafficInfluSub) (loc string, err error) {
 
 	if af.subIdnum >= nefCtx.cfg.MaxSubSupport+nefCtx.cfg.SubStartId {
 		return "", errors.New("MAX SUBS Created")
 	}
-	log.Infoln(af.subIdnum)
-	log.Infoln(af.maxSubSupp)
+
 	//Generate a unique subscription ID string
 	subIdStr := strconv.Itoa(af.subIdnum)
 	af.subIdnum++
@@ -91,7 +89,7 @@ func (af *afData) afAddSubscription(nefCtx nefContext, ti TrafficInfluSub) (loc 
 	return afsub.loc, nil
 }
 
-func (af *afData) afUpdateSubscription(nefCtx nefContext, subId string, ti TrafficInfluSub) (err error) {
+func (af *afData) afUpdateSubscription(nefCtx *nefContext, subId string, ti TrafficInfluSub) (err error) {
 
 	sub, ok := af.subs[subId]
 	if ok == false {
@@ -102,7 +100,7 @@ func (af *afData) afUpdateSubscription(nefCtx nefContext, subId string, ti Traff
 	return
 }
 
-func (af *afData) afGetSubscription(nefCtx nefContext, subId string) (ti TrafficInfluSub, err error) {
+func (af *afData) afGetSubscription(nefCtx *nefContext, subId string) (ti TrafficInfluSub, err error) {
 
 	_, ok := af.subs[subId]
 
@@ -114,7 +112,7 @@ func (af *afData) afGetSubscription(nefCtx nefContext, subId string) (ti Traffic
 
 }
 
-func (af *afData) afGetSubscriptionList(nefCtx nefContext) (subslist []TrafficInfluSub, err error) {
+func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (subslist []TrafficInfluSub, err error) {
 
 	if len(af.subs) > 0 {
 		for _, value := range af.subs {
@@ -126,7 +124,7 @@ func (af *afData) afGetSubscriptionList(nefCtx nefContext) (subslist []TrafficIn
 	return nil, errors.New("No Subscriptions present")
 }
 
-func (af *afData) afDeleteSubscription(nefCtx nefContext, subId string) error {
+func (af *afData) afDeleteSubscription(nefCtx *nefContext, subId string) error {
 	//Check if AF is already present
 	_, ok := af.subs[subId]
 
@@ -149,11 +147,11 @@ func (af *afData) afDestroy(afid string) error {
 type nefData struct {
 	//nefport   string
 	//location  string
-	afcount   int
-	subIdnum  int
+	afcount int
+	//subIdnum  int
 	//maxSubSup int
 	//maxAfSup  int
-	afs       map[string]*afData
+	afs map[string]*afData
 
 	//Member functions
 	//nefCreate
@@ -170,23 +168,24 @@ type nefData struct {
 func (nef *nefData) nefCreate() error {
 
 	//To be fetched from config right now hard coded
-	nef.nefport = "80"
-	nef.location = "http://localhost:80/3gpp-traffic-influence/v1/"
+	//nef.nefport = "80"
+	//nef.location = "http://localhost:80/3gpp-traffic-influence/v1/"
 	nef.afcount = 0
-	nef.subIdnum = 11111
-	nef.maxAfSup = 2
-	nef.maxSubSup = 5
+	//nef.subIdnum = 11111
+	//nef.maxAfSup = 2
+	//nef.maxSubSup = 5
 	nef.afs = make(map[string]*afData)
 
 	return nil
 }
 
+/*
 func NEFInit() error {
 
 	return nef.nefCreate()
-}
+}*/
 
-func (nef *nefData) nefAddAf(afId string) (af *afData, err error) {
+func (nef *nefData) nefAddAf(nefCtx *nefContext, afId string) (af *afData, err error) {
 
 	var afe afData
 
@@ -198,7 +197,7 @@ func (nef *nefData) nefAddAf(afId string) (af *afData, err error) {
 	} else {
 		//Create a new entry of AF
 
-		afe.afCreate(afId)
+		afe.afCreate(nefCtx, afId)
 		nef.afs[afId] = &afe
 		nef.afcount++
 	}
@@ -238,12 +237,14 @@ func (nef *nefData) nefDestroy() {
 	// Todo
 }
 
-func createNewSub(nefCtx nefContext, afId string, ti TrafficInfluSub) (loc string, err error) {
+func createNewSub(nefCtx *nefContext, afId string, ti TrafficInfluSub) (loc string, err error) {
 
 	var af *afData
 
+	nef := &nefCtx.nef
+
 	//Validate the Traffic Influence
-	err = validateTIS(ti)
+	err = validateTIS(nefCtx, ti)
 	if err != nil {
 		log.Infoln(err)
 		return "", err
@@ -253,13 +254,13 @@ func createNewSub(nefCtx nefContext, afId string, ti TrafficInfluSub) (loc strin
 
 	if err != nil {
 		log.Infoln("NO AF PRESENT CREATE AF")
-		af, _ = nef.nefAddAf(afId)
+		af, _ = nef.nefAddAf(nefCtx, afId)
 	} else {
 		log.Infoln("AF PRESENT AF")
 		log.Infoln(af)
 	}
 
-	loc, err = af.afAddSubscription(ti)
+	loc, err = af.afAddSubscription(nefCtx, ti)
 
 	if err != nil {
 		log.Infoln(err)
@@ -273,10 +274,11 @@ func createNewSub(nefCtx nefContext, afId string, ti TrafficInfluSub) (loc strin
 }
 
 //Validate the Traffic influence data received from AF
-func validateTIS(nefCtx nefContext, ti TrafficInfluSub) (err error) {
+func validateTIS(nefCtx *nefContext, ti TrafficInfluSub) (err error) {
 
+	nef := &nefCtx.nef
 	//Check if we have crossed max supported AF
-	if nef.afcount >= nef.maxAfSup {
+	if nef.afcount >= nefCtx.cfg.MaxAFSupport {
 		log.Infoln("MAX AF exceeded ")
 		return errors.New("MAX AF exceeded")
 		//return err
@@ -289,7 +291,7 @@ func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
-	nef := nefCtx.nef
+	nef := &nefCtx.nef
 
 	log.Infof("===============================================")
 	log.Infof(" Method : GET ")
@@ -322,7 +324,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
-	nef := nefCtx.nef
+	nef := &nefCtx.nef
 
 	log.Infof("===============================================")
 	log.Infof(" Method : POST ")
@@ -369,7 +371,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	loc, err3 := createNewSub(nefCtx, vars["afId"], TrInBody)
 	log.Infoln(loc)
 
-	logNef()
+	logNef(nef)
 
 	if err3 != nil {
 		log.Infof("Error:  Failed to Create AF data")
@@ -390,7 +392,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
-	nef := nefCtx.nef
+	nef := &nefCtx.nef
 
 	log.Infof("===============================================")
 	log.Infof(" Method : GET ")
@@ -434,7 +436,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
-	nef := nefCtx.nef
+	nef := &nefCtx.nef
 
 	log.Infof("===============================================")
 	log.Infof(" Method : PUT ")
@@ -498,7 +500,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
-	nef := nefCtx.nef
+	nef := &nefCtx.nef
 
 	log.Infof("===============================================")
 	log.Infof(" Method : PATCH ")
@@ -562,7 +564,7 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
-	nef := nefCtx.nef
+	nef := &nefCtx.nef
 
 	log.Infof("===============================================")
 	log.Infof(" Method : DELETE ")
@@ -589,10 +591,10 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 
 	w.WriteHeader(http.StatusOK)
 
-	logNef()
+	logNef(nef)
 }
 
-func logNef() {
+func logNef(nef *nefData) {
 
 	log.Infof("AF Count %+v", len(nef.afs))
 	if len(nef.afs) > 0 {
