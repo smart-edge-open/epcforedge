@@ -49,7 +49,7 @@ lint:
 	golangci-lint run
 
 test-unit:
-	ginkgo ./pkg/oam
+	ginkgo -v -cover ./pkg/config ./pkg/oam
 
 clean:
 	rm -rf "${BUILD_DIR}"

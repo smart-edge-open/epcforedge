@@ -36,10 +36,19 @@ func APIStubInit(apistub_testdatapath string) error {
 
 }
 
+func APIStubReset() error {
+    AllRecords = nil
+    AllRecordsAfId = nil
+    NewRecordAfId = 0
+    return nil
+
+}
+
 func APIStubGetAll(w http.ResponseWriter, r *http.Request) {
 
     log.Printf("URL GetAll: %s\n", r.URL.Path)
 
+    log.Printf("Number of All Records is: %d", len(AllRecords))
     ret, _ := json.Marshal(AllRecords)
     if ret != nil {
          w.Header().Set("Content-Type", "application/json; charset=UTF-8")

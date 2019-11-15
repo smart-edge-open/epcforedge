@@ -1,6 +1,7 @@
 package oam 
 
 import (
+    "errors"
     "log"
     "net/http"
 )
@@ -17,6 +18,8 @@ func InitProxy(npcEndpoint string, redirectTarget string, apistub_testdatapath s
     NGCType = redirectTarget
     if NGCType == "APISTUB" {
         APIStubInit(apistub_testdatapath)
+    } else {
+       return errors.New("can't not support flexcore")
     }
     
     return nil
