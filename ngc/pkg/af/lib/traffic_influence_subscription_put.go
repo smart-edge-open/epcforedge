@@ -17,6 +17,7 @@ package af
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -54,6 +55,7 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 		transID        int
 	)
 
+	fmt.Println("Received PUT")
 	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 

@@ -66,49 +66,49 @@ var afRoutes = Routes{
 	Route{
 		"GetAllSubscriptions",
 		strings.ToUpper("Get"),
-		"/CNCA/1.0.1/subscriptions",
+		"/AF/v1/subscriptions",
 		GetAllSubscriptions,
 	},
 
 	Route{
 		"GetSubscription",
 		strings.ToUpper("Get"),
-		"/CNCA/1.0.1/subscriptions/{subscriptionId}",
+		"/AF/v1/subscriptions/{subscriptionId}",
 		GetSubscription,
 	},
 
 	Route{
 		"DeleteSubscription",
 		strings.ToUpper("Delete"),
-		"/CNCA/1.0.1/subscriptions/{subscriptionId}",
+		"/AF/v1/subscriptions/{subscriptionId}",
 		DeleteSubscription,
 	},
 
 	Route{
 		"SubscriptionPatch",
 		strings.ToUpper("Patch"),
-		"/CNCA/1.0.1/subscriptions/{subscriptionId}",
+		"/AF/v1/subscriptions/{subscriptionId}",
 		ModifySubscriptionPatch,
 	},
 
 	Route{
 		"CreateSubscription",
 		strings.ToUpper("Post"),
-		"/CNCA/1.0.1/subscriptions",
+		"/AF/v1/subscriptions",
 		CreateSubscription,
 	},
 
 	Route{
 		"SubscriptionPut",
 		strings.ToUpper("Put"),
-		"/CNCA/1.0.1/subscriptions/{subscriptionId}",
+		"/AF/v1/subscriptions/{subscriptionId}",
 		ModifySubscriptionPut,
 	},
 
 	Route{
 		"NotificationPost",
 		strings.ToUpper("Post"),
-		"/CNCA/1.0.1/notifications",
+		"/AF/v1/notifications",
 		NotificationPost,
 	},
 }

@@ -37,7 +37,6 @@ func (a *TrafficInfluenceSubscriptionPutAPIService) handlePutResponse(
 
 	if localVarHTTPResponse.StatusCode == 200 {
 
-		//var v TrafficInfluSub
 		err := json.Unmarshal(localVarBody, localVarReturnValue)
 		if err != nil {
 			log.Errf("Error decoding response body %s, ", err.Error())
@@ -45,32 +44,7 @@ func (a *TrafficInfluenceSubscriptionPutAPIService) handlePutResponse(
 		return err
 	}
 
-	newErr := GenericError{
-		body:  localVarBody,
-		error: localVarHTTPResponse.Status,
-	}
-	switch localVarHTTPResponse.StatusCode {
-	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
-
-		var v ProblemDetails
-		err := json.Unmarshal(localVarBody, &v)
-		if err != nil {
-			newErr.error = err.Error()
-			return newErr
-		}
-		newErr.model = v
-		return newErr
-
-	default:
-		var v interface{}
-		err := json.Unmarshal(localVarBody, &v)
-		if err != nil {
-			newErr.error = err.Error()
-			return newErr
-		}
-		newErr.model = v
-		return newErr
-	}
+	return handlePostPutPatchErrorResp(localVarHTTPResponse, localVarBody)
 
 }
 
@@ -83,8 +57,7 @@ Replaces an existing subscription resource
  * @param afID Identifier of the AF
  * @param subscriptionID Identifier of the subscription resource
  * @param body Parameters to replace the existing subscription
-
-@return TrafficInfluSub
+@return TrafficInfluSub, *http.Response, error
 */
 func (a *TrafficInfluenceSubscriptionPutAPIService) SubscriptionPut(
 	ctx context.Context, afID string, subscriptionID string,
@@ -105,7 +78,6 @@ func (a *TrafficInfluenceSubscriptionPutAPIService) SubscriptionPut(
 		"{"+"subscriptionId"+"}", fmt.Sprintf("%v", subscriptionID), -1)
 
 	localVarHeaderParams := make(map[string]string)
-	//localVarQueryParams := url.Values{}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
@@ -141,14 +113,16 @@ func (a *TrafficInfluenceSubscriptionPutAPIService) SubscriptionPut(
 	}
 
 	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
-	if err != nil {
-		if err = localVarHTTPResponse.Body.Close(); err != nil {
-			log.Errf("response body could not be closed properly")
+	defer func() {
+		err = localVarHTTPResponse.Body.Close()
+		if err != nil {
+			log.Errf("response body was not closed properly")
 		}
+	}()
+
+	if err != nil {
+		log.Errf("http response body could not be read")
 		return localVarReturnValue, localVarHTTPResponse, err
-	}
-	if err = localVarHTTPResponse.Body.Close(); err != nil {
-		log.Errf("response body could not be closed properly")
 	}
 
 	if err = a.handlePutResponse(&localVarReturnValue, localVarHTTPResponse,
@@ -156,6 +130,5 @@ func (a *TrafficInfluenceSubscriptionPutAPIService) SubscriptionPut(
 		log.Errf("Handle Put response")
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
-
 	return localVarReturnValue, localVarHTTPResponse, nil
 }

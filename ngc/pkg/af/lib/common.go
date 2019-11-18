@@ -15,8 +15,10 @@
 package af
 
 import (
+	"encoding/json"
 	"errors"
 	"math"
+	"net/http"
 	"net/url"
 	"strings"
 )
@@ -72,4 +74,66 @@ func genTransactionID(afCtx *afContext) (int, error) {
 
 	return afTransID, nil
 
+}
+
+func handleGetErrorResp(localVarHTTPResponse *http.Response,
+	localVarBody []byte) error {
+
+	newErr := GenericError{
+		body:  localVarBody,
+		error: localVarHTTPResponse.Status,
+	}
+	switch localVarHTTPResponse.StatusCode {
+	case 400, 401, 403, 404, 406, 429, 500, 503:
+
+		var v ProblemDetails
+		err := json.Unmarshal(localVarBody, &v)
+		if err != nil {
+			newErr.error = err.Error()
+			return newErr
+		}
+		newErr.model = v
+		return newErr
+
+	default:
+		var v interface{}
+		err := json.Unmarshal(localVarBody, &v)
+		if err != nil {
+			newErr.error = err.Error()
+			return newErr
+		}
+		newErr.model = v
+		return newErr
+	}
+}
+
+func handlePostPutPatchErrorResp(localVarHTTPResponse *http.Response,
+	localVarBody []byte) error {
+
+	newErr := GenericError{
+		body:  localVarBody,
+		error: localVarHTTPResponse.Status,
+	}
+	switch localVarHTTPResponse.StatusCode {
+	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
+
+		var v ProblemDetails
+		err := json.Unmarshal(localVarBody, &v)
+		if err != nil {
+			newErr.error = err.Error()
+			return newErr
+		}
+		newErr.model = v
+		return newErr
+
+	default:
+		var v interface{}
+		err := json.Unmarshal(localVarBody, &v)
+		if err != nil {
+			newErr.error = err.Error()
+			return newErr
+		}
+		newErr.model = v
+		return newErr
+	}
 }

@@ -42,33 +42,7 @@ func (a *TrafficInfluenceSubscriptionGetAPIService) handleGetResponse(
 		}
 		return err
 	}
-	newErr := GenericError{
-		body:  localVarBody,
-		error: localVarHTTPResponse.Status,
-	}
-	switch localVarHTTPResponse.StatusCode {
-	case 400, 401, 403, 404, 406, 429, 500, 503:
-
-		var v ProblemDetails
-		err := json.Unmarshal(localVarBody, &v)
-		if err != nil {
-			newErr.error = err.Error()
-			return newErr
-		}
-		newErr.model = v
-		return newErr
-
-	default:
-		var v interface{}
-		err := json.Unmarshal(localVarBody, &v)
-		if err != nil {
-			newErr.error = err.Error()
-			return newErr
-		}
-		newErr.model = v
-		return newErr
-	}
-
+	return handleGetErrorResp(localVarHTTPResponse, localVarBody)
 }
 
 /*

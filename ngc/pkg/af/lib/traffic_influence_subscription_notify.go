@@ -21,7 +21,7 @@ import (
 	"strconv"
 )
 
-func verifyTransID(afCtx *afContext, transID string, p *ProblemDetails) (int,
+func verifyAfTransID(afCtx *afContext, transID string, p *ProblemDetails) (int,
 	error) {
 
 	var (
@@ -29,11 +29,13 @@ func verifyTransID(afCtx *afContext, transID string, p *ProblemDetails) (int,
 		err        error
 	)
 
+	const ProblemTitle = "AF transaction ID verification"
+
 	if transID == "" {
-		log.Errf("Traffic Influance Subscription notification - empty " +
-			" afTransID")
+		log.Errf("Traffic Influence Subscription notification - empty " +
+			"afTransID")
 		p.Status = http.StatusInternalServerError
-		p.Title = "Internal Server Error"
+		p.Title = ProblemTitle
 		p.Detail = "Traffic Influance Subscription notification" +
 			" - empty transactionID"
 		p.InvalidParams = []InvalidParam{{
@@ -48,7 +50,7 @@ func verifyTransID(afCtx *afContext, transID string, p *ProblemDetails) (int,
 	if transIDInt, err = strconv.Atoi(transID); err != nil {
 		log.Errf("Error while converting transaction ID to int: %s.", err)
 		p.Status = http.StatusInternalServerError
-		p.Title = "Internal Server Error"
+		p.Title = ProblemTitle
 		p.Detail = "Error while converting transaction ID to int: " +
 			err.Error()
 		p.InvalidParams = []InvalidParam{{
@@ -64,7 +66,7 @@ func verifyTransID(afCtx *afContext, transID string, p *ProblemDetails) (int,
 		log.Errf("Transaction ID %s corresponding to notification does "+
 			"not exist", transID)
 		p.Status = http.StatusInternalServerError
-		p.Title = "Internal Server Error"
+		p.Title = ProblemTitle
 		p.Detail = "Transaction ID " + transID + " corresponding to " +
 			"notification was not found"
 
@@ -84,7 +86,7 @@ func NotificationPost(w http.ResponseWriter, r *http.Request) {
 		en         EventNotification
 		prJSON     []byte
 		statusCode int
-		problem    ProblemDetails
+		problem    = ProblemDetails{}
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
@@ -94,7 +96,7 @@ func NotificationPost(w http.ResponseWriter, r *http.Request) {
 		log.Errf("Traffic Influance Subscription notify: %s", err.Error())
 		problem = ProblemDetails{
 			Status: http.StatusInternalServerError,
-			Title:  "Internal Server Error",
+			Title:  "Decoding response body",
 			Detail: "Traffic Influance Subscription notify: " + err.Error(),
 		}
 		w.WriteHeader(http.StatusInternalServerError)
@@ -106,8 +108,8 @@ func NotificationPost(w http.ResponseWriter, r *http.Request) {
 		log.Errf("Traffic Influance Subscription notify: %s", err.Error())
 		return
 	}
-	problem = ProblemDetails{}
-	if statusCode, err = verifyTransID(afCtx, en.AfTransID,
+
+	if statusCode, err = verifyAfTransID(afCtx, en.AfTransID,
 		&problem); err != nil {
 
 		w.WriteHeader(statusCode)
@@ -115,13 +117,11 @@ func NotificationPost(w http.ResponseWriter, r *http.Request) {
 			if _, err = w.Write(prJSON); err != nil {
 				log.Errf("Traffic Influance Subscription notify: %s",
 					err.Error())
-
 			}
 			return
 		}
 		log.Errf("Traffic Influance Subscription notify: %s", err.Error())
 		return
 	}
-
 	w.WriteHeader(statusCode)
 }

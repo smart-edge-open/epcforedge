@@ -76,7 +76,7 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 	}
 	if interMap, ok := afCtx.subscriptions[subscriptionID]; ok {
 
-		for transID := range interMap { //there's only one entry in the map
+		for transID := range interMap {
 			afCtx.subscriptions[subscriptionID][(transID)] = tsResp
 		}
 

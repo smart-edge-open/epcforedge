@@ -17,6 +17,7 @@ package af
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
@@ -26,7 +27,8 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
-	"time"
+
+	"golang.org/x/net/http2"
 )
 
 var (
@@ -35,13 +37,11 @@ var (
 )
 
 // Client manages communication with the NEF Northbound API API v1.0.1
-// In most cases there should be only one, shared, Client.
 type Client struct {
 	cfg *Configuration
 	// Reuse a single struct instead of allocating one for each service on
 	// the heap.
 	common service
-
 	// API Services
 	TrafficInfluSubGetAllAPI *TrafficInfluenceSubscriptionGetAllAPIService
 	TrafficInfluSubDeleteAPI *TrafficInfluenceSubscriptionDeleteAPIService
@@ -56,12 +56,26 @@ type service struct {
 }
 
 // NewClient creates a new API client. Requires a userAgent string describing
-// your application.
-// optionally a custom http.Client to allow for advanced features
-// such as caching.
+// the application, optionally a custom http.Client to allow for advanced
+// features such as caching.
 func NewClient(cfg *Configuration) *Client {
 	if cfg.HTTPClient == nil {
-		cfg.HTTPClient = http.DefaultClient
+
+		cer, err := tls.LoadX509KeyPair("server.crt", "server.key")
+		if err != nil {
+			log.Errf("Error %v", err)
+
+			return nil
+		}
+
+		cfg.HTTPClient = &http.Client{
+			Transport: &http2.Transport{
+				TLSClientConfig: &tls.Config{
+					Certificates:       []tls.Certificate{cer},
+					InsecureSkipVerify: true,
+				},
+			},
+		}
 	}
 
 	c := &Client{}
@@ -111,10 +125,9 @@ func selectHeaderAccept(accepts []string) string {
 }
 
 // contains is a case insenstive match, finding needle in a haystack
-func contains(haystack []string, needle string) bool {
-	for _, a := range haystack {
-		if strings.EqualFold(strings.ToLower(a), strings.ToLower(needle)) {
-			//strings.ToLower(a) == strings.ToLower(needle) {
+func contains(words []string, word string) bool {
+	for _, a := range words {
+		if strings.EqualFold(strings.ToLower(a), strings.ToLower(word)) {
 			return true
 		}
 	}
@@ -188,6 +201,8 @@ func (c *Client) prepareRequest(
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("method:")
+	fmt.Println(method)
 
 	// Generate a new request
 	localVarRequest, err = genNewRequest(body, url.String(), method)
@@ -271,62 +286,6 @@ func detectContentType(body interface{}) string {
 	}
 
 	return contentType
-}
-
-// Ripped from https://github.com/gregjones/httpcache/blob/master/httpcache.go
-type cacheControl map[string]string
-
-func parseCacheControl(headers http.Header) cacheControl {
-	cc := cacheControl{}
-	ccHeader := headers.Get("Cache-Control")
-	for _, part := range strings.Split(ccHeader, ",") {
-		part = strings.Trim(part, " ")
-		if part == "" {
-			continue
-		}
-		if strings.ContainsRune(part, '=') {
-			keyval := strings.Split(part, "=")
-			cc[strings.Trim(keyval[0], " ")] =
-				strings.Trim(keyval[1], ",")
-		} else {
-			cc[part] = ""
-		}
-	}
-	return cc
-}
-
-// CacheExpires helper function to determine remaining time before repeating a
-// request.
-func CacheExpires(r *http.Response) time.Time {
-	// Figure out when the cache expires.
-	var (
-		expires  time.Time
-		lifetime time.Duration
-	)
-	now, err := time.Parse(time.RFC1123, r.Header.Get("date"))
-	if err != nil {
-		return time.Now()
-	}
-	respCacheControl := parseCacheControl(r.Header)
-
-	if maxAge, ok := respCacheControl["max-age"]; ok {
-		lifetime, err = time.ParseDuration(maxAge + "s")
-		if err != nil {
-			log.Errf("error parsing time duration")
-			expires = now
-		} else {
-			expires = now.Add(lifetime)
-		}
-	} else {
-		expiresHeader := r.Header.Get("Expires")
-		if expiresHeader != "" {
-			expires, err = time.Parse(time.RFC1123, expiresHeader)
-			if err != nil {
-				expires = now
-			}
-		}
-	}
-	return expires
 }
 
 // GenericError Provides access to the body,

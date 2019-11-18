@@ -17,10 +17,10 @@ package af
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"fmt"
 )
 
 // Linger please
@@ -44,33 +44,7 @@ func (a *TrafficInfluenceSubscriptionPostAPIService) handlePostResponse(
 		return err
 	}
 
-	newErr := GenericError{
-		body:  localVarBody,
-		error: localVarHTTPResponse.Status,
-	}
-	switch localVarHTTPResponse.StatusCode {
-	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
-
-		var v ProblemDetails
-		err := json.Unmarshal(localVarBody, &v)
-		if err != nil {
-			newErr.error = err.Error()
-			return newErr
-		}
-		newErr.model = v
-		return newErr
-
-	default:
-		var v interface{}
-		err := json.Unmarshal(localVarBody, &v)
-		if err != nil {
-			newErr.error = err.Error()
-			return newErr
-		}
-		newErr.model = v
-		return newErr
-	}
-
+	return handlePostPutPatchErrorResp(localVarHTTPResponse, localVarBody)
 }
 
 /*
@@ -84,8 +58,8 @@ Creates a new subscription resource
 @return TrafficInfluSub
 */
 func (a *TrafficInfluenceSubscriptionPostAPIService) SubscriptionPost(
-	ctx context.Context, afID string,
-	body TrafficInfluSub) (TrafficInfluSub, *http.Response, error) {
+	ctx context.Context, afID string, body TrafficInfluSub) (TrafficInfluSub,
+	*http.Response, error) {
 
 	var (
 		localVarHTTPMethod  = strings.ToUpper("Post")
@@ -97,6 +71,9 @@ func (a *TrafficInfluenceSubscriptionPostAPIService) SubscriptionPost(
 	localVarPath := a.client.cfg.BasePath + "/{afId}/subscriptions"
 	localVarPath = strings.Replace(localVarPath,
 		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
+
+	fmt.Println(localVarPath)
+	fmt.Println(localVarPath)
 
 	localVarHeaderParams := make(map[string]string)
 
@@ -133,7 +110,6 @@ func (a *TrafficInfluenceSubscriptionPostAPIService) SubscriptionPost(
 	}
 
 	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
-	//defer localVarHTTPResponse.Body.Close()
 	defer func() {
 		err = localVarHTTPResponse.Body.Close()
 		if err != nil {
@@ -145,14 +121,15 @@ func (a *TrafficInfluenceSubscriptionPostAPIService) SubscriptionPost(
 		log.Errf("http response body could not be read")
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
+	fmt.Println("Request andBody: ")
+	//fmt.Println(string(r))
+	fmt.Println(string(localVarBody))
 
 	if err = a.handlePostResponse(&localVarReturnValue, localVarHTTPResponse,
 		localVarBody); err != nil {
 
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
-
-	//fmt.Println("Decoded: ", localVarReturnValue)
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }

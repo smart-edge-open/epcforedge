@@ -38,36 +38,13 @@ func (a *TrafficInfluenceSubscriptionGetAllAPIService) handleGetAllResponse(
 	if localVarHTTPResponse.StatusCode == 200 {
 		err := json.Unmarshal(localVarBody, localVarReturnValue)
 		if err != nil {
+			fmt.Println(string(localVarBody))
 			log.Errf("Error decoding response body %s, ", err.Error())
 		}
 		return err
 	}
-	newErr := GenericError{
-		body:  localVarBody,
-		error: localVarHTTPResponse.Status,
-	}
-	switch localVarHTTPResponse.StatusCode {
-	case 400, 401, 403, 404, 406, 429, 500, 503:
 
-		var v ProblemDetails
-		err := json.Unmarshal(localVarBody, &v)
-		if err != nil {
-			newErr.error = err.Error()
-			return newErr
-		}
-		newErr.model = v
-		return newErr
-
-	default:
-		var v interface{}
-		err := json.Unmarshal(localVarBody, &v)
-		if err != nil {
-			newErr.error = err.Error()
-			return newErr
-		}
-		newErr.model = v
-		return newErr
-	}
+	return handleGetErrorResp(localVarHTTPResponse, localVarBody)
 }
 
 /*
@@ -95,10 +72,8 @@ func (a *TrafficInfluenceSubscriptionGetAllAPIService) SubscriptionsGetAll(
 		fmt.Sprintf("%v", afID), -1)
 
 	localVarHeaderParams := make(map[string]string)
-
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
-
 	// set Content-Type header
 	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
 	if localVarHTTPContentType != "" {
@@ -107,7 +82,6 @@ func (a *TrafficInfluenceSubscriptionGetAllAPIService) SubscriptionsGetAll(
 
 	// to determine the Accept header
 	localVarHTTPHeaderAccepts := []string{"application/json"}
-
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
@@ -122,23 +96,26 @@ func (a *TrafficInfluenceSubscriptionGetAllAPIService) SubscriptionsGetAll(
 
 	localVarHTTPResponse, err := a.client.callAPI(r)
 	if err != nil || localVarHTTPResponse == nil {
+
+		log.Errf("Calling API2 ")
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
-	if err != nil {
-		if err = localVarHTTPResponse.Body.Close(); err != nil {
-			log.Errf("response body could not be closed properly")
+	defer func() {
+		err = localVarHTTPResponse.Body.Close()
+		if err != nil {
+			log.Errf("response body was not closed properly")
 		}
+	}()
+
+	if err != nil {
+		log.Errf("http response body could not be read")
 		return localVarReturnValue, localVarHTTPResponse, err
-	}
-	if err = localVarHTTPResponse.Body.Close(); err != nil {
-		log.Errf("response body could not be closed properly")
 	}
 
 	if err = a.handleGetAllResponse(&localVarReturnValue, localVarHTTPResponse,
 		localVarBody); err != nil {
-
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
 

@@ -16,6 +16,7 @@ package af
 
 import (
 	"context"
+	"golang.org/x/net/http2"
 	"net/http"
 
 	logger "github.com/otcshare/common/log"
@@ -55,6 +56,11 @@ func runServer(ctx context.Context, afCtx *afContext) error {
 		Addr:    afCtx.cfg.Endpoint,
 		Handler: afRouter,
 	}
+
+	if err = http2.ConfigureServer(server, &http2.Server{}); err != nil {
+		log.Errf("AF failed at configuring HTTP2 server")
+		return err
+	}
 	stopServerCh := make(chan bool, 2)
 
 	go func(stopServerCh chan bool) {
@@ -70,7 +76,8 @@ func runServer(ctx context.Context, afCtx *afContext) error {
 
 	go func(stopServerCh chan bool) {
 		log.Infof("Serving AF on: %s", afCtx.cfg.Endpoint)
-		if err = server.ListenAndServe(); err != nil {
+		if err = server.ListenAndServeTLS("server.crt",
+			"server.key"); err != nil {
 			log.Info("AF server error: " + err.Error())
 		}
 		log.Errf("Stopped AF serving")

@@ -35,39 +35,34 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) handleDeleteResponse(
 	localVarHTTPResponse *http.Response,
 	localVarBody []byte) error {
 
-	if localVarHTTPResponse.StatusCode > 300 {
-
-		newErr := GenericError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-
-		switch localVarHTTPResponse.StatusCode {
-
-		case 400, 401, 403, 404, 429, 500, 503:
-
-			var v ProblemDetails
-			err := json.Unmarshal(localVarBody, &v)
-			if err != nil {
-				newErr.error = err.Error()
-				return newErr
-			}
-			newErr.model = v
-			return newErr
-
-		default:
-			var v interface{}
-			err := json.Unmarshal(localVarBody, &v)
-			if err != nil {
-				newErr.error = err.Error()
-				return newErr
-			}
-			newErr.model = v
-			return newErr
-		}
+	newErr := GenericError{
+		body:  localVarBody,
+		error: localVarHTTPResponse.Status,
 	}
 
-	return nil
+	switch localVarHTTPResponse.StatusCode {
+
+	case 400, 401, 403, 404, 429, 500, 503:
+
+		var v ProblemDetails
+		err := json.Unmarshal(localVarBody, &v)
+		if err != nil {
+			newErr.error = err.Error()
+			return newErr
+		}
+		newErr.model = v
+		return newErr
+
+	default:
+		var v interface{}
+		err := json.Unmarshal(localVarBody, &v)
+		if err != nil {
+			newErr.error = err.Error()
+			return newErr
+		}
+		newErr.model = v
+		return newErr
+	}
 }
 
 /*
@@ -78,8 +73,6 @@ Deletes an already existing subscription
  * deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param afID Identifier of the AF
  * @param subscriptionID Identifier of the subscription resource
-
-
 */
 func (a *TrafficInfluenceSubscriptionDeleteAPIService) SubscriptionDelete(
 	ctx context.Context, afID string, subscriptionID string) (*http.Response,
@@ -96,7 +89,6 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) SubscriptionDelete(
 		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
 	localVarPath = strings.Replace(localVarPath,
 		"{"+"subscriptionId"+"}", fmt.Sprintf("%v", subscriptionID), -1)
-
 	localVarHeaderParams := make(map[string]string)
 
 	// to determine the Content-Type header
@@ -128,20 +120,24 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) SubscriptionDelete(
 	}
 
 	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
-	if err != nil {
-		if err = localVarHTTPResponse.Body.Close(); err != nil {
-			log.Errf("response body could not be closed properly")
+	defer func() {
+		err = localVarHTTPResponse.Body.Close()
+		if err != nil {
+			log.Errf("response body was not closed properly")
 		}
+	}()
+
+	if err != nil {
+		log.Errf("http response body could not be read")
 		return localVarHTTPResponse, err
 	}
-	if err = localVarHTTPResponse.Body.Close(); err != nil {
-		log.Errf("response body could not be closed properly")
-	}
 
-	if err = a.handleDeleteResponse(localVarHTTPResponse,
-		localVarBody); err != nil {
+	if localVarHTTPResponse.StatusCode > 300 {
+		if err = a.handleDeleteResponse(localVarHTTPResponse,
+			localVarBody); err != nil {
 
-		return localVarHTTPResponse, err
+			return localVarHTTPResponse, err
+		}
 	}
 
 	return localVarHTTPResponse, nil
