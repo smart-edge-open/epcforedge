@@ -23,17 +23,16 @@ import (
 	logtool "github.com/otcshare/common/log"
 )
 
-/* Log handler initialized. This is to be used throughout the nef module for
- * logging */
+// Log handler initialized. This is to be used throughout the nef module for
+// logging
 var log = logtool.DefaultLogger.WithField("NEF", nil)
 
-/* Path for NEF Configuration file */
+// Path for NEF Configuration file
 const cfgPath string = "../configs/nef.json"
 
-/* Function: main
- * Description: Entry point for NEF Module Execution
- * Input Args: None
- * Output Args: None */
+// main: Entry point for NEF Module Execution
+// Input Args: None
+// Output Args: None
 func main() {
 
 	/* Opening a file for Logging and setting it to Logger Module */
@@ -43,6 +42,7 @@ func main() {
 		os.Exit(1)
 	}
 	defer file.Close()
+	file.Truncate(0)
 	logtool.SetOutput(file)
 
 	/* Reading Log Level and and set it to logger, As of now it is hardcoded to

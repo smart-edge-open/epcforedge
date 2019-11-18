@@ -24,9 +24,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const SUB_START_ID int = 11111
-const MAX_SUB_SUPP int = 5
-
 //AF Subscription data
 type afSubscription struct {
 	subid string
@@ -55,7 +52,7 @@ func (af *afData) afCreate(nefCtx *nefContext, afid string) error {
 	//Validate afid ??
 
 	af.afid = afid
-	af.subIdnum = nefCtx.cfg.SubStartId //Start Number
+	af.subIdnum = nefCtx.cfg.SubStartID //Start Number
 	af.maxSubSupp = nefCtx.cfg.MaxSubSupport
 	af.subs = make(map[string]*afSubscription)
 	return nil
@@ -64,23 +61,23 @@ func (af *afData) afCreate(nefCtx *nefContext, afid string) error {
 //Creates a new subscription
 func (af *afData) afAddSubscription(nefCtx *nefContext, ti TrafficInfluSub) (loc string, err error) {
 
-	if af.subIdnum >= nefCtx.cfg.MaxSubSupport+nefCtx.cfg.SubStartId {
+	if af.subIdnum >= nefCtx.cfg.MaxSubSupport+nefCtx.cfg.SubStartID {
 		return "", errors.New("MAX SUBS Created")
 	}
 
 	//Generate a unique subscription ID string
-	subIdStr := strconv.Itoa(af.subIdnum)
+	subIDStr := strconv.Itoa(af.subIdnum)
 	af.subIdnum++
 	log.Infoln(af.subIdnum)
 
 	//Create the Subscription info
-	afsub := afSubscription{subid: subIdStr, ti: ti}
+	afsub := afSubscription{subid: subIDStr, ti: ti}
 
 	//Create Location URI
-	afsub.loc = /*TODO - Add Local IP:Port */ nefCtx.cfg.LocationPrefix + af.afid + "/subscriptions/" + subIdStr
+	afsub.loc = /*TODO - Add Local IP:Port */ nefCtx.cfg.LocationPrefix + af.afid + "/subscriptions/" + subIDStr
 
 	//Link the subscription with the AF
-	af.subs[subIdStr] = &afsub
+	af.subs[subIDStr] = &afsub
 
 	log.Infoln(" SUBSCRIPTION ADDED ")
 	log.Infoln(len(af.subs))
@@ -89,9 +86,9 @@ func (af *afData) afAddSubscription(nefCtx *nefContext, ti TrafficInfluSub) (loc
 	return afsub.loc, nil
 }
 
-func (af *afData) afUpdateSubscription(nefCtx *nefContext, subId string, ti TrafficInfluSub) (err error) {
+func (af *afData) afUpdateSubscription(nefCtx *nefContext, subID string, ti TrafficInfluSub) (err error) {
 
-	sub, ok := af.subs[subId]
+	sub, ok := af.subs[subID]
 	if ok == false {
 		sub.ti = ti
 		return errors.New("Subscription Not Found")
@@ -100,12 +97,12 @@ func (af *afData) afUpdateSubscription(nefCtx *nefContext, subId string, ti Traf
 	return
 }
 
-func (af *afData) afGetSubscription(nefCtx *nefContext, subId string) (ti TrafficInfluSub, err error) {
+func (af *afData) afGetSubscription(nefCtx *nefContext, subID string) (ti TrafficInfluSub, err error) {
 
-	_, ok := af.subs[subId]
+	_, ok := af.subs[subID]
 
 	if ok == true {
-		return af.subs[subId].ti, nil
+		return af.subs[subID].ti, nil
 	}
 
 	return ti, errors.New("SubscriptionId Not found")
@@ -124,17 +121,18 @@ func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (subslist []TrafficI
 	return nil, errors.New("No Subscriptions present")
 }
 
-func (af *afData) afDeleteSubscription(nefCtx *nefContext, subId string) error {
+func (af *afData) afDeleteSubscription(nefCtx *nefContext, subID string) error {
 	//Check if AF is already present
-	_, ok := af.subs[subId]
+	_, ok := af.subs[subID]
 
 	if ok == true {
-		delete(af.subs, subId)
+		delete(af.subs, subID)
 		af.subIdnum--
 		return nil
-	} else {
-		return errors.New("SubscriotionId not found")
 	}
+
+	return errors.New("SubscriotionId not found")
+
 }
 func (af *afData) afDestroy(afid string) error {
 
@@ -185,51 +183,51 @@ func NEFInit() error {
 	return nef.nefCreate()
 }*/
 
-func (nef *nefData) nefAddAf(nefCtx *nefContext, afId string) (af *afData, err error) {
+func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData, err error) {
 
 	var afe afData
 
 	//Check if AF is already present
-	_, ok := nef.afs[afId]
+	_, ok := nef.afs[afID]
 
 	if ok == true {
-		return nef.afs[afId], errors.New("AF already present")
-	} else {
-		//Create a new entry of AF
-
-		afe.afCreate(nefCtx, afId)
-		nef.afs[afId] = &afe
-		nef.afcount++
+		return nef.afs[afID], errors.New("AF already present")
 	}
+
+	//Create a new entry of AF
+
+	afe.afCreate(nefCtx, afID)
+	nef.afs[afID] = &afe
+	nef.afcount++
+
 	return &afe, nil
 }
 
-func (nef *nefData) nefGetAf(afId string) (af *afData, err error) {
+func (nef *nefData) nefGetAf(afID string) (af *afData, err error) {
 
 	//Check if AF is already present
-	afe, ok := nef.afs[afId]
+	afe, ok := nef.afs[afID]
 
 	if ok == true {
 		return afe, nil
-	} else {
-		err = errors.New("AF entry not present")
-		return afe, err
 	}
+	err = errors.New("AF entry not present")
+	return afe, err
 }
 
-func (nef *nefData) nefDeleteAf(afId string) (err error) {
+func (nef *nefData) nefDeleteAf(afID string) (err error) {
 
 	//Check if AF is already present
-	_, ok := nef.afs[afId]
+	_, ok := nef.afs[afID]
 
 	if ok == true {
-		delete(nef.afs, afId)
+		delete(nef.afs, afID)
 		nef.afcount--
 		return nil
-	} else {
-		err = errors.New("AF entry not present")
-		return err
 	}
+
+	err = errors.New("AF entry not present")
+	return err
 }
 
 func (nef *nefData) nefDestroy() {
@@ -237,7 +235,7 @@ func (nef *nefData) nefDestroy() {
 	// Todo
 }
 
-func createNewSub(nefCtx *nefContext, afId string, ti TrafficInfluSub) (loc string, err error) {
+func createNewSub(nefCtx *nefContext, afID string, ti TrafficInfluSub) (loc string, err error) {
 
 	var af *afData
 
@@ -250,11 +248,11 @@ func createNewSub(nefCtx *nefContext, afId string, ti TrafficInfluSub) (loc stri
 		return "", err
 	}
 
-	af, err = nef.nefGetAf(afId)
+	af, err = nef.nefGetAf(afID)
 
 	if err != nil {
 		log.Infoln("NO AF PRESENT CREATE AF")
-		af, _ = nef.nefAddAf(nefCtx, afId)
+		af, _ = nef.nefAddAf(nefCtx, afID)
 	} else {
 		log.Infoln("AF PRESENT AF")
 		log.Infoln(af)
@@ -293,15 +291,18 @@ func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
-	log.Infof("===============================================")
-	log.Infof(" Method : GET ")
-	log.Infof(" URL PATH : " + r.URL.Path[1:])
-
 	vars := mux.Vars(r)
-
 	log.Infof(" AFID  : %s", vars["afId"])
 
-	af, _ := nef.nefGetAf(vars["afId"])
+	af, err := nef.nefGetAf(vars["afId"])
+
+	if err != nil {
+		log.Infof("Error: AF ID not found ")
+		log.Infoln(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
+		return
+	}
 
 	subslist, _ := af.afGetSubscriptionList(nefCtx)
 
@@ -316,6 +317,7 @@ func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
 	w.Write(mdata)
 
 	w.WriteHeader(http.StatusOK)
+	log.Infof("HTTP Response sent: %d", http.StatusOK)
 }
 
 // CreateTrafficInfluenceSubscription : Handles the traffic influence requested
@@ -326,9 +328,6 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
-	log.Infof("===============================================")
-	log.Infof(" Method : POST ")
-	log.Infof(" URL PATH : " + r.URL.Path[1:])
 	vars := mux.Vars(r)
 	log.Infof(" AFID  : %s", vars["afId"])
 
@@ -338,6 +337,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 		return
 	}
 
@@ -354,6 +354,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 		log.Infof("Error: Failed to UNmarshal POST req ")
 		log.Infoln(err1)
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 		return
 	}
 	//Update the data respose of POST
@@ -365,6 +366,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 		log.Infof("Error:  Failed to marshal the json data")
 		log.Infoln(err2)
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 	}
 
 	//loc, err3 := createNewSubscription(vars["afId"], TrInBody)
@@ -378,6 +380,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 		log.Infoln(err3)
 		//panic(err3)
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -386,6 +389,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	w.Write(mdata)
 
 	w.WriteHeader(http.StatusOK)
+	log.Infof("HTTP Response sent: %d", http.StatusOK)
 }
 
 // ReadTrafficInfluenceSubscription : Read a particular subscription details
@@ -394,9 +398,6 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
-	log.Infof("===============================================")
-	log.Infof(" Method : GET ")
-	log.Infof(" URL PATH : " + r.URL.Path[1:])
 	vars := mux.Vars(r)
 	log.Infof(" AFID  : %s", vars["afId"])
 	log.Infof(" SUBSCRIPTION ID  : %s", vars["subscriptionId"])
@@ -406,6 +407,7 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 	if ok != nil {
 		log.Infoln(ok)
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 		return
 	}
 	log.Infoln("AF Found ")
@@ -415,6 +417,7 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Infoln(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 		return
 	}
 
@@ -423,11 +426,13 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 		log.Infof("Error:  Failed to marshal the json data")
 		log.Infoln(err2)
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write(mdata)
 
 	w.WriteHeader(http.StatusOK)
+	log.Infof("HTTP Response sent: %d", http.StatusOK)
 }
 
 // UpdatePutTrafficInfluenceSubscription : Updates a traffic influence created
@@ -438,12 +443,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
-	log.Infof("===============================================")
-	log.Infof(" Method : PUT ")
-	log.Infof(" URL PATH : " + r.URL.Path[1:])
-
 	vars := mux.Vars(r)
-
 	log.Infof(" AFID  : %s", vars["afId"])
 	log.Infof(" SUBSCRIPTION ID  : %s", vars["subscriptionId"])
 
@@ -469,12 +469,14 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 			log.Infof("Error: Failed to UNmarshal POST req ")
 			log.Infoln(err1)
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 			return
 		}
 
 		ok := af.afUpdateSubscription(nefCtx, vars["subscriptionId"], TrInBody)
 		if ok != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 			return
 		}
 
@@ -484,6 +486,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 			log.Infof("Error:  Failed to marshal the json data")
 			log.Infoln(err2)
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -492,6 +495,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 	}
 
 	w.WriteHeader(http.StatusOK)
+	log.Infof("HTTP Response sent: %d", http.StatusOK)
 }
 
 // UpdatePatchTrafficInfluenceSubscription : Updates a traffic influence created
@@ -502,12 +506,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
-	log.Infof("===============================================")
-	log.Infof(" Method : PATCH ")
-	log.Infof(" URL PATH : " + r.URL.Path[1:])
-
 	vars := mux.Vars(r)
-
 	log.Infof(" AFID  : %s", vars["afId"])
 	log.Infof(" SUBSCRIPTION ID  : %s", vars["subscriptionId"])
 
@@ -533,12 +532,14 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 			log.Infof("Error: Failed to UNmarshal POST req ")
 			log.Infoln(err1)
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 			return
 		}
 
 		ok := af.afUpdateSubscription(nefCtx, vars["subscriptionId"], TrInBody)
 		if ok != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 			return
 		}
 
@@ -548,6 +549,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 			log.Infof("Error:  Failed to marshal the json data")
 			log.Infoln(err2)
 			w.WriteHeader(http.StatusInternalServerError)
+			log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -556,6 +558,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 	}
 
 	w.WriteHeader(http.StatusOK)
+	log.Infof("HTTP Response sent: %d", http.StatusOK)
 }
 
 // DeleteTrafficInfluenceSubscription : Deletes a traffic influence created by
@@ -566,12 +569,7 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
-	log.Infof("===============================================")
-	log.Infof(" Method : DELETE ")
-	log.Infof(" URL PATH : " + r.URL.Path[1:])
-
 	vars := mux.Vars(r)
-
 	log.Infof(" AFID  : %s", vars["afId"])
 	log.Infof(" SUBSCRIPTION ID  : %s", vars["subscriptionId"])
 
@@ -580,16 +578,19 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	if err != nil {
 		log.Infoln(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 		return
 	}
 	err = af.afDeleteSubscription(nefCtx, vars["subscriptionId"])
 	if err != nil {
 		log.Infoln(err)
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	log.Infof("HTTP Response sent: %d", http.StatusOK)
 
 	logNef(nef)
 }
