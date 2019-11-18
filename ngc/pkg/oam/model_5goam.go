@@ -22,12 +22,12 @@ type AfServiceList struct {
 // AF Service JSON struct
 type AfService struct {
         AfInstance    string         `json:"afInstance,omitempty"`
-        LocalServices []LocalService `json:"localServices,omitempty"`
+        LocationServices []LocationService `json:"locationServices,omitempty"`
 }
 
 
-// local Service JSON struct
-type LocalService struct {
+// location Service JSON struct
+type LocationService struct {
         Dnai   string                   `json:"dnai,omitempty"`
         Dnn    string                   `json:"dnn,omitempty"`
         Dns    string                   `json:"dns,omitempty"`

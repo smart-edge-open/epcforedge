@@ -158,11 +158,11 @@ func APIStubDelDnn(w http.ResponseWriter, r *http.Request) {
     for recordId, a := range AllRecordsAfId {
          if a == afId {
                record := AllRecords[recordId]
-               for servId, b := range record.LocalServices {
+               for servId, b := range record.LocationServices {
                     if b.Dnai == dnai {
-                         AllRecords[recordId].LocalServices = 
-                            append(AllRecords[recordId].LocalServices[:servId],
-                                   AllRecords[recordId].LocalServices[servId+1:]...)
+                         AllRecords[recordId].LocationServices = 
+                            append(AllRecords[recordId].LocationServices[:servId],
+                                   AllRecords[recordId].LocationServices[servId+1:]...)
                          w.WriteHeader(http.StatusOK)
                          return
                     }

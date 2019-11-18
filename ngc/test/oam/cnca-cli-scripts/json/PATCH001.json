@@ -1,6 +1,6 @@
 [{
   "afInstance": "by-a",
-  "localServices": [
+  "locationServices": [
     {
       "dnai": "by_dnai",
       "dnn": "by_dnn",

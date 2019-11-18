@@ -1,6 +1,6 @@
 [{
         "afInstance":"mike",
-        "localServices":[
+        "locationServices":[
               {
                    "dnai":"mike1_dnai",
                    "dnn":"mike1_dnn",

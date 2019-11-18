@@ -1,6 +1,6 @@
 [{
   "afInstance": "gf-a",
-  "localServices": [
+  "locationServices": [
     {
       "dnai": "a_dnai",
       "dnn": "a_dnn",
