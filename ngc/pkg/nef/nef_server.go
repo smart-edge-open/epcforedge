@@ -24,11 +24,12 @@ import (
 
 /* Config: NEF Module Configuration Data Structure */
 type Config struct {
-	Endpoint string `json:"endpoint"`
-	LocationPrefix string `json:"locationPrefix"`
-	MaxSubSupport int `json:"maxSubSupport"`
-	MaxAFSupport int `json:"maxAFSupport"`
-	SubStartId int `json:"subStartId"`
+	Endpoint                  string `json:"endpoint"`
+	LocationPrefix            string `json:"locationPrefix"`
+	MaxSubSupport             int    `json:"maxSubSupport"`
+	MaxAFSupport              int    `json:"maxAFSupport"`
+	SubStartId                int    `json:"subStartId"`
+	UpfNotificationResUriPath string `json:"UpfNotificationResUriPath"`
 }
 
 /* NEF Module Context Data Structure */

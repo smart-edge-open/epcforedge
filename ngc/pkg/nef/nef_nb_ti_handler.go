@@ -594,6 +594,23 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	logNef(nef)
 }
 
+// NotifySmfUPFEvent : Handles the SMF notification for UPF event
+func NotifySmfUPFEvent(w http.ResponseWriter,
+	r *http.Request) {
+
+	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
+	nef := &nefCtx.nef
+
+	log.Infof("===============================================")
+	log.Infof(" Method : POST ")
+	log.Infof(" URL PATH : " + r.URL.Path[1:])
+
+	w.WriteHeader(http.StatusOK)
+
+	logNef(nef)
+
+}
+
 func logNef(nef *nefData) {
 
 	log.Infof("AF Count %+v", len(nef.afs))

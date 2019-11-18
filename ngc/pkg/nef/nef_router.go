@@ -72,7 +72,6 @@ var NEFRoutes = []Route{
 	},
 }
 
-
 /* Function: NewNEFRouter
 *  Description: This function creates and initializes a NEF Router with all the
 *               available routes for NEF Module. This router object is defined
@@ -84,6 +83,20 @@ var NEFRoutes = []Route{
 func NewNEFRouter(nefCtx *nefContext) *mux.Router {
 
 	router := mux.NewRouter().StrictSlash(true)
+
+	if nefCtx.cfg.UpfNotificationResUriPath != "" {
+		// smf upf notification route
+		smfNotif := Route{}
+		smfNotif.Name = "NotifySmfUPFEvent"
+		smfNotif.Method = strings.ToUpper("Post")
+		smfNotif.Handler = NotifySmfUPFEvent
+		smfNotif.Pattern = nefCtx.cfg.UpfNotificationResUriPath
+		NEFRoutes = append(NEFRoutes, smfNotif)
+		log.Infof("SMF UPF Event notification uri: %s", smfNotif.Pattern)
+	} else {
+		log.Infof("SMF UPF Event notification uri missing in configuration")
+	}
+
 	for _, route := range NEFRoutes {
 		router.
 			Methods(route.Method).

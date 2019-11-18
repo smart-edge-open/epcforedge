@@ -135,6 +135,7 @@ func unusedlint() {
 	_, _ = udrClient.UdrInfluenceDataGet(ctx)
 
 	ev := EventNotification{}
-	_ = ev
-
+	notifURI := URI("af_uri")
+	var afClient AfNotification = NewAfClient(nil)
+	_ = afClient.AfNotificationUpfEvent(ctx, notifURI, ev)
 }
