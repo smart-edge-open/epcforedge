@@ -32,7 +32,7 @@ func modifySubscriptionByPatch(cliCtx context.Context, ts TrafficInfluSubPatch,
 
 	if err != nil {
 
-		log.Errf("AF Traffic Influance Subscription PUT: %s", err.Error())
+		log.Errf("AF Traffic Influance Subscription modify: %s", err.Error())
 		return TrafficInfluSub{}, nil, err
 	}
 	return tsResp, resp, nil
@@ -55,14 +55,14 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err = json.NewDecoder(r.Body).Decode(&tsPatch); err != nil {
-		log.Errf("Traffic Influance Subscription PATCH: %s", err.Error())
+		log.Errf("Traffic Influance Subscription modify: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	subscriptionID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription PATCH: %s", err.Error())
+		log.Errf("Traffic Influence Subscription modify: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -70,7 +70,7 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 	tsResp, resp, err = modifySubscriptionByPatch(cliCtx, tsPatch, afCtx,
 		subscriptionID)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription PATCH : %s", err.Error())
+		log.Errf("Traffic Influence Subscription mpdify : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

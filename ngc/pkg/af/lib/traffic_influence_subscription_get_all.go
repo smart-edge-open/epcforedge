@@ -31,7 +31,7 @@ func getAllSubscriptions(cliCtx context.Context, afCtx *afContext) (
 
 	if err != nil {
 
-		log.Errf("AF Traffic Influance Subscription GET: %s", err.Error())
+		log.Errf("AF Traffic Influance Subscriptions get all: %s", err.Error())
 
 		return nil, nil, err
 	}
@@ -57,7 +57,7 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	transID, err = genTransactionID(afCtx)
 	if err != nil {
 
-		log.Errf("Traffic Influance Subscription GET ALL %s", err.Error())
+		log.Errf("Traffic Influance Subscriptions get all %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -66,20 +66,20 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	tsResp, resp, err = getAllSubscriptions(cliCtx, afCtx)
 	delete(afCtx.transactions, transID)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription GET ALL : %s", err.Error())
+		log.Errf("Traffic Influence Subscriptions get all : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	tsRespJSON, err = json.Marshal(tsResp)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription GET ALL: %s", err.Error())
+		log.Errf("Traffic Influence Subscriptions get all: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(resp.StatusCode)
 	if _, err = w.Write(tsRespJSON); err != nil {
-		log.Errf("Traffic Influance Subscription GET ALL %s", err.Error())
+		log.Errf("Traffic Influance Subscriptions get all %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

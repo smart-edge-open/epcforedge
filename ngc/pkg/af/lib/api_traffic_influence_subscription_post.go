@@ -17,10 +17,10 @@ package af
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"fmt"
 )
 
 // Linger please
@@ -72,9 +72,6 @@ func (a *TrafficInfluenceSubscriptionPostAPIService) SubscriptionPost(
 	localVarPath = strings.Replace(localVarPath,
 		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
 
-	fmt.Println(localVarPath)
-	fmt.Println(localVarPath)
-
 	localVarHeaderParams := make(map[string]string)
 
 	// to determine the Content-Type header
@@ -121,9 +118,6 @@ func (a *TrafficInfluenceSubscriptionPostAPIService) SubscriptionPost(
 		log.Errf("http response body could not be read")
 		return localVarReturnValue, localVarHTTPResponse, err
 	}
-	fmt.Println("Request andBody: ")
-	//fmt.Println(string(r))
-	fmt.Println(string(localVarBody))
 
 	if err = a.handlePostResponse(&localVarReturnValue, localVarHTTPResponse,
 		localVarBody); err != nil {

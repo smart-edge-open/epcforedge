@@ -31,7 +31,7 @@ func deleteSubscription(cliCtx context.Context, afCtx *afContext,
 
 	if err != nil {
 
-		log.Errf("AF Traffic Influance Subscription DELETE: %s", err.Error())
+		log.Errf("AF Traffic Influance Subscription delete: %s", err.Error())
 
 		return nil, err
 	}
@@ -55,13 +55,13 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 
 	subscriptionID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription PUT: %s", err.Error())
+		log.Errf("Traffic Influence Subscription delete: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	resp, err = deleteSubscription(cliCtx, afCtx, subscriptionID)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription DELETE : %s", err.Error())
+		log.Errf("Traffic Influence Subscription delete: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

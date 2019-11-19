@@ -31,7 +31,7 @@ func getSubscription(cliCtx context.Context, afCtx *afContext,
 
 	if err != nil {
 
-		log.Errf("AF Traffic Influance Subscription GET: %s", err.Error())
+		log.Errf("AF Traffic Influance Subscription get: %s", err.Error())
 		return TrafficInfluSub{}, nil, err
 	}
 	return tsResp, resp, nil
@@ -58,28 +58,28 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 	transID, err = genTransactionID(afCtx)
 	if err != nil {
 
-		log.Errf("Traffic Influance Subscription GET %s", err.Error())
+		log.Errf("Traffic Influance Subscription get %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	subscriptionID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription GET: %s", err.Error())
+		log.Errf("Traffic Influence Subscription get: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	afCtx.transactions[transID] = TrafficInfluSub{}
 	tsResp, resp, err = getSubscription(cliCtx, afCtx, subscriptionID)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription create : %s", err.Error())
+		log.Errf("Traffic Influence Subscription get : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	tsRespJSON, err = json.Marshal(tsResp)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription GET : %s", err.Error())
+		log.Errf("Traffic Influence Subscription get : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -87,7 +87,7 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(resp.StatusCode)
 
 	if _, err = w.Write(tsRespJSON); err != nil {
-		log.Errf("Traffic Influance Subscription GET %s", err.Error())
+		log.Errf("Traffic Influance Subscription get %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

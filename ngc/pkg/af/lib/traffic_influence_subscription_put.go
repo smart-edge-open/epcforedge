@@ -17,7 +17,6 @@ package af
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -37,7 +36,7 @@ func modifySubscriptionByPut(cliCtx context.Context, ts TrafficInfluSub,
 
 	if err != nil {
 
-		log.Errf("AF Traffic Influance Subscription PUT: %s", err.Error())
+		log.Errf("AF Traffic Influance Subscription modify: %s", err.Error())
 		return TrafficInfluSub{}, nil, err
 	}
 	return tsResp, resp, nil
@@ -55,7 +54,6 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 		transID        int
 	)
 
-	fmt.Println("Received PUT")
 	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 
@@ -70,7 +68,7 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err = json.NewDecoder(r.Body).Decode(&ts); err != nil {
-		log.Errf("Traffic Influance Subscription PUT: %s", err.Error())
+		log.Errf("Traffic Influance Subscription modify: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -78,7 +76,7 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 	transID, err = genTransactionID(afCtx)
 	if err != nil {
 
-		log.Errf("Traffic Influance Subscription PUT %s", err.Error())
+		log.Errf("Traffic Influance Subscription modify %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -86,7 +84,7 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 	ts.AfTransID = strconv.Itoa(transID)
 	subscriptionID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription PUT: %s", err.Error())
+		log.Errf("Traffic Influence Subscription modify: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -95,7 +93,7 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 		subscriptionID)
 
 	if err != nil {
-		log.Errf("Traffic Influence Subscription create : %s", err.Error())
+		log.Errf("Traffic Influence Subscription modify : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

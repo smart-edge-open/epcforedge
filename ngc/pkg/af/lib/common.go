@@ -29,6 +29,8 @@ func genAFTransID(trans TransactionIDs) int {
 		min   = 1
 		found = true
 	)
+	const limit = math.MaxInt32
+
 	for max := range trans {
 		num =
 			max
@@ -40,11 +42,11 @@ func genAFTransID(trans TransactionIDs) int {
 		}
 	}
 
-	if num == math.MaxInt32 {
+	if num == limit {
 		num = min
 	}
 	//look for a free ID until it is <= math.MaxInt32 is achieved again
-	for found && num < math.MaxInt32 {
+	for found && num < limit {
 		num++
 		//check if the ID is in use, if not - return the ID
 		if _, found = trans[num]; !found {
@@ -61,8 +63,20 @@ func getSubsIDFromURL(url *url.URL) (string, error) {
 	if url == nil {
 		return "", errors.New("empty URL in the request message")
 	}
-	s := strings.Split(subsURL, "/")
-	return s[len(s)-1], nil
+	// It is assumed the URL address
+	// ends with  "/subscriptions/{subscriptionID}"
+	s := strings.Split(subsURL, "subscriptions")
+	switch len(s) {
+	case 1:
+		return "", errors.New("subscriptionID was not found " +
+			"in the URL string")
+	case 2:
+		subscriptionID := strings.Replace(s[1], "/", "", -1)
+		return subscriptionID, nil
+
+	default:
+		return "", errors.New("wrong URL")
+	}
 }
 
 func genTransactionID(afCtx *afContext) (int, error) {
@@ -71,9 +85,7 @@ func genTransactionID(afCtx *afContext) (int, error) {
 	if afTransID == 0 {
 		return 0, errors.New("the pool of AF Transaction IDs is already used")
 	}
-
 	return afTransID, nil
-
 }
 
 func handleGetErrorResp(localVarHTTPResponse *http.Response,

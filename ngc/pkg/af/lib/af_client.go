@@ -18,10 +18,12 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -59,20 +61,20 @@ type service struct {
 // the application, optionally a custom http.Client to allow for advanced
 // features such as caching.
 func NewClient(cfg *Configuration) *Client {
+
 	if cfg.HTTPClient == nil {
-
-		cer, err := tls.LoadX509KeyPair("server.crt", "server.key")
+		caCert, err := ioutil.ReadFile("root-ca-cert.pem")
 		if err != nil {
-			log.Errf("Error %v", err)
-
-			return nil
+			log.Errf("Error: %v", err)
 		}
+
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
 
 		cfg.HTTPClient = &http.Client{
 			Transport: &http2.Transport{
 				TLSClientConfig: &tls.Config{
-					Certificates:       []tls.Certificate{cer},
-					InsecureSkipVerify: true,
+					RootCAs: caCertPool,
 				},
 			},
 		}
@@ -201,8 +203,6 @@ func (c *Client) prepareRequest(
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("method:")
-	fmt.Println(method)
 
 	// Generate a new request
 	localVarRequest, err = genNewRequest(body, url.String(), method)

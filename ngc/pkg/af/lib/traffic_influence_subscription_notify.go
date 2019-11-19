@@ -51,7 +51,8 @@ func verifyAfTransID(afCtx *afContext, transID string, p *ProblemDetails) (int,
 		log.Errf("Error while converting transaction ID to int: %s.", err)
 		p.Status = http.StatusInternalServerError
 		p.Title = ProblemTitle
-		p.Detail = "Error while converting transaction ID to int: " +
+		p.Detail = "Traffic Influance Subscription notification - " +
+			"error while converting transaction ID to int: " +
 			err.Error()
 		p.InvalidParams = []InvalidParam{{
 			Param: "AfTransID",
@@ -67,7 +68,8 @@ func verifyAfTransID(afCtx *afContext, transID string, p *ProblemDetails) (int,
 			"not exist", transID)
 		p.Status = http.StatusInternalServerError
 		p.Title = ProblemTitle
-		p.Detail = "Transaction ID " + transID + " corresponding to " +
+		p.Detail = "Traffic Influance Subscription notification - " +
+			"Transaction ID " + transID + " corresponding to " +
 			"notification was not found"
 
 		err = errors.New("AfTransID not found")
