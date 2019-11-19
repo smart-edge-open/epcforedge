@@ -124,7 +124,7 @@ type TrafficInfluSub struct {
 	// URL where notifications shall be sent
 	NotificationDestination Link `json:"notificationDestination,omitempty"`
 	// URL of created subscription resource
-	Self Link `json:"self,omitempty"`
+	Self Link `json:"selfURL,omitempty"`
 	// Identifies IP packet filters.
 	TrafficFilters []FlowInfo `json:"trafficFilters,omitempty"`
 	// Identifies Ethernet packet filters.
