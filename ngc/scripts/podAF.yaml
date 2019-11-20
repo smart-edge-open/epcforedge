@@ -15,7 +15,7 @@ spec:
   containers:
   - securityContext:
       privileged: false
-    name: pod-af-container 
+    name: pod-af 
     image: af-image:1.0
     imagePullPolicy: Never
     command: [ "/bin/bash", "-c", "--" ]
