@@ -1,33 +1,38 @@
 apiVersion: v1
 kind: Pod
-metadata:
+metadata: 
+  labels:
+    service: pod-nef
   name: pod-nef
 spec:
+  volumes:
+  - name: shared-configs
+    hostPath:
+      path: /root/configs
+  - name: shared-certs
+    hostPath:
+      path: /var/certs
   containers:
   - securityContext:
       privileged: false
-    name: nef-container 
-    image: nef-image:1.0
+    name: pod-nef 
+    image: nef-stub-image:1.0
     imagePullPolicy: Never
     command: [ "/bin/bash", "-c", "--" ]
+    #args: [ "./entrypoint.sh" ]
     args: [ "while true; do sleep 300000; done;" ]
     resources:
       requests:
         memory: 1Gi
       limits:
         memory: 1Gi
+    ports:
+    - containerPort: 8081
+    volumeMounts:
+    - name: shared-configs
+      mountPath: /root/configs
+    - name: shared-certs
+      mountPath: /var/certs
 
-  - securityContext:
-      privileged: false
-    name: af-stub-container
-    image: af_stub-image:1.0
-    imagePullPolicy: Never
-    command: [ "/bin/bash", "-c", "--" ]
-    args: [ "while true; do sleep 300000; done;" ]
-    resources:
-      requests:
-        memory: 1Gi
-      limits:
-        memory: 1Gi
 
 
