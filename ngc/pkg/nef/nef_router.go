@@ -73,6 +73,8 @@ var NEFRoutes = []Route{
 	},
 }
 
+type nefCtxKey string
+
 // NewNEFRouter : This function creates and initializes a NEF Router with all
 //                the available routes for NEF Module. This router object is
 //                defined in "github.com/gorilla/mux" package.
@@ -99,7 +101,7 @@ func NewNEFRouter(nefCtx *nefContext) *mux.Router {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := context.WithValue(
 				r.Context(),
-				string("nefCtx"),
+				nefCtxKey("nefCtx"),
 				nefCtx)
 			next.ServeHTTP(w, r.WithContext(ctx))
 
@@ -133,6 +135,7 @@ func nefRouteLogger(httpHandler http.Handler, name string) http.Handler {
 
 		httpHandler.ServeHTTP(w, r)
 
-		log.Infof("HTTP Request Handling -- ENDS. Time Taken: %s", time.Since(start))
+		log.Infof("HTTP Request Handling -- ENDS. Time Taken: %s",
+			time.Since(start))
 	})
 }

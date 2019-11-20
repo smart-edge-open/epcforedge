@@ -59,7 +59,8 @@ func (af *afData) afCreate(nefCtx *nefContext, afid string) error {
 }
 
 //Creates a new subscription
-func (af *afData) afAddSubscription(nefCtx *nefContext, ti TrafficInfluSub) (loc string, err error) {
+func (af *afData) afAddSubscription(nefCtx *nefContext, ti TrafficInfluSub) (
+	loc string, err error) {
 
 	if af.subIdnum >= nefCtx.cfg.MaxSubSupport+nefCtx.cfg.SubStartID {
 		return "", errors.New("MAX SUBS Created")
@@ -74,7 +75,8 @@ func (af *afData) afAddSubscription(nefCtx *nefContext, ti TrafficInfluSub) (loc
 	afsub := afSubscription{subid: subIDStr, ti: ti}
 
 	//Create Location URI
-	afsub.loc = /*TODO - Add Local IP:Port */ nefCtx.cfg.LocationPrefix + af.afid + "/subscriptions/" + subIDStr
+	afsub.loc = /*TODO - Add Local IP:Port */ nefCtx.cfg.LocationPrefix +
+		af.afid + "/subscriptions/" + subIDStr
 
 	//Link the subscription with the AF
 	af.subs[subIDStr] = &afsub
@@ -86,10 +88,11 @@ func (af *afData) afAddSubscription(nefCtx *nefContext, ti TrafficInfluSub) (loc
 	return afsub.loc, nil
 }
 
-func (af *afData) afUpdateSubscription(nefCtx *nefContext, subID string, ti TrafficInfluSub) (err error) {
+func (af *afData) afUpdateSubscription(nefCtx *nefContext, subID string,
+	ti TrafficInfluSub) (err error) {
 
 	sub, ok := af.subs[subID]
-	if ok == false {
+	if !ok {
 		sub.ti = ti
 		return errors.New("Subscription Not Found")
 	}
@@ -97,11 +100,12 @@ func (af *afData) afUpdateSubscription(nefCtx *nefContext, subID string, ti Traf
 	return
 }
 
-func (af *afData) afGetSubscription(nefCtx *nefContext, subID string) (ti TrafficInfluSub, err error) {
+func (af *afData) afGetSubscription(nefCtx *nefContext, subID string) (
+	ti TrafficInfluSub, err error) {
 
 	_, ok := af.subs[subID]
 
-	if ok == true {
+	if ok {
 		return af.subs[subID].ti, nil
 	}
 
@@ -109,7 +113,8 @@ func (af *afData) afGetSubscription(nefCtx *nefContext, subID string) (ti Traffi
 
 }
 
-func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (subslist []TrafficInfluSub, err error) {
+func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (
+	subslist []TrafficInfluSub, err error) {
 
 	if len(af.subs) > 0 {
 		for _, value := range af.subs {
@@ -125,16 +130,21 @@ func (af *afData) afDeleteSubscription(nefCtx *nefContext, subID string) error {
 	//Check if AF is already present
 	_, ok := af.subs[subID]
 
-	if ok == true {
+	if ok {
 		delete(af.subs, subID)
 		af.subIdnum--
 		return nil
 	}
 
+	err := af.afDestroy()
+	if err != nil {
+		log.Errf("AF Destroy Failed: %v", err)
+	}
+
 	return errors.New("SubscriotionId not found")
 
 }
-func (af *afData) afDestroy(afid string) error {
+func (af *afData) afDestroy() error {
 
 	//Todo delete all subscriptions, needed in go ??
 	//Needed for gracefully disconnecting
@@ -183,20 +193,25 @@ func NEFInit() error {
 	return nef.nefCreate()
 }*/
 
-func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData, err error) {
+func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData,
+	err error) {
 
 	var afe afData
 
 	//Check if AF is already present
 	_, ok := nef.afs[afID]
 
-	if ok == true {
+	if ok {
 		return nef.afs[afID], errors.New("AF already present")
 	}
 
 	//Create a new entry of AF
 
-	afe.afCreate(nefCtx, afID)
+	err1 := afe.afCreate(nefCtx, afID)
+	if err1 != nil {
+		log.Errf("AF Create Failed: %v", err1)
+		return nil, err1
+	}
 	nef.afs[afID] = &afe
 	nef.afcount++
 
@@ -208,7 +223,7 @@ func (nef *nefData) nefGetAf(afID string) (af *afData, err error) {
 	//Check if AF is already present
 	afe, ok := nef.afs[afID]
 
-	if ok == true {
+	if ok {
 		return afe, nil
 	}
 	err = errors.New("AF entry not present")
@@ -220,7 +235,7 @@ func (nef *nefData) nefDeleteAf(afID string) (err error) {
 	//Check if AF is already present
 	_, ok := nef.afs[afID]
 
-	if ok == true {
+	if ok {
 		delete(nef.afs, afID)
 		nef.afcount--
 		return nil
@@ -235,7 +250,8 @@ func (nef *nefData) nefDestroy() {
 	// Todo
 }
 
-func createNewSub(nefCtx *nefContext, afID string, ti TrafficInfluSub) (loc string, err error) {
+func createNewSub(nefCtx *nefContext, afID string, ti TrafficInfluSub) (
+	loc string, err error) {
 
 	var af *afData
 
@@ -288,7 +304,7 @@ func validateTIS(nefCtx *nefContext, ti TrafficInfluSub) (err error) {
 func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
-	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
 	vars := mux.Vars(r)
@@ -314,7 +330,10 @@ func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
 		w.WriteHeader(http.StatusOK)
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Write(mdata)
+	_, err = w.Write(mdata)
+	if err != nil {
+		log.Errf("Write Failed: %v", err)
+	}
 
 	w.WriteHeader(http.StatusOK)
 	log.Infof("HTTP Response sent: %d", http.StatusOK)
@@ -325,15 +344,13 @@ func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
 func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
-	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
 	vars := mux.Vars(r)
 	log.Infof(" AFID  : %s", vars["afId"])
 
 	b, err := ioutil.ReadAll(r.Body)
-
-	defer r.Body.Close()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -354,6 +371,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 		log.Infof("Error: Failed to UNmarshal POST req ")
 		log.Infoln(err1)
 		w.WriteHeader(http.StatusInternalServerError)
+		_ = r.Body.Close()
 		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 		return
 	}
@@ -381,21 +399,26 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 		//panic(err3)
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
+		_ = r.Body.Close()
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Location", loc)
 
-	w.Write(mdata)
+	_, err = w.Write(mdata)
+	if err != nil {
+		log.Errf("Write Failed: %v", err)
+	}
 
 	w.WriteHeader(http.StatusOK)
+	_ = r.Body.Close()
 	log.Infof("HTTP Response sent: %d", http.StatusOK)
 }
 
 // ReadTrafficInfluenceSubscription : Read a particular subscription details
 func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 
-	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
 	vars := mux.Vars(r)
@@ -429,7 +452,10 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Write(mdata)
+	_, err = w.Write(mdata)
+	if err != nil {
+		log.Errf("Write Failed: %v", err)
+	}
 
 	w.WriteHeader(http.StatusOK)
 	log.Infof("HTTP Response sent: %d", http.StatusOK)
@@ -440,7 +466,7 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
-	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
 	vars := mux.Vars(r)
@@ -452,10 +478,9 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 
 		b, err := ioutil.ReadAll(r.Body)
 
-		defer r.Body.Close()
-
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			_ = r.Body.Close()
 			return
 		}
 
@@ -470,6 +495,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 			log.Infoln(err1)
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
+			_ = r.Body.Close()
 			return
 		}
 
@@ -477,6 +503,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 		if ok != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
+			_ = r.Body.Close()
 			return
 		}
 
@@ -490,11 +517,15 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 		}
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-		w.Write(mdata)
+		_, err = w.Write(mdata)
+		if err != nil {
+			log.Errf("Write Failed: %v", err)
+		}
 
 	}
 
 	w.WriteHeader(http.StatusOK)
+	_ = r.Body.Close()
 	log.Infof("HTTP Response sent: %d", http.StatusOK)
 }
 
@@ -503,7 +534,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
-	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
 	vars := mux.Vars(r)
@@ -515,10 +546,9 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 
 		b, err := ioutil.ReadAll(r.Body)
 
-		defer r.Body.Close()
-
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			_ = r.Body.Close()
 			return
 		}
 
@@ -533,6 +563,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 			log.Infoln(err1)
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
+			_ = r.Body.Close()
 			return
 		}
 
@@ -540,6 +571,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 		if ok != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
+			_ = r.Body.Close()
 			return
 		}
 
@@ -553,11 +585,15 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 		}
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-		w.Write(mdata)
+		_, err = w.Write(mdata)
+		if err != nil {
+			log.Errf("Write Failed: %v", err)
+		}
 
 	}
 
 	w.WriteHeader(http.StatusOK)
+	_ = r.Body.Close()
 	log.Infof("HTTP Response sent: %d", http.StatusOK)
 }
 
@@ -566,7 +602,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
-	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
 	vars := mux.Vars(r)
@@ -579,6 +615,7 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 		log.Infoln(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Infof("HTTP Response sent: %d", http.StatusInternalServerError)
+		_ = nef.nefDeleteAf(vars["afId"])
 		return
 	}
 	err = af.afDeleteSubscription(nefCtx, vars["subscriptionId"])
@@ -602,9 +639,11 @@ func logNef(nef *nefData) {
 		for key, value := range nef.afs {
 			log.Infof(" AFKey : %+v, valAF_Id : %+v", key, value.afid)
 
-			log.Infof("SUB Count for AF: %+v is %+v", value.afid, len(value.subs))
+			log.Infof("SUB Count for AF: %+v is %+v", value.afid,
+				len(value.subs))
 			for ks, vs := range value.subs {
-				log.Infof("   SubKey : %+v, valSub_Id : %+v, ServiceId: %+v", ks, vs.subid, vs.ti.AfServiceID)
+				log.Infof("   SubKey : %+v, valSub_Id : %+v, ServiceId: %+v",
+					ks, vs.subid, vs.ti.AfServiceID)
 			}
 		}
 	}

@@ -75,8 +75,11 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 		if err = server.Close(); err != nil {
 			log.Errf("Could not close NEF server: %#v", err)
 		}
-
 		log.Info("NEF server stopped")
+
+		/* De-initializes NEF Data */
+		nefCtx.nef.nefDestroy()
+
 		stopServerCh <- true
 	}(stopServerCh)
 
@@ -107,8 +110,9 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 //    - ctx:     NEF Module Running context
 //    - cfgPath: This is NEF Module Configuration file path
 // Output Args:
-//     - error: retruns error in case any error occurred in reading NEF
-//              configuration file or any error occurred in starting server
+//     - error: returns error in case any error occurred in reading NEF
+//              configuration file, NEF create error or any error occurred in
+//              starting server
 func Run(ctx context.Context, cfgPath string) error {
 
 	var nefCtx nefContext
@@ -122,7 +126,11 @@ func Run(ctx context.Context, cfgPath string) error {
 	}
 
 	/* Creates/Initializes NEF Data */
-	nefCtx.nef.nefCreate()
+	err = nefCtx.nef.nefCreate()
+	if err != nil {
+		log.Errf("NEF Create Failed: %v", err)
+		return err
+	}
 
 	return runServer(ctx, &nefCtx)
 }
