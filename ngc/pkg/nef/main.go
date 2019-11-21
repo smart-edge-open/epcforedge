@@ -23,33 +23,38 @@ import (
 	logtool "github.com/otcshare/common/log"
 )
 
-/* Log handler initialized. This is to be used throughout the nef module for
- * logging */
+// Log handler initialized. This is to be used throughout the nef module for
+// logging
 var log = logtool.DefaultLogger.WithField("NEF", nil)
 
-/* Path for NEF Configuration file */
+// Path for NEF Configuration file
 const cfgPath string = "../configs/nef.json"
 
-/* Function: main
- * Description: Entry point for NEF Module Execution
- * Input Args: None
- * Output Args: None */
+// main: Entry point for NEF Module Execution
+// Input Args: None
+// Output Args: None
 func main() {
 
 	/* Opening a file for Logging and setting it to Logger Module */
-	file, err1 := os.OpenFile("nef.log", os.O_CREATE|os.O_WRONLY, 0644)
-	if err1 != nil {
-		log.Errf("Failed to open NEF log file: %s", err1.Error())
-		os.Exit(1)
-	}
-	defer file.Close()
-	logtool.SetOutput(file)
+	//file, err1 := os.OpenFile("nef.log", os.O_CREATE|os.O_WRONLY, 0644)
+	//if err1 != nil {
+	//	log.Errf("Failed to open NEF log file: %s", err1.Error())
+	//	os.Exit(1)
+	//}
+
+	//if file.Truncate(0) != nil {
+	//	log.Errf("Failed to truncate file opened for logging")
+	//}
+	//logtool.SetOutput(file)
 
 	/* Reading Log Level and and set it to logger, As of now it is hardcoded to
 	 * info */
 	lvl, err := logtool.ParseLevel("info")
 	if err != nil {
 		log.Errf("Failed to parse log level: %s", err.Error())
+		//if file.Close() != nil {
+		//	log.Errf("Failed to close file opened for logging")
+		//}
 		os.Exit(1)
 	}
 	logtool.SetLevel(lvl)
@@ -59,13 +64,13 @@ func main() {
 
 	/* Creating a context. This context will be used for following:
 	 * 1. To store the NEF Module Context data and other module related data.
-	 * 2. To notify in case context is cancelled. */
+	 * 2. To notify in case context is canceled. */
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	/* Subscribing to os Interrupt/Signal - SIGTERM and waiting for
 	 * notification in a separate go routine. When the notification is received
-	 * the created context will be cancelled */
+	 * the created context will be canceled */
 	osSignalCh := make(chan os.Signal, 1)
 	signal.Notify(osSignalCh, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -75,7 +80,11 @@ func main() {
 	}()
 
 	log.Infof("Starting NEF server ...")
-	Run(ctx, cfgPath)
+	_ = Run(ctx, cfgPath)
+
+	//if file.Close() != nil {
+	//	log.Errf("Failed to close file opened for logging")
+	//}
 }
 
 func unusedlint() {

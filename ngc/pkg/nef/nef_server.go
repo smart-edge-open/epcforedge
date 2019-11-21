@@ -22,7 +22,7 @@ import (
 	"github.com/otcshare/edgenode/pkg/config"
 )
 
-/* Config: NEF Module Configuration Data Structure */
+// Config: NEF Module Configuration Data Structure
 type Config struct {
 	Endpoint                  string `json:"endpoint"`
 	LocationPrefix            string `json:"locationPrefix"`
@@ -32,23 +32,22 @@ type Config struct {
 	UpfNotificationResUriPath string `json:"UpfNotificationResUriPath"`
 }
 
-/* NEF Module Context Data Structure */
+// NEF Module Context Data Structure
 type nefContext struct {
 	cfg Config
 	nef nefData
 }
 
-/* Function: runServer
-*  Description: This function cretaes a Router object and starts a HTTP Server
-*              in a separate go routine. Also it listens for NEF module
-*              running context cancellation event in another go routine. If
-*              cancellation event occurs, it shutdowns the HTTP Server.
-*  Input Args:
-*    - ctx:    NEF Module Running context
-     - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
-*  Output Args:
-*     - error: retruns no error. It only logs the error if any happened while
-*              starting the HTTP Server */
+// runServer : This function cretaes a Router object and starts a HTTP Server
+//             in a separate go routine. Also it listens for NEF module
+//             running context cancellation event in another go routine. If
+//             cancellation event occurs, it shutdowns the HTTP Server.
+// Input Args:
+//   - ctx:    NEF Module Running context
+//   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
+// Output Args:
+//    - error: retruns no error. It only logs the error if any happened while
+//             starting the HTTP Server
 func runServer(ctx context.Context, nefCtx *nefContext) error {
 
 	var err error
@@ -69,15 +68,19 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 
 	stopServerCh := make(chan bool, 2)
 
-	/* Go Routine is spawned here for listening for cancellation event on context */
+	/* Go Routine is spawned here for listening for cancellation event on
+	 * context */
 	go func(stopServerCh chan bool) {
 		<-ctx.Done()
 		log.Info("Executing graceful stop")
 		if err = server.Close(); err != nil {
 			log.Errf("Could not close NEF server: %#v", err)
 		}
-
 		log.Info("NEF server stopped")
+
+		/* De-initializes NEF Data */
+		nefCtx.nef.nefDestroy()
+
 		stopServerCh <- true
 	}(stopServerCh)
 
@@ -101,29 +104,34 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	return nil
 }
 
-/* Function: Run
-*  Description: This function reads the NEF Module configuration file and
-*              stores in NEF Module Context. Also it  calls runServer function
-*              for starting HTTP Server.
-*  Input Args:
-*    - ctx:     NEF Module Running context
-*    - cfgPath: This is NEF Module Configuration file path
-*  Output Args:
-*     - error: retruns error in case any error occurred in reading NEF
-*              configuration file or any error occurred in starting server */
+// Run : This function reads the NEF Module configuration file and stores in
+//       NEF Module Context. This also calls the Initialization/Creation of
+//       NEF Data. Also it  calls runServer function for starting HTTP Server.
+// Input Args:
+//    - ctx:     NEF Module Running context
+//    - cfgPath: This is NEF Module Configuration file path
+// Output Args:
+//     - error: returns error in case any error occurred in reading NEF
+//              configuration file, NEF create error or any error occurred in
+//              starting server
 func Run(ctx context.Context, cfgPath string) error {
 
 	var nefCtx nefContext
 
 	/* Reads NEF Configuration file which is json format. Also it converts
-	 * configuration data from jason format to go structure data */
+	 * configuration data from json format to structure data */
 	err := config.LoadJSONConfig(cfgPath, &nefCtx.cfg)
 	if err != nil {
 		log.Errf("Failed to load NEF configuration: %v", err)
 		return err
 	}
 
-	nefCtx.nef.nefCreate()
+	/* Creates/Initializes NEF Data */
+	err = nefCtx.nef.nefCreate()
+	if err != nil {
+		log.Errf("NEF Create Failed: %v", err)
+		return err
+	}
 
 	return runServer(ctx, &nefCtx)
 }
