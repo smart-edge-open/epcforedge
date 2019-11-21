@@ -639,10 +639,6 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
-	log.Infof("===============================================")
-	log.Infof(" Method : POST ")
-	log.Infof(" URL PATH : " + r.URL.Path[1:])
-
 	w.WriteHeader(http.StatusOK)
 
 	logNef(nef)

@@ -100,6 +100,10 @@ func NewNEFRouter(nefCtx *nefContext) *mux.Router {
 	}
 
 	for _, route := range NEFRoutes {
+
+		var handler http.Handler = route.Handler
+		handler = nefRouteLogger(handler, route.Name)
+
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).

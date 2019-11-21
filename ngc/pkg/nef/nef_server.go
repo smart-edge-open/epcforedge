@@ -28,7 +28,7 @@ type Config struct {
 	LocationPrefix            string `json:"locationPrefix"`
 	MaxSubSupport             int    `json:"maxSubSupport"`
 	MaxAFSupport              int    `json:"maxAFSupport"`
-	SubStartId                int    `json:"subStartId"`
+	SubStartID                int    `json:"subStartID"`
 	UpfNotificationResUriPath string `json:"UpfNotificationResUriPath"`
 }
 
