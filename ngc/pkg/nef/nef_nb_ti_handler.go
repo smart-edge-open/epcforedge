@@ -17,6 +17,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -636,12 +637,17 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 func NotifySmfUPFEvent(w http.ResponseWriter,
 	r *http.Request) {
 
-	nefCtx := r.Context().Value(string("nefCtx")).(*nefContext)
-	nef := &nefCtx.nef
+	ev := EventNotification{}
+	notifURI := URI("af_uri")
+
+	//nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	fmt.Println(nefCtx)
+	var afClient AfNotification = NewAfClient(&nefCtx.cfg)
+	_ = afClient.AfNotificationUpfEvent(r.Context(), notifURI, ev)
 
 	w.WriteHeader(http.StatusOK)
-
-	logNef(nef)
 
 }
 

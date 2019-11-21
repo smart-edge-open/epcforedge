@@ -26,12 +26,8 @@ type PcfClientStub struct {
 	pcf string
 }
 
-// Configuration to be removed
-type Configuration struct {
-}
-
 // NewPCFClient creates a new PCF Client
-func NewPCFClient(cfg *Configuration) *PcfClientStub {
+func NewPCFClient(cfg *Config) *PcfClientStub {
 
 	c := &PcfClientStub{}
 	c.pcf = "PCF Stub"

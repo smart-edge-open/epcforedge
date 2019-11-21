@@ -27,7 +27,7 @@ type UdrClientStub struct {
 }
 
 // NewUDRClient creates a new Udr Client
-func NewUDRClient(cfg *Configuration) *UdrClientStub {
+func NewUDRClient(cfg *Config) *UdrClientStub {
 
 	c := &UdrClientStub{}
 	c.udr = "UDR Stub"

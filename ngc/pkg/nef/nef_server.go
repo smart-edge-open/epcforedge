@@ -30,6 +30,7 @@ type Config struct {
 	MaxAFSupport              int    `json:"maxAFSupport"`
 	SubStartID                int    `json:"subStartID"`
 	UpfNotificationResUriPath string `json:"UpfNotificationResUriPath"`
+	UserAgent                 string `json:"UserAgent"`
 }
 
 // NEF Module Context Data Structure

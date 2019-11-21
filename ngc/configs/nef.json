@@ -4,5 +4,6 @@
     "MaxSubSupport": 10,
     "MaxAFSupport": 2,
     "SubStartId": 11111,
-    "UpfNotificationResUriPath": "/3gpp-traffic-influence/v1/notification/upf"
+    "UpfNotificationResUriPath": "/3gpp-traffic-influence/v1/notification/upf",
+    "UserAgent": "NEF-OPENNESS-1912"
 }
