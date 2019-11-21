@@ -16,15 +16,12 @@ FROM centos:7.6.1810
 
 ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
-ENV no_proxy=localhost,127.0.0.1,pod-af
+ENV no_proxy=localhost,127.0.0.1,pod-nef-stub
 
 RUN yum install -y wget\
 	net-tools \ 
 	nmap \
         && yum clean all
-
-ENV PORT 8080
-EXPOSE 8080
 
 WORKDIR /root
 COPY   ./main . 

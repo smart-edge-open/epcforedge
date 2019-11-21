@@ -8,7 +8,7 @@ spec:
   volumes:
   - name: shared-configs
     hostPath:
-      path: /usr/config
+      path: /usr/configs
   - name: shared-certs
     hostPath:
       path: /var/certs
@@ -28,7 +28,7 @@ spec:
         memory: 1Gi
     volumeMounts:
     - name: shared-data
-      mountPath: /root/configs
+      mountPath: /usr/configs
     - name: shared-certs
       mountPath: /var/certs
 
@@ -47,14 +47,14 @@ spec:
        volumeMounts:
     volumeMounts:
     - name: shared-data
-      mountPath: /root/configs
+      mountPath: /usr/configs
     - name: shared-certs
       mountPath: /var/certs
         
   - securityContext:
       privileged: false
     name: cnca-stub
-    image: cnca-image:1.0
+    image: cnca-stub-image:1.0
     imagePullPolicy: Never
     command: [ "/bin/bash", "-c", "--" ]
     args: [ "while true; do sleep 300000; done;" ]
@@ -66,7 +66,7 @@ spec:
         memory: 1Gi
     volumeMounts:
     - name: shared-data
-      mountPath: /root/configs
+      mountPath: /usr/configs
     - name: shared-certs
       mountPath: /var/certs
 

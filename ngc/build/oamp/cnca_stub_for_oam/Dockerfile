@@ -16,13 +16,15 @@ FROM centos:7.6.1810
 
 ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
-#RUN yum install -y libvirt-devel\
-#        && yum clean all
+ENV no_proxy=localhost,127.0.0.1,pod-oam
 
+RUN yum install -y wget\
+        net-tools \
+        nmap \
+        && yum clean all
 
 WORKDIR /root/
-COPY  cnca_stub_for_oam . 
+COPY  ./main . 
 COPY ./entrypoint.sh .
-
 
 CMD ["./entrypoint.sh"]

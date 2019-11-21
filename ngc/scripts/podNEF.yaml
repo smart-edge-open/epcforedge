@@ -8,7 +8,7 @@ spec:
   volumes:
   - name: shared-configs
     hostPath:
-      path: /root/configs
+      path: /usr/configs
   - name: shared-certs
     hostPath:
       path: /var/certs
@@ -16,7 +16,7 @@ spec:
   - securityContext:
       privileged: false
     name: pod-nef 
-    image: nef-stub-image:1.0
+    image: nef-image:1.0
     imagePullPolicy: Never
     command: [ "/bin/bash", "-c", "--" ]
     #args: [ "./entrypoint.sh" ]
@@ -30,9 +30,10 @@ spec:
     - containerPort: 8081
     volumeMounts:
     - name: shared-configs
-      mountPath: /root/configs
+      mountPath: /usr/configs
     - name: shared-certs
       mountPath: /var/certs
+  restartPolicy: Always
 
 
 

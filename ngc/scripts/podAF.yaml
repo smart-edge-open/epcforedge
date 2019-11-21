@@ -8,7 +8,7 @@ spec:
   volumes:
   - name: shared-configs
     hostPath:
-      path: /usr/config
+      path: /usr/configs
   - name: shared-certs
     hostPath:
       path: /var/certs
@@ -29,7 +29,15 @@ spec:
     ports:
     - containerPort: 8080
     volumeMounts:
-    - name: shared-data
-      mountPath: /root/configs
+    - name: shared-configs
+      mountPath: /usr/configs
     - name: shared-certs
       mountPath: /var/certs
+  tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: "Exists"
+    effect: "NoSchedule"
+  nodeSelector:
+    5g-af: "true"
+  restartPolicy: Always
+
