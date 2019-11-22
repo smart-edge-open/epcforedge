@@ -4,21 +4,64 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	//"io/ioutil"
-	//"strings"
+	"encoding/json"
+	"bytes"
+	af "github.com/otcshare/epcforedge/ngc/pkg/af/lib"
 )
 
-//func SendGetRequest(c http.Client, 
 
 func main(){	
 
 	client := &http.Client{}
-	fmt.Println("Sending GET request")
-	request, err := http.NewRequest("GET", "http://localhost:8080/CNCA/1.0.1/subscriptions", nil)
+
+	var ReqBody = &af.TrafficInfluSub{
+		AfAppID: "app001",
+		ExternalGroupID: "",
+		AfServiceID: "",
+  		AfTransID: "",
+		Dnn: "edgeLocation001",
+  		Snssai: af.Snssai{Sst: 0,
+    			 Sd: "default"},
+  		SubscribedEvents: []af.SubscribedEvent{""},
+  		Gpsi: "",
+  		Ipv4Addr: "",
+  		Ipv6Addr: "",
+  		MacAddr: "",
+  		DnaiChgType: "",
+  		NotificationDestination: "",
+  		Self: "",
+  		//TrafficFilters: []af.FlowInfo{{FlowDescriptions: nil,
+		//			      FlowID: nil}},
+  		//EthTrafficFilters: []af.EthFlowDescription{{""}},
+  		TrafficRoutes: []af.RouteToLocation{{Dnai: "", 
+						RouteProfID: "", 
+				RouteInfo: af.RouteInformation{Ipv4Addr: "", Ipv6Addr: "", PortNumber: 0}}},
+  		TempValidities: []af.TemporalValidity{{StartTime: "",
+						      StopTime: "",}},
+  		ValidGeoZoneIDs: nil,
+  		SuppFeat: "",
+    		RequestTestNotification: true,
+  		WebsockNotifConfig: af.WebsockNotifConfig{WebsocketURI: "",
+    				     RequestWebsocketURI: true},
+  		AppReloInd: false,
+  		AnyUeInd: true,
+		}
+
+	buf := new(bytes.Buffer)
+	json.NewEncoder(buf).Encode(ReqBody)
+
+	
+	//fmt.Println("Sending GET request")
+	fmt.Println("Sending POST request")
+
+	//request, err := http.NewRequest("GET", "http://localhost:8080/CNCA/1.0.1/subscriptions", nil)
+	request, err := http.NewRequest("POST", "http://localhost:8080/CNCA/1.0.1/subscriptions", buf)
 	if err != nil {
-		fmt.Println("Status code 0")
+		fmt.Println("Error preparing request")
 	}
+
 	request.Header.Set("Content-Type", "application/json")
+
 	response, err := client.Do(request)
 	
 	if err != nil {
@@ -26,13 +69,6 @@ func main(){
 		log.Fatal(err)
 	}
 	
-	//body, err := ioutil.ReadAll(response.body)
-	
-	//if err != nil {
-	//	fmt.Printf("Status code 2 %v", resp.StatusCode)
-	//	log.Fatal(err)
-	//}
-
-	//fmt.Println(string(body))
-	fmt.Printf("Response status : %v", response.Status)	
+	defer response.Body.Close()
+	fmt.Printf("Response status : %v \n", response.Status)	
 }

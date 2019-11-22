@@ -2,11 +2,11 @@ package main_test
 
 import (
 	"testing"
-	//"context"
-	//"fmt"
+	"context"
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	//af "github.com/otcshare/epcforedge/ngc/pkg/af/lib"
+	af "github.com/otcshare/epcforedge/ngc/pkg/af/lib"
 )
 
 func TestGoApiTests(t *testing.T) {
@@ -14,7 +14,7 @@ func TestGoApiTests(t *testing.T) {
 	RunSpecs(t, "CncaClient Suite")
 }
 
-/*const(
+const(
 	cfgPath = "/root/go_projects/src/github.com/otcshare/epcforedge/ngc"
 )
 
@@ -53,4 +53,4 @@ func stopAf(stopIndication chan bool) int {
 	}
 
 	return 1
-}*/
+}
