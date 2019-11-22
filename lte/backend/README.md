@@ -58,7 +58,7 @@ In the test directory , there two types of tests:
 add_definitions(-g -Wall)
 add_definitions(-O3)
 add_definitions(-DCUPS_API_INT64_TYPE)
-#add_definitions(-DINT_TEST)
+add_definitions(-DINT_TEST)
 ```
 - Then make 
 - Copy json_payload folder (backend/test/unit_test/test_app/json_payload) into the same folder with oamagent

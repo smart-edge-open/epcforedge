@@ -73,6 +73,9 @@ start_pf() {
     echo "[starting] nginx ..."
     test -f ${NGINX_CONF} && cp -a ${NGINX_CONF} ${NGINX_CONF}-bk
     cp -a ${CURRENT_DIR}/ut_http.conf ${NGINX_CONF}
+    test -d ${CURRENT_DIR}/ssl && rm -rf ${CURRENT_DIR}/ssl
+    mkdir -p ${CURRENT_DIR}/ssl
+    sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ${CURRENT_DIR}/ssl/mec.key -out ${CURRENT_DIR}/ssl/mec.crt -subj "/C=US/ST=Mec/L=Mec/O=Mec/OU=Mec/CN=mec.local"
     cp -a ${CURRENT_DIR}/ssl ${NGINX_SSL}
     #nginx start -c $NGINX_CONF;
     nginx
@@ -125,6 +128,9 @@ run_ut() {
 }
 clean_ut() {
     echo "[starting] cleanUT"
+    rm -rf ssl
+    rm -rf ../test_app/build
+    rm -f ../test_app/oamagent-test
     rm -rf ../tmp
     rm -rf ../result   
 }
