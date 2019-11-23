@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package af
+package ngcaf
 
 import (
 	"context"
@@ -32,8 +32,6 @@ func createSubscription(cliCtx context.Context, ts TrafficInfluSub,
 		afCtx.cfg.AfID, ts)
 
 	if err != nil {
-
-		log.Errf("AF Traffic Influance Subscription POST: %s", err.Error())
 		return TrafficInfluSub{}, nil, err
 	}
 	return tsResp, resp, nil
@@ -76,11 +74,16 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 	afCtx.transactions[transID] = TrafficInfluSub{}
 	log.Infof("Saving transaction ID %d", transID)
 
-	ts.AfTransID = strconv.Itoa(transID)
+	ts.AFTransID = strconv.Itoa(transID)
+	if len(tsResp.SubscribedEvents) == 0 {
+		ts.Self = Link("https://" + afCtx.cfg.SrvCfg.NotifEndpoint +
+			DefaultNotifURL)
+	}
 	tsResp, resp, err = createSubscription(cliCtx, ts, afCtx)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription create : %s", err.Error())
 		delete(afCtx.transactions, transID)
+		log.Infof("Deleted transaction ID %v", transID)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -88,12 +91,14 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 	if url, err = resp.Location(); err != nil {
 		log.Errf("Traffic Influence Subscription create: %s", err.Error())
 		delete(afCtx.transactions, transID)
+		log.Infof("Deleted transaction ID %v", transID)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	if subscriptionID, err = getSubsIDFromURL(url); err != nil {
 		delete(afCtx.transactions, transID)
+		log.Infof("Deleted transaction ID %v", transID)
 		log.Errf("Traffic Influence Subscription create: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -103,9 +108,10 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 	if len(tsResp.SubscribedEvents) == 0 {
 		//keep in memory only subscriptions to notifications
 		delete(afCtx.transactions, transID)
+		log.Infof("Deleted transaction ID %v", transID)
 	} else {
 		afCtx.transactions[transID] = tsResp
-		log.Infof("Saving subscription %s to local memory.",
+		log.Infof("Saving subscription %s.",
 			subscriptionID)
 		afCtx.subscriptions[subscriptionID] =
 			map[string]TrafficInfluSub{

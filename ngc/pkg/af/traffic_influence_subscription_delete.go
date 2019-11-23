@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package af
+package ngcaf
 
 import (
 	"context"
@@ -21,18 +21,15 @@ import (
 )
 
 func deleteSubscription(cliCtx context.Context, afCtx *afContext,
-	subscriptionID string) (*http.Response, error) {
+	sID string) (*http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
 	resp, err := cli.TrafficInfluSubDeleteAPI.SubscriptionDelete(cliCtx,
-		afCtx.cfg.AfID, subscriptionID)
+		afCtx.cfg.AfID, sID)
 
 	if err != nil {
-
-		log.Errf("AF Traffic Influance Subscription delete: %s", err.Error())
-
 		return nil, err
 	}
 	return resp, nil
@@ -66,11 +63,13 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if interMap, ok := afCtx.subscriptions[subscriptionID]; ok {
-
 		for transID := range interMap {
 			var i int
-			if i, err = strconv.Atoi(transID); err == nil {
+			if i, err = strconv.Atoi(transID); err != nil {
+				log.Errf("Error converting transID to integer: %v", err)
+			} else {
 				delete(afCtx.transactions, i)
+				log.Infof("Deleted transaction ID %v", i)
 			}
 		}
 		delete(afCtx.subscriptions, subscriptionID)

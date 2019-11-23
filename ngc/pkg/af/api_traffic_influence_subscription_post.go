@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package af
+package ngcaf
 
 import (
 	"context"
@@ -32,19 +32,19 @@ var (
 type TrafficInfluenceSubscriptionPostAPIService service
 
 func (a *TrafficInfluenceSubscriptionPostAPIService) handlePostResponse(
-	localVarReturnValue *TrafficInfluSub, localVarHTTPResponse *http.Response,
-	localVarBody []byte) error {
+	ts *TrafficInfluSub, r *http.Response,
+	body []byte) error {
 
-	if localVarHTTPResponse.StatusCode == 201 {
+	if r.StatusCode == 201 {
 
-		err := json.Unmarshal(localVarBody, localVarReturnValue)
+		err := json.Unmarshal(body, ts)
 		if err != nil {
 			log.Errf("Error decoding response body %s, ", err.Error())
 		}
 		return err
 	}
 
-	return handlePostPutPatchErrorResp(localVarHTTPResponse, localVarBody)
+	return handlePostPutPatchErrorResp(r, body)
 }
 
 /*
@@ -62,53 +62,53 @@ func (a *TrafficInfluenceSubscriptionPostAPIService) SubscriptionPost(
 	*http.Response, error) {
 
 	var (
-		localVarHTTPMethod  = strings.ToUpper("Post")
-		localVarPostBody    interface{}
-		localVarReturnValue TrafficInfluSub
+		method  = strings.ToUpper("Post")
+		postBody    interface{}
+		ret TrafficInfluSub
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/{afId}/subscriptions"
-	localVarPath = strings.Replace(localVarPath,
+	path := a.client.cfg.NEFBasePath + "/{afId}/subscriptions"
+	path = strings.Replace(path,
 		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
 
-	localVarHeaderParams := make(map[string]string)
+	headerParams := make(map[string]string)
 
 	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
+	contentTypes := []string{"application/json"}
 
 	// set Content-Type header
-	localVarHTTPContentType :=
-		selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	contentType :=
+		selectHeaderContentType(contentTypes)
+	if contentType != "" {
+		headerParams["Content-Type"] = contentType
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	headerAccepts := []string{"application/json"}
 
 	// set Accept header
-	localVarHTTPHeaderAccept :=
-		selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	headerAccept :=
+		selectHeaderAccept(headerAccepts)
+	if headerAccept != "" {
+		headerParams["Accept"] = headerAccept
 	}
 	// body params
-	localVarPostBody = &body
-	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod,
-		localVarPostBody, localVarHeaderParams)
+	postBody = &body
+	r, err := a.client.prepareRequest(ctx, path, method,
+		postBody, headerParams)
 	if err != nil {
-		return localVarReturnValue, nil, err
+		return ret, nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+	resp, err := a.client.callAPI(r)
+	if err != nil || resp == nil {
+		return ret, resp, err
 	}
 
-	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	respBody, err := ioutil.ReadAll(resp.Body)
 	defer func() {
-		err = localVarHTTPResponse.Body.Close()
+		err = resp.Body.Close()
 		if err != nil {
 			log.Errf("response body was not closed properly")
 		}
@@ -116,14 +116,14 @@ func (a *TrafficInfluenceSubscriptionPostAPIService) SubscriptionPost(
 
 	if err != nil {
 		log.Errf("http response body could not be read")
-		return localVarReturnValue, localVarHTTPResponse, err
+		return ret, resp, err
 	}
 
-	if err = a.handlePostResponse(&localVarReturnValue, localVarHTTPResponse,
-		localVarBody); err != nil {
+	if err = a.handlePostResponse(&ret, resp,
+		respBody); err != nil {
 
-		return localVarReturnValue, localVarHTTPResponse, err
+		return ret, resp, err
 	}
 
-	return localVarReturnValue, localVarHTTPResponse, nil
+	return ret, resp, nil
 }

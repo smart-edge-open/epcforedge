@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ import (
 	"os/signal"
 	"syscall"
 
+	ngcaf "github.com/otcshare/epcforedge/ngc/pkg/af"
 	logger "github.com/otcshare/common/log"
-
-	 af "./lib"
 )
 
 var log = logger.DefaultLogger.WithField("main", nil)
+const cfgPath = "configs/af.json"
 
 func main() {
 
@@ -44,6 +44,6 @@ func main() {
 		cancel()
 	}()
 
-	log.Infof("Starting server ...")
-	af.Run(parenCtx, "../../configs/af.json")
+	log.Infof("Starting NGC AF servers..")
+	ngcaf.Run(parenCtx, cfgPath)
 }

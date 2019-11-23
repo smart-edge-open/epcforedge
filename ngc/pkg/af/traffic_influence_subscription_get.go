@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package af
+package ngcaf
 
 import (
 	"context"
@@ -26,15 +26,13 @@ func getSubscription(cliCtx context.Context, afCtx *afContext,
 	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
-	tsResp, resp, err := cli.TrafficInfluSubGetAPI.SubscriptionGet(
+	ts, resp, err := cli.TrafficInfluSubGetAPI.SubscriptionGet(
 		cliCtx, afCtx.cfg.AfID, subscriptionID)
 
 	if err != nil {
-
-		log.Errf("AF Traffic Influance Subscription get: %s", err.Error())
 		return TrafficInfluSub{}, nil, err
 	}
-	return tsResp, resp, nil
+	return ts, resp, nil
 }
 
 // GetSubscription function
@@ -45,7 +43,6 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 		tsResp         TrafficInfluSub
 		resp           *http.Response
 		subscriptionID string
-		transID        int
 		tsRespJSON     []byte
 	)
 
@@ -55,21 +52,13 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	transID, err = genTransactionID(afCtx)
-	if err != nil {
-
-		log.Errf("Traffic Influance Subscription get %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	subscriptionID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription get: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	afCtx.transactions[transID] = TrafficInfluSub{}
+	
 	tsResp, resp, err = getSubscription(cliCtx, afCtx, subscriptionID)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription get : %s", err.Error())

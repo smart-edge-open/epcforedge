@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+# Copyright 2019 Intel Corporation, Inc. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #GOOS=linux go build -o "${BUILD_DIR}/oam-flexcore" ./pkg/oam ./internal/flexcore/oam_backend.go
 
-export GO111MODULE = on
+export GO115MODULE = on
 
 .PHONY: build af oam oam-test oam-test-flexcore lint test-unit
 TMP_DIR:=$(shell mktemp -d)
@@ -28,7 +28,7 @@ build: af oam
 
 af:
 	mkdir -p "${BUILD_DIR}"
-	GOOS=linux go build -o "${BUILD_DIR}/af" ./pkg/af
+	GOOS=linux go build -o "${BUILD_DIR}/af" ./cmd/af
 
 oam:
 	mkdir -p "${BUILD_DIR}"

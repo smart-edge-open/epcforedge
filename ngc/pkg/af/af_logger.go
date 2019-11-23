@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package af
+package ngcaf
 
 import (
 	"net/http"
@@ -22,14 +22,14 @@ import (
 func afLogger(inner http.Handler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-
-		inner.ServeHTTP(w, r)
-
-		log.Infof("%s %s %s %s",
+		
+		log.Infoln("")
+		log.Infof("%s %s %s %s\n",
 			r.Method,
 			r.RequestURI,
 			name,
 			time.Since(start),
 		)
+		inner.ServeHTTP(w, r)
 	})
 }

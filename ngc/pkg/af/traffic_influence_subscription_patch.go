@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package af
+package ngcaf
 
 import (
 	"context"
@@ -21,21 +21,19 @@ import (
 )
 
 func modifySubscriptionByPatch(cliCtx context.Context, ts TrafficInfluSubPatch,
-	afCtx *afContext, subscriptionID string) (TrafficInfluSub,
+	afCtx *afContext, sID string) (TrafficInfluSub,
 	*http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
-	tsResp, resp, err := cli.TrafficInfluSubPatchAPI.SubscriptionPatch(cliCtx,
-		afCtx.cfg.AfID, subscriptionID, ts)
+	tsRet, resp, err := cli.TrafficInfluSubPatchAPI.SubscriptionPatch(cliCtx,
+		afCtx.cfg.AfID, sID, ts)
 
 	if err != nil {
-
-		log.Errf("AF Traffic Influance Subscription modify: %s", err.Error())
 		return TrafficInfluSub{}, nil, err
 	}
-	return tsResp, resp, nil
+	return tsRet, resp, nil
 }
 
 // ModifySubscriptionPatch function
@@ -70,7 +68,7 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 	tsResp, resp, err = modifySubscriptionByPatch(cliCtx, tsPatch, afCtx,
 		subscriptionID)
 	if err != nil {
-		log.Errf("Traffic Influence Subscription mpdify : %s", err.Error())
+		log.Errf("Traffic Influence Subscription modify : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

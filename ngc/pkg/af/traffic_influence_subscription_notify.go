@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package af
+package ngcaf
 
 import (
 	"encoding/json"
@@ -21,7 +21,7 @@ import (
 	"strconv"
 )
 
-func verifyAfTransID(afCtx *afContext, transID string, p *ProblemDetails) (int,
+func verifyAFTransID(afCtx *afContext, transID string, p *ProblemDetails) (int,
 	error) {
 
 	var (
@@ -111,7 +111,7 @@ func NotificationPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if statusCode, err = verifyAfTransID(afCtx, en.AfTransID,
+	if statusCode, err = verifyAFTransID(afCtx, en.AFTransID,
 		&problem); err != nil {
 
 		w.WriteHeader(statusCode)

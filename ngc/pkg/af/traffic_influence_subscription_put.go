@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package af
+package ngcaf
 
 import (
 	"context"
@@ -25,18 +25,16 @@ import (
 )
 
 func modifySubscriptionByPut(cliCtx context.Context, ts TrafficInfluSub,
-	afCtx *afContext, subscriptionID string) (TrafficInfluSub,
+	afCtx *afContext, sID string) (TrafficInfluSub,
 	*http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
 	tsResp, resp, err := cli.TrafficInfluSubPutAPI.SubscriptionPut(cliCtx,
-		afCtx.cfg.AfID, subscriptionID, ts)
+		afCtx.cfg.AfID, sID, ts)
 
 	if err != nil {
-
-		log.Errf("AF Traffic Influance Subscription modify: %s", err.Error())
 		return TrafficInfluSub{}, nil, err
 	}
 	return tsResp, resp, nil
@@ -46,12 +44,12 @@ func modifySubscriptionByPut(cliCtx context.Context, ts TrafficInfluSub,
 func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err            error
-		ts             TrafficInfluSub
-		tsResp         TrafficInfluSub
-		resp           *http.Response
-		subscriptionID string
-		transID        int
+		err     error
+		ts      TrafficInfluSub
+		tsResp  TrafficInfluSub
+		resp    *http.Response
+		sID     string
+		transID int
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
@@ -81,8 +79,8 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts.AfTransID = strconv.Itoa(transID)
-	subscriptionID, err = getSubsIDFromURL(r.URL)
+	ts.AFTransID = strconv.Itoa(transID)
+	sID, err = getSubsIDFromURL(r.URL)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription modify: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -90,7 +88,7 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 	}
 	afCtx.transactions[transID] = TrafficInfluSub{}
 	tsResp, resp, err = modifySubscriptionByPut(cliCtx, ts, afCtx,
-		subscriptionID)
+		sID)
 
 	if err != nil {
 		log.Errf("Traffic Influence Subscription modify : %s", err.Error())
@@ -100,21 +98,23 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 
 	if ts.SubscribedEvents == nil {
 		delete(afCtx.transactions, transID)
+		log.Infof("Deleted transaction: %v", transID)
 	} else {
 		afCtx.transactions[transID] = tsResp
 	}
 
-	if _, ok := afCtx.subscriptions[subscriptionID][strconv.Itoa(transID)]; ok {
+	if _, ok := afCtx.subscriptions[sID][strconv.Itoa(transID)]; ok {
 		delete(afCtx.transactions, transID)
+		log.Infof("Deleted transaction: %v", transID)
 	}
 
-	if afCtx.subscriptions[subscriptionID] == nil {
-		afCtx.subscriptions[subscriptionID] =
+	if afCtx.subscriptions[sID] == nil {
+		afCtx.subscriptions[sID] =
 			make(map[string]TrafficInfluSub)
 	}
 
-	afCtx.subscriptions[subscriptionID] =
-		map[string]TrafficInfluSub{ts.AfTransID: tsResp}
+	afCtx.subscriptions[sID] =
+		map[string]TrafficInfluSub{ts.AFTransID: tsResp}
 
 	if resp != nil {
 		w.WriteHeader(resp.StatusCode)

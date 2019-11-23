@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package af
+package ngcaf
 
 import (
 	"context"
@@ -32,20 +32,19 @@ var (
 type TrafficInfluenceSubscriptionDeleteAPIService service
 
 func (a *TrafficInfluenceSubscriptionDeleteAPIService) handleDeleteResponse(
-	localVarHTTPResponse *http.Response,
-	localVarBody []byte) error {
+	r *http.Response, body []byte) error {
 
 	newErr := GenericError{
-		body:  localVarBody,
-		error: localVarHTTPResponse.Status,
+		body:  body,
+		error: r.Status,
 	}
 
-	switch localVarHTTPResponse.StatusCode {
+	switch r.StatusCode {
 
 	case 400, 401, 403, 404, 429, 500, 503:
 
 		var v ProblemDetails
-		err := json.Unmarshal(localVarBody, &v)
+		err := json.Unmarshal(body, &v)
 		if err != nil {
 			newErr.error = err.Error()
 			return newErr
@@ -54,14 +53,9 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) handleDeleteResponse(
 		return newErr
 
 	default:
-		var v interface{}
-		err := json.Unmarshal(localVarBody, &v)
-		if err != nil {
-			newErr.error = err.Error()
-			return newErr
-		}
-		newErr.model = v
-		return newErr
+		b, _ := ioutil.ReadAll(r.Body)
+		err := fmt.Errorf("NEF returned error - %s, %s", r.Status, string(b))
+		return err
 	}
 }
 
@@ -78,50 +72,50 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) SubscriptionDelete(
 	ctx context.Context, afID string, subscriptionID string) (*http.Response,
 	error) {
 	var (
-		localVarHTTPMethod = strings.ToUpper("Delete")
-		localVarPostBody   interface{}
+		method = strings.ToUpper("Delete")
+		deleteBody   interface{}
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath +
+	path := a.client.cfg.NEFBasePath +
 		"/{afId}/subscriptions/{subscriptionId}"
-	localVarPath = strings.Replace(localVarPath,
+	path = strings.Replace(path,
 		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
-	localVarPath = strings.Replace(localVarPath,
+	path = strings.Replace(path,
 		"{"+"subscriptionId"+"}", fmt.Sprintf("%v", subscriptionID), -1)
-	localVarHeaderParams := make(map[string]string)
+	headerParams := make(map[string]string)
 
 	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
+	contentTypes := []string{"application/json"}
 
 	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	contentType := selectHeaderContentType(contentTypes)
+	if contentType != "" {
+		headerParams["Content-Type"] = contentType
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	headerAccepts := []string{"application/json"}
 
 	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	headerAccept := selectHeaderAccept(headerAccepts)
+	if headerAccept != "" {
+		headerParams["Accept"] = headerAccept
 	}
-	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod,
-		localVarPostBody, localVarHeaderParams)
+	r, err := a.client.prepareRequest(ctx, path, method,
+		deleteBody, headerParams)
 	if err != nil {
 		return nil, err
 	}
 
-	localVarHTTPResponse, err := a.client.callAPI(r)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+	resp, err := a.client.callAPI(r)
+	if err != nil || resp == nil {
+		return resp, err
 	}
 
-	localVarBody, err := ioutil.ReadAll(localVarHTTPResponse.Body)
+	respBody, err := ioutil.ReadAll(resp.Body)
 	defer func() {
-		err = localVarHTTPResponse.Body.Close()
+		err = resp.Body.Close()
 		if err != nil {
 			log.Errf("response body was not closed properly")
 		}
@@ -129,16 +123,16 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) SubscriptionDelete(
 
 	if err != nil {
 		log.Errf("http response body could not be read")
-		return localVarHTTPResponse, err
+		return resp, err
 	}
 
-	if localVarHTTPResponse.StatusCode > 300 {
-		if err = a.handleDeleteResponse(localVarHTTPResponse,
-			localVarBody); err != nil {
+	if resp.StatusCode > 300 {
+		if err = a.handleDeleteResponse(resp,
+			respBody); err != nil {
 
-			return localVarHTTPResponse, err
+			return resp, err
 		}
 	}
 
-	return localVarHTTPResponse, nil
+	return resp, nil
 }

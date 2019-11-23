@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package af
+package ngcaf
 
 import (
 	"bytes"
@@ -29,6 +29,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 
 	"golang.org/x/net/http2"
 )
@@ -40,7 +41,7 @@ var (
 
 // Client manages communication with the NEF Northbound API API v1.0.1
 type Client struct {
-	cfg *Configuration
+	cfg *CliConfig
 	// Reuse a single struct instead of allocating one for each service on
 	// the heap.
 	common service
@@ -60,21 +61,23 @@ type service struct {
 // NewClient creates a new API client. Requires a userAgent string describing
 // the application, optionally a custom http.Client to allow for advanced
 // features such as caching.
-func NewClient(cfg *Configuration) *Client {
+func NewClient(cfg *CliConfig) *Client {
 
 	if cfg.HTTPClient == nil {
-		caCert, err := ioutil.ReadFile("root-ca-cert.pem")
+
+		CACert, err := ioutil.ReadFile(cfg.NEFCliCertPath)
 		if err != nil {
 			log.Errf("Error: %v", err)
 		}
 
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
+		CACertPool := x509.NewCertPool()
+		CACertPool.AppendCertsFromPEM(CACert)
 
 		cfg.HTTPClient = &http.Client{
+			Timeout: 15 * time.Second,
 			Transport: &http2.Transport{
 				TLSClientConfig: &tls.Config{
-					RootCAs: caCertPool,
+					RootCAs: CACertPool,
 				},
 			},
 		}
@@ -186,14 +189,14 @@ func genBody(postBody interface{},
 func (c *Client) prepareRequest(
 	ctx context.Context,
 	path string, method string,
-	postBody interface{},
+	body interface{},
 	headerParams map[string]string,
 ) (localVarRequest *http.Request, err error) {
 
-	var body *bytes.Buffer
+	var b *bytes.Buffer
 
-	// Detect postBody type and post.
-	body, err = genBody(postBody, headerParams)
+	// Detect body type and post.
+	b, err = genBody(body, headerParams)
 	if err != nil {
 		return nil, err
 	}
@@ -205,7 +208,7 @@ func (c *Client) prepareRequest(
 	}
 
 	// Generate a new request
-	localVarRequest, err = genNewRequest(body, url.String(), method)
+	localVarRequest, err = genNewRequest(b, url.String(), method)
 	if err != nil {
 		return nil, err
 	}
