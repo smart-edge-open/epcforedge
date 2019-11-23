@@ -62,9 +62,9 @@ func (a *TrafficInfluenceSubscriptionPostAPIService) SubscriptionPost(
 	*http.Response, error) {
 
 	var (
-		method  = strings.ToUpper("Post")
-		postBody    interface{}
-		ret TrafficInfluSub
+		method   = strings.ToUpper("Post")
+		postBody interface{}
+		ret      TrafficInfluSub
 	)
 
 	// create path and map variables

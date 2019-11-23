@@ -72,8 +72,8 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) SubscriptionDelete(
 	ctx context.Context, afID string, subscriptionID string) (*http.Response,
 	error) {
 	var (
-		method = strings.ToUpper("Delete")
-		deleteBody   interface{}
+		method     = strings.ToUpper("Delete")
+		deleteBody interface{}
 	)
 
 	// create path and map variables

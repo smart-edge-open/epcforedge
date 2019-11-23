@@ -66,9 +66,9 @@ func (a *TrafficInfluenceSubscriptionPatchAPIService) SubscriptionPatch(
 	body TrafficInfluSubPatch) (TrafficInfluSub, *http.Response, error) {
 
 	var (
-		method  = strings.ToUpper("Patch")
-		patchBody    interface{}
-		ret TrafficInfluSub
+		method    = strings.ToUpper("Patch")
+		patchBody interface{}
+		ret       TrafficInfluSub
 	)
 
 	path := a.client.cfg.NEFBasePath +

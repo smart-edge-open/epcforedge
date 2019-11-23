@@ -60,8 +60,8 @@ func (a *TrafficInfluenceSubscriptionGetAllAPIService) SubscriptionsGetAll(
 	*http.Response, error) {
 	var (
 		method  = strings.ToUpper("Get")
-		getBody    interface{}
-		ret []TrafficInfluSub
+		getBody interface{}
+		ret     []TrafficInfluSub
 	)
 
 	// create path and map variables

@@ -22,6 +22,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// DefaultNotifURL const
 const DefaultNotifURL = "/af/v1/notifications"
 
 type keyType string

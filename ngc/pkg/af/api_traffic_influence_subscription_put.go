@@ -65,8 +65,8 @@ func (a *TrafficInfluenceSubscriptionPutAPIService) SubscriptionPut(
 
 	var (
 		method  = strings.ToUpper("Put")
-		putBody    interface{}
-		ret TrafficInfluSub
+		putBody interface{}
+		ret     TrafficInfluSub
 	)
 
 	// create path and map variables

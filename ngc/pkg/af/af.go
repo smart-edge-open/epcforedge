@@ -31,20 +31,19 @@ type TransactionIDs map[int]TrafficInfluSub
 // NotifSubscryptions type
 type NotifSubscryptions map[string]map[string]TrafficInfluSub
 
+// ServerConfig struct
 type ServerConfig struct {
 	CNCAEndpoint        string `json:"CNCAEndpoint"`
 	NotifEndpoint       string `json:"NotifEndpoint"`
 	NotifServerCertPath string `json:"NotifServerCertPath"`
 	NotifServerKeyPath  string `json:"NotifServerKeyPath"`
-
 }
-//Config structure
-type Config struct {
-	
-	AfID                string `json:"AfId"`
-    SrvCfg        ServerConfig `json:"ServerConfig"`
-	CliCfg        CliConfig `json:"CliConfig"`
 
+//Config struct
+type Config struct {
+	AfID   string       `json:"AfId"`
+	SrvCfg ServerConfig `json:"ServerConfig"`
+	CliCfg CliConfig    `json:"CliConfig"`
 }
 
 type afContext struct {

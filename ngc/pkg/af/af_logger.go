@@ -22,7 +22,7 @@ import (
 func afLogger(inner http.Handler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		
+
 		log.Infoln("")
 		log.Infof("%s %s %s %s\n",
 			r.Method,
