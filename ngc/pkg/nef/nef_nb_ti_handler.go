@@ -683,7 +683,7 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 	// TBD - mapping of correlation trans id and AF notification url
 	ev.AfTransID = "TBD"
 	afURL = URI("TBD")
-	log.Errf("NotifySmfUPFEvent TBD mapping of corrid to AfTransId and URL")
+	log.Err("NotifySmfUPFEvent TBD mapping of corrid to AfTransId and URL")
 	ev.Gpsi = nsmEvNo.Gpsi
 	ev.DnaiChgType = nsmEvNo.DnaiChgType
 	ev.SrcUeIpv4Addr = nsmEvNo.SourceUeIpv4Addr
