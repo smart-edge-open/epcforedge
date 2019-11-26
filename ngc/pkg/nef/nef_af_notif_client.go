@@ -22,6 +22,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -101,8 +102,12 @@ func (af *AfClient) AfNotificationUpfEvent(ctx context.Context,
 				},
 			},
 		}
-	} else {
+	} else if u.Scheme == "http" {
 		client = http.Client{Timeout: 15 * time.Second}
+	} else {
+		log.Errf("Unsupported url scheme: %s", u.Scheme)
+		return errors.New("Unsupported url scheme")
+
 	}
 
 	requestBody, err := json.Marshal(body)
@@ -110,6 +115,7 @@ func (af *AfClient) AfNotificationUpfEvent(ctx context.Context,
 		log.Err(err)
 		return err
 	}
+	//log.Infof("POST body ==> \n %s", string(requestBody))
 	// Set request type as POST
 	req, _ := http.NewRequest("POST", string(afURI),
 		bytes.NewBuffer(requestBody))

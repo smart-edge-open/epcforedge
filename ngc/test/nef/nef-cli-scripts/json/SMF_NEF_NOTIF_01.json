@@ -1,0 +1,18 @@
+{
+    "notifId": "smf_id_01",
+    "eventNotifs": [
+        {
+            "event": "UP_PATH_CH",
+            "supi": "imsi123456789012345",
+            "gpsi": "msisdn-1234567890",
+            "sourceDnai": "source_dnai",
+            "targetDnai": "target_dnai",
+            "dnaiChgType": "EARLY",
+            "sourceUeIpv4Addr": "192.10.20.30",
+            "targetUeIpv4Addr": "192.10.20.31",
+            "sourceTraRouting": {},
+            "targetTraRouting": {},
+            "ueMac": "00:0a:95:9d:68:16"
+        }
+    ]
+}

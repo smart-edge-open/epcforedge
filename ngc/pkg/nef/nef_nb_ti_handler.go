@@ -641,6 +641,7 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 		ev      EventNotification
 		afURL   URI
 		nsmEvNo NsmEventNotification
+		i       int
 	)
 
 	// Retrieve the event notification information from the request
@@ -665,7 +666,7 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 		return
 	}
 
-	for i, nsmEvNo := range smfEv.EventNotifs {
+	for i, nsmEvNo = range smfEv.EventNotifs {
 		if nsmEvNo.Event == "UP_PATH_CH" {
 			log.Infof("NotifySmfUPFEvent found an entry for UP_PATH_CH"+
 				"at index: %d", i)
@@ -682,7 +683,7 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 	// Map the content of NsmfEventExposureNotification to EventNotificaiton
 	// TBD - mapping of correlation trans id and AF notification url
 	ev.AfTransID = "TBD"
-	afURL = URI("TBD")
+	afURL = URI("http://localhost:9080")
 	log.Err("NotifySmfUPFEvent TBD mapping of corrid to AfTransId and URL")
 	ev.Gpsi = nsmEvNo.Gpsi
 	ev.DnaiChgType = nsmEvNo.DnaiChgType

@@ -74,9 +74,8 @@ func startHTTP2Server(serverHTTP2 *http.Server, nefCtx *nefContext,
 		if err := serverHTTP2.ListenAndServeTLS(
 			nefCtx.cfg.HTTP2Config.NefServerCert,
 			nefCtx.cfg.HTTP2Config.NefServerKey); err != nil {
-			log.Errf("NEF HTTP2 server error: " + err.Error())
+			log.Errf("NEF HTTP2server error: " + err.Error())
 		}
-		log.Info("Exiting")
 	}
 	stopServerCh <- true
 }
@@ -183,6 +182,7 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	if numchannels == 3 {
 		<-stopServerCh
 	}
+	log.Info("Exiting NEF server")
 	return nil
 
 }

@@ -10,7 +10,7 @@
         "Endpoint": ":8080"
     },
     "HTTP2Config": {
-        "Endpoint": "",
+        "Endpoint": ":8090",
         "NefServerCert": "certs/server-cert.pem",
         "NefServerKey": "certs/server-key.pem",
         "AfServerCert": "certs/root-ca-cert.pem"
