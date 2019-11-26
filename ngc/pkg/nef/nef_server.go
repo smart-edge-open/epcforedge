@@ -22,15 +22,30 @@ import (
 	"github.com/otcshare/edgenode/pkg/config"
 )
 
+//HTTPConfig : Contains the configuration for the HTTP 1.1
+type HttpConfig struct {
+	Endpoint                 string `json:"endpoint"`,	
+}
+
+//HTTP2Config : Contains the configuration for the HTTP2 
+type Http2Config struct {
+	Endpoint                 string `json:"endpoint"`,
+	NefServerCert			 string `json:"NefServerCert"`,
+	NefServerKey			 string `json:"NefServerKey"`,
+	AfServerCert			 string `json:"AfServerCert"`
+}
+
 // Config: NEF Module Configuration Data Structure
 type Config struct {
-	Endpoint                  string `json:"endpoint"`
 	LocationPrefix            string `json:"locationPrefix"`
 	MaxSubSupport             int    `json:"maxSubSupport"`
 	MaxAFSupport              int    `json:"maxAFSupport"`
 	SubStartID                int    `json:"subStartID"`
 	UpfNotificationResUriPath string `json:"UpfNotificationResUriPath"`
 	UserAgent                 string `json:"UserAgent"`
+	HttpConfig				  HttpConfig
+	Http2Config				  Http2Config
+
 }
 
 // NEF Module Context Data Structure
@@ -58,26 +73,60 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	 * server receives any HTTP Request */
 	nefRouter := NewNEFRouter(nefCtx)
 
-	/* HTTP Server object is created */
-	server := &http.Server{
-		Addr:           nefCtx.cfg.Endpoint,
-		Handler:        nefRouter,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
+	// 1 for http2, 1 for http and 1 for the os signal
+	numchannels := 3
 
-	stopServerCh := make(chan bool, 2)
+	// Check if http and http 2 are both configured to determine number 
+	// of channels
+
+	if nefCtx.cfg.HttpConfig.Endpoint == nil {
+		log.Info("HTTP Server not configured")
+		numchannels--		
+	} else {
+		// HTTP Server object is created
+		server := &http.Server {
+			Addr:           nefCtx.cfg.Endpoint,
+			Handler:        nefRouter,
+			ReadTimeout:    10 * time.Second,
+			WriteTimeout:   10 * time.Second,
+			MaxHeaderBytes: 1 << 20,
+	}	
+
+	if nefCtx.cfg.Http2Config.Endpoint == nil {
+		log.Info("HTTP 2 Server not configured")
+		numchannels--		
+	} else {
+		serverHttp2 := &http.Server{
+			Addr:           nefCtx.cfg.Endpoint,
+			Handler:        nefRouter,
+			ReadTimeout:    10 * time.Second,
+			WriteTimeout:   10 * time.Second,
+			MaxHeaderBytes: 1 << 20,
+		}
+	
+		if err = http2.ConfigureServer(serverHttp2, &http2.Server{}); err != nil {
+			log.Errf("NEF failed at configuring HTTP2 server")
+			return err
+		}	
+	}	
+
+	stopServerCh := make(chan bool, numchannels)
 
 	/* Go Routine is spawned here for listening for cancellation event on
 	 * context */
 	go func(stopServerCh chan bool) {
 		<-ctx.Done()
-		log.Info("Executing graceful stop")
+		log.Info("Executing graceful stop for NEF HTTP Server")
 		if err = server.Close(); err != nil {
-			log.Errf("Could not close NEF server: %#v", err)
+			log.Errf("Could not close NEF HTTP server: %#v", err)
 		}
-		log.Info("NEF server stopped")
+		log.Info("NEF HTTP server stopped")
+
+		log.Info("Executing graceful stop for NEF HTTP2 Server")
+		if err = serverHttp2.Close(); err != nil {
+			log.Errf("Could not close NEF HTTP2 server: %#v", err)
+		}
+		log.Info("NEF HTTP2 server stopped")
 
 		/* De-initializes NEF Data */
 		nefCtx.nef.nefDestroy()
@@ -87,13 +136,25 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 
 	/* Go Routine is spawned here for starting HTTP Server */
 	go func(stopServerCh chan bool) {
+		if nefCtx.cfg.HttpConfig.Endpoint != nil {
+			log.Infof("NEF HTTP 1.1 listening on %s", server.Addr)
+			if err = server.ListenAndServe(); err != nil {
+				log.Errf("NEF server error: " + err.Error())
+			}
+		stopServerCh <- true
+	}(stopServerCh)
 
-		log.Infof("NEF listening on %s", server.Addr)
-		if err = server.ListenAndServe(); err != nil {
-			log.Errf("NEF server error: " + err.Error())
+	/* Go Routine is spawned here for starting HTTP-2 Server */
+	go func(stopServerCh chan bool) {
+		if nefCtx.cfg.HttpConfig2.Endpoint != nil {
+			log.Infof("NEF HTTP 2.0 listening on %s", server.Addr)
+			if err = serverHttp2.ListenAndServeTLS(
+				nefCtx.cfg.SrvCfg.Http2Config.NefServerCert,
+				nefCtx.cfg.SrvCfg.Http2Config.NefServerKey); err != nil {
+				log.Errf("NEF server error: " + err.Error())
+			}
+			log.Info("Exiting")
 		}
-		log.Info("Exiting")
-
 		stopServerCh <- true
 	}(stopServerCh)
 
@@ -101,7 +162,8 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	 * go routines */
 	<-stopServerCh
 	<-stopServerCh
-
+	if numchannels == 3 
+		<-stopServerCh
 	return nil
 }
 

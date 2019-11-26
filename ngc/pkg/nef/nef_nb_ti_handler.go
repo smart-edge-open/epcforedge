@@ -17,7 +17,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -637,18 +636,75 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 func NotifySmfUPFEvent(w http.ResponseWriter,
 	r *http.Request) {
 
-	ev := EventNotification{}
-	notifURI := URI("af_uri")
+	var (
+		smfEv NsmfEventExposureNotification
+		ev    EventNotification
+		afUrl URI
+		nsmEvNo NsmEventNotification
+	)
 
-	//nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	// Retrieve the event notification information from the request
+	if err = json.NewDecoder(r.Body).Decode(&smfEv); err != nil {
+		log.Errf("NotifySmfUPFEvent body parse: %s", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
-	fmt.Println(nefCtx)
-	var afClient AfNotification = NewAfClient(&nefCtx.cfg)
-	_ = afClient.AfNotificationUpfEvent(r.Context(), notifURI, ev)
+	// Validate the content of the NsmfEventExposureNotification
+	// Check if notification id is present
+	if smfEv.NotifID == nil {
+		log.Errf("NotifySmfUPFEvent missing notif id")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Check if notification events with UP_PATH_CH is present
+	if len(smfEv.EventNotifs) == 0 {
+		log.Errf("NotifySmfUPFEvent missing event notifications")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	for i, nsmEvNo := range smfEv.EventNotifs {
+		if nsmEvNo.Event == "UP_PATH_CH" {
+			log.Infof|( "NotifySmfUPFEvent found an entry for UP_PATH_CH 
+			at index: %d", i)
+			break
+		}
+
+	}
+
+	if len(smfEv.EventNotifs) == 0 {
+		log.Errf("NotifySmfUPFEvent missing event with UP_PATH_CH")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	// Map the content of NsmfEventExposureNotification to EventNotificaiton
+	// TBD - mapping of correlation trans id and AF notification url
+	ev.AfTransID = "TBD"
+	afUrl = "TBD"
+	log.Errf("NotifySmfUPFEvent TBD mapping of corrid to AfTransId and URL")
+	ev.Gpsi = nsmEvNo.Gpsi
+	ev.DnaiChgType = nsmEvNo.DnaiChgType
+	ev.SrcUeIpv4Addr = nsmEvNo.SourceUeIpv4Addr
+	ev.SrcUeIpv6Prefix = nsmEvNo.SourceUeIpv6Prefix
+	ev.TgtUeIpv4Addr = nsmEvNo.TargetUeIpv4Addr
+	ev.TgtUeIpv6Prefix = nsmEvNo.TargetUeIpv6Prefix
+	ev.UeMac = nsmEvNo.UeMac
+	ev.SourceTrafficRoute = nsmEvNo.SourceTraRouting
+	ev.TargetTrafficRoute = nsmEvNo.TargetTraRouting
 
 	w.WriteHeader(http.StatusOK)
-
+	
+	// Send the request towards AF
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	var afClient AfNotification = NewAfClient(&nefCtx.cfg)
+	err := afClient.AfNotificationUpfEvent(r.Context(), afUrl, ev)
+	if err != nil {
+		log.Errf("NotifySmfUPFEvent sending to AF failed : %s",
+			err.Error () )
+	}
+	
 }
 
 func logNef(nef *nefData) {

@@ -139,7 +139,7 @@ func nefRouteLogger(httpHandler http.Handler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		log.Infof("HTTP Request Received")
+		log.Infof("HTTP Request Received :%s", r.Proto)
 		log.Infof("===============================================")
 		log.Infof(" Method : %s ", r.Method)
 		log.Infof(" URL PATH : %s", r.RequestURI)
