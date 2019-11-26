@@ -637,14 +637,14 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 	r *http.Request) {
 
 	var (
-		smfEv NsmfEventExposureNotification
-		ev    EventNotification
-		afUrl URI
+		smfEv   NsmfEventExposureNotification
+		ev      EventNotification
+		afURL   URI
 		nsmEvNo NsmEventNotification
 	)
 
 	// Retrieve the event notification information from the request
-	if err = json.NewDecoder(r.Body).Decode(&smfEv); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&smfEv); err != nil {
 		log.Errf("NotifySmfUPFEvent body parse: %s", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -652,7 +652,7 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 
 	// Validate the content of the NsmfEventExposureNotification
 	// Check if notification id is present
-	if smfEv.NotifID == nil {
+	if smfEv.NotifID == "" {
 		log.Errf("NotifySmfUPFEvent missing notif id")
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -667,8 +667,8 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 
 	for i, nsmEvNo := range smfEv.EventNotifs {
 		if nsmEvNo.Event == "UP_PATH_CH" {
-			log.Infof|( "NotifySmfUPFEvent found an entry for UP_PATH_CH 
-			at index: %d", i)
+			log.Infof("NotifySmfUPFEvent found an entry for UP_PATH_CH"+
+				"at index: %d", i)
 			break
 		}
 
@@ -682,7 +682,7 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 	// Map the content of NsmfEventExposureNotification to EventNotificaiton
 	// TBD - mapping of correlation trans id and AF notification url
 	ev.AfTransID = "TBD"
-	afUrl = "TBD"
+	afURL = URI("TBD")
 	log.Errf("NotifySmfUPFEvent TBD mapping of corrid to AfTransId and URL")
 	ev.Gpsi = nsmEvNo.Gpsi
 	ev.DnaiChgType = nsmEvNo.DnaiChgType
@@ -695,16 +695,16 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 	ev.TargetTrafficRoute = nsmEvNo.TargetTraRouting
 
 	w.WriteHeader(http.StatusOK)
-	
+
 	// Send the request towards AF
 	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
 	var afClient AfNotification = NewAfClient(&nefCtx.cfg)
-	err := afClient.AfNotificationUpfEvent(r.Context(), afUrl, ev)
+	err := afClient.AfNotificationUpfEvent(r.Context(), afURL, ev)
 	if err != nil {
 		log.Errf("NotifySmfUPFEvent sending to AF failed : %s",
-			err.Error () )
+			err.Error())
 	}
-	
+
 }
 
 func logNef(nef *nefData) {

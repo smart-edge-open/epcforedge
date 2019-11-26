@@ -43,7 +43,7 @@ Content-Type: application/json
 Content-Encoding: Not supported and not added as we do not specify any special
 content encodings
 User-Agent: Would be read from the configuration file. It's of the format
-NEF-xxxx eg: NEF-OPENESS-1912
+NEF-xxxx eg: NEF-OPENNESS-1912
 Cache-Control: Not supported and not added
 If-Module-Since: Not supported and not added
 If-Match : Not supported and not added
@@ -69,13 +69,14 @@ func NewAfClient(cfg *Config) *AfClient {
 func (af *AfClient) AfNotificationUpfEvent(ctx context.Context,
 	afURI URI, body EventNotification) error {
 
+	var client http.Client
+
 	nefCtx := ctx.Value(nefCtxKey("nefCtx")).(*nefContext)
-	cfg := nefCtx.cfg
 
 	log.Infof("AfNotificationUpfEvent uri :%s", afURI)
 
 	/* Check the url type - if its https or http */
-	u, err := url.Parse(afURI)
+	u, err := url.Parse(string(afURI))
 	if err != nil {
 		log.Errf("AfNotification URl error :%v", err)
 		return err
@@ -83,10 +84,10 @@ func (af *AfClient) AfNotificationUpfEvent(ctx context.Context,
 
 	// If https then load the certificate
 	if u.Scheme == "https" {
-		CACert, err := ioutil.ReadFile(nefCtx.cfg.Http2Config.AfServerCert)
-		if err != nil {
+		CACert, err1 := ioutil.ReadFile(nefCtx.cfg.HTTP2Config.AfServerCert)
+		if err1 != nil {
 			log.Errf("Af Certification loading Error: %v", err)
-			return err
+			return err1
 		}
 
 		CACertPool := x509.NewCertPool()
@@ -101,32 +102,39 @@ func (af *AfClient) AfNotificationUpfEvent(ctx context.Context,
 			},
 		}
 	} else {
-		client := http.Client{Timeout: 15 * time.Second}
+		client = http.Client{Timeout: 15 * time.Second}
 	}
 
 	requestBody, err := json.Marshal(body)
-	if error != nil {
-		log.Fatal(error)
+	if err != nil {
+		log.Err(err)
 		return err
 	}
 	// Set request type as POST
-	req, err := http.NewRequest("POST", afURI, bytes.NewBuffer(requestBody))
+	req, _ := http.NewRequest("POST", string(afURI),
+		bytes.NewBuffer(requestBody))
 	// Add user-agent header and content-type header
 	req.Header.Set("User-Agent", "NEF-OPENNESS-1912")
 	req.Header.Set("Content-Type", "application/json")
-	req.WithContext(ctx)
-	log.Printf("Sending a request to the server")
-	res, err := client.Do(req)
+	req = req.WithContext(ctx)
+	log.Info("Sending a request to the server")
+	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		log.Err(err)
 	}
-	defer res.Body.Close()
-	log.Println("Headers in the response =>")
-	for k, v := range res.Header {
-		log.Printf("%q:%q\n", k, v)
+	defer func() {
+		err = resp.Body.Close()
+		if err != nil {
+			log.Errf("response body was not closed properly")
+		}
+	}()
+
+	log.Info("Headers in the response =>")
+	for k, v := range resp.Header {
+		log.Infof("%q:%q\n", k, v)
 	}
-	log.Println("Body in the response =>")
-	body, err := ioutil.ReadAll(res.Body)
-	log.Println(string(body))
+	log.Info("Body in the response =>")
+	respbody, err := ioutil.ReadAll(resp.Body)
+	log.Infof(string(respbody))
 	return err
 }

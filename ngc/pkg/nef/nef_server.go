@@ -20,32 +20,32 @@ import (
 	"time"
 
 	"github.com/otcshare/edgenode/pkg/config"
+	"golang.org/x/net/http2"
 )
 
-//HTTPConfig : Contains the configuration for the HTTP 1.1
-type HttpConfig struct {
-	Endpoint                 string `json:"endpoint"`,	
+//HTTPConfig contains the configuration for the HTTP 1.1
+type HTTPConfig struct {
+	Endpoint string `json:"endpoint"`
 }
 
-//HTTP2Config : Contains the configuration for the HTTP2 
-type Http2Config struct {
-	Endpoint                 string `json:"endpoint"`,
-	NefServerCert			 string `json:"NefServerCert"`,
-	NefServerKey			 string `json:"NefServerKey"`,
-	AfServerCert			 string `json:"AfServerCert"`
+//HTTP2Config Contains the configuration for the HTTP2
+type HTTP2Config struct {
+	Endpoint      string `json:"endpoint"`
+	NefServerCert string `json:"NefServerCert"`
+	NefServerKey  string `json:"NefServerKey"`
+	AfServerCert  string `json:"AfServerCert"`
 }
 
-// Config: NEF Module Configuration Data Structure
+// Config contains NEF Module Configuration Data Structure
 type Config struct {
 	LocationPrefix            string `json:"locationPrefix"`
 	MaxSubSupport             int    `json:"maxSubSupport"`
 	MaxAFSupport              int    `json:"maxAFSupport"`
 	SubStartID                int    `json:"subStartID"`
-	UpfNotificationResUriPath string `json:"UpfNotificationResUriPath"`
+	UpfNotificationResURIPath string `json:"UpfNotificationResUriPath"`
 	UserAgent                 string `json:"UserAgent"`
-	HttpConfig				  HttpConfig
-	Http2Config				  Http2Config
-
+	HTTPConfig                HTTPConfig
+	HTTP2Config               HTTP2Config
 }
 
 // NEF Module Context Data Structure
@@ -67,6 +67,7 @@ type nefContext struct {
 func runServer(ctx context.Context, nefCtx *nefContext) error {
 
 	var err error
+	var server, serverHTTP2 *http.Server
 
 	/* NEFRouter obeject is created. After creation this object contains all
 	 * the HTTP Service Handlers. These hanlders will be called when HTTP
@@ -76,39 +77,41 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	// 1 for http2, 1 for http and 1 for the os signal
 	numchannels := 3
 
-	// Check if http and http 2 are both configured to determine number 
+	// Check if http and http 2 are both configured to determine number
 	// of channels
 
-	if nefCtx.cfg.HttpConfig.Endpoint == nil {
+	if nefCtx.cfg.HTTPConfig.Endpoint == "" {
 		log.Info("HTTP Server not configured")
-		numchannels--		
+		numchannels--
 	} else {
 		// HTTP Server object is created
-		server := &http.Server {
-			Addr:           nefCtx.cfg.Endpoint,
-			Handler:        nefRouter,
-			ReadTimeout:    10 * time.Second,
-			WriteTimeout:   10 * time.Second,
-			MaxHeaderBytes: 1 << 20,
-	}	
-
-	if nefCtx.cfg.Http2Config.Endpoint == nil {
-		log.Info("HTTP 2 Server not configured")
-		numchannels--		
-	} else {
-		serverHttp2 := &http.Server{
-			Addr:           nefCtx.cfg.Endpoint,
+		server = &http.Server{
+			Addr:           nefCtx.cfg.HTTPConfig.Endpoint,
 			Handler:        nefRouter,
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
 			MaxHeaderBytes: 1 << 20,
 		}
-	
-		if err = http2.ConfigureServer(serverHttp2, &http2.Server{}); err != nil {
+	}
+
+	if nefCtx.cfg.HTTP2Config.Endpoint == "" {
+		log.Info("HTTP 2 Server not configured")
+		numchannels--
+	} else {
+		serverHTTP2 = &http.Server{
+			Addr:           nefCtx.cfg.HTTP2Config.Endpoint,
+			Handler:        nefRouter,
+			ReadTimeout:    10 * time.Second,
+			WriteTimeout:   10 * time.Second,
+			MaxHeaderBytes: 1 << 20,
+		}
+
+		if err = http2.ConfigureServer(serverHTTP2,
+			&http2.Server{}); err != nil {
 			log.Errf("NEF failed at configuring HTTP2 server")
 			return err
-		}	
-	}	
+		}
+	}
 
 	stopServerCh := make(chan bool, numchannels)
 
@@ -116,17 +119,21 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	 * context */
 	go func(stopServerCh chan bool) {
 		<-ctx.Done()
-		log.Info("Executing graceful stop for NEF HTTP Server")
-		if err = server.Close(); err != nil {
-			log.Errf("Could not close NEF HTTP server: %#v", err)
+		if server != nil {
+			log.Info("Executing graceful stop for NEF HTTP Server")
+			if err = server.Close(); err != nil {
+				log.Errf("Could not close NEF HTTP server: %#v", err)
+			}
+			log.Info("NEF HTTP server stopped")
 		}
-		log.Info("NEF HTTP server stopped")
 
-		log.Info("Executing graceful stop for NEF HTTP2 Server")
-		if err = serverHttp2.Close(); err != nil {
-			log.Errf("Could not close NEF HTTP2 server: %#v", err)
+		if serverHTTP2 != nil {
+			log.Info("Executing graceful stop for NEF HTTP2 Server")
+			if err = serverHTTP2.Close(); err != nil {
+				log.Errf("Could not close NEF HTTP2 server: %#v", err)
+			}
+			log.Info("NEF HTTP2 server stopped")
 		}
-		log.Info("NEF HTTP2 server stopped")
 
 		/* De-initializes NEF Data */
 		nefCtx.nef.nefDestroy()
@@ -136,21 +143,22 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 
 	/* Go Routine is spawned here for starting HTTP Server */
 	go func(stopServerCh chan bool) {
-		if nefCtx.cfg.HttpConfig.Endpoint != nil {
+		if nefCtx.cfg.HTTPConfig.Endpoint != "" {
 			log.Infof("NEF HTTP 1.1 listening on %s", server.Addr)
 			if err = server.ListenAndServe(); err != nil {
 				log.Errf("NEF server error: " + err.Error())
 			}
+		}
 		stopServerCh <- true
 	}(stopServerCh)
 
 	/* Go Routine is spawned here for starting HTTP-2 Server */
 	go func(stopServerCh chan bool) {
-		if nefCtx.cfg.HttpConfig2.Endpoint != nil {
+		if nefCtx.cfg.HTTP2Config.Endpoint != "" {
 			log.Infof("NEF HTTP 2.0 listening on %s", server.Addr)
-			if err = serverHttp2.ListenAndServeTLS(
-				nefCtx.cfg.SrvCfg.Http2Config.NefServerCert,
-				nefCtx.cfg.SrvCfg.Http2Config.NefServerKey); err != nil {
+			if err = serverHTTP2.ListenAndServeTLS(
+				nefCtx.cfg.HTTP2Config.NefServerCert,
+				nefCtx.cfg.HTTP2Config.NefServerKey); err != nil {
 				log.Errf("NEF server error: " + err.Error())
 			}
 			log.Info("Exiting")
@@ -162,9 +170,11 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	 * go routines */
 	<-stopServerCh
 	<-stopServerCh
-	if numchannels == 3 
+	if numchannels == 3 {
 		<-stopServerCh
+	}
 	return nil
+
 }
 
 // Run : This function reads the NEF Module configuration file and stores in

@@ -86,13 +86,13 @@ func NewNEFRouter(nefCtx *nefContext) *mux.Router {
 
 	router := mux.NewRouter().StrictSlash(true)
 
-	if nefCtx.cfg.UpfNotificationResUriPath != "" {
+	if nefCtx.cfg.UpfNotificationResURIPath != "" {
 		// smf upf notification route
 		smfNotif := Route{}
 		smfNotif.Name = "NotifySmfUPFEvent"
 		smfNotif.Method = strings.ToUpper("Post")
 		smfNotif.Handler = NotifySmfUPFEvent
-		smfNotif.Pattern = nefCtx.cfg.UpfNotificationResUriPath
+		smfNotif.Pattern = nefCtx.cfg.UpfNotificationResURIPath
 		NEFRoutes = append(NEFRoutes, smfNotif)
 		log.Infof("SMF UPF Event notification uri: %s", smfNotif.Pattern)
 	} else {
