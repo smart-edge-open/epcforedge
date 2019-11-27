@@ -225,7 +225,7 @@ type RouteToLocation struct {
 	// Dnai route profile identifier
 	RouteProfID string `json:"routeProfId,omitempty"`
 	// Additional route information about the route to Dnai
-	RouteInfo *RouteInformation `json:"routeInfo,omitempty"`
+	RouteInfo RouteInformation `json:"routeInfo,omitempty"`
 }
 
 // RouteInformation Route information struct

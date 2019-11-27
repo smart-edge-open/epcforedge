@@ -25,13 +25,14 @@ import (
 	"strings"
 )
 
+var TransIDMax int = math.MaxInt32
+
 func genAFTransID(trans TransactionIDs) int {
 	var (
 		num   int
 		min   = 1
 		found = true
 	)
-	const limit = math.MaxInt32
 
 	for max := range trans {
 		num =
@@ -44,11 +45,11 @@ func genAFTransID(trans TransactionIDs) int {
 		}
 	}
 
-	if num == limit {
+	if num == TransIDMax {
 		num = min
 	}
 	//look for a free ID until it is <= math.MaxInt32 is achieved again
-	for found && num < limit {
+	for found && num < TransIDMax {
 		num++
 		//check if the ID is in use, if not - return the ID
 		if _, found = trans[num]; !found {
