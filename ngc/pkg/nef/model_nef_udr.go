@@ -57,7 +57,7 @@ type TrafficInfluData struct {
 	NwAreaInfo NetworkAreaInfo `json:"nwAreaInfo,omitempty"`
 	// Contains the Notification Correlation Id allocated by the NEF for the
 	// UP path change notification.
-	UpPathChgNotifCorreID URI `json:"upPathChgNotifCorreId,omitempty"`
+	UpPathChgNotifCorreID string `json:"upPathChgNotifCorreId,omitempty"`
 }
 
 // TrafficInfluDataPatch traffic influ data patch
