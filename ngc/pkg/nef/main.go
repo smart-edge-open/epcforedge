@@ -126,11 +126,10 @@ func unusedlint() {
 
 	var pcfClient PcfPolicyAuthorization = NewPCFClient(nil)
 	ctx := context.Background()
-	asd := AppSessionID("dummy")
-	_, _, _ = pcfClient.PcfPolicyAuthorizationCreate(ctx, ac)
-	_, _ = pcfClient.PolicyAuthorizationDelete(ctx, asd)
+	asd, _, _ := pcfClient.PcfPolicyAuthorizationCreate(ctx, ac)
 	_, _ = pcfClient.PolicyAuthorizationGet(ctx, asd)
 	_, _ = pcfClient.PolicyAuthorizationUpdate(ctx, acu, asd)
+	_, _ = pcfClient.PolicyAuthorizationDelete(ctx, asd)
 
 	// Avoid lint unused warning :  UDR client stub invocation
 	tid := TrafficInfluData{}
