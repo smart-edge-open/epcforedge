@@ -3,7 +3,7 @@
     "ServerConfig": {
         "CNCAEndpoint": ":8080",
         "NotifEndpoint": "localhost:8081",
-        "NotifServerCertPath": "certs/server-cert.pem",
+        "NotifServerCertPath": "certs/notif_server/server-cert.pem",
         "NotifServerKeyPath": "certs/notif_server/server-key.pem"
     },
     "CliConfig": {
