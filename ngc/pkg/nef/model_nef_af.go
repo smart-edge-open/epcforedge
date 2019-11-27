@@ -14,8 +14,8 @@
 
 package main
 
-// SubscribedEvent : The possible value is CHANGE_OF_DNAI - the AF requests to
-// be notified when the UP path changes for the PDU isession.
+// SubscribedEvent :Identifies a UP path management event the AF requested to
+// be notified of
 type SubscribedEvent string
 
 // List of SubscribedEvent
@@ -122,7 +122,7 @@ type EventNotification struct {
 	DnaiChgType DnaiChangeType `json:"dnaiChgType"`
 	// Identifies the N6 traffic routing information associated to the source
 	// DNAI. Shall be present if the "subscribedEvent" sets to "UP_PATH_CHANGE".
-	SourceTrafficRoute RouteToLocation `json:"sourceTrafficRouteO,omitempty"`
+	SourceTrafficRoute RouteToLocation `json:"sourceTrafficRoute,omitempty"`
 	// Identifies a UP path management event the AF requested to be notified of
 	SubscribedEvent SubscribedEvent `json:"subscribedEvent,omitempty"`
 	// Identifies the N6 traffic routing information associated to the target

@@ -693,6 +693,7 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 	ev.TgtUeIpv6Prefix = nsmEvNo.TargetUeIpv6Prefix
 	ev.UeMac = nsmEvNo.UeMac
 	ev.SourceTrafficRoute = nsmEvNo.SourceTraRouting
+	ev.SubscribedEvent = SubscribedEvent("UP_PATH_CHANGE")
 	ev.TargetTrafficRoute = nsmEvNo.TargetTraRouting
 
 	w.WriteHeader(http.StatusOK)
