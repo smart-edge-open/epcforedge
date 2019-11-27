@@ -7,7 +7,7 @@
     "UpfNotificationResUriPath": "/3gpp-traffic-influence/v1/notification/upf",
     "UserAgent": "NEF-OPENNESS-1912",
     "HTTPConfig": {
-        "Endpoint": ":8080"
+        "Endpoint": ":8091"
     },
     "HTTP2Config": {
         "Endpoint": ":8090",
