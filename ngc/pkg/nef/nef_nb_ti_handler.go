@@ -19,6 +19,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+
 	//"strconv"
 
 	"github.com/gorilla/mux"
@@ -29,16 +30,6 @@ func createNewSub(nefCtx *nefContext, afID string,
 
 	var af *afData
 	nef := &nefCtx.nef
-
-	//Validate the Traffic Influence
-	err = validateTIS(nefCtx, ti)
-	if err != nil {
-		log.Infoln(err)
-		eRsp := nefSBRspData{errorCode: 400,
-			pd: ProblemDetails{Title: "MAX AF support reached "}}
-
-		return "", eRsp, err
-	}
 
 	af, err = nef.nefGetAf(afID)
 
@@ -56,18 +47,6 @@ func createNewSub(nefCtx *nefContext, afID string,
 	}
 
 	return loc, rsp, nil
-}
-
-//Validate the Traffic influence data received from AF
-func validateTIS(nefCtx *nefContext, ti TrafficInfluSub) (err error) {
-
-	nef := &nefCtx.nef
-	//Check if we have crossed max supported AF
-	if nef.afcount >= nefCtx.cfg.MaxAFSupport {
-		log.Infoln("MAX AF exceeded ")
-		return errors.New("MAX AF exceeded")
-	}
-	return nil
 }
 
 // ReadAllTrafficInfluenceSubscription : API to read all the subscritions
@@ -394,6 +373,11 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	w.WriteHeader(http.StatusOK)
 
 	log.Infof("HTTP Response sent: %d", http.StatusOK)
+
+	if af.afGetSubCount() == 0 {
+
+		nef.nefDeleteAf(vars["afId"])
+	}
 
 	logNef(nef)
 }

@@ -315,6 +315,11 @@ func (af *afData) afDeleteSubscription(nefCtx *nefContext,
 	return rsp, err
 }
 
+func (af *afData) afGetSubCount() (afCount int) {
+
+	return len(af.subs)
+}
+
 /* unused function
 func (af *afData) afDestroy(afid string) error {
 
@@ -347,10 +352,15 @@ func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData,
 
 	var afe afData
 
+	if nef.afcount == nefCtx.cfg.MaxAFSupport {
+		log.Infoln("MAX AF exceeded ")
+		return af, errors.New("MAX AF exceeded")
+	}
+
 	//Check if AF is already present
 	_, ok := nef.afs[afID]
 
-	if !ok {
+	if ok {
 		return nef.afs[afID], errors.New("AF already present")
 	}
 
@@ -368,20 +378,19 @@ func (nef *nefData) nefGetAf(afID string) (af *afData, err error) {
 	//Check if AF is already present
 	afe, ok := nef.afs[afID]
 
-	if !ok {
+	if ok {
 		return afe, nil
 	}
 	err = errors.New("AF entry not present")
 	return afe, err
 }
 
-/* unused function
 func (nef *nefData) nefDeleteAf(afID string) (err error) {
 
 	//Check if AF is already present
 	_, ok := nef.afs[afID]
 
-	if !ok {
+	if ok {
 		delete(nef.afs, afID)
 		nef.afcount--
 		return nil
@@ -390,7 +399,6 @@ func (nef *nefData) nefDeleteAf(afID string) (err error) {
 	err = errors.New("AF entry not present")
 	return err
 }
-*/
 
 func (nef *nefData) nefDestroy() {
 
