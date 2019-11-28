@@ -74,7 +74,6 @@ var NEFRoutes = []Route{
 }
 
 type nefCtxKey string
-
 // NewNEFRouter : This function creates and initializes a NEF Router with all
 //                the available routes for NEF Module. This router object is
 //                defined in "github.com/gorilla/mux" package.
