@@ -32,7 +32,7 @@ af:
 
 nef:
 	mkdir -p "${BUILD_DIR}"
-	GOOS=linux go build -o "${BUILD_DIR}/nef" ./pkg/nef
+	GOOS=linux go build -o "${BUILD_DIR}/nef" ./cmd/nef
 
 oam:
 	mkdir -p "${BUILD_DIR}"

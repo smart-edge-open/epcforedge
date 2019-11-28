@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package ngcnef
 
 // NsmfEventExposureNotification Provides Information about observed events
 type NsmfEventExposureNotification struct {

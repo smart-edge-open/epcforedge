@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package ngcnef
 
 // SubscribedEvent :Identifies a UP path management event the AF requested to
 // be notified of

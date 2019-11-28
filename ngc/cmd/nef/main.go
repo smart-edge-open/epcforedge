@@ -21,14 +21,15 @@ import (
 	"syscall"
 
 	logtool "github.com/otcshare/common/log"
+	ngcnef "github.com/otcshare/epcforedge/ngc/pkg/nef"
 )
 
 // Log handler initialized. This is to be used throughout the nef module for
 // logging
-var log = logtool.DefaultLogger.WithField("NEF", nil)
+var log = logtool.DefaultLogger.WithField("NEF-MAIN", nil)
 
 // Path for NEF Configuration file
-const cfgPath string = "../configs/nef.json"
+const cfgPath string = "./configs/nef.json"
 
 // main: Entry point for NEF Module Execution
 // Input Args: None
@@ -80,7 +81,7 @@ func main() {
 	}()
 
 	log.Infof("Starting NEF server ...")
-	_ = Run(ctx, cfgPath)
+	_ = ngcnef.Run(ctx, cfgPath)
 
 	//if file.Close() != nil {
 	//	log.Errf("Failed to close file opened for logging")

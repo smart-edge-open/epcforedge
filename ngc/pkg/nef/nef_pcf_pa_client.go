@@ -14,7 +14,7 @@
 
 /* Client implementation of the pcf stub */
 
-package main
+package ngcnef
 
 import (
 	"context"

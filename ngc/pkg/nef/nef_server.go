@@ -12,16 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package ngcnef
 
 import (
 	"context"
 	"net/http"
 	"time"
 
+	logtool "github.com/otcshare/common/log"
 	"github.com/otcshare/edgenode/pkg/config"
 	"golang.org/x/net/http2"
 )
+
+// Log handler initialized. This is to be used throughout the nef module for
+// logging
+var log = logtool.DefaultLogger.WithField("NEF", nil)
 
 //HTTPConfig contains the configuration for the HTTP 1.1
 type HTTPConfig struct {
