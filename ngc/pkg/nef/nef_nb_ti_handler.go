@@ -261,10 +261,10 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 			return
 		}
 
-		rsp, ok := af.afUpdateSubscription(nefCtx, vars["subscriptionId"],
+		rsp, err := af.afUpdateSubscription(nefCtx, vars["subscriptionId"],
 			trInBody)
 
-		if ok != nil {
+		if err != nil {
 			sendErrorResponseToAF(w, rsp)
 			_ = r.Body.Close()
 			return
@@ -274,7 +274,8 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 
 		if err2 != nil {
 			log.Infoln(err2)
-			sendCustomeErrorRspToAF(w, 400, "Failed to Marshal PUT response data")
+			sendCustomeErrorRspToAF(w, 400, "Failed to Marshal PUT"+
+				"response data")
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -329,9 +330,10 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 			return
 		}
 
-		rsp, ti, ok := af.afPartialUpdateSubscription(nefCtx, vars["subscriptionId"], TrInSPBody)
+		rsp, ti, err := af.afPartialUpdateSubscription(nefCtx,
+			vars["subscriptionId"], TrInSPBody)
 
-		if ok != nil {
+		if err != nil {
 			sendErrorResponseToAF(w, rsp)
 			_ = r.Body.Close()
 			return
@@ -341,7 +343,8 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 
 		if err2 != nil {
 			log.Infoln(err2)
-			sendCustomeErrorRspToAF(w, 400, "Failed to Marshal PATCH response data")
+			sendCustomeErrorRspToAF(w, 400,
+				"Failed to Marshal PATCH response data")
 			return
 
 		}
@@ -444,10 +447,20 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 		return
 	}
 	// Map the content of NsmfEventExposureNotification to EventNotificaiton
-	// TBD - mapping of correlation trans id and AF notification url
-	ev.AfTransID = "TBD"
-	afURL = URI("http://localhost:9080")
-	log.Err("NotifySmfUPFEvent TBD mapping of corrid to AfTransId and URL")
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	afSubs, err1 := getSubFromCorrID(nefCtx, smfEv.NotifID)
+	if err1 != nil {
+		log.Errf("NotifySmfUPFEvent getSubFromCorrId [%s]: %s",
+			smfEv.NotifID, err1.Error())
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	log.Infof("NotifySmfUPFEvent [NotifID, TransId, URL] => [%s,%s,%s",
+		smfEv.NotifID, afSubs.ti.AfTransID,
+		afSubs.ti.NotificationDestination)
+
+	ev.AfTransID = afSubs.ti.AfTransID
+	afURL = URI(afSubs.ti.NotificationDestination)
 	ev.Gpsi = nsmEvNo.Gpsi
 	ev.DnaiChgType = nsmEvNo.DnaiChgType
 	ev.SrcUeIpv4Addr = nsmEvNo.SourceUeIpv4Addr
@@ -462,17 +475,16 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 	w.WriteHeader(http.StatusOK)
 
 	// Send the request towards AF
-	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
 	var afClient AfNotification = NewAfClient(&nefCtx.cfg)
 	err := afClient.AfNotificationUpfEvent(r.Context(), afURL, ev)
 	if err != nil {
 		log.Errf("NotifySmfUPFEvent sending to AF failed : %s",
 			err.Error())
 	}
-
 }
 
-func sendCustomeErrorRspToAF(w http.ResponseWriter, eCode int, custTitleString string) {
+func sendCustomeErrorRspToAF(w http.ResponseWriter, eCode int,
+	custTitleString string) {
 
 	eRsp := nefSBRspData{errorCode: eCode,
 		pd: ProblemDetails{Title: custTitleString}}
@@ -482,7 +494,7 @@ func sendCustomeErrorRspToAF(w http.ResponseWriter, eCode int, custTitleString s
 }
 func sendErrorResponseToAF(w http.ResponseWriter, rsp nefSBRspData) {
 
-	mdata, eCode := createErrorJson(rsp)
+	mdata, eCode := createErrorJSON(rsp)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(eCode)
 	_, err := w.Write(mdata)
@@ -492,16 +504,22 @@ func sendErrorResponseToAF(w http.ResponseWriter, rsp nefSBRspData) {
 
 }
 
-func createErrorJson(rsp nefSBRspData) (mdata []byte, statusCode int) {
+func createErrorJSON(rsp nefSBRspData) (mdata []byte, statusCode int) {
 
 	var err error
 	statusCode = 404
 
-	if rsp.errorCode == 400 || rsp.errorCode == 401 || rsp.errorCode == 403 ||
+	/*
+			TBD: Commented to fix cyclometrix complexity
+		if
+		rsp.errorCode == 400 || rsp.errorCode == 401 || rsp.errorCode == 403 ||
 		rsp.errorCode == 404 || rsp.errorCode == 411 || rsp.errorCode == 413 ||
 		rsp.errorCode == 415 || rsp.errorCode == 429 || rsp.errorCode == 500 ||
 		rsp.errorCode == 503 {
+	*/
 
+	if rsp.errorCode == 400 || rsp.errorCode == 401 || rsp.errorCode == 403 ||
+		rsp.errorCode == 503 {
 		statusCode = rsp.errorCode
 		mdata, err = json.Marshal(rsp.pd)
 
@@ -531,7 +549,8 @@ func logNef(nef *nefData) {
 			log.Infof(" AF ID : %+v, Sub Registered Count %+v",
 				key, len(value.subs))
 			for _, vs := range value.subs {
-				log.Infof("   SubId : %+v, ServiceId: %+v", vs.subid, vs.ti.AfServiceID)
+				log.Infof("   SubId : %+v, ServiceId: %+v", vs.subid,
+					vs.ti.AfServiceID)
 			}
 
 		}
@@ -539,7 +558,8 @@ func logNef(nef *nefData) {
 
 }
 
-func getSubFromCorrId(nefCtx *nefContext, corrId string) (sub *afSubscription, err error) {
+func getSubFromCorrID(nefCtx *nefContext, corrID string) (sub *afSubscription,
+	err error) {
 
 	nef := &nefCtx.nef
 
@@ -549,7 +569,7 @@ func getSubFromCorrId(nefCtx *nefContext, corrId string) (sub *afSubscription, e
 		/*Search across all the Subscription*/
 		for _, vs := range value.subs {
 
-			if vs.NotifCorreID == corrId {
+			if vs.NotifCorreID == corrID {
 				/*Match found return sub handle*/
 				return vs, nil
 			}

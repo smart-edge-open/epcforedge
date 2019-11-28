@@ -21,10 +21,8 @@ import (
 	"strings"
 )
 
-// default error response
-const rsp_error_default = 504
-
 const correlationIDOffset = 20
+const subNotFound string = "Subscription Not Found"
 
 //NEF context data
 type nefData struct {
@@ -36,12 +34,19 @@ type nefData struct {
 	afs       map[string]*afData
 }
 
+//NEFSBGetFn is the callback for SB API
 type NEFSBGetFn func(subData *afSubscription, nefCtx *nefContext) (
 	sub TrafficInfluSub, rsp nefSBRspData, err error)
+
+//NEFSBPutFn is the callback for SB API
 type NEFSBPutFn func(subData *afSubscription, nefCtx *nefContext,
 	ti TrafficInfluSub) (rsp nefSBRspData, err error)
+
+//NEFSBPatchFn is the callback for SB API
 type NEFSBPatchFn func(subData *afSubscription, nefCtx *nefContext,
 	tisp TrafficInfluSubPatch) (rsp nefSBRspData, err error)
+
+//NEFSBDeleteFn is the callback for SB API
 type NEFSBDeleteFn func(subData *afSubscription, nefCtx *nefContext) (
 	rsp nefSBRspData, err error)
 
@@ -51,7 +56,7 @@ type afSubscription struct {
 	ti    TrafficInfluSub
 
 	//Applicable in case of single UE case only
-	appSessionId AppSessionID
+	appSessionID AppSessionID
 
 	//Applicable in case of Multiple UE only
 	iid                       InfluenceID
@@ -105,14 +110,14 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 	af.subIdnum++
 
 	//Create Subscription data
-	afsub := afSubscription{subid: subIDStr, ti: ti, appSessionId: "",
+	afsub := afSubscription{subid: subIDStr, ti: ti, appSessionID: "",
 		NotifCorreID: "", iid: ""}
 
-	if ti.AnyUeInd == false {
+	if !ti.AnyUeInd {
 
 		//Applicable to single UE, PCF case
 
-		rsp, err = NEFSBPCFPost(&afsub, nefCtx, ti)
+		rsp, err = nefSBPCFPost(&afsub, nefCtx, ti)
 
 		if err != nil {
 
@@ -121,15 +126,15 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 		}
 		//Store Notification Destination URI
 		afsub.afNotificationDestination = ti.NotificationDestination
-		afsub.NEFSBGet = NEFSBPCFGet
-		afsub.NEFSBPut = NEFSBPCFPut
-		afsub.NEFSBPatch = NEFSBPCFPatch
-		afsub.NEFSBDelete = NEFSBPCFDelete
+		afsub.NEFSBGet = nefSBPCFGet
+		afsub.NEFSBPut = nefSBPCFPut
+		afsub.NEFSBPatch = nefSBPCFPatch
+		afsub.NEFSBDelete = nefSBPCFDelete
 
 	} else {
 		//Applicable to Any UE, UDR case
 
-		rsp, err := NEFSBUDRPost(&afsub, nefCtx, ti)
+		rsp, err = nefSBUDRPost(&afsub, nefCtx, ti)
 
 		if err != nil {
 
@@ -139,10 +144,10 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 		//Store Notification Destination URI
 		afsub.afNotificationDestination = ti.NotificationDestination
 
-		afsub.NEFSBGet = NEFSBUDRGet
-		afsub.NEFSBPut = NEFSBUDRPut
-		afsub.NEFSBPatch = NEFSBUDRPatch
-		afsub.NEFSBDelete = NEFSBUDRDelete
+		afsub.NEFSBGet = nefSBUDRGet
+		afsub.NEFSBPut = nefSBUDRPut
+		afsub.NEFSBPatch = nefSBUDRPatch
+		afsub.NEFSBDelete = nefSBUDRDelete
 
 	}
 
@@ -150,22 +155,24 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 	af.subs[subIDStr] = &afsub
 
 	//Create Location URI
-	loc = nefCtx.nef.apiRoot + nefCtx.cfg.LocationPrefix + af.afid + "/subscriptions/" + subIDStr
+	loc = nefCtx.nef.apiRoot + nefCtx.cfg.LocationPrefix + af.afid +
+		"/subscriptions/" + subIDStr
 
 	log.Infoln(" NEW AF Subscription added " + subIDStr)
 
 	return loc, rsp, nil
 }
 
-func (af *afData) afUpdateSubscription(nefCtx *nefContext, subID string, ti TrafficInfluSub) (rsp nefSBRspData, err error) {
+func (af *afData) afUpdateSubscription(nefCtx *nefContext, subID string,
+	ti TrafficInfluSub) (rsp nefSBRspData, err error) {
 
 	sub, ok := af.subs[subID]
 
-	if ok == false {
+	if !ok {
 		rsp.errorCode = 400
-		rsp.pd.Title = "Subscription Not Found"
+		rsp.pd.Title = subNotFound
 
-		return rsp, errors.New("Subscription Not Found")
+		return rsp, errors.New(subNotFound)
 	}
 
 	rsp, err = sub.NEFSBPut(sub, nefCtx, ti)
@@ -176,7 +183,7 @@ func (af *afData) afUpdateSubscription(nefCtx *nefContext, subID string, ti Traf
 	}
 	sub.ti = ti
 
-	log.Infoln("Update Subscription Successfull")
+	log.Infoln("Update Subscription Successful")
 	return rsp, err
 }
 
@@ -212,14 +219,16 @@ func updateTiFromTisp(ti *TrafficInfluSub, tisp TrafficInfluSubPatch) {
 
 }
 
-func (af *afData) afPartialUpdateSubscription(nefCtx *nefContext, subID string, tisp TrafficInfluSubPatch) (rsp nefSBRspData, ti TrafficInfluSub, err error) {
+func (af *afData) afPartialUpdateSubscription(nefCtx *nefContext, subID string,
+	tisp TrafficInfluSubPatch) (rsp nefSBRspData, ti TrafficInfluSub,
+	err error) {
 
 	sub, ok := af.subs[subID]
 
-	if ok == false {
+	if !ok {
 		rsp.errorCode = 400
-		rsp.pd.Title = "Subscription Not Found"
-		return rsp, ti, errors.New("Subscription Not Found")
+		rsp.pd.Title = subNotFound
+		return rsp, ti, errors.New(subNotFound)
 	}
 
 	rsp, err = sub.NEFSBPatch(sub, nefCtx, tisp)
@@ -234,14 +243,15 @@ func (af *afData) afPartialUpdateSubscription(nefCtx *nefContext, subID string, 
 
 }
 
-func (af *afData) afGetSubscription(nefCtx *nefContext, subID string) (rsp nefSBRspData, ti TrafficInfluSub, err error) {
+func (af *afData) afGetSubscription(nefCtx *nefContext,
+	subID string) (rsp nefSBRspData, ti TrafficInfluSub, err error) {
 
 	sub, ok := af.subs[subID]
 
-	if ok == false {
+	if !ok {
 		rsp.errorCode = 400
-		rsp.pd.Title = "Subscription Not Found"
-		return rsp, ti, errors.New("Subscription Not Found")
+		rsp.pd.Title = subNotFound
+		return rsp, ti, errors.New(subNotFound)
 	}
 
 	//ti, rsp, err = sub.NEFSBGet(sub, nefCtx)
@@ -259,13 +269,14 @@ func (af *afData) afGetSubscription(nefCtx *nefContext, subID string) (rsp nefSB
 	return rsp, sub.ti, err
 }
 
-func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (rsp nefSBRspData, subslist []TrafficInfluSub, err error) {
+func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (rsp nefSBRspData,
+	subslist []TrafficInfluSub, err error) {
 
 	var ti TrafficInfluSub
 
 	if len(af.subs) > 0 {
 
-		for key, _ := range af.subs {
+		for key := range af.subs {
 
 			rsp, ti, err = af.afGetSubscription(nefCtx, key)
 
@@ -278,15 +289,16 @@ func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (rsp nefSBRspData, s
 	return rsp, subslist, err
 }
 
-func (af *afData) afDeleteSubscription(nefCtx *nefContext, subID string) (rsp nefSBRspData, err error) {
+func (af *afData) afDeleteSubscription(nefCtx *nefContext,
+	subID string) (rsp nefSBRspData, err error) {
 
 	//Check if AF is already present
 	sub, ok := af.subs[subID]
 
-	if ok == false {
+	if !ok {
 		rsp.errorCode = 400
-		rsp.pd.Title = "Subscription Not Found"
-		return rsp, errors.New("Subscription Not Found")
+		rsp.pd.Title = subNotFound
+		return rsp, errors.New(subNotFound)
 	}
 
 	rsp, err = sub.NEFSBDelete(sub, nefCtx)
@@ -302,12 +314,15 @@ func (af *afData) afDeleteSubscription(nefCtx *nefContext, subID string) (rsp ne
 
 	return rsp, err
 }
+
+/* unused function
 func (af *afData) afDestroy(afid string) error {
 
 	//Todo delete all subscriptions, needed in go ??
 	//Needed for gracefully disconnecting
 	return errors.New("AF data cleaned")
 }
+*/
 
 //Initialize the NEF component
 func (nef *nefData) nefCreate(ctx context.Context, cfg Config) error {
@@ -327,20 +342,21 @@ func NEFInit() error {
 	return nef.nefCreate()
 }*/
 
-func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData, err error) {
+func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData,
+	err error) {
 
 	var afe afData
 
 	//Check if AF is already present
 	_, ok := nef.afs[afID]
 
-	if ok == true {
+	if !ok {
 		return nef.afs[afID], errors.New("AF already present")
 	}
 
 	//Create a new entry of AF
 
-	afe.afCreate(nefCtx, afID)
+	_ = afe.afCreate(nefCtx, afID)
 	nef.afs[afID] = &afe
 	nef.afcount++
 
@@ -352,19 +368,20 @@ func (nef *nefData) nefGetAf(afID string) (af *afData, err error) {
 	//Check if AF is already present
 	afe, ok := nef.afs[afID]
 
-	if ok == true {
+	if !ok {
 		return afe, nil
 	}
 	err = errors.New("AF entry not present")
 	return afe, err
 }
 
+/* unused function
 func (nef *nefData) nefDeleteAf(afID string) (err error) {
 
 	//Check if AF is already present
 	_, ok := nef.afs[afID]
 
-	if ok == true {
+	if !ok {
 		delete(nef.afs, afID)
 		nef.afcount--
 		return nil
@@ -373,13 +390,14 @@ func (nef *nefData) nefDeleteAf(afID string) (err error) {
 	err = errors.New("AF entry not present")
 	return err
 }
+*/
 
 func (nef *nefData) nefDestroy() {
 
 	// Todo
 }
 
-// NEFSBPost : This function sends HTTP POST Request to PCF to create Policy
+// nefSBPCFPost : This function sends HTTP POST Request to PCF to create Policy
 //             Authorization.
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
@@ -388,7 +406,7 @@ func (nef *nefData) nefDestroy() {
 //    - rsp: This is Policy Authorization Create Response Data
 //    - error: retruns error in case there is failure happened in sending the
 //             request or any failure response is received.
-func NEFSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
+func nefSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
 	ti TrafficInfluSub) (rsp nefSBRspData, err error) {
 
 	var appSessID AppSessionID
@@ -409,9 +427,17 @@ func NEFSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
 
 	//Populating UP Path Chnage Subbscription Data in App Session Context
 	appSessCtx.AscReqData.AfRoutReq.UpPathChgSub.DnaiChgType = ti.DnaiChgType
-	appSessCtx.AscReqData.AfRoutReq.UpPathChgSub.NotificationURI =
-		URI("http://localhost" + nefCtx.cfg.Endpoint)
-		/*+ nefCtx.cfg.UpfNotificationResUriPath*/
+
+	// If http2 port is configured use it else http port
+	if nefCtx.cfg.HTTP2Config.Endpoint != "" {
+		appSessCtx.AscReqData.AfRoutReq.UpPathChgSub.NotificationURI =
+			URI("https://localhost" + nefCtx.cfg.HTTP2Config.Endpoint)
+	} else {
+		appSessCtx.AscReqData.AfRoutReq.UpPathChgSub.NotificationURI =
+			URI("http://localhost" + nefCtx.cfg.HTTPConfig.Endpoint)
+	}
+
+	/*+ nefCtx.cfg.UpfNotificationResUriPath*/
 	appSessCtx.AscReqData.AfRoutReq.UpPathChgSub.NotifCorreID =
 		pcfSub.NotifCorreID
 
@@ -436,10 +462,10 @@ func NEFSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
 
 	//Populating DNN and NW Slice Info and SUPI in App Session Context
 	for _, afServIdcounter := range nefCtx.cfg.AfServiceIDs {
-		afServiceId := afServIdcounter.(map[string]interface{})
-		if 0 == strings.Compare(ti.AfServiceID, afServiceId["id"].(string)) {
-			appSessCtx.AscReqData.Dnn = Dnn(afServiceId["dnn"].(string))
-			appSessCtx.AscReqData.SliceInfo.Sd = afServiceId["snssai"].(string)
+		afServiceID := afServIdcounter.(map[string]interface{})
+		if 0 == strings.Compare(ti.AfServiceID, afServiceID["id"].(string)) {
+			appSessCtx.AscReqData.Dnn = Dnn(afServiceID["dnn"].(string))
+			appSessCtx.AscReqData.SliceInfo.Sd = afServiceID["snssai"].(string)
 			appSessCtx.AscReqData.SliceInfo.Sst =
 				uint8(len(appSessCtx.AscReqData.SliceInfo.Sd))
 		}
@@ -469,14 +495,14 @@ func NEFSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
 		log.Errf("PCF Policy Authorization Create Failure. Response Code: %d",
 			rsp.errorCode)
 	} else {
-		pcfSub.appSessionId = appSessID
+		pcfSub.appSessionID = appSessID
 		log.Infof("PCF Policy Authorization Create Success. Response Code: %d",
 			rsp.errorCode)
 	}
 	return rsp, err
 }
 
-// NEFSBGet : This function sends HTTP GET Request to PCF to fetch Policy
+// nefSBPCFGet : This function sends HTTP GET Request to PCF to fetch Policy
 //             Authorization using App Session Context Key.
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
@@ -485,7 +511,7 @@ func NEFSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
 //    - rsp: This is Policy Authorization Get Response Data
 //    - error: retruns error in case there is failure happened in sending the
 //             request or any failure response is received.
-func NEFSBPCFGet(pcfSub *afSubscription, nefCtx *nefContext) (
+func nefSBPCFGet(pcfSub *afSubscription, nefCtx *nefContext) (
 	sub TrafficInfluSub, rsp nefSBRspData, err error) {
 
 	nef := &nefCtx.nef
@@ -494,7 +520,7 @@ func NEFSBPCFGet(pcfSub *afSubscription, nefCtx *nefContext) (
 	defer cancel()
 
 	pcfPolicyResp, err :=
-		nef.pcfClient.PolicyAuthorizationGet(cliCtx, pcfSub.appSessionId)
+		nef.pcfClient.PolicyAuthorizationGet(cliCtx, pcfSub.appSessionID)
 	if err != nil {
 		rsp.errorCode = int(pcfPolicyResp.ResponseCode)
 		if pcfPolicyResp.Pd != nil {
@@ -521,7 +547,7 @@ func NEFSBPCFGet(pcfSub *afSubscription, nefCtx *nefContext) (
 	return sub, rsp, err
 }
 
-// NEFSBPut : This function returns error as HTTP PUT Request to PCF is not
+// nefSBPCFPut : This function returns error as HTTP PUT Request to PCF is not
 //            supported.
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
@@ -529,15 +555,15 @@ func NEFSBPCFGet(pcfSub *afSubscription, nefCtx *nefContext) (
 // Output Args:
 //    - rsp: This is Policy Authorization Put Response Data
 //    - error: retruns error .
-func NEFSBPCFPut(pcfSub *afSubscription, nefCtx *nefContext,
+func nefSBPCFPut(pcfSub *afSubscription, nefCtx *nefContext,
 	ti TrafficInfluSub) (rsp nefSBRspData, err error) {
 	err = errors.New("PUT Method Not Supported")
 	log.Errf("PCF Policy Authorization Put Not Supported")
 	return rsp, err
 }
 
-// NEFSBPatch : This function sends HTTP PATCH Request to PCF to update Policy
-//             Authorization using App Session Context Key.
+// nefSBPCFPatch : This function sends HTTP PATCH Request to PCF to update
+//             Policy Authorization using App Session Context Key.
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
 //   - tisp: This is Traffic Influence Subscription Patch Data.
@@ -545,7 +571,7 @@ func NEFSBPCFPut(pcfSub *afSubscription, nefCtx *nefContext,
 //    - rsp: This is Policy Authorization Patch Response Data
 //    - error: retruns error in case there is failure happened in sending the
 //             request or any failure response is received.
-func NEFSBPCFPatch(pcfSub *afSubscription, nefCtx *nefContext,
+func nefSBPCFPatch(pcfSub *afSubscription, nefCtx *nefContext,
 	tisp TrafficInfluSubPatch) (rsp nefSBRspData, err error) {
 
 	nef := &nefCtx.nef
@@ -562,9 +588,15 @@ func NEFSBPCFPatch(pcfSub *afSubscription, nefCtx *nefContext,
 	//Populating UP Path Chnage Subbscription Data in App Session Context
 	//TODO: appSessCtxUpdtData.AfRoutReq.UpPathChgSub.DnaiChgType =
 	//         ti.DnaiChgType
-	appSessCtxUpdtData.AfRoutReq.UpPathChgSub.NotificationURI =
-		URI("http://localhost" + nefCtx.cfg.Endpoint)
-		/*+ nefCtx.cfg.UpfNotificationResUriPath*/
+	// If HTTP2 port is configured use it else HTTP port
+	if nefCtx.cfg.HTTP2Config.Endpoint != "" {
+		appSessCtxUpdtData.AfRoutReq.UpPathChgSub.NotificationURI =
+			URI("https://localhost" + nefCtx.cfg.HTTP2Config.Endpoint)
+	} else {
+		appSessCtxUpdtData.AfRoutReq.UpPathChgSub.NotificationURI =
+			URI("http://localhost" + nefCtx.cfg.HTTPConfig.Endpoint)
+	}
+	/*+ nefCtx.cfg.UpfNotificationResUriPath*/
 	appSessCtxUpdtData.AfRoutReq.UpPathChgSub.NotifCorreID =
 		pcfSub.NotifCorreID
 
@@ -583,7 +615,7 @@ func NEFSBPCFPatch(pcfSub *afSubscription, nefCtx *nefContext,
 		&appSessCtxUpdtData.AfRoutReq.SpVal)
 
 	pcfPolicyResp, err := nef.pcfClient.PolicyAuthorizationUpdate(cliCtx,
-		appSessCtxUpdtData, pcfSub.appSessionId)
+		appSessCtxUpdtData, pcfSub.appSessionID)
 	if err != nil {
 		rsp.errorCode = int(pcfPolicyResp.ResponseCode)
 		if pcfPolicyResp.Pd != nil {
@@ -609,15 +641,15 @@ func NEFSBPCFPatch(pcfSub *afSubscription, nefCtx *nefContext,
 	return rsp, err
 }
 
-// NEFSBPatch : This function sends HTTP DELETE Request to PCF to delete Policy
-//             Authorization using App Session Context Key.
+// nefSBPCFDelete : This function sends HTTP DELETE Request to PCF to delete
+// 				    Policy Authorization using App Session Context Key.
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
 // Output Args:
 //    - rsp: This is Policy Authorization Delete Response Data
 //    - error: retruns error in case there is failure happened in sending the
 //             request or any failure response is received.
-func NEFSBPCFDelete(pcfSub *afSubscription, nefCtx *nefContext) (
+func nefSBPCFDelete(pcfSub *afSubscription, nefCtx *nefContext) (
 	rsp nefSBRspData, err error) {
 
 	nef := &nefCtx.nef
@@ -626,7 +658,7 @@ func NEFSBPCFDelete(pcfSub *afSubscription, nefCtx *nefContext) (
 	defer cancel()
 
 	pcfPolicyResp, err :=
-		nef.pcfClient.PolicyAuthorizationDelete(cliCtx, pcfSub.appSessionId)
+		nef.pcfClient.PolicyAuthorizationDelete(cliCtx, pcfSub.appSessionID)
 	if err != nil {
 		rsp.errorCode = int(pcfPolicyResp.ResponseCode)
 		if pcfPolicyResp.Pd != nil {
@@ -652,7 +684,7 @@ func NEFSBPCFDelete(pcfSub *afSubscription, nefCtx *nefContext) (
 	return rsp, err
 }
 
-// NEFSBPost : This function returns error as HTTP POST Request to UDR is not
+// nefSBUDRPost : This function returns error as HTTP POST Request to UDR is not
 //            supported.
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
@@ -660,15 +692,15 @@ func NEFSBPCFDelete(pcfSub *afSubscription, nefCtx *nefContext) (
 // Output Args:
 //    - rsp: This is Traffic Influence Data Put Response Data
 //    - error: retruns error .
-func NEFSBUDRPost(udrSub *afSubscription, nefCtx *nefContext,
+func nefSBUDRPost(udrSub *afSubscription, nefCtx *nefContext,
 	ti TrafficInfluSub) (rsp nefSBRspData, err error) {
 
-	rsp, err = NEFSBUDRPut(udrSub, nefCtx, ti)
+	rsp, err = nefSBUDRPut(udrSub, nefCtx, ti)
 	return rsp, err
 
 }
 
-// NEFSBGet : This function sends HTTP GET Request to UDR to fetch
+// nefSBUDRGet : This function sends HTTP GET Request to UDR to fetch
 //               Traffic Influence Data.
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
@@ -677,7 +709,7 @@ func NEFSBUDRPost(udrSub *afSubscription, nefCtx *nefContext,
 //    - rsp: This is Traffic Influence Data Delete Response Data
 //    - error: retruns error in case there is failure happened in sending the
 //             request or any failure response is received.
-func NEFSBUDRGet(udrSub *afSubscription, nefCtx *nefContext) (
+func nefSBUDRGet(udrSub *afSubscription, nefCtx *nefContext) (
 	sub TrafficInfluSub, rsp nefSBRspData, err error) {
 
 	nef := &nefCtx.nef
@@ -712,7 +744,7 @@ func NEFSBUDRGet(udrSub *afSubscription, nefCtx *nefContext) (
 	return sub, rsp, err
 }
 
-// NEFSBPut : This function sends HTTP PUT Request to UDR to create Traffic
+// nefSBUDRPut : This function sends HTTP PUT Request to UDR to create Traffic
 //            Influence Data.
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
@@ -721,7 +753,7 @@ func NEFSBUDRGet(udrSub *afSubscription, nefCtx *nefContext) (
 //    - rsp: This is Traffic Influence Data Create Response Data
 //    - error: retruns error in case there is failure happened in sending the
 //             request or any failure response is received.
-func NEFSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
+func nefSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
 	ti TrafficInfluSub) (rsp nefSBRspData, err error) {
 
 	nef := &nefCtx.nef
@@ -736,10 +768,10 @@ func NEFSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
 
 	//Populating DNN and NW Slice Info in Traffic Influence Data
 	for _, afServIdcounter := range nefCtx.cfg.AfServiceIDs {
-		afServiceId := afServIdcounter.(map[string]interface{})
-		if 0 == strings.Compare(ti.AfServiceID, afServiceId["id"].(string)) {
-			trafficInfluData.Dnn = Dnn(afServiceId["dnn"].(string))
-			trafficInfluData.Snssai.Sd = afServiceId["snssai"].(string)
+		afServiceID := afServIdcounter.(map[string]interface{})
+		if 0 == strings.Compare(ti.AfServiceID, afServiceID["id"].(string)) {
+			trafficInfluData.Dnn = Dnn(afServiceID["dnn"].(string))
+			trafficInfluData.Snssai.Sd = afServiceID["snssai"].(string)
 			trafficInfluData.Snssai.Sst = uint8(len(trafficInfluData.Snssai.Sd))
 		}
 	}
@@ -748,14 +780,20 @@ func NEFSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
 	trafficInfluData.InterGroupID = string(ti.ExternalGroupID)
 
 	//Populating UP Path Chnage Subbscription Data in Traffic Influence Data
-	trafficInfluData.UpPathChgNotifURI =
-		URI("http://localhost" + nefCtx.cfg.Endpoint)
-		/*+ nefCtx.cfg.UpfNotificationResUriPath*/
+	// If HTTP2 port is configured use it else HTTP port
+	if nefCtx.cfg.HTTP2Config.Endpoint != "" {
+		trafficInfluData.UpPathChgNotifURI =
+			URI("https://localhost" + nefCtx.cfg.HTTP2Config.Endpoint)
+	} else {
+		trafficInfluData.UpPathChgNotifURI =
+			URI("http://localhost" + nefCtx.cfg.HTTPConfig.Endpoint)
+	}
+	/*+ nefCtx.cfg.UpfNotificationResUriPath*/
 	if len(string(ti.SubscribedEvents[0])) > 0 &&
 		0 == strings.Compare(string(ti.SubscribedEvents[0]), "UP_PATH_CHANGE") {
 		udrSub.NotifCorreID = strconv.Itoa(int(nef.corrID))
 		nef.corrID++
-		trafficInfluData.UpPathChgNotifCorreID = URI(udrSub.NotifCorreID)
+		trafficInfluData.UpPathChgNotifCorreID = udrSub.NotifCorreID
 	}
 
 	//Populating Traffic Filters in Traffic Influence Data
@@ -810,8 +848,8 @@ func NEFSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
 	return rsp, err
 }
 
-// NEFSBPatch : This function sends HTTP PATCH Request to UDR to update Traffic
-//            Influence Data.
+// nefSBUDRPatch : This function sends HTTP PATCH Request to UDR to update
+//            Traffic Influence Data.
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
 //   - tisp: This is Traffic Influence Subscription Patch Data.
@@ -819,7 +857,7 @@ func NEFSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
 //    - rsp: This is Traffic Influence Data Update Response Data
 //    - error: retruns error in case there is failure happened in sending the
 //             request or any failure response is received.
-func NEFSBUDRPatch(udrSub *afSubscription, nefCtx *nefContext,
+func nefSBUDRPatch(udrSub *afSubscription, nefCtx *nefContext,
 	tisp TrafficInfluSubPatch) (rsp nefSBRspData, err error) {
 
 	nef := &nefCtx.nef
@@ -880,7 +918,7 @@ func NEFSBUDRPatch(udrSub *afSubscription, nefCtx *nefContext,
 	return rsp, err
 }
 
-// NEFSBDelete : This function sends HTTP DELETE Request to UDR to delete
+// nefSBUDRDelete : This function sends HTTP DELETE Request to UDR to delete
 //               Traffic Influence Data.
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
@@ -888,7 +926,7 @@ func NEFSBUDRPatch(udrSub *afSubscription, nefCtx *nefContext,
 //    - rsp: This is Traffic Influence Data Delete Response Data
 //    - error: retruns error in case there is failure happened in sending the
 //             request or any failure response is received.
-func NEFSBUDRDelete(udrSub *afSubscription, nefCtx *nefContext) (
+func nefSBUDRDelete(udrSub *afSubscription, nefCtx *nefContext) (
 	rsp nefSBRspData, err error) {
 
 	nef := &nefCtx.nef
@@ -916,8 +954,8 @@ func NEFSBUDRDelete(udrSub *afSubscription, nefCtx *nefContext) (
 		log.Errf("UDR Traffic Influence Data Delete Failure. Response Code: %d",
 			rsp.errorCode)
 	} else {
-		log.Infof("UDR Traffic Influence Data Delete Success. Response Code: %d",
-			rsp.errorCode)
+		log.Infof("UDR Traffic Influence Data Delete Success."+
+			"Response Code: %d", rsp.errorCode)
 	}
 
 	return rsp, err

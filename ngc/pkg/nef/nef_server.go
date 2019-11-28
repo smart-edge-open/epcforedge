@@ -46,7 +46,7 @@ type Config struct {
 	UserAgent                 string `json:"UserAgent"`
 	HTTPConfig                HTTPConfig
 	HTTP2Config               HTTP2Config
-	AfServiceIDs   []interface{} `json:"afServiceIDs"`
+	AfServiceIDs              []interface{} `json:"afServiceIDs"`
 }
 
 // NEF Module Context Data Structure

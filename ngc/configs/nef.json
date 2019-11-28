@@ -14,7 +14,7 @@
         "NefServerCert": "certs/server-cert.pem",
         "NefServerKey": "certs/server-key.pem",
         "AfServerCert": "certs/root-ca-cert.pem"
-    }
+    },
     "AfServiceID": [
         {
             "id": "id1_value",

@@ -18,11 +18,13 @@ package main
 // be notified of
 type SubscribedEvent string
 
+/*
 // List of SubscribedEvent
 const (
 	//UP_PATH_CHANGE SubscribedEvent = "UP_PATH_CHANGE" >> causing lint error
 	UpPathChange SubscribedEvent = "UP_PATH_CHANGE"
 )
+*/
 
 // TrafficInfluSub is Traffic Influence Subscription structure
 type TrafficInfluSub struct {

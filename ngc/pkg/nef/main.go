@@ -60,7 +60,7 @@ func main() {
 	logtool.SetLevel(lvl)
 	log.Infof("Logger Level: %d", lvl)
 
-	unusedlint()
+	//unusedlint()
 
 	/* Creating a context. This context will be used for following:
 	 * 1. To store the NEF Module Context data and other module related data.
@@ -87,8 +87,9 @@ func main() {
 	//}
 }
 
+/*
 func unusedlint() {
-	/* For unused variables lint warning to be  removed later */
+	// For unused variables lint warning to be  removed later
 	ti := TrafficInfluSub{}
 	_ = ti
 
@@ -143,3 +144,4 @@ func unusedlint() {
 	_, _ = udrClient.UdrInfluenceDataGet(ctx)
 
 }
+*/

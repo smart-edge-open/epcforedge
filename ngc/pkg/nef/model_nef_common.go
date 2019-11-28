@@ -93,10 +93,6 @@ type Link URI
 // pattern: '^([0-9a-fA-F]{2})((-[0-9a-fA-F]{2}){5})$'
 type MacAddr48 string
 
-// Port : Identifies a port number
-// Unsigned integer with valid values between 0 and 65535.
-type Port uint32
-
 // RouteInformation Route information struct
 type RouteInformation struct {
 	// string identifying a Ipv4 address formatted in the \"dotted decimal\"
