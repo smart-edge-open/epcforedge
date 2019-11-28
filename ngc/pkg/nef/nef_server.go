@@ -46,6 +46,7 @@ type Config struct {
 	UserAgent                 string `json:"UserAgent"`
 	HTTPConfig                HTTPConfig
 	HTTP2Config               HTTP2Config
+	AfServiceIDs   []interface{} `json:"afServiceIDs"`
 }
 
 // NEF Module Context Data Structure
@@ -210,7 +211,7 @@ func Run(ctx context.Context, cfgPath string) error {
 	}
 
 	/* Creates/Initializes NEF Data */
-	err = nefCtx.nef.nefCreate()
+	err = nefCtx.nef.nefCreate(ctx, nefCtx.cfg)
 	if err != nil {
 		log.Errf("NEF Create Failed: %v", err)
 		return err
