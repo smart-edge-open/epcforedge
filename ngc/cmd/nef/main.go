@@ -29,7 +29,7 @@ import (
 var log = logtool.DefaultLogger.WithField("NEF-MAIN", nil)
 
 // Path for NEF Configuration file
-const cfgPath string = "./configs/nef.json"
+const cfgPath string = "configs/nef.json"
 
 // main: Entry point for NEF Module Execution
 // Input Args: None
