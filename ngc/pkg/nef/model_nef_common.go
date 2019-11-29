@@ -31,13 +31,6 @@ type DnaiChangeType string
 // Dnn : string identify the Data network name
 type Dnn string
 
-// ExternalID : string containing a local identifier followed by "@" and a
-//  domain identifier. B
-// Both the local identifier and the domain identifier shall be encoded as
-//  strings that do not contain any "@" characters.
-// See Clause 4.6.2 of 3GPP TS 23.682 for more information
-// type ExternalID string
-
 // ExternalGroupID : string containing a local identifier followed by "@" and
 // a domain identifier.
 // Both the local identifier and the domain identifier shall be encoded as

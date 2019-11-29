@@ -36,18 +36,6 @@ const cfgPath string = "configs/nef.json"
 // Output Args: None
 func main() {
 
-	/* Opening a file for Logging and setting it to Logger Module */
-	//file, err1 := os.OpenFile("nef.log", os.O_CREATE|os.O_WRONLY, 0644)
-	//if err1 != nil {
-	//	log.Errf("Failed to open NEF log file: %s", err1.Error())
-	//	os.Exit(1)
-	//}
-
-	//if file.Truncate(0) != nil {
-	//	log.Errf("Failed to truncate file opened for logging")
-	//}
-	//logtool.SetOutput(file)
-
 	/* Reading Log Level and and set it to logger, As of now it is hardcoded to
 	 * info */
 	lvl, err := logtool.ParseLevel("info")

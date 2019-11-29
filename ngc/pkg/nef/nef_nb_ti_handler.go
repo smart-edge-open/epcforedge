@@ -34,7 +34,7 @@ func createNewSub(nefCtx *nefContext, afID string,
 	af, err = nef.nefGetAf(afID)
 
 	if err != nil {
-		log.Infoln("NO AF PRESENT CREATE AF")
+		log.Err("NO AF PRESENT CREATE AF")
 		af, _ = nef.nefAddAf(nefCtx, afID)
 	} else {
 		log.Infoln("AF PRESENT")
@@ -70,7 +70,7 @@ func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
 	rsp, subslist, err := af.afGetSubscriptionList(nefCtx)
 
 	if err != nil {
-		log.Infoln(err)
+		log.Err(err)
 		sendErrorResponseToAF(w, rsp)
 		return
 	}
@@ -119,7 +119,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	err1 := json.Unmarshal(b, &trInBody)
 
 	if err1 != nil {
-		log.Infoln(err1)
+		log.Err(err1)
 		sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal GET data")
 		return
 	}
@@ -131,7 +131,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	//logNef(nef)
 
 	if err3 != nil {
-		log.Infoln(err3)
+		log.Err(err3)
 		sendErrorResponseToAF(w, rsp)
 		_ = r.Body.Close()
 		return
@@ -141,7 +141,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	mdata, err2 := json.Marshal(trInBody)
 
 	if err2 != nil {
-		log.Infoln(err2)
+		log.Err(err2)
 		sendCustomeErrorRspToAF(w, 400, "Failed to Marshal GET response data")
 		return
 	}
@@ -149,7 +149,8 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Location", loc)
 
-	w.WriteHeader(http.StatusOK)
+	// Response should be 201 Created as per 3GPP 29.522
+	w.WriteHeader(http.StatusCreated)
 	_, err = w.Write(mdata)
 	if err != nil {
 		log.Errf("Write Failed: %v", err)
@@ -173,7 +174,6 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 	af, ok := nef.nefGetAf(vars["afId"])
 
 	if ok != nil {
-		log.Infoln(ok)
 		sendCustomeErrorRspToAF(w, 400, "Failed to find AF records")
 		return
 	}
@@ -181,14 +181,14 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 	rsp, substi, err := af.afGetSubscription(nefCtx, vars["subscriptionId"])
 
 	if err != nil {
-		log.Infoln(err)
+		log.Err(err)
 		sendErrorResponseToAF(w, rsp)
 		return
 	}
 
 	mdata, err2 := json.Marshal(substi)
 	if err2 != nil {
-		log.Infoln(err2)
+		log.Err(err2)
 		sendCustomeErrorRspToAF(w, 400, "Failed to Marshal GET response data")
 	}
 
@@ -221,7 +221,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 		b, err := ioutil.ReadAll(r.Body)
 
 		if err != nil {
-			log.Infoln(err)
+			log.Err(err)
 			sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP PUT Body")
 			_ = r.Body.Close()
 			return
@@ -234,7 +234,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 		err1 := json.Unmarshal(b, &trInBody)
 
 		if err1 != nil {
-			log.Infoln(err1)
+			log.Err(err1)
 			sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal PUT data")
 			_ = r.Body.Close()
 			return
@@ -252,7 +252,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 		mdata, err2 := json.Marshal(trInBody)
 
 		if err2 != nil {
-			log.Infoln(err2)
+			log.Err(err2)
 			sendCustomeErrorRspToAF(w, 400, "Failed to Marshal PUT"+
 				"response data")
 			return
@@ -290,7 +290,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 		b, err := ioutil.ReadAll(r.Body)
 
 		if err != nil {
-			log.Infoln(err)
+			log.Err(err)
 			sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP PATCH Body")
 			_ = r.Body.Close()
 			return
@@ -303,7 +303,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 		err1 := json.Unmarshal(b, &TrInSPBody)
 
 		if err1 != nil {
-			log.Infoln(err1)
+			log.Err(err1)
 			sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal PATCH data")
 			_ = r.Body.Close()
 			return
@@ -321,7 +321,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 		mdata, err2 := json.Marshal(ti)
 
 		if err2 != nil {
-			log.Infoln(err2)
+			log.Err(err2)
 			sendCustomeErrorRspToAF(w, 400,
 				"Failed to Marshal PATCH response data")
 			return
@@ -357,7 +357,7 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	af, err := nef.nefGetAf(vars["afId"])
 
 	if err != nil {
-		log.Infoln(err)
+		log.Err(err)
 		sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP DELETE Body")
 		_ = r.Body.Close()
 		return
@@ -365,12 +365,13 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	rsp, err := af.afDeleteSubscription(nefCtx, vars["subscriptionId"])
 
 	if err != nil {
-		log.Infoln(err)
+		log.Err(err)
 		sendErrorResponseToAF(w, rsp)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	// Response should be 204 as per 3GPP 29.522
+	w.WriteHeader(http.StatusNoContent)
 
 	log.Infof("HTTP Response sent: %d", http.StatusOK)
 
@@ -483,7 +484,7 @@ func sendErrorResponseToAF(w http.ResponseWriter, rsp nefSBRspData) {
 	w.WriteHeader(eCode)
 	_, err := w.Write(mdata)
 	if err != nil {
-		log.Infoln("NEF ERROR : Failed to send response to AF !!!")
+		log.Err("NEF ERROR : Failed to send response to AF !!!")
 	}
 
 }
@@ -494,16 +495,14 @@ func createErrorJSON(rsp nefSBRspData) (mdata []byte, statusCode int) {
 	statusCode = 404
 
 	/*
-			TBD: Commented to fix cyclometrix complexity
-		if
-		rsp.errorCode == 400 || rsp.errorCode == 401 || rsp.errorCode == 403 ||
-		rsp.errorCode == 404 || rsp.errorCode == 411 || rsp.errorCode == 413 ||
-		rsp.errorCode == 415 || rsp.errorCode == 429 || rsp.errorCode == 500 ||
-		rsp.errorCode == 503 {
+		TBD: Removed check for 401, 403, 413 and 429
+		due cyclometrix complexity lint warning. Once a better mechanism
+		is found to be added back. Anyhow currently these errors are not
+		supported
 	*/
 
-	if rsp.errorCode == 400 || rsp.errorCode == 401 || rsp.errorCode == 403 ||
-		rsp.errorCode == 503 {
+	if rsp.errorCode == 400 || rsp.errorCode == 404 || rsp.errorCode == 411 ||
+		rsp.errorCode == 415 || rsp.errorCode == 500 || rsp.errorCode == 503 {
 		statusCode = rsp.errorCode
 		mdata, err = json.Marshal(rsp.pd)
 

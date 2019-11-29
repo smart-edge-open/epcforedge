@@ -26,7 +26,7 @@ const subNotFound string = "Subscription Not Found"
 
 //NEF context data
 type nefData struct {
-	afcount   int
+	afCount   int
 	apiRoot   string
 	pcfClient PcfPolicyAuthorization
 	udrClient UdrInfluenceData
@@ -70,8 +70,8 @@ type afSubscription struct {
 
 //AF data
 type afData struct {
-	afid       string
-	subIdnum   int
+	afID       string
+	subIDnum   int
 	maxSubSupp int
 	subs       map[string]*afSubscription
 }
@@ -82,12 +82,12 @@ type nefSBRspData struct {
 }
 
 //Creates a AF instance
-func (af *afData) afCreate(nefCtx *nefContext, afid string) error {
+func (af *afData) afCreate(nefCtx *nefContext, afID string) error {
 
 	//Validate afid ??
 
-	af.afid = afid
-	af.subIdnum = nefCtx.cfg.SubStartID //Start Number
+	af.afID = afID
+	af.subIDnum = nefCtx.cfg.SubStartID //Start Number
 	af.maxSubSupp = nefCtx.cfg.MaxSubSupport
 	af.subs = make(map[string]*afSubscription)
 	return nil
@@ -106,8 +106,8 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 	}
 
 	//Generate a unique subscription ID string
-	subIDStr := strconv.Itoa(af.subIdnum)
-	af.subIdnum++
+	subIDStr := strconv.Itoa(af.subIDnum)
+	af.subIDnum++
 
 	//Create Subscription data
 	afsub := afSubscription{subid: subIDStr, ti: ti, appSessionID: "",
@@ -155,7 +155,7 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 	af.subs[subIDStr] = &afsub
 
 	//Create Location URI
-	loc = nefCtx.nef.apiRoot + nefCtx.cfg.LocationPrefix + af.afid +
+	loc = nefCtx.nef.apiRoot + nefCtx.cfg.LocationPrefix + af.afID +
 		"/subscriptions/" + subIDStr
 
 	log.Infoln(" NEW AF Subscription added " + subIDStr)
@@ -178,7 +178,7 @@ func (af *afData) afUpdateSubscription(nefCtx *nefContext, subID string,
 	rsp, err = sub.NEFSBPut(sub, nefCtx, ti)
 
 	if err != nil {
-		log.Infoln("Failed to Update Subscription")
+		log.Err("Failed to Update Subscription")
 		return rsp, err
 	}
 	sub.ti = ti
@@ -234,7 +234,7 @@ func (af *afData) afPartialUpdateSubscription(nefCtx *nefContext, subID string,
 	rsp, err = sub.NEFSBPatch(sub, nefCtx, tisp)
 
 	if err != nil {
-		log.Infoln("Failed to Patch Subscription")
+		log.Err("Failed to Patch Subscription")
 		return rsp, ti, err
 	}
 	updateTiFromTisp(&sub.ti, tisp)
@@ -270,7 +270,7 @@ func (af *afData) afGetSubscription(nefCtx *nefContext,
 }
 
 func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (rsp nefSBRspData,
-	subslist []TrafficInfluSub, err error) {
+	subsList []TrafficInfluSub, err error) {
 
 	var ti TrafficInfluSub
 
@@ -281,12 +281,12 @@ func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (rsp nefSBRspData,
 			rsp, ti, err = af.afGetSubscription(nefCtx, key)
 
 			if err != nil {
-				return rsp, subslist, err
+				return rsp, subsList, err
 			}
-			subslist = append(subslist, ti)
+			subsList = append(subsList, ti)
 		}
 	}
-	return rsp, subslist, err
+	return rsp, subsList, err
 }
 
 func (af *afData) afDeleteSubscription(nefCtx *nefContext,
@@ -304,13 +304,13 @@ func (af *afData) afDeleteSubscription(nefCtx *nefContext,
 	rsp, err = sub.NEFSBDelete(sub, nefCtx)
 
 	if err != nil {
-		log.Infoln("Failed to Delete Subscription")
+		log.Err("Failed to Delete Subscription")
 		return rsp, err
 	}
 
 	//Delete local entry in map
 	delete(af.subs, subID)
-	af.subIdnum--
+	af.subIDnum--
 
 	return rsp, err
 }
@@ -333,7 +333,7 @@ func (af *afData) afDestroy(afid string) error {
 func (nef *nefData) nefCreate(ctx context.Context, cfg Config) error {
 
 	_ = ctx
-	nef.afcount = 0
+	nef.afCount = 0
 	nef.pcfClient = NewPCFClient(nil)
 	nef.udrClient = NewUDRClient(nil)
 	nef.afs = make(map[string]*afData)
@@ -352,7 +352,7 @@ func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData,
 
 	var afe afData
 
-	if nef.afcount == nefCtx.cfg.MaxAFSupport {
+	if nef.afCount == nefCtx.cfg.MaxAFSupport {
 		log.Infoln("MAX AF exceeded ")
 		return af, errors.New("MAX AF exceeded")
 	}
@@ -368,7 +368,7 @@ func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData,
 
 	_ = afe.afCreate(nefCtx, afID)
 	nef.afs[afID] = &afe
-	nef.afcount++
+	nef.afCount++
 
 	return &afe, nil
 }
@@ -392,7 +392,7 @@ func (nef *nefData) nefDeleteAf(afID string) (err error) {
 
 	if ok {
 		delete(nef.afs, afID)
-		nef.afcount--
+		nef.afCount--
 		return nil
 	}
 
