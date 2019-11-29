@@ -147,6 +147,8 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 
 	// Response should be 201 Created as per 3GPP 29.522
 	w.WriteHeader(http.StatusCreated)
+	log.Infof("CreateTrafficInfluenceSubscription respones => %d",
+		http.StatusCreated)
 	_, err = w.Write(mdata)
 	if err != nil {
 		log.Errf("Write Failed: %v", err)

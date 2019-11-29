@@ -127,6 +127,7 @@ func (af *AfClient) AfNotificationUpfEvent(ctx context.Context,
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Err(err)
+		return err
 	}
 	defer func() {
 		err = resp.Body.Close()
@@ -135,7 +136,7 @@ func (af *AfClient) AfNotificationUpfEvent(ctx context.Context,
 		}
 	}()
 
-	log.Info("Headers in the response =>")
+	log.Infof("Headers in the response %d =>", resp.StatusCode)
 	for k, v := range resp.Header {
 		log.Infof("%q:%q\n", k, v)
 	}
