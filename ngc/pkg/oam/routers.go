@@ -22,6 +22,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Route : route handler structure
 type Route struct {
 	Name        string
 	Method      string
@@ -29,24 +30,24 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
+// Routes : slice for route
 type Routes []Route
 
+// NewRouter : function of mux router
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
-		var handler http.Handler
-		handler = route.HandlerFunc
-
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
-			Handler(handler)
+			Handler(route.HandlerFunc)
 	}
 
 	return router
 }
 
+// Index : function for index
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello From OpenNESS!")
 }
@@ -63,41 +64,34 @@ var routes = Routes{
 		"Add",
 		strings.ToUpper("Post"),
 		"/oam/v1/af/services",
-		Add,
+		add,
 	},
 
 	Route{
 		"Delete",
 		strings.ToUpper("Delete"),
-		"/oam/v1/af/services/{afId}",
-		Delete,
-	},
-
-	Route{
-		"DeleteDns",
-		strings.ToUpper("Delete"),
-		"/oam/v1/af/services/{afId}/locationServices/{dnai}",
-		DeleteDns,
+		"/oam/v1/af/services/{afServiceId}",
+		delete,
 	},
 
 	Route{
 		"Get",
 		strings.ToUpper("Get"),
-		"/oam/v1/af/services/{afId}",
-		Get,
+		"/oam/v1/af/services/{afServiceId}",
+		get,
 	},
 
 	Route{
 		"GetAll",
 		strings.ToUpper("Get"),
 		"/oam/v1/af/services",
-		GetAll,
+		getAll,
 	},
 
 	Route{
 		"Update",
 		strings.ToUpper("Patch"),
-		"/oam/v1/af/services/{afId}",
-		Update,
+		"/oam/v1/af/services/{afServiceId}",
+		update,
 	},
 }

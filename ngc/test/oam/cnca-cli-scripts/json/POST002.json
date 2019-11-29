@@ -1,10 +1,10 @@
-[{
-  "afInstance": "gf-b",
-  "locationServices": [
-    {
+{
       "dnai": "b_dnai",
       "dnn": "b_dnn",
-      "dns": "192.168.9.9"
-    }
-  ]
-}]
+      "tac": 77,
+      "priDns": "192.168.9.9",
+      "secDns": "192.168.8.8",
+      "upfIp": "192.168.10.18",
+      "snssai": "slice1"
+  
+}

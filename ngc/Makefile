@@ -45,7 +45,7 @@ oam-test-flexcore:
 
 
 lint:
-	golangci-lint run
+	golangci-lint run ./pkg/oam
 
 test-unit:
 	ginkgo -v -cover ./pkg/config ./pkg/oam

@@ -1,10 +1,13 @@
-[{
-  "afInstance": "by-a",
-  "locationServices": [
-    {
-      "dnai": "by_dnai",
-      "dnn": "by_dnn",
-      "dns": "192.168.8.8"
-    }
-  ]
-}]
+{
+  "locationService": 
+  {
+      "dnai": "patch_dnai",
+      "dnn": "patch_dnn",
+      "tac": 66,
+      "priDns": "192.168.9.9",
+      "secDns": "192.168.8.8",
+      "upfIp": "192.168.10.18",
+      "snssai": "slice1"
+  }
+  
+}

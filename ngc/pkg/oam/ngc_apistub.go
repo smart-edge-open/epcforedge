@@ -25,12 +25,22 @@ import (
 
 )
 
-var AllRecords []AfService
-var AllRecordsAfId []string
-var NewRecordAfId  int
+// AllRecords store all the AFService
+var AllRecords             []AFService
 
-func APIStubInit(apistub_testdatapath string) error {
-    cfgData, err := ioutil.ReadFile(filepath.Clean(apistub_testdatapath))
+// NewRecordAFServiceID is id to allocate
+var NewRecordAFServiceID   int
+
+// AFServiceIDBaseValue is base value for the id to allocate
+const AFServiceIDBaseValue = 123456
+
+// APIStubInit : stub init
+func APIStubInit(apistubTestdatapath string) error {
+    // Init value     
+    NewRecordAFServiceID = AFServiceIDBaseValue // BaseValue for new AFServiceID
+    
+    // Read records from test stub file
+    cfgData, err := ioutil.ReadFile(filepath.Clean(apistubTestdatapath))
     if err != nil {
        return err
     }
@@ -38,30 +48,56 @@ func APIStubInit(apistub_testdatapath string) error {
     if err != nil {
        return err
     }
-    log.Printf("[APISTUB MODE] Init AllRecords with num %d: \n", len(AllRecords))
+    log.Printf("[APISTUB MODE] Init with num %d: \n", len(AllRecords))
     for _, a := range AllRecords {
        log.Println(a)
-       NewRecordAfId++;
-       newAfId   := []string { strconv.Itoa(NewRecordAfId) }
-       AllRecordsAfId = append(AllRecordsAfId, newAfId...)
+       // ignore serviceID in the test, allocate new serviceID
+       a.AFServiceID = APIStubNewAFServiceID()
     }
     
     return nil
-
 }
 
+// APIStubReset : stub reset
 func APIStubReset() error {
+
     AllRecords = nil
-    AllRecordsAfId = nil
-    NewRecordAfId = 0
+    NewRecordAFServiceID = AFServiceIDBaseValue // BaseValue for new AFServiceID
     return nil
 
 }
 
+// APIStubPrintAll : stub print all
+func APIStubPrintAll() {
+    // Print all records
+    log.Printf("[APISTUB MODE] NewAFServiceID: %d\n", NewRecordAFServiceID)
+    log.Printf("[APISTUB MODE] AllRecords num is: %d\n", len(AllRecords))
+    log.Println(AllRecords)
+}
+
+// APIStubNewAFServiceID : allocate new service id
+func APIStubNewAFServiceID() string {
+     NewRecordAFServiceID++
+     return   strconv.Itoa(NewRecordAFServiceID) 
+}
+
+// APIStubGetRecordIndex : get record by service id
+func APIStubGetRecordIndex(serviceID string) int {
+
+    log.Printf("[APISTUB MODE]  Searching: %s\n", serviceID)
+     // loop recorded AFID
+     for i, a := range AllRecords {
+         if a.AFServiceID == serviceID {
+               return i
+         }
+     }
+     return -1
+}
+
+// APIStubGetAll : get all records from stub
 func APIStubGetAll(w http.ResponseWriter, r *http.Request) {
 
     log.Printf("URL GetAll: %s\n", r.URL.Path)
-
     log.Printf("Number of All Records is: %d", len(AllRecords))
     ret, _ := json.Marshal(AllRecords)
     if ret != nil {
@@ -72,53 +108,47 @@ func APIStubGetAll(w http.ResponseWriter, r *http.Request) {
     }
 
     log.Printf("GetAll Failed")
-    w.WriteHeader(404)
+    w.WriteHeader(http.StatusNotFound)
 }
 
+// APIStubAdd : add one to records
 func APIStubAdd(w http.ResponseWriter, r *http.Request) {
 
     log.Printf("URL Add: %s\n", r.URL.Path)
-
     body, _ := ioutil.ReadAll(r.Body)
     log.Printf("HTTPRequest Body: %s\n", string(body))
 
-    var newRecord []AfService
-    if err := json.Unmarshal(body, &newRecord); err == nil {
-             // Append the new record.
-             AllRecords = append(AllRecords, newRecord...)
-             
-             // Append the new AFID for the new record
-             NewRecordAfId ++
-             newAfId   := []string { strconv.Itoa(NewRecordAfId) }
-             AllRecordsAfId = append(AllRecordsAfId, newAfId...)
-             
-             // Print all records information
-             log.Printf("[APISTUB MODE] NewRecords AfId: %d\n", NewRecordAfId)
-             log.Printf("[APISTUB MODE] AllRecords with num: %d\n", len(AllRecords))
-             log.Println(AllRecords)
-             log.Println(AllRecordsAfId)
-             
-             // Respons Body.
-             var rspData AfId
-             rspData.AfId = strconv.Itoa(NewRecordAfId)
-             jData, err := json.Marshal(rspData)
-             if err != nil {
-                 w.WriteHeader(404)
-                 log.Println(err)
-                 return;
-             }
-             w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-             w.WriteHeader(http.StatusOK)
-             w.Write(jData)
-             return
-    } else {
-             log.Println(err)
+    //var httpBody     LocationService
+    // create and append the new record.
+    newRecord := make([]AFService,1)
+    //newRecord[0].LocationService  = httpBody
+    err := json.Unmarshal(body, &(newRecord[0].LocationService))
+    if  err != nil {
+        log.Println(err)
+        log.Printf("Add Failed\n")
+        w.WriteHeader(http.StatusNotFound)
+        return
     }
 
-    log.Printf("Add Failed\n")
-    w.WriteHeader(404)
+    newRecord[0].AFServiceID      = APIStubNewAFServiceID()
+    AllRecords = append(AllRecords, newRecord...)
+    APIStubPrintAll()
+         
+    // Respons Body.
+    var rspData AFServiceID
+    rspData.AFServiceID = newRecord[0].AFServiceID 
+    jData, err := json.Marshal(rspData)
+    if err != nil {
+        w.WriteHeader(http.StatusNotFound)
+        log.Println(err)
+        return;
+    }
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+    w.WriteHeader(http.StatusOK)
+    w.Write(jData)
 }
 
+// APIStubDel : delete one from the records
 func APIStubDel(w http.ResponseWriter, r *http.Request) {
 
     log.Printf("URL Del: %s\n", URLBase + r.URL.Path)
@@ -126,121 +156,86 @@ func APIStubDel(w http.ResponseWriter, r *http.Request) {
     // get AFID
     vars := mux.Vars(r)
         
-    // loop recorded AFID
-    for j, a := range AllRecordsAfId {
-         if a == vars["afId"] {
-               AllRecords = append(AllRecords[:j], AllRecords[j+1:]...)
-               AllRecordsAfId = append(AllRecordsAfId[:j], AllRecordsAfId[j+1:]...)
-               if len(AllRecordsAfId) == 0 { NewRecordAfId = 0}
-
-               log.Printf("[APISTUB MODE] AllRecords with num: %d\n", len(AllRecords))
-               log.Println(AllRecords)
-               log.Println(AllRecordsAfId)
-               w.WriteHeader(http.StatusOK)
-               return
-         }
+    // get recorded AFService
+    j := APIStubGetRecordIndex(vars["afServiceId"])
+    if j == -1 {
+       log.Printf("Not found in the AllRecords\n")
+       w.WriteHeader(http.StatusNotFound) 
+       return
     }
-    log.Printf("Not found in the AllRecords\n")
-    w.WriteHeader(404)
+
+    AllRecords = append(AllRecords[:j], AllRecords[j+1:]...)
+    if len(AllRecords) == 0 { 
+       APIStubReset()
+    }
+    APIStubPrintAll()
+    w.WriteHeader(http.StatusOK)
 }
 
-
-func APIStubDelDnn(w http.ResponseWriter, r *http.Request) {
-
-    log.Printf("URL Del: %s\n", URLBase + r.URL.Path)
-
-    // get AFID
-    vars := mux.Vars(r)
-    afId := vars["afId"]
-    dnai := vars["dnai"]
-    log.Printf("[APISTUB MODE] DelDnn afId %s, dnai %s\n", afId, dnai)
-    
-    for recordId, a := range AllRecordsAfId {
-         if a == afId {
-               record := AllRecords[recordId]
-               for servId, b := range record.LocationServices {
-                    if b.Dnai == dnai {
-                         AllRecords[recordId].LocationServices = 
-                            append(AllRecords[recordId].LocationServices[:servId],
-                                   AllRecords[recordId].LocationServices[servId+1:]...)
-                         w.WriteHeader(http.StatusOK)
-                         return
-                    }
-               }
-               break
-         }
-    }
-    log.Printf("Not found afId %s dnai %s in the AllRecords\n", afId, dnai)
-    w.WriteHeader(404)
-
-
-}
-
-
-
+// APIStubGet : get one from the records
 func APIStubGet(w http.ResponseWriter, r *http.Request) {
 
     log.Printf("URL Get: %s\n", r.URL.Path)
 
     // afId check
     vars := mux.Vars(r)
-    for j, a := range AllRecordsAfId {
-
-        if a == vars["afId"] {
-            log.Printf("[APISTUB MODE] GetRecord with index: %d\n", j)
-            log.Println(AllRecords[j])
-
-            // Respons Body.
-            jData, err := json.Marshal(AllRecords[j])
-            if err != nil {
-                w.WriteHeader(404)
-                log.Println(err)
-                return
-            }
-            w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-            w.WriteHeader(http.StatusOK)
-            w.Write(jData)
-            return
-        }
+    // get recorded AFService
+    j := APIStubGetRecordIndex(vars["afServiceId"])
+    if j == -1 {
+       log.Printf("Not found in the AllRecords\n")
+       w.WriteHeader(http.StatusNotFound) 
+       return
     }
 
-    log.Printf("Not found in the AllRecords\n")
-    w.WriteHeader(404)
+
+    log.Printf("[APISTUB MODE] GetRecord with index: %d\n", j)
+    log.Println(AllRecords[j])
+
+    // Respons Body.
+    rspBody := AllRecords[j].LocationService
+    jData, err := json.Marshal(rspBody)
+    if err != nil {
+       w.WriteHeader(http.StatusNotFound)
+       log.Println(err)
+       return
+    }
+    w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+    w.WriteHeader(http.StatusOK)
+    w.Write(jData)
 }
 
-
+// APIStubUpdate : update one from records
 func APIStubUpdate(w http.ResponseWriter, r *http.Request) {
 
     log.Printf("URL Update: %s\n", r.URL.Path)
 
     // afId Check
     vars := mux.Vars(r)
-    
-    for j, a := range AllRecordsAfId {
-
-        if a == vars["afId"] {
-            log.Printf("[APISTUB MODE] GetRecord with index: %d\n", j)
-            body, _ := ioutil.ReadAll(r.Body)
-            log.Printf("HTTPRequest Body: %s\n", string(body))
-
-            //insert and delete
-            var newRecord []AfService
-            if err := json.Unmarshal(body, &newRecord); err == nil {
-                 AllRecords[j] = newRecord[0]
-                 w.WriteHeader(http.StatusOK)
-                 return
-
-            } 
-
-            log.Printf("Update Failed")
-            w.WriteHeader(404)
-             
-            return
-        }
+    // get recorded AFService
+    j := APIStubGetRecordIndex(vars["afServiceId"])
+    if j == -1 {
+       log.Printf("Not found in the AllRecords\n")
+       w.WriteHeader(http.StatusNotFound) 
+       return
     }
     
-    log.Printf("Not found in the AllRecords\n")
-    w.WriteHeader(404)
-    return
+    body, _ := ioutil.ReadAll(r.Body)
+    log.Printf("[APISTUB MODE] GetRecord with index: %d\n", j)
+    log.Printf("HTTPRequest Body: %s\n", string(body))
+
+    if err := json.Unmarshal(body, &(AllRecords[j].LocationService)); err == nil {
+       w.WriteHeader(http.StatusOK)
+       return
+    } 
+    //insert and delete
+    //var newRecord []AfService
+    //if err := json.Unmarshal(body, &newRecord); err == nil {
+    //     AllRecords[j] = newRecord[0]
+    //     w.WriteHeader(http.StatusOK)
+    //     return
+    //} 
+
+    log.Printf("Update Failed")
+    w.WriteHeader(http.StatusNotFound)
 
 }

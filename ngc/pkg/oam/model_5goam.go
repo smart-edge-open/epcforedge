@@ -14,26 +14,30 @@
 
 package oam
 
-// ServiceList JSON struct
-type AfServiceList struct {
-        AfServices []AfService      `json:"afServices,omitempty"`
+// AFServiceID is ID of service
+type AFServiceID struct {
+     AFServiceID   string   `json:"afServiceId,omitempty"` // AF service ID
 }
 
-// AF Service JSON struct
-type AfService struct {
-        AfInstance    string         `json:"afInstance,omitempty"`
-        LocationServices []LocationService `json:"locationServices,omitempty"`
-}
-
-
-// location Service JSON struct
+// LocationService JSON struct
 type LocationService struct {
-        Dnai   string                   `json:"dnai,omitempty"`
-        Dnn    string                   `json:"dnn,omitempty"`
-        Dns    string                   `json:"dns,omitempty"`
+     DNAI      string     `json:"dnai,omitempty"`  //DNAI value
+     DNN       string     `json:"dnn,omitempty"`   //DNN value
+     TAC       int        `json:"tac,omitempty"`
+     PriDNS    string     `json:"priDns,omitempty"`
+     SecDNS    string     `json:"secDns,omitempty"`
+     UPFIP     string     `json:"upfIp,omitempty"`
+     SNSSAI    string     `json:"snssai,omitempty"`
 }
 
-//  AfId struct
-type AfId struct {
-        AfId   string                   `json:"afid,omitempty"`
+
+// AFService JSON struct
+type AFService struct {
+     AFServiceID      string          `json:"afServiceId,omitempty"`
+     LocationService  LocationService `json:"locationService,omitempty"`
+}
+
+// AFServiceList JSON struct
+type AFServiceList struct {
+     AfServiceList []AFService      `json:"afServiceList,omitempty"`
 }
