@@ -16,12 +16,13 @@ package ngcnef
 
 import (
 	"context"
-	"net/http"
-	"time"
-
+	"encoding/json"
 	logtool "github.com/otcshare/common/log"
-	"github.com/otcshare/edgenode/pkg/config"
 	"golang.org/x/net/http2"
+	"io/ioutil"
+	"net/http"
+	"path/filepath"
+	"time"
 )
 
 // Log handler initialized. This is to be used throughout the nef module for
@@ -193,6 +194,16 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 
 }
 
+// LoadJSONConfig reads a file located at configPath and unmarshals it to
+// config structure
+func loadJSONConfig(configPath string, config interface{}) error {
+	cfgData, err := ioutil.ReadFile(filepath.Clean(configPath))
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(cfgData, config)
+}
+
 // Run : This function reads the NEF Module configuration file and stores in
 //       NEF Module Context. This also calls the Initialization/Creation of
 //       NEF Data. Also it  calls runServer function for starting HTTP Server.
@@ -209,7 +220,7 @@ func Run(ctx context.Context, cfgPath string) error {
 
 	/* Reads NEF Configuration file which is json format. Also it converts
 	 * configuration data from json format to structure data */
-	err := config.LoadJSONConfig(cfgPath, &nefCtx.cfg)
+	err := loadJSONConfig(cfgPath, &nefCtx.cfg)
 	if err != nil {
 		log.Errf("Failed to load NEF configuration: %v", err)
 		return err

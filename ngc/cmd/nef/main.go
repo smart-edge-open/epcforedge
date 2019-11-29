@@ -24,8 +24,7 @@ import (
 	ngcnef "github.com/otcshare/epcforedge/ngc/pkg/nef"
 )
 
-// Log handler initialized. This is to be used throughout the nef module for
-// logging
+// Log handler initialized. This is to be used for NEF Main
 var log = logtool.DefaultLogger.WithField("NEF-MAIN", nil)
 
 // Path for NEF Configuration file
@@ -41,15 +40,10 @@ func main() {
 	lvl, err := logtool.ParseLevel("info")
 	if err != nil {
 		log.Errf("Failed to parse log level: %s", err.Error())
-		//if file.Close() != nil {
-		//	log.Errf("Failed to close file opened for logging")
-		//}
 		os.Exit(1)
 	}
 	logtool.SetLevel(lvl)
 	log.Infof("Logger Level: %d", lvl)
-
-	//unusedlint()
 
 	/* Creating a context. This context will be used for following:
 	 * 1. To store the NEF Module Context data and other module related data.
@@ -71,66 +65,4 @@ func main() {
 	log.Infof("Starting NEF server ...")
 	_ = ngcnef.Run(ctx, cfgPath)
 
-	//if file.Close() != nil {
-	//	log.Errf("Failed to close file opened for logging")
-	//}
 }
-
-/*
-func unusedlint() {
-	// For unused variables lint warning to be  removed later
-	ti := TrafficInfluSub{}
-	_ = ti
-
-	tis := TrafficInfluSubPatch{}
-	_ = tis
-
-	upc := UpPathChange
-	_ = upc
-
-	pd := ProblemDetails{}
-	_ = pd
-
-	var ipx Ipv6Prefix = " "
-	_ = ipx
-
-	var pt Port = 8080
-	_ = pt
-
-	var apsd AppSessionID = "empty"
-	_ = apsd
-
-	een := NsmfEventExposureNotification{}
-	_ = een
-
-	pcfpr := PcfPolicyResponse{}
-	_ = pcfpr
-
-	udrpr := UdrInfluenceResponse{}
-	_ = udrpr
-
-	ac := AppSessionContext{}
-	acu := AppSessionContextUpdateData{}
-
-	// Avoid lint unused warning :  PCF client stub invocation
-
-	var pcfClient PcfPolicyAuthorization = NewPCFClient(nil)
-	ctx := context.Background()
-	asd, _, _ := pcfClient.PcfPolicyAuthorizationCreate(ctx, ac)
-	_, _ = pcfClient.PolicyAuthorizationGet(ctx, asd)
-	_, _ = pcfClient.PolicyAuthorizationUpdate(ctx, acu, asd)
-	_, _ = pcfClient.PolicyAuthorizationDelete(ctx, asd)
-
-	// Avoid lint unused warning :  UDR client stub invocation
-	tid := TrafficInfluData{}
-	tids := TrafficInfluDataPatch{}
-	iid := InfluenceID("empty")
-
-	var udrClient UdrInfluenceData = NewUDRClient(nil)
-	_, _ = udrClient.UdrInfluenceDataCreate(ctx, tid, iid)
-	_, _ = udrClient.UdrInfluenceDataUpdate(ctx, tids, iid)
-	_, _ = udrClient.UdrInfluenceDataDelete(ctx, iid)
-	_, _ = udrClient.UdrInfluenceDataGet(ctx)
-
-}
-*/
