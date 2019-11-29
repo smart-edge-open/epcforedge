@@ -369,7 +369,7 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	// Response should be 204 as per 3GPP 29.522
 	w.WriteHeader(http.StatusNoContent)
 
-	log.Infof("HTTP Response sent: %d", http.StatusOK)
+	log.Infof("HTTP Response sent: %d", http.StatusNoContent)
 
 	if af.afGetSubCount() == 0 {
 

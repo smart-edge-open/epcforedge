@@ -61,6 +61,8 @@ func (udr *UdrClientStub) UdrInfluenceDataCreate(ctx context.Context,
 	udrPr.Tid = &Tid
 	udrPr.Pd = nil
 
+	log.Infof("UDRs InfluenceDataCreate [CorrId,NotifUrl]  => [%s,%s]",
+		body.UpPathChgNotifCorreID, body.UpPathChgNotifURI)
 	log.Infof("UDRs UdrInfluenceDataCreate Exited for %s", string(iid))
 	return udrPr, err
 }

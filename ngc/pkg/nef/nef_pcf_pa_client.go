@@ -78,6 +78,11 @@ func (pcf *PcfClientStub) PcfPolicyAuthorizationCreate(ctx context.Context,
 	pcfPr.Asc = &Asc
 	pcfPr.Pd = nil
 	appSessionID := AppSessionID(strconv.Itoa(sessid))
+	log.Infof("PCFs PolicyAuthorizationCreate [CorrId,NotifUrl,DnaiChgType]"+
+		" => [%s,%s,%s]", body.AscReqData.AfRoutReq.UpPathChgSub.NotifCorreID,
+		body.AscReqData.AfRoutReq.UpPathChgSub.NotificationURI,
+		body.AscReqData.AfRoutReq.UpPathChgSub.DnaiChgType)
+
 	log.Infof("PCFs PolicyAuthorizationCreate Exited successfully with "+
 		"sessid: %s", appSessionID)
 	return appSessionID, pcfPr, err

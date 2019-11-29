@@ -17,7 +17,7 @@
     "ipv6Addr": "string",
     "macAddr": "string",
     "dnaiChgType": "EARLY",
-    "notificationDestination": "http://example.com:80",
+    "notificationDestination": "http://localhost:9080",
     "requestTestNotification": false,
     "websockNotifConfig": {
         "websocketUri": "",
