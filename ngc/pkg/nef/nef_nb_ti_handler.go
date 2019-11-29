@@ -105,6 +105,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	log.Infof(" AFID  : %s", vars["afId"])
 
 	b, err := ioutil.ReadAll(r.Body)
+	defer closeReqBody(r)
 
 	if err != nil {
 		sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP POST Body")
@@ -129,7 +130,6 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	if err3 != nil {
 		log.Err(err3)
 		sendErrorResponseToAF(w, rsp)
-		_ = r.Body.Close()
 		return
 	}
 
@@ -154,7 +154,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	}
 	nef := &nefCtx.nef
 	logNef(nef)
-	_ = r.Body.Close()
+
 }
 
 // ReadTrafficInfluenceSubscription : Read a particular subscription details
@@ -174,7 +174,7 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rsp, substi, err := af.afGetSubscription(nefCtx, vars["subscriptionId"])
+	rsp, sub, err := af.afGetSubscription(nefCtx, vars["subscriptionId"])
 
 	if err != nil {
 		log.Err(err)
@@ -182,7 +182,7 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mdata, err2 := json.Marshal(substi)
+	mdata, err2 := json.Marshal(sub)
 	if err2 != nil {
 		log.Err(err2)
 		sendCustomeErrorRspToAF(w, 400, "Failed to Marshal GET response data")
@@ -215,11 +215,11 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 	if ok == nil {
 
 		b, err := ioutil.ReadAll(r.Body)
+		defer closeReqBody(r)
 
 		if err != nil {
 			log.Err(err)
 			sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP PUT Body")
-			_ = r.Body.Close()
 			return
 		}
 
@@ -232,7 +232,6 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 		if err1 != nil {
 			log.Err(err1)
 			sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal PUT data")
-			_ = r.Body.Close()
 			return
 		}
 
@@ -241,7 +240,6 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 
 		if err != nil {
 			sendErrorResponseToAF(w, rsp)
-			_ = r.Body.Close()
 			return
 		}
 
@@ -265,7 +263,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 	}
 	log.Infoln(ok)
 	sendCustomeErrorRspToAF(w, 400, "Failed to find AF records")
-	_ = r.Body.Close()
+
 }
 
 // UpdatePatchTrafficInfluenceSubscription : Updates a traffic influence created
@@ -285,10 +283,11 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 
 		b, err := ioutil.ReadAll(r.Body)
 
+		defer closeReqBody(r)
+
 		if err != nil {
 			log.Err(err)
 			sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP PATCH Body")
-			_ = r.Body.Close()
 			return
 		}
 
@@ -301,7 +300,6 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 		if err1 != nil {
 			log.Err(err1)
 			sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal PATCH data")
-			_ = r.Body.Close()
 			return
 		}
 
@@ -310,7 +308,6 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 
 		if err != nil {
 			sendErrorResponseToAF(w, rsp)
-			_ = r.Body.Close()
 			return
 		}
 
@@ -335,7 +332,6 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 
 	log.Infoln(ok)
 	sendCustomeErrorRspToAF(w, 400, "Failed to find AF records")
-	_ = r.Body.Close()
 }
 
 // DeleteTrafficInfluenceSubscription : Deletes a traffic influence created by
@@ -355,7 +351,6 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	if err != nil {
 		log.Err(err)
 		sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP DELETE Body")
-		_ = r.Body.Close()
 		return
 	}
 	rsp, err := af.afDeleteSubscription(nefCtx, vars["subscriptionId"])
@@ -377,6 +372,13 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 	}
 
 	logNef(nef)
+}
+
+func closeReqBody(r *http.Request) {
+	err := r.Body.Close()
+	if err != nil {
+		log.Errf("response body was not closed properly")
+	}
 }
 
 // NotifySmfUPFEvent : Handles the SMF notification for UPF event

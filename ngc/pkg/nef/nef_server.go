@@ -45,7 +45,7 @@ type HTTP2Config struct {
 // Config contains NEF Module Configuration Data Structure
 type Config struct {
 	// API Root for the NEF
-	NefAPIRoot                string `json:"nefAPIRoot`
+	NefAPIRoot                string `json:"nefAPIRoot"`
 	LocationPrefix            string `json:"locationPrefix"`
 	MaxSubSupport             int    `json:"maxSubSupport"`
 	MaxAFSupport              int    `json:"maxAFSupport"`
