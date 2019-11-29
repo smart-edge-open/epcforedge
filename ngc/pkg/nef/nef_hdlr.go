@@ -26,12 +26,14 @@ const subNotFound string = "Subscription Not Found"
 
 //NEF context data
 type nefData struct {
-	afCount   int
-	apiRoot   string
-	pcfClient PcfPolicyAuthorization
-	udrClient UdrInfluenceData
-	corrID    uint
-	afs       map[string]*afData
+	ctx                context.Context
+	afCount            int
+	locationUrlPrefix  string
+	pcfClient          PcfPolicyAuthorization
+	udrClient          UdrInfluenceData
+	corrID             uint
+	afs                map[string]*afData
+	upfNotificationUrl URI
 }
 
 //NEFSBGetFn is the callback for SB API
@@ -155,8 +157,8 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 	af.subs[subIDStr] = &afsub
 
 	//Create Location URI
-	loc = nefCtx.nef.apiRoot + nefCtx.cfg.LocationPrefix + af.afID +
-		"/subscriptions/" + subIDStr
+	loc = nefCtx.nef.locationUrlPrefix + af.afID + "/subscriptions/" +
+		subIDStr
 
 	log.Infoln(" NEW AF Subscription added " + subIDStr)
 
@@ -329,15 +331,71 @@ func (af *afData) afDestroy(afid string) error {
 }
 */
 
+// Generate the notification uri to be provided to PCF/UDR
+func getNefNotificationUri(cfg *Config) URI {
+	var uri string
+	// If http2 port is configured use it else http port
+	if cfg.HTTP2Config.Endpoint != "" {
+		uri = "https://" + cfg.NefAPIRoot +
+			cfg.HTTP2Config.Endpoint
+	} else {
+		uri = "http://" + cfg.NefAPIRoot +
+			cfg.HTTPConfig.Endpoint
+	}
+	uri += cfg.UpfNotificationResURIPath
+	return URI(uri)
+}
+
+func getNefLocationUrlPrefix(cfg *Config) string {
+
+	var uri string
+	// If http2 port is configured use it else http port
+	if cfg.HTTP2Config.Endpoint != "" {
+		uri = "https://" + cfg.NefAPIRoot +
+			cfg.HTTP2Config.Endpoint
+	} else {
+		uri = "http://" + cfg.NefAPIRoot +
+			cfg.HTTPConfig.Endpoint
+	}
+	uri += cfg.LocationPrefix
+	return uri
+
+}
+
 //Initialize the NEF component
 func (nef *nefData) nefCreate(ctx context.Context, cfg Config) error {
 
-	_ = ctx
+	nef.ctx = ctx
 	nef.afCount = 0
-	nef.pcfClient = NewPCFClient(nil)
-	nef.udrClient = NewUDRClient(nil)
+	nef.pcfClient = NewPCFClient(&cfg)
+	if nef.pcfClient == nil {
+		return errors.New("PCF Client creation failed")
+	}
+	nef.udrClient = NewUDRClient(&cfg)
+	if nef.udrClient == nil {
+		return errors.New("PCF Client creation failed")
+	}
 	nef.afs = make(map[string]*afData)
 	nef.corrID = uint(cfg.SubStartID + correlationIDOffset)
+
+	if cfg.NefAPIRoot == "" {
+		return errors.New("NefAPIRoot is empty")
+	}
+
+	if cfg.LocationPrefix == "" {
+		return errors.New("NEF LocationPrefix is empty")
+	}
+
+	// Generate the location url prefix
+	nef.locationUrlPrefix = getNefLocationUrlPrefix(&cfg)
+	log.Infof("NEF Location URL Prefix :%s", nef.locationUrlPrefix)
+
+	// Genereate the notification url
+	if cfg.UpfNotificationResURIPath == "" {
+		return errors.New("UpfNotificationResURIPath is empty")
+	}
+	nef.upfNotificationUrl = getNefNotificationUri(&cfg)
+	log.Infof("SMF UPF Notification URL :%s", nef.upfNotificationUrl)
 	return nil
 }
 
@@ -420,7 +478,7 @@ func nefSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
 	var appSessID AppSessionID
 	nef := &nefCtx.nef
 
-	cliCtx, cancel := context.WithCancel(context.Background())
+	cliCtx, cancel := context.WithCancel(nef.ctx)
 	defer cancel()
 
 	pcfSub.NotifCorreID = strconv.Itoa(int(nef.corrID))
@@ -439,10 +497,12 @@ func nefSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
 	// If http2 port is configured use it else http port
 	if nefCtx.cfg.HTTP2Config.Endpoint != "" {
 		appSessCtx.AscReqData.AfRoutReq.UpPathChgSub.NotificationURI =
-			URI("https://localhost" + nefCtx.cfg.HTTP2Config.Endpoint)
+			URI("https://" + nefCtx.cfg.NefAPIRoot +
+				nefCtx.cfg.HTTP2Config.Endpoint)
 	} else {
 		appSessCtx.AscReqData.AfRoutReq.UpPathChgSub.NotificationURI =
-			URI("http://localhost" + nefCtx.cfg.HTTPConfig.Endpoint)
+			URI("http://" + nefCtx.cfg.NefAPIRoot +
+				nefCtx.cfg.HTTPConfig.Endpoint)
 	}
 
 	/*+ nefCtx.cfg.UpfNotificationResUriPath*/
@@ -524,7 +584,7 @@ func nefSBPCFGet(pcfSub *afSubscription, nefCtx *nefContext) (
 
 	nef := &nefCtx.nef
 
-	cliCtx, cancel := context.WithCancel(context.Background())
+	cliCtx, cancel := context.WithCancel(nef.ctx)
 	defer cancel()
 
 	pcfPolicyResp, err :=
@@ -584,7 +644,7 @@ func nefSBPCFPatch(pcfSub *afSubscription, nefCtx *nefContext,
 
 	nef := &nefCtx.nef
 
-	cliCtx, cancel := context.WithCancel(context.Background())
+	cliCtx, cancel := context.WithCancel(nef.ctx)
 	defer cancel()
 
 	appSessCtxUpdtData := AppSessionContextUpdateData{}
@@ -594,17 +654,9 @@ func nefSBPCFPatch(pcfSub *afSubscription, nefCtx *nefContext,
 	appSessCtxUpdtData.AfRoutReq.AppReloc = tisp.AppReloInd
 
 	//Populating UP Path Chnage Subbscription Data in App Session Context
-	//TODO: appSessCtxUpdtData.AfRoutReq.UpPathChgSub.DnaiChgType =
-	//         ti.DnaiChgType
-	// If HTTP2 port is configured use it else HTTP port
-	if nefCtx.cfg.HTTP2Config.Endpoint != "" {
-		appSessCtxUpdtData.AfRoutReq.UpPathChgSub.NotificationURI =
-			URI("https://localhost" + nefCtx.cfg.HTTP2Config.Endpoint)
-	} else {
-		appSessCtxUpdtData.AfRoutReq.UpPathChgSub.NotificationURI =
-			URI("http://localhost" + nefCtx.cfg.HTTPConfig.Endpoint)
-	}
-	/*+ nefCtx.cfg.UpfNotificationResUriPath*/
+	appSessCtxUpdtData.AfRoutReq.UpPathChgSub.NotificationURI =
+		nefCtx.nef.upfNotificationUrl
+
 	appSessCtxUpdtData.AfRoutReq.UpPathChgSub.NotifCorreID =
 		pcfSub.NotifCorreID
 
@@ -662,7 +714,7 @@ func nefSBPCFDelete(pcfSub *afSubscription, nefCtx *nefContext) (
 
 	nef := &nefCtx.nef
 
-	cliCtx, cancel := context.WithCancel(context.Background())
+	cliCtx, cancel := context.WithCancel(nef.ctx)
 	defer cancel()
 
 	pcfPolicyResp, err :=
@@ -692,8 +744,7 @@ func nefSBPCFDelete(pcfSub *afSubscription, nefCtx *nefContext) (
 	return rsp, err
 }
 
-// nefSBUDRPost : This function returns error as HTTP POST Request to UDR is not
-//            supported.
+// nefSBUDRPost :  HTTP POST Request to UDR is to trigger Put
 // Input Args:
 //   - nefCtx: This is NEF Module Context. This contains the NEF Module Data.
 //   - ti: This is Traffic Influence Subscription Data.
@@ -722,7 +773,7 @@ func nefSBUDRGet(udrSub *afSubscription, nefCtx *nefContext) (
 
 	nef := &nefCtx.nef
 
-	cliCtx, cancel := context.WithCancel(context.Background())
+	cliCtx, cancel := context.WithCancel(nef.ctx)
 	defer cancel()
 
 	udrInfluenceResp, err := nef.udrClient.UdrInfluenceDataGet(cliCtx)
@@ -766,7 +817,7 @@ func nefSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
 
 	nef := &nefCtx.nef
 
-	cliCtx, cancel := context.WithCancel(context.Background())
+	cliCtx, cancel := context.WithCancel(nef.ctx)
 	defer cancel()
 
 	trafficInfluData := TrafficInfluData{}
@@ -788,15 +839,8 @@ func nefSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
 	trafficInfluData.InterGroupID = string(ti.ExternalGroupID)
 
 	//Populating UP Path Chnage Subbscription Data in Traffic Influence Data
-	// If HTTP2 port is configured use it else HTTP port
-	if nefCtx.cfg.HTTP2Config.Endpoint != "" {
-		trafficInfluData.UpPathChgNotifURI =
-			URI("https://localhost" + nefCtx.cfg.HTTP2Config.Endpoint)
-	} else {
-		trafficInfluData.UpPathChgNotifURI =
-			URI("http://localhost" + nefCtx.cfg.HTTPConfig.Endpoint)
-	}
-	/*+ nefCtx.cfg.UpfNotificationResUriPath*/
+	trafficInfluData.UpPathChgNotifURI = nefCtx.nef.upfNotificationUrl
+
 	if len(string(ti.SubscribedEvents[0])) > 0 &&
 		0 == strings.Compare(string(ti.SubscribedEvents[0]), "UP_PATH_CHANGE") {
 		udrSub.NotifCorreID = strconv.Itoa(int(nef.corrID))
@@ -870,7 +914,7 @@ func nefSBUDRPatch(udrSub *afSubscription, nefCtx *nefContext,
 
 	nef := &nefCtx.nef
 
-	cliCtx, cancel := context.WithCancel(context.Background())
+	cliCtx, cancel := context.WithCancel(nef.ctx)
 	defer cancel()
 
 	trafficInfluDataPatch := TrafficInfluDataPatch{}
@@ -939,7 +983,7 @@ func nefSBUDRDelete(udrSub *afSubscription, nefCtx *nefContext) (
 
 	nef := &nefCtx.nef
 
-	cliCtx, cancel := context.WithCancel(context.Background())
+	cliCtx, cancel := context.WithCancel(nef.ctx)
 	defer cancel()
 
 	udrInfluenceResp, err := nef.udrClient.UdrInfluenceDataDelete(cliCtx,

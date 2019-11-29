@@ -44,6 +44,8 @@ type HTTP2Config struct {
 
 // Config contains NEF Module Configuration Data Structure
 type Config struct {
+	// API Root for the NEF
+	NefAPIRoot                string `json:"nefAPIRoot`
 	LocationPrefix            string `json:"locationPrefix"`
 	MaxSubSupport             int    `json:"maxSubSupport"`
 	MaxAFSupport              int    `json:"maxAFSupport"`
@@ -65,9 +67,9 @@ type nefContext struct {
 func startHTTPServer(server *http.Server,
 	stopServerCh chan bool) {
 	if server != nil {
-		log.Infof("NEF HTTP 1.1 listening on %s", server.Addr)
+		log.Infof("HTTP 1.1 listening on %s", server.Addr)
 		if err := server.ListenAndServe(); err != nil {
-			log.Errf("NEF HTTP server error: " + err.Error())
+			log.Errf("HTTP server error: " + err.Error())
 		}
 	}
 	stopServerCh <- true
@@ -77,11 +79,11 @@ func startHTTPServer(server *http.Server,
 func startHTTP2Server(serverHTTP2 *http.Server, nefCtx *nefContext,
 	stopServerCh chan bool) {
 	if serverHTTP2 != nil {
-		log.Infof("NEF HTTP 2.0 listening on %s", serverHTTP2.Addr)
+		log.Infof("HTTP 2.0 listening on %s", serverHTTP2.Addr)
 		if err := serverHTTP2.ListenAndServeTLS(
 			nefCtx.cfg.HTTP2Config.NefServerCert,
 			nefCtx.cfg.HTTP2Config.NefServerKey); err != nil {
-			log.Errf("NEF HTTP2server error: " + err.Error())
+			log.Errf("HTTP2server error: " + err.Error())
 		}
 	}
 	stopServerCh <- true
@@ -141,7 +143,7 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 
 		if err = http2.ConfigureServer(serverHTTP2,
 			&http2.Server{}); err != nil {
-			log.Errf("NEF failed at configuring HTTP2 server")
+			log.Errf("failed at configuring HTTP2 server")
 			return err
 		}
 	}
@@ -157,19 +159,19 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	go func(stopServerCh chan bool) {
 		<-ctx.Done()
 		if server != nil {
-			log.Info("Executing graceful stop for NEF HTTP Server")
+			log.Info("Executing graceful stop for HTTP Server")
 			if err = server.Close(); err != nil {
-				log.Errf("Could not close NEF HTTP server: %#v", err)
+				log.Errf("Could not close HTTP server: %#v", err)
 			}
-			log.Info("NEF HTTP server stopped")
+			log.Info("HTTP server stopped")
 		}
 
 		if serverHTTP2 != nil {
 
 			if err = serverHTTP2.Close(); err != nil {
-				log.Errf("Could not close NEF HTTP2 server: %#v", err)
+				log.Errf("Could not close HTTP2 server: %#v", err)
 			}
-			log.Info("NEF HTTP2 server stopped")
+			log.Info("HTTP2 server stopped")
 		}
 
 		/* De-initializes NEF Data */
@@ -224,7 +226,10 @@ func Run(ctx context.Context, cfgPath string) error {
 	if err != nil {
 		log.Errf("Failed to load NEF configuration: %v", err)
 		return err
+
 	}
+
+	printConfig(nefCtx.cfg)
 
 	/* Creates/Initializes NEF Data */
 	err = nefCtx.nef.nefCreate(ctx, nefCtx.cfg)
@@ -234,4 +239,21 @@ func Run(ctx context.Context, cfgPath string) error {
 	}
 
 	return runServer(ctx, &nefCtx)
+}
+
+func printConfig(cfg Config) {
+
+	log.Infoln("********************* NGC NEF CONFIGURATION ******************")
+	log.Infoln("APIRoot: ", cfg.NefAPIRoot)
+	log.Infoln("LocationPrefix: ", cfg.LocationPrefix)
+	log.Infoln("UpfNotificationResUriPath:", cfg.UpfNotificationResURIPath)
+	log.Infoln("UserAgent:", cfg.UserAgent)
+	log.Infoln("-------------------------- NEF SERVER ----------------------")
+	log.Infoln("EndPoint(HTTP): ", cfg.HTTPConfig.Endpoint)
+	log.Infoln("EndPoint(HTTP2): ", cfg.HTTP2Config.Endpoint)
+	log.Infoln("ServerCert(HTTP2): ", cfg.HTTP2Config.NefServerCert)
+	log.Infoln("ServerKey(HTTP2): ", cfg.HTTP2Config.NefServerKey)
+	log.Infoln("AFServerCert(HTTP2): ", cfg.HTTP2Config.AfServerCert)
+	log.Infoln("*************************************************************")
+
 }

@@ -57,7 +57,7 @@ func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
 	nef := &nefCtx.nef
 
 	vars := mux.Vars(r)
-	log.Infof(" AFID  : %s", vars["afId"])
+	log.Infof(" AFID : %s", vars["afId"])
 
 	af, err := nef.nefGetAf(vars["afId"])
 
@@ -107,7 +107,6 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	b, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-
 		sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP POST Body")
 		return
 	}
@@ -120,15 +119,12 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 
 	if err1 != nil {
 		log.Err(err1)
-		sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal GET data")
+		sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal POST data")
 		return
 	}
 
-	//loc, err3 := createNewSubscription(vars["afId"], TrInBody)
 	loc, rsp, err3 := createNewSub(nefCtx, vars["afId"], trInBody)
 	log.Infoln(loc)
-
-	//logNef(nef)
 
 	if err3 != nil {
 		log.Err(err3)
@@ -495,7 +491,7 @@ func createErrorJSON(rsp nefSBRspData) (mdata []byte, statusCode int) {
 	statusCode = 404
 
 	/*
-		TBD: Removed check for 401, 403, 413 and 429
+		TBD for future: Removed check for 401, 403, 413 and 429
 		due cyclometrix complexity lint warning. Once a better mechanism
 		is found to be added back. Anyhow currently these errors are not
 		supported

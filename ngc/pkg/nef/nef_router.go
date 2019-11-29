@@ -94,7 +94,6 @@ func NewNEFRouter(nefCtx *nefContext) *mux.Router {
 		smfNotif.Handler = NotifySmfUPFEvent
 		smfNotif.Pattern = nefCtx.cfg.UpfNotificationResURIPath
 		NEFRoutes = append(NEFRoutes, smfNotif)
-		log.Infof("SMF UPF Event notification uri: %s", smfNotif.Pattern)
 	} else {
 		log.Infof("SMF UPF Event notification uri missing in configuration")
 	}
