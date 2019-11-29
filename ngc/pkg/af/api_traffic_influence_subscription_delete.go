@@ -1,0 +1,138 @@
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package ngcaf
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
+)
+
+// Linger please
+var (
+	_ context.Context
+)
+
+// TrafficInfluenceSubscriptionDeleteAPIService type
+type TrafficInfluenceSubscriptionDeleteAPIService service
+
+func (a *TrafficInfluenceSubscriptionDeleteAPIService) handleDeleteResponse(
+	r *http.Response, body []byte) error {
+
+	newErr := GenericError{
+		body:  body,
+		error: r.Status,
+	}
+
+	switch r.StatusCode {
+
+	case 400, 401, 403, 404, 429, 500, 503:
+
+		var v ProblemDetails
+		err := json.Unmarshal(body, &v)
+		if err != nil {
+			newErr.error = err.Error()
+			return newErr
+		}
+		newErr.model = v
+		return newErr
+
+	default:
+		b, _ := ioutil.ReadAll(r.Body)
+		err := fmt.Errorf("NEF returned error - %s, %s", r.Status, string(b))
+		return err
+	}
+}
+
+/*
+SubscriptionDelete Deletes an already
+existing subscription
+Deletes an already existing subscription
+ * @param ctx context.Context - for authentication, logging, cancellation,
+ * deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * @param afID Identifier of the AF
+ * @param subscriptionID Identifier of the subscription resource
+*/
+func (a *TrafficInfluenceSubscriptionDeleteAPIService) SubscriptionDelete(
+	ctx context.Context, afID string, subscriptionID string) (*http.Response,
+	error) {
+	var (
+		method     = strings.ToUpper("Delete")
+		deleteBody interface{}
+	)
+
+	// create path and map variables
+	path := a.client.cfg.NEFBasePath +
+		"/{afId}/subscriptions/{subscriptionId}"
+	path = strings.Replace(path,
+		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
+	path = strings.Replace(path,
+		"{"+"subscriptionId"+"}", fmt.Sprintf("%v", subscriptionID), -1)
+	headerParams := make(map[string]string)
+
+	// to determine the Content-Type header
+	contentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	contentType := selectHeaderContentType(contentTypes)
+	if contentType != "" {
+		headerParams["Content-Type"] = contentType
+	}
+
+	// to determine the Accept header
+	headerAccepts := []string{"application/json"}
+
+	// set Accept header
+	headerAccept := selectHeaderAccept(headerAccepts)
+	if headerAccept != "" {
+		headerParams["Accept"] = headerAccept
+	}
+	r, err := a.client.prepareRequest(ctx, path, method,
+		deleteBody, headerParams)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := a.client.callAPI(r)
+	if err != nil || resp == nil {
+		return resp, err
+	}
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	defer func() {
+		err = resp.Body.Close()
+		if err != nil {
+			log.Errf("response body was not closed properly")
+		}
+	}()
+
+	if err != nil {
+		log.Errf("http response body could not be read")
+		return resp, err
+	}
+
+	if resp.StatusCode > 300 {
+		if err = a.handleDeleteResponse(resp,
+			respBody); err != nil {
+
+			return resp, err
+		}
+	}
+
+	return resp, nil
+}

@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation, Inc. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,29 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package ngcaf
 
 import (
-	"log"
 	"net/http"
-	"time"
 )
 
-// Connectivity constants
-const (
-	AFServerPort = "80"
-)
+// CliConfig struct
+type CliConfig struct {
+	NEFBasePath    string `json:"NEFBasePath"`
+	UserAgent      string `json:"UserAgent"`
+	NEFCliCertPath string `json:"NEFCliCertPath"`
+	HTTPClient     *http.Client
+}
 
-func main() {
+// NewConfiguration function initializes client configuration
+func NewConfiguration(afCtx *afContext) *CliConfig {
 
-	AFRouter := NewAFRouter()
-	s := &http.Server{
-		Addr:           ":"+AFServerPort,
-		Handler:        AFRouter,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+	cfg := &CliConfig{
+		NEFBasePath:    afCtx.cfg.CliCfg.NEFBasePath,
+		UserAgent:      afCtx.cfg.CliCfg.UserAgent,
+		NEFCliCertPath: afCtx.cfg.CliCfg.NEFCliCertPath,
 	}
-	log.Println("AF listening on", s.Addr)
-	log.Fatal(s.ListenAndServe())
+
+	return cfg
 }
