@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod 
+metadata:
+  labels:
+  name: af.ngc
+spec:
+  volumes:
+  - name: shared-configs
+    hostPath:
+      path: /etc/openness/configs/ngc
+  - name: shared-certs
+    hostPath:
+      path: /etc/openness/certs/ngc
+  containers:
+  - securityContext:
+      privileged: false
+    name: af-container 
+    image: af-image:1.0
+    imagePullPolicy: Never
+    command: [ "/bin/bash", "-c", "--" ]
+    #args: [ "./entrypoint.sh" ]
+    args: [ "while true; do sleep 300000; done;" ]
+    resources:
+      requests:
+        memory: 1Gi
+      limits:
+        memory: 1Gi
+    ports:
+    - containerPort: 8080
+      name: cnca
+    - containerPort: 8082
+      name: nef
+    volumeMounts:
+    - name: shared-configs
+      mountPath: /etc/configs
+    - name: shared-certs
+      mountPath: /etc/certs
+  tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: "Exists"
+    effect: "NoSchedule"
+  nodeSelector:
+    5g-openness: "true"
+  restartPolicy: Always
+
