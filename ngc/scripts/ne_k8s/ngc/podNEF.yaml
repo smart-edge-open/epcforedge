@@ -16,8 +16,8 @@ apiVersion: v1
 kind: Pod
 metadata: 
   labels:
-    service: nefservice.ngc
-  name: nef.ngc
+    service: nefservice
+  name: nef
   namespace: ngc
 spec:
   volumes:
@@ -41,13 +41,31 @@ spec:
       limits:
         memory: 1Gi
     ports:
-    - containerPort: 8081
+    - containerPort: 8060
     volumeMounts:
     - name: shared-configs
       mountPath: /etc/configs
     - name: shared-certs
       mountPath: /etc/certs
   restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nefservice
+  labels:
+    service: nefservice
+spec:
+  type: NodePort
+  ports:
+  - port: 8060
+    targetPort: 8060
+    protocol: TCP
+    name: af 
+  selector:
+    service: nefservice
 
 
 

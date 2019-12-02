@@ -15,7 +15,7 @@
 apiVersion: v1
 kind: Pod
 metadata: 
-  name: nef.ngc
+  name: nef
   namespace: ngc
 spec:
   volumes:
@@ -39,7 +39,7 @@ spec:
       limits:
         memory: 1Gi
     ports:
-    - containerPort: 8081
+    - containerPort: 8060
     volumeMounts:
     - name: shared-configs
       mountPath: /etc/configs
