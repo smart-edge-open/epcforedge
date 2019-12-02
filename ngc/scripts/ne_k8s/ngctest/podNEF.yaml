@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Pod
 metadata: 
-  labels:
   name: nef.ngc
+  namespace: ngc
 spec:
   volumes:
   - name: shared-configs

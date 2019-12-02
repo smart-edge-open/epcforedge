@@ -4,6 +4,7 @@ metadata:
   labels:
     service: nefservice.ngc
   name: nef.ngc
+  namespace: ngc
 spec:
   volumes:
   - name: shared-configs
