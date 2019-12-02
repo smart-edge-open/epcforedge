@@ -46,6 +46,7 @@ type Config struct {
 	CliCfg CliConfig    `json:"CliConfig"`
 }
 
+//AFContext struct
 type AFContext struct {
 	subscriptions NotifSubscryptions
 	transactions  TransactionIDs

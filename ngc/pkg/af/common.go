@@ -25,7 +25,8 @@ import (
 	"strings"
 )
 
-var TransIDMax int = math.MaxInt32
+//TransIDMax var
+var TransIDMax = math.MaxInt32
 
 func genAFTransID(trans TransactionIDs) int {
 	var (
