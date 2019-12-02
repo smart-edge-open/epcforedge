@@ -46,7 +46,8 @@ type Config struct {
 	CliCfg CliConfig    `json:"CliConfig"`
 }
 
-type afContext struct {
+//AFContext struct
+type AFContext struct {
 	subscriptions NotifSubscryptions
 	transactions  TransactionIDs
 	cfg           Config
@@ -54,7 +55,7 @@ type afContext struct {
 
 var log = logger.DefaultLogger.WithField("ngc-af", nil)
 
-func runServer(ctx context.Context, afCtx *afContext) error {
+func runServer(ctx context.Context, afCtx *AFContext) error {
 
 	var err error
 
@@ -141,7 +142,7 @@ func printConfig(cfg Config) {
 // Run function
 func Run(parentCtx context.Context, cfgPath string) error {
 
-	var afCtx afContext
+	var afCtx AFContext
 
 	// load AF configuration from file
 	err := config.LoadJSONConfig(cfgPath, &afCtx.cfg)

@@ -20,7 +20,7 @@ import (
 	"net/http"
 )
 
-func getSubscription(cliCtx context.Context, afCtx *afContext,
+func getSubscription(cliCtx context.Context, afCtx *AFContext,
 	subscriptionID string) (TrafficInfluSub, *http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
@@ -46,7 +46,7 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 		tsRespJSON     []byte
 	)
 
-	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*AFContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

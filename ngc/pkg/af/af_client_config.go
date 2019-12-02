@@ -27,7 +27,7 @@ type CliConfig struct {
 }
 
 // NewConfiguration function initializes client configuration
-func NewConfiguration(afCtx *afContext) *CliConfig {
+func NewConfiguration(afCtx *AFContext) *CliConfig {
 
 	cfg := &CliConfig{
 		NEFBasePath:    afCtx.cfg.CliCfg.NEFBasePath,

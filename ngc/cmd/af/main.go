@@ -20,11 +20,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	ngcaf "github.com/otcshare/epcforedge/ngc/pkg/af"
 	logger "github.com/otcshare/common/log"
+	ngcaf "github.com/otcshare/epcforedge/ngc/pkg/af"
 )
 
 var log = logger.DefaultLogger.WithField("main", nil)
+
 const cfgPath = "configs/af.json"
 
 func main() {
@@ -45,5 +46,7 @@ func main() {
 	}()
 
 	log.Infof("Starting NGC AF servers..")
-	ngcaf.Run(parenCtx, cfgPath)
+	if err = ngcaf.Run(parenCtx, cfgPath); err != nil {
+		log.Errf("AF finished with error: %v", err)
+	}
 }

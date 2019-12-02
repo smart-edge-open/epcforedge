@@ -25,7 +25,7 @@ import (
 )
 
 func modifySubscriptionByPut(cliCtx context.Context, ts TrafficInfluSub,
-	afCtx *afContext, sID string) (TrafficInfluSub,
+	afCtx *AFContext, sID string) (TrafficInfluSub,
 	*http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
@@ -52,7 +52,7 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 		transID int
 	)
 
-	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*AFContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 
 	osSignals := make(chan os.Signal, 1)

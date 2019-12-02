@@ -23,7 +23,7 @@ import (
 )
 
 func createSubscription(cliCtx context.Context, ts TrafficInfluSub,
-	afCtx *afContext) (TrafficInfluSub, *http.Response, error) {
+	afCtx *AFContext) (TrafficInfluSub, *http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
@@ -50,7 +50,7 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		transID        int
 	)
 
-	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*AFContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

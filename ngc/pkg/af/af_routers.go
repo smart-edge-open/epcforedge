@@ -39,7 +39,7 @@ type Route struct {
 type Routes []Route
 
 // NewAFRouter function
-func NewAFRouter(afCtx *afContext) *mux.Router {
+func NewAFRouter(afCtx *AFContext) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range afRoutes {
 		var handler http.Handler = route.HandlerFunc
@@ -65,7 +65,7 @@ func NewAFRouter(afCtx *afContext) *mux.Router {
 }
 
 // NewNotifRouter function
-func NewNotifRouter(afCtx *afContext) *mux.Router {
+func NewNotifRouter(afCtx *AFContext) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range notifRoutes {
 		var handler http.Handler = route.HandlerFunc
