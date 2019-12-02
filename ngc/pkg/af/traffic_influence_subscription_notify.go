@@ -21,7 +21,7 @@ import (
 	"strconv"
 )
 
-func verifyAFTransID(afCtx *afContext, transID string, p *ProblemDetails) (int,
+func verifyAFTransID(afCtx *AFContext, transID string, p *ProblemDetails) (int,
 	error) {
 
 	var (
@@ -91,7 +91,7 @@ func NotificationPost(w http.ResponseWriter, r *http.Request) {
 		problem    = ProblemDetails{}
 	)
 
-	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*AFContext)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err = json.NewDecoder(r.Body).Decode(&en); err != nil {

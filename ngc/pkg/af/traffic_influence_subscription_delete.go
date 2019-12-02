@@ -20,7 +20,7 @@ import (
 	"strconv"
 )
 
-func deleteSubscription(cliCtx context.Context, afCtx *afContext,
+func deleteSubscription(cliCtx context.Context, afCtx *AFContext,
 	sID string) (*http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
@@ -44,7 +44,7 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 		subscriptionID string
 	)
 
-	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*AFContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

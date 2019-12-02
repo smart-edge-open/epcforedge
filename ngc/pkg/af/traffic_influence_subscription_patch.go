@@ -21,7 +21,7 @@ import (
 )
 
 func modifySubscriptionByPatch(cliCtx context.Context, ts TrafficInfluSubPatch,
-	afCtx *afContext, sID string) (TrafficInfluSub,
+	afCtx *AFContext, sID string) (TrafficInfluSub,
 	*http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
@@ -46,7 +46,7 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 		subscriptionID string
 	)
 
-	afCtx := r.Context().Value(keyType("af-ctx")).(*afContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*AFContext)
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
