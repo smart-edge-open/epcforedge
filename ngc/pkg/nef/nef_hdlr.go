@@ -28,12 +28,12 @@ const subNotFound string = "Subscription Not Found"
 type nefData struct {
 	ctx                context.Context
 	afCount            int
-	locationUrlPrefix  string
+	locationURLPrefix  string
 	pcfClient          PcfPolicyAuthorization
 	udrClient          UdrInfluenceData
 	corrID             uint
 	afs                map[string]*afData
-	upfNotificationUrl URI
+	upfNotificationURL URI
 }
 
 //NEFSBGetFn is the callback for SB API
@@ -157,7 +157,7 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 	af.subs[subIDStr] = &afsub
 
 	//Create Location URI
-	loc = nefCtx.nef.locationUrlPrefix + af.afID + "/subscriptions/" +
+	loc = nefCtx.nef.locationURLPrefix + af.afID + "/subscriptions/" +
 		subIDStr
 
 	log.Infoln(" NEW AF Subscription added " + subIDStr)
@@ -332,7 +332,7 @@ func (af *afData) afDestroy(afid string) error {
 */
 
 // Generate the notification uri to be provided to PCF/UDR
-func getNefNotificationUri(cfg *Config) URI {
+func getNefNotificationURI(cfg *Config) URI {
 	var uri string
 	// If http2 port is configured use it else http port
 	if cfg.HTTP2Config.Endpoint != "" {
@@ -346,7 +346,7 @@ func getNefNotificationUri(cfg *Config) URI {
 	return URI(uri)
 }
 
-func getNefLocationUrlPrefix(cfg *Config) string {
+func getNefLocationURLPrefix(cfg *Config) string {
 
 	var uri string
 	// If http2 port is configured use it else http port
@@ -387,15 +387,15 @@ func (nef *nefData) nefCreate(ctx context.Context, cfg Config) error {
 	}
 
 	// Generate the location url prefix
-	nef.locationUrlPrefix = getNefLocationUrlPrefix(&cfg)
-	log.Infof("NEF Location URL Prefix :%s", nef.locationUrlPrefix)
+	nef.locationURLPrefix = getNefLocationURLPrefix(&cfg)
+	log.Infof("NEF Location URL Prefix :%s", nef.locationURLPrefix)
 
 	// Genereate the notification url
 	if cfg.UpfNotificationResURIPath == "" {
 		return errors.New("UpfNotificationResURIPath is empty")
 	}
-	nef.upfNotificationUrl = getNefNotificationUri(&cfg)
-	log.Infof("SMF UPF Notification URL :%s", nef.upfNotificationUrl)
+	nef.upfNotificationURL = getNefNotificationURI(&cfg)
+	log.Infof("SMF UPF Notification URL :%s", nef.upfNotificationURL)
 	return nil
 }
 
@@ -655,7 +655,7 @@ func nefSBPCFPatch(pcfSub *afSubscription, nefCtx *nefContext,
 
 	//Populating UP Path Chnage Subbscription Data in App Session Context
 	appSessCtxUpdtData.AfRoutReq.UpPathChgSub.NotificationURI =
-		nefCtx.nef.upfNotificationUrl
+		nefCtx.nef.upfNotificationURL
 
 	appSessCtxUpdtData.AfRoutReq.UpPathChgSub.NotifCorreID =
 		pcfSub.NotifCorreID
@@ -839,7 +839,7 @@ func nefSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
 	trafficInfluData.InterGroupID = string(ti.ExternalGroupID)
 
 	//Populating UP Path Chnage Subbscription Data in Traffic Influence Data
-	trafficInfluData.UpPathChgNotifURI = nefCtx.nef.upfNotificationUrl
+	trafficInfluData.UpPathChgNotifURI = nefCtx.nef.upfNotificationURL
 
 	if len(string(ti.SubscribedEvents[0])) > 0 &&
 		0 == strings.Compare(string(ti.SubscribedEvents[0]), "UP_PATH_CHANGE") {

@@ -147,7 +147,7 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 
 	// Response should be 201 Created as per 3GPP 29.522
 	w.WriteHeader(http.StatusCreated)
-	log.Infof("CreateTrafficInfluenceSubscription respones => %d",
+	log.Infof("CreateTrafficInfluenceSubscription responses => %d",
 		http.StatusCreated)
 	_, err = w.Write(mdata)
 	if err != nil {
@@ -370,7 +370,7 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 
 	if af.afGetSubCount() == 0 {
 
-		nef.nefDeleteAf(vars["afId"])
+		_ = nef.nefDeleteAf(vars["afId"])
 	}
 
 	logNef(nef)
