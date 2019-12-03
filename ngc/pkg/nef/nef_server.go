@@ -17,6 +17,7 @@ package ngcnef
 import (
 	"context"
 	"encoding/json"
+	"github.com/gorilla/mux"
 	logtool "github.com/otcshare/common/log"
 	"golang.org/x/net/http2"
 	"io/ioutil"
@@ -24,6 +25,14 @@ import (
 	"path/filepath"
 	"time"
 )
+
+// NefApp structure to store the variables/contexts for access in UT
+type NefApp struct {
+	NefRouter *mux.Router
+	NefCtx    *nefContext
+}
+
+var NefAppG NefApp
 
 // Log handler initialized. This is to be used throughout the nef module for
 // logging
@@ -108,6 +117,7 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	 * the HTTP Service Handlers. These hanlders will be called when HTTP
 	 * server receives any HTTP Request */
 	nefRouter := NewNEFRouter(nefCtx)
+	NefAppG.NefRouter = nefRouter
 
 	// 1 for http2, 1 for http and 1 for the os signal
 	numchannels := 3
@@ -237,7 +247,7 @@ func Run(ctx context.Context, cfgPath string) error {
 		log.Errf("NEF Create Failed: %v", err)
 		return err
 	}
-
+	NefAppG.NefCtx = &nefCtx
 	return runServer(ctx, &nefCtx)
 }
 
