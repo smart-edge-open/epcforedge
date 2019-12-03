@@ -32,6 +32,8 @@ type NefApp struct {
 	NefCtx    *nefContext
 }
 
+// NefAppG is the NEF App variable which can be used for accessing the
+// global contexts
 var NefAppG NefApp
 
 // Log handler initialized. This is to be used throughout the nef module for
@@ -202,6 +204,8 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 		<-stopServerCh
 	}
 	log.Info("Exiting NEF server")
+	//NefAppG.NefCtx = nil
+	//NefAppG.NefRouter = nil
 	return nil
 
 }
