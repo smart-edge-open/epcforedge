@@ -25,7 +25,7 @@ type PcfPolicyResponse struct {
 	ResponseCode uint16
 	// asc if not nil contains the AppSessionContext data provided by PCF
 	Asc *AppSessionContext
-	// pd if not not contains the problem infomration from PCF.
+	// pd if not not contains the problem information from PCF.
 	// Valid for 3xx, 4xx, 5xx or 6xx responses
 	Pd *ProblemDetails
 }
