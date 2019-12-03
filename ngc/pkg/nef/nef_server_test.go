@@ -2,7 +2,6 @@ package ngcnef_test
 
 import (
 	"context"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -12,9 +11,9 @@ import (
 var _ = Describe("NefServer", func() {
 
 	var (
-		ctx     context.Context
-		cancel  func()
-		testErr error
+		ctx    context.Context
+		cancel func()
+		//testErr error
 	)
 
 	Describe("NefServer init", func() {
@@ -26,19 +25,32 @@ var _ = Describe("NefServer", func() {
 				err := ngcnef.Run(ctx, "noconfig")
 				Expect(err).NotTo(BeNil())
 			})
-		It("Will init NefServer - Valid Configurations",
+
+		It("Will init NefServer - No HTTP endpoints",
 			func() {
-				ctx, cancel := context.WithCancel(context.Background())
+
+				ctx, cancel = context.WithCancel(context.Background())
 				defer cancel()
-				go func() {
-					testErr = ngcnef.Run(ctx,
-						NefTestCfgBasepath+"valid.json")
-				}()
-				/* Send a cancel after 5 seconds */
-				time.Sleep(3 * time.Second)
-				cancel()
-				Expect(testErr).To(BeNil())
+				err := ngcnef.Run(ctx,
+					NefTestCfgBasepath+"invalid_no_eps.json")
+				Expect(err).NotTo(BeNil())
 			})
+		/*
+			// Commenting since its covered through other tests
+			It("Will init NefServer - Valid Configurations",
+				func() {
+					ctx, cancel := context.WithCancel(context.Background())
+					defer cancel()
+					go func() {
+						testErr = ngcnef.Run(ctx,
+							NefTestCfgBasepath+"valid.json")
+					}()
+					// Send a cancel after 3 seconds
+					time.Sleep(3 * time.Second)
+					cancel()
+					Expect(testErr).To(BeNil())
+				})
+		*/
 	})
 
 })

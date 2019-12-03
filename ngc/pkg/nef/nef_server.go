@@ -17,6 +17,7 @@ package ngcnef
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	logtool "github.com/otcshare/common/log"
 	"golang.org/x/net/http2"
@@ -161,7 +162,7 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	}
 	if server == nil && serverHTTP2 == nil {
 		log.Err("HTTP Servers are not configured")
-		return err
+		return errors.New("HTTP Endpoints config missing")
 	}
 
 	stopServerCh := make(chan bool, numchannels)
