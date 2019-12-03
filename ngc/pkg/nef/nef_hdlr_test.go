@@ -50,7 +50,7 @@ func CreateReqForNEF(method string, subID string,
 
 var _ = Describe("Test NEF Server NB API's ", func() {
 	var ctx context.Context
-	//var cancel context.CancelFunc
+	var cancel func()
 
 	ctx, _ = context.WithCancel(context.Background())
 	//defer cancel()
@@ -59,16 +59,13 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 		func() {
 			It("Will init NefServer",
 				func() {
-					ctx, cancel := context.WithCancel(context.Background())
+					ctx, cancel = context.WithCancel(context.Background())
 					defer cancel()
-
 					go func() {
-						/* Send a cancel after 5 seconds */
-						time.Sleep(1 * time.Second)
-						cancel()
+						err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid.json")
+						Expect(err).To(BeNil())
 					}()
-					err := ngcnef.Run(ctx, validCfgPath)
-					Expect(err).To(BeNil())
+					time.Sleep(2 * time.Second)
 				})
 		})
 
@@ -166,5 +163,13 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 			Expect(rr.Code).Should(Equal(http.StatusNoContent))
 		})
 	})
+
+	Describe("End the NEF Server: To be done to end NEF API testing",
+		func() {
+			It("Will stop NefServer", func() {
+				cancel()
+				time.Sleep(2 * time.Second)
+			})
+		})
 
 })

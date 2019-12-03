@@ -31,30 +31,17 @@ var _ = Describe("NefSmf", func() {
 			time.Sleep(2 * time.Second)
 		})
 
-		It("Creating a new traffice influnce subscription",
+		It("POST an UPF notification",
 			func() {
 				postbody, _ := ioutil.ReadFile(NefTestJSONBasepath +
-					"AF_NEF_POST_01.json")
-				req, _ := http.NewRequest("POST", NefTIFApiPrefix+
-					"AF_01/subscriptions", bytes.NewBuffer(postbody))
+					"SMF_NEF_NOTIF_01.json")
+				req, _ := http.NewRequest("POST", NefTIFApiPrefixHTTP2+
+					"notification/upf", bytes.NewBuffer(postbody))
 				req.Header.Set("Content-Type", "application/json")
 				rr := httptest.NewRecorder()
 				ngcnef.NefAppG.NefRouter.ServeHTTP(rr,
 					req.WithContext(ctx))
-				Expect(rr.Code == http.StatusCreated).To(BeTrue())
-			})
-
-		It("Get a new traffice influnce subscription",
-			func() {
-				req, _ := http.NewRequest("GET", NefTIFApiPrefix+
-					"AF_01/subscriptions", nil)
-				rr := httptest.NewRecorder()
-				ngcnef.NefAppG.NefRouter.ServeHTTP(rr,
-					req.WithContext(ctx))
-				if rr.Code != http.StatusOK {
-					Fail("GET failed with incorrrect status code")
-				}
-				//Expect(rr.Code == http.StatusOK).To(BeTrue())
+				Expect(rr.Code == http.StatusNotFound).To(BeTrue())
 			})
 
 		It("Stopping the NEF server", func() {
