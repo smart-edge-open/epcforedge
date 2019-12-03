@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,29 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package ngcnef
 
-import (
-	"log"
-	"net/http"
-	"time"
-)
+import "context"
 
-// Connectivity constants
-const (
-	NEFServerPort = "80"
-)
+/* The SB interface towards the AF for sending the notifications received
+   from different NF's */
 
-func main() {
+// AfNotification definesthe interfaces that are exposed for sending
+// nofitifications towards the AF
+type AfNotification interface {
 
-	NEFRouter := NewNEFRouter()
-	s := &http.Server{
-		Addr:           ":"+NEFServerPort,
-		Handler:        NEFRouter,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-	log.Println("NEF listening on", s.Addr)
-	log.Fatal(s.ListenAndServe())
+	// AAfNotificationUpfEvent sends the UPF event through POST method
+	// towards the AF
+	AfNotificationUpfEvent(ctx context.Context,
+		afURI URI,
+		body EventNotification) error
 }

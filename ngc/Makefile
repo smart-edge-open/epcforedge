@@ -23,11 +23,15 @@ BUILD_DIR ?=dist
 
 VER:=1.0
 
-build: af oam
+build: af nef oam
 
 af:
 	mkdir -p "${BUILD_DIR}"
 	GOOS=linux go build -o "${BUILD_DIR}/af" ./cmd/af
+
+nef:
+	mkdir -p "${BUILD_DIR}"
+	GOOS=linux go build -o "${BUILD_DIR}/nef" ./cmd/nef
 
 oam:
 	mkdir -p "${BUILD_DIR}"
