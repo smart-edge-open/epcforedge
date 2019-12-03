@@ -35,7 +35,10 @@ func createNewSub(nefCtx *nefContext, afID string,
 
 	if err != nil {
 		log.Err("NO AF PRESENT CREATE AF")
-		af, _ = nef.nefAddAf(nefCtx, afID)
+		af, err = nef.nefAddAf(nefCtx, afID)
+		if err != nil {
+			return loc, rsp, err
+		}
 	} else {
 		log.Infoln("AF PRESENT")
 	}
@@ -125,13 +128,15 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 	}
 
 	loc, rsp, err3 := createNewSub(nefCtx, vars["afId"], trInBody)
-	log.Infoln(loc)
 
 	if err3 != nil {
 		log.Err(err3)
+		// we return bad request here since we have reached the max
+		rsp.errorCode = 400
 		sendErrorResponseToAF(w, rsp)
 		return
 	}
+	log.Infoln(loc)
 
 	//Martshal data and send into the body
 	mdata, err2 := json.Marshal(trInBody)
