@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import "context"
 /* The SB interfaces towards the PCF that need to be implemented by
    eith the NEF SB stub / NEF SB client receivers */
 
-// PcfPolicyResponse contains the response information from PCF
+// PcfPolicyResponse contains the response from PCF
 type PcfPolicyResponse struct {
 	// responseCode contains the http response code provided by the PCF
 	ResponseCode uint16
@@ -38,13 +38,13 @@ type AppSessionID string
 // PcfPolicyAuthorization defines the interfaces that are exposed for
 // TrafficInfluence
 type PcfPolicyAuthorization interface {
-	// PcfPolicyAuthorizationCreate sends POST request to the PCF using the
+	// PolicyAuthorizationCreate sends POST request to the PCF using the
 	// configuration mentioned in the context. Context would have all the
 	// informration related to the PCF like the URI, authentication, logging,
 	// cancellation It returns the response received from the PCF, the app and
 	// any error encountered when sending the request. The contents of the
 	// actual response received are part of the PcfPolicyResponse
-	PcfPolicyAuthorizationCreate(ctx context.Context,
+	PolicyAuthorizationCreate(ctx context.Context,
 		body AppSessionContext) (AppSessionID, PcfPolicyResponse, error)
 
 	// PolicyAuthorizationUpdate sends PATCH request to the PCF to the

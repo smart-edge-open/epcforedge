@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,9 +60,9 @@ func genAppSessionID(pcf *PcfClientStub) int {
 	return sessid
 }
 
-// PcfPolicyAuthorizationCreate is a stub implementation
+// PolicyAuthorizationCreate is a stub implementation
 // Successful response : 201 and body contains AppSessionContext
-func (pcf *PcfClientStub) PcfPolicyAuthorizationCreate(ctx context.Context,
+func (pcf *PcfClientStub) PolicyAuthorizationCreate(ctx context.Context,
 	body AppSessionContext) (AppSessionID, PcfPolicyResponse, error) {
 
 	log.Infof("PCFs PolicyAuthorizationCreate Entered")
