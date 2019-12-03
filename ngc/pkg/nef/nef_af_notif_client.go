@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ func (af *AfClient) AfNotificationUpfEvent(ctx context.Context,
 
 	// If https then load the certificate
 	if u.Scheme == "https" {
-		CACert, err1 := ioutil.ReadFile(nefCtx.cfg.HTTP2Config.AfServerCert)
+		CACert, err1 := ioutil.ReadFile(nefCtx.cfg.HTTP2Config.AfClientCert)
 		if err1 != nil {
 			log.Errf("Af Certification loading Error: %v", err)
 			return err1

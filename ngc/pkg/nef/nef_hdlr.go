@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -543,7 +543,7 @@ func nefSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
 	_ = getSupiData(cliCtx, nefCtx, &appSessCtx.AscReqData.Supi)
 
 	appSessID, pcfPolicyResp, err =
-		nef.pcfClient.PcfPolicyAuthorizationCreate(cliCtx, appSessCtx)
+		nef.pcfClient.PolicyAuthorizationCreate(cliCtx, appSessCtx)
 
 	if err != nil {
 		rsp.errorCode = int(pcfPolicyResp.ResponseCode)

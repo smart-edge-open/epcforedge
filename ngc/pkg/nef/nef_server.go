@@ -1,4 +1,4 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+// Copyright 2019 Intel Corporation. All rights reserved
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ type HTTP2Config struct {
 	Endpoint      string `json:"endpoint"`
 	NefServerCert string `json:"NefServerCert"`
 	NefServerKey  string `json:"NefServerKey"`
-	AfServerCert  string `json:"AfServerCert"`
+	AfClientCert  string `json:"AfClientCert"`
 }
 
 // Config contains NEF Module Configuration Data Structure
@@ -253,7 +253,7 @@ func printConfig(cfg Config) {
 	log.Infoln("EndPoint(HTTP2): ", cfg.HTTP2Config.Endpoint)
 	log.Infoln("ServerCert(HTTP2): ", cfg.HTTP2Config.NefServerCert)
 	log.Infoln("ServerKey(HTTP2): ", cfg.HTTP2Config.NefServerKey)
-	log.Infoln("AFServerCert(HTTP2): ", cfg.HTTP2Config.AfServerCert)
+	log.Infoln("AFClientCert(HTTP2): ", cfg.HTTP2Config.AfClientCert)
 	log.Infoln("*************************************************************")
 
 }
