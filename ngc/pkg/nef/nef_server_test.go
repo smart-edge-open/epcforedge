@@ -2,10 +2,11 @@ package ngcnef_test
 
 import (
 	"context"
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	ngcnef "github.com/otcshare/epcforedge/ngc/pkg/nef"
-	"time"
 )
 
 var _ = Describe("NefServer", func() {
@@ -27,7 +28,7 @@ var _ = Describe("NefServer", func() {
 			})
 		It("Will init NefServer - Valid Configurations",
 			func() {
-				ctx, cancel = context.WithCancel(context.Background())
+				ctx, cancel := context.WithCancel(context.Background())
 				defer cancel()
 				go func() {
 					testErr = ngcnef.Run(ctx,

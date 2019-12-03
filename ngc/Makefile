@@ -66,6 +66,7 @@ help:
 	@echo "  oam                    to build the OAM with API-stub backend (default mode)"
 	@echo "  oam-test-stub          to build the OAM with API-stub backend"
 	@echo "  oam-test-flexcore      to build the OAM with Flexcore backend"
+	@echo "  nef                    to build the NEF"
 	@echo ""
 	@echo "Executing Test:"
 	@echo "  lint                   to run static code analysis with golangci-lint"
