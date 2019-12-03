@@ -1,1 +1,14 @@
-placeholder
+{
+    "AfId": "1",
+    "ServerConfig": {
+        "CNCAEndpoint": ":8080",
+        "NotifEndpoint": "localhost:8081",
+        "NotifServerCertPath": "certs/notif_server/server-cert.pem",
+        "NotifServerKeyPath": "certs/notif_server/server-key.pem"
+    },
+    "CliConfig": {
+        "NEFBasePath": "https://localhost:8081/3gpp-traffic-influence/v1",
+        "UserAgent": "NGC-AF",
+        "NEFCliCertPath": "certs/nef_client/root-ca-cert.pem"
+    }
+}

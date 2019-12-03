@@ -1,5 +1,5 @@
 ################################################################################
-# Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
+# Copyright 2019 Intel Corporation, Inc. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
 # limitations under the License.
 ################################################################################
 
-#GOOS=linux go build -o "${BUILD_DIR}/oam-flexcore" ./pkg/oam ./internal/flexcore/oam_backend.go
 
-export GO111MODULE = on
+export GO115MODULE = on
 
 .PHONY: build af oam oam-test oam-test-flexcore lint test-unit
 TMP_DIR:=$(shell mktemp -d)
@@ -28,7 +27,7 @@ build: af nef oam
 
 af:
 	mkdir -p "${BUILD_DIR}"
-	GOOS=linux go build -o "${BUILD_DIR}/af" ./pkg/af
+	GOOS=linux go build -o "${BUILD_DIR}/af" ./cmd/af
 
 nef:
 	mkdir -p "${BUILD_DIR}"
@@ -36,15 +35,11 @@ nef:
 
 oam:
 	mkdir -p "${BUILD_DIR}"
-	rm -f ./pkg/oam/oam_backend.go
-	ln -s ../../internal/flexcore/oam_flexcore_backend.go ./pkg/oam/oam_backend.go
-	GOOS=linux go build -o "${BUILD_DIR}/oam-stub" ./pkg/oam
+	GOOS=linux go build -o "${BUILD_DIR}/oam-stub" ./cmd/oam
 
 oam-test-stub:
 	mkdir -p "${BUILD_DIR}"
-	rm -f ./pkg/oam/oam_backend.go
-	ln -s ../../internal/flexcore/oam_flexcore_backend.go ./pkg/oam/oam_backend.go
-	GOOS=linux go build -o "${BUILD_DIR}/oam-stub" ./pkg/oam
+	GOOS=linux go build -o "${BUILD_DIR}/oam-stub" ./cmd/oam
 
 oam-test-flexcore:
 	mkdir -p "${BUILD_DIR}"
@@ -54,10 +49,10 @@ oam-test-flexcore:
 
 
 lint:
-	golangci-lint run
+	golangci-lint run ./pkg/oam
 
 test-unit:
-	ginkgo ./pkg/oam
+	ginkgo -v -cover ./pkg/config ./pkg/oam
 
 clean:
 	rm -rf "${BUILD_DIR}"

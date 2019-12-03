@@ -1,0 +1,62 @@
+{
+  "afServiceId": "string",
+  "afAppId": "string",
+  "afTransId": "string",
+  "appReloInd": true,
+  "dnn": "string",
+  "snssai": {
+    "sst": 0,
+    "sd": "string"
+  },
+  "externalGroupId": "string",
+  "anyUeInd": true,
+  "subscribedEvents": [
+    "UP_PATH_CHANGE",
+    "string"
+  ],
+  "gpsi": "string",
+  "ipv4Addr": "string",
+  "ipv6Addr": "string",
+  "macAddr": "string",
+  "notificationDestination": "string",
+  "requestTestNotification": true,
+  "websockNotifConfig": {
+    "websocketUri": "string",
+    "requestWebsocketUri": true
+  },
+  "self": "string",
+  "trafficFilters": [
+    {
+      "flowId": 0,
+      "flowDescriptions": [
+        "string"
+      ]
+    }
+  ],
+  "ethTrafficFilters": [
+    {
+      "destMacAddr": "string",
+      "ethType": "string",
+      "fDesc": "string",
+      "sourceMacAddr": "string",
+      "vlanTags": [
+        "string"
+      ]
+    }
+  ],
+  "trafficRoutes": [
+    null,
+    null
+  ],
+  "tempValidities": [
+    {
+      "startTime": "string",
+      "stopTime": "string"
+    }
+  ],
+  "validGeoZoneIds": [
+    "string"
+  ],
+  "suppFeat": "string"
+}
+

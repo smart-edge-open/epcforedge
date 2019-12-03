@@ -12,29 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main 
+package config
 
 import (
-	"log"
-	"net/http"
-	"time"
+	"encoding/json"
+	"io/ioutil"
+	"path/filepath"
 )
 
-// Connectivity constants
-const (
-	OAMServerPort = "80"
-)
-
-func main() {
-
-	OAMRouter := NewOAMRouter()
-	s := &http.Server{
-		Addr:           ":"+OAMServerPort,
-		Handler:        OAMRouter,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+// LoadJSONConfig reads a file located at configPath and unmarshals it to
+// config structure
+func LoadJSONConfig(configPath string, config interface{}) error {
+	cfgData, err := ioutil.ReadFile(filepath.Clean(configPath))
+	if err != nil {
+		return err
 	}
-	log.Println("OAM listening on", s.Addr)
-	log.Fatal(s.ListenAndServe())
+	return json.Unmarshal(cfgData, config)
 }

@@ -1,4 +1,7 @@
 {
-    "Endpoint": ":60055",
-    "HeartbeatInterval": "60s"
+    "TlsEndpoint": ":443",
+    "OpenEndpoint": ":8080",
+    "NgcEndpoint": "127.0.0.1:12345",
+    "NgcType": "APISTUB",
+    "NgcTestData": "./test/oam/ngc-apistub-testdata/testdata_00.json" 
 }

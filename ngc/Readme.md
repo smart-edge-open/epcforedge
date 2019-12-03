@@ -3,18 +3,25 @@ SPDX-License-Identifier: Apache-2.0
 Copyright © 2019 Intel Corporation and Smart-Edge.com, Inc.
 ```
 # 1. Introduction
-## OAM Pkg source code
-hello-world level sample code right now.
-OAM core source files stay under ngc/pkg/oam directory.
-OAM API-stub backend source files stay under ngc/test/oam/ directory.
-OAM Flexcore backend source files stay under ngc/internal/flexcore/directory. 
+## Directory Structure
+- `/cmd` : Main applications inside. 
+- `/pkg` : Lib code used by applications. Perphaps common libs such as lib or utils in the folder. 
+- `/api` : Swagger JSON schema files inside. 
+- `/dist` : Built golang binaries inside. 
+- `/test` : Test apps and Test data inside. 
+- `/configs` : Configuration files inside. 
 
+## Download (My example: oam)
+- Check GOPATH. My example is "/root/go"
+- In `/root/go/src/github.com/otcshare/`, clone repos by `git clone https://github.com/otcshare/epcforedge.git`.
+- Switch branch: `git checkout -b 5g_oamagent remotes/origin/5g_oamagent`.
+- Enter into `/root/go/src/github.com/otcshare/epcforedge/ngc`.
 
 ## How to build oam sample bin and run it
 * `make oam`
 The bin will be generated under ngc/dist directory, used to build the OAM with API-stub backend (default mode).
 Jus directly run bin as below:
-`./oam-stub`
+`./dist/oam-stub`
 
 
 * `make oam-test-stub`

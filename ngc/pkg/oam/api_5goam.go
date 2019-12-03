@@ -12,29 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package oam 
 
 import (
-	"log"
 	"net/http"
-	"time"
 )
 
-// Connectivity constants
-const (
-	AFServerPort = "80"
-)
+func add(w http.ResponseWriter, r *http.Request) {
+        ProxyAdd(w, r)
+}
 
-func main() {
+func delete(w http.ResponseWriter, r *http.Request) {
+        ProxyDel(w, r)
+}
 
-	AFRouter := NewAFRouter()
-	s := &http.Server{
-		Addr:           ":"+AFServerPort,
-		Handler:        AFRouter,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-	log.Println("AF listening on", s.Addr)
-	log.Fatal(s.ListenAndServe())
+func get(w http.ResponseWriter, r *http.Request) {
+        ProxyGet(w, r)
+}
+
+func getAll(w http.ResponseWriter, r *http.Request) {
+        ProxyGetAll(w, r)
+}
+
+func update(w http.ResponseWriter, r *http.Request) {
+        ProxyUpdate(w, r)
 }
