@@ -393,13 +393,19 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 	r *http.Request) {
 
 	var (
-		smfEv   NsmfEventExposureNotification
-		ev      EventNotification
-		afURL   URI
-		nsmEvNo NsmEventNotification
-		i       int
+		smfEv    NsmfEventExposureNotification
+		ev       EventNotification
+		afURL    URI
+		nsmEvNo  NsmEventNotification
+		i        int
+		upfFound bool
 	)
 
+	if r.Body == nil {
+		log.Errf("NotifySmfUPFEvent Empty Body")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	// Retrieve the event notification information from the request
 	if err := json.NewDecoder(r.Body).Decode(&smfEv); err != nil {
 		log.Errf("NotifySmfUPFEvent body parse: %s", err.Error())
@@ -426,12 +432,13 @@ func NotifySmfUPFEvent(w http.ResponseWriter,
 		if nsmEvNo.Event == "UP_PATH_CH" {
 			log.Infof("NotifySmfUPFEvent found an entry for UP_PATH_CH"+
 				"at index: %d", i)
+			upfFound = true
 			break
 		}
 
 	}
 
-	if len(smfEv.EventNotifs) == 0 {
+	if !upfFound {
 		log.Errf("NotifySmfUPFEvent missing event with UP_PATH_CH")
 		w.WriteHeader(http.StatusBadRequest)
 		return
