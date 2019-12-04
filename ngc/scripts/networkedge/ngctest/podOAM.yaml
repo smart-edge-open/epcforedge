@@ -13,8 +13,10 @@
 # limitations under the License.
 
 apiVersion: v1
-kind: Pod 
+kind: Pod
 metadata:
+  labels:
+    service: oamservice
   name: oam
   namespace: ngc
 spec:
@@ -28,7 +30,7 @@ spec:
   containers:
   - securityContext:
       privileged: false
-    name: oam-container 
+    name: oam-container
     image: oam-image:1.0
     imagePullPolicy: Never
     command: [ "/bin/bash", "-c", "--" ]
@@ -40,7 +42,6 @@ spec:
         memory: 1Gi
     ports:
     - containerPort: 8070
-      name: ui
     volumeMounts:
     - name: shared-configs
       mountPath: /etc/configs
@@ -53,4 +54,23 @@ spec:
   nodeSelector:
     5g-openness: "true"
   restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: oamservice
+  labels:
+    service: oamservice
+  namespace: ngc
+spec:
+  type: NodePort
+  ports:
+  - port: 8070
+    targetPort: 8070
+    protocol: TCP
+    name: oamcnca
+  selector:
+    service: oamservice
 

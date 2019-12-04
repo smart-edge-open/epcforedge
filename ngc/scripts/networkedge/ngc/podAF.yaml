@@ -67,6 +67,7 @@ metadata:
   name: afservice
   labels:
     service: afservice
+  namespace: ngc
 spec:
   type: NodePort
   ports:

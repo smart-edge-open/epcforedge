@@ -14,8 +14,10 @@
 
 apiVersion: v1
 kind: Pod
-metadata: 
-  name: nef
+metadata:
+  labels:
+    service: afservice
+  name: af
   namespace: ngc
 spec:
   volumes:
@@ -24,12 +26,12 @@ spec:
       path: /etc/openness/configs/ngc
   - name: shared-certs
     hostPath:
-      path: /etc/openness/ngc/certs
+      path: /etc/openness/certs/ngc
   containers:
   - securityContext:
       privileged: false
-    name: nef-container 
-    image: nef-image:1.0
+    name: af-container
+    image: af-image:1.0
     imagePullPolicy: Never
     command: [ "/bin/bash", "-c", "--" ]
     args: [ "./entrypoint.sh" ]
@@ -39,7 +41,11 @@ spec:
       limits:
         memory: 1Gi
     ports:
-    - containerPort: 8060
+    - containerPort: 8050
+      name: cnca
+    ports:
+    - containerPort: 8051
+      name: nef
     volumeMounts:
     - name: shared-configs
       mountPath: /etc/configs
@@ -53,5 +59,26 @@ spec:
     5g-openness: "true"
   restartPolicy: Always
 
+  ---
 
+apiVersion: v1
+kind: Service
+metadata:
+  name: afservice
+  labels:
+    service: afservice
+  namespace: ngc
+spec:
+  type: NodePort
+  ports:
+  - port: 8050
+    targetPort: 8050
+    protocol: TCP
+    name: cnca
+  - port: 8051
+    targetPort: 8051
+    protocol: TCP
+    name: nef
+  selector:
+    service: afservice
 
