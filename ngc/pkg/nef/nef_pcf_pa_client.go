@@ -68,7 +68,7 @@ func (pcf *PcfClientStub) PolicyAuthorizationCreate(ctx context.Context,
 	log.Infof("PCFs PolicyAuthorizationCreate Entered")
 	_ = ctx
 
-	var err error = nil
+	var err error
 	pcfPr := PcfPolicyResponse{}
 	// generated a session id return the same body as provided in the request
 	sessid := genAppSessionID(pcf)
@@ -97,7 +97,7 @@ func (pcf *PcfClientStub) PolicyAuthorizationUpdate(ctx context.Context,
 		string(appSessionID))
 	_ = ctx
 
-	var err error = nil
+	var err error
 	pcfPr := PcfPolicyResponse{}
 	// convert the appsession id to integer
 	sessid, _ := strconv.Atoi(string(appSessionID))
@@ -133,7 +133,7 @@ func (pcf *PcfClientStub) PolicyAuthorizationDelete(ctx context.Context,
 		string(appSessionID))
 	_ = ctx
 
-	var err error = nil
+	var err error
 	pcfPr := PcfPolicyResponse{}
 	// convert the appsession id to integer
 	sessid, _ := strconv.Atoi(string(appSessionID))
@@ -165,7 +165,7 @@ func (pcf *PcfClientStub) PolicyAuthorizationGet(ctx context.Context,
 		string(appSessionID))
 	_ = ctx
 
-	var err error = nil
+	var err error
 	pcfPr := PcfPolicyResponse{}
 	// convert the appsession id to integer
 	sessid, _ := strconv.Atoi(string(appSessionID))

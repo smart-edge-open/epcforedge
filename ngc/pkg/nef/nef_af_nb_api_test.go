@@ -13,13 +13,13 @@ import (
 	ngcnef "github.com/otcshare/epcforedge/ngc/pkg/nef"
 )
 
-const validCfgPath = "../../configs/nef.json"
+//const validCfgPath = "../../configs/nef.json"
 const testJSONPath = "../../test/nef/nef-cli-scripts/json/"
-const baseAPIURL = "http://localhost:8091/3gpp-traffic-influence/v1/AF_01/subscriptions"
+const baseAPIURL = "http://localhost:8091/3gpp-traffic-influence/" +
+	"v1/AF_01/subscriptions"
 
-func CreateReqForNEF(method string, subID string,
-	ctx context.Context, body []byte) (*httptest.ResponseRecorder,
-	*http.Request) {
+func CreateReqForNEF(ctx context.Context, method string, subID string,
+	body []byte) (*httptest.ResponseRecorder, *http.Request) {
 	var req *http.Request
 	if len(subID) > 0 {
 		if body != nil {
@@ -39,11 +39,12 @@ func CreateReqForNEF(method string, subID string,
 			req, _ = http.NewRequest(method, baseAPIURL, nil)
 		}
 	}
-
-	ctx = context.WithValue(
-		req.Context(),
-		"nefCtx",
-		ngcnef.NefAppG.NefCtx)
+	/*
+		ctx = context.WithValue(
+			req.Context(),
+			"nefCtx",
+			ngcnef.NefAppG.NefCtx)
+	*/
 	rr := httptest.NewRecorder()
 	return rr, req
 }
@@ -52,8 +53,8 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 	var ctx context.Context
 	var cancel func()
 
-	ctx, _ = context.WithCancel(context.Background())
-	//defer cancel()
+	ctx, cancel = context.WithCancel(context.Background())
+	defer cancel()
 
 	Describe("Start the NEF Server: To be done to start NEF API testing",
 		func() {
@@ -76,7 +77,7 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 		patchbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PATCH_01.json")
 
 		It("Send valid POST to NEF towards PCF ", func() {
-			rr, req := CreateReqForNEF("POST", "", ctx, postbody)
+			rr, req := CreateReqForNEF(ctx, "POST", "", postbody)
 			req.Header.Set("Content-Type", "application/json")
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 
@@ -86,34 +87,34 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 		})
 		It("Will Send a valid GET all towards PCF", func() {
 
-			rr, req := CreateReqForNEF("GET", "", ctx, nil)
+			rr, req := CreateReqForNEF(ctx, "GET", "", nil)
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 			//Validate TI
 		})
 		It("Will Send a valid GET towards PCF", func() {
 
-			rr, req := CreateReqForNEF("GET", "11111", ctx, nil)
+			rr, req := CreateReqForNEF(ctx, "GET", "11111", nil)
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 		})
 		It("Will Send a valid PUT towards PCF", func() {
 
-			rr, req := CreateReqForNEF("PUT", "11111", ctx, putbody)
+			rr, req := CreateReqForNEF(ctx, "PUT", "11111", putbody)
 			req.Header.Set("Content-Type", "application/json")
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusNotFound))
 		})
 		It("Will Send a valid PATCH towards PCF", func() {
 
-			rr, req := CreateReqForNEF("PATCH", "11111", ctx, patchbody)
+			rr, req := CreateReqForNEF(ctx, "PATCH", "11111", patchbody)
 			req.Header.Set("Content-Type", "application/json")
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 		})
 		It("Will Send a valid DELETE towards PCF", func() {
 
-			rr, req := CreateReqForNEF("DELETE", "11111", ctx, nil)
+			rr, req := CreateReqForNEF(ctx, "DELETE", "11111", nil)
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusNoContent))
 		})
@@ -122,43 +123,44 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 	Describe("REQ towards UDR(POST/PUT/PATCH/DELETE)", func() {
 		postbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_POST_UDR_01.json")
 		putbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PUT_UDR_01.json")
-		patchbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PATCH_UDR_01.json")
+		patchbody, _ := ioutil.ReadFile(testJSONPath +
+			"AF_NEF_PATCH_UDR_01.json")
 
 		It("Send valid POST to NEF towards UDR ", func() {
-			rr, req := CreateReqForNEF("POST", "", ctx, postbody)
+			rr, req := CreateReqForNEF(ctx, "POST", "", postbody)
 			req.Header.Set("Content-Type", "application/json")
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusCreated))
 		})
 		It("Will Send a valid GET all towards UDR", func() {
 
-			rr, req := CreateReqForNEF("GET", "", ctx, nil)
+			rr, req := CreateReqForNEF(ctx, "GET", "", nil)
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 		})
 		It("Will Send a valid GET towards UDR", func() {
 
-			rr, req := CreateReqForNEF("GET", "11111", ctx, nil)
+			rr, req := CreateReqForNEF(ctx, "GET", "11111", nil)
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 		})
 		It("Will Send a valid PUT towards UDR", func() {
 
-			rr, req := CreateReqForNEF("PUT", "11111", ctx, putbody)
+			rr, req := CreateReqForNEF(ctx, "PUT", "11111", putbody)
 			req.Header.Set("Content-Type", "application/json")
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 		})
 		It("Will Send a valid PATCH towards UDR", func() {
 
-			rr, req := CreateReqForNEF("PATCH", "11111", ctx, patchbody)
+			rr, req := CreateReqForNEF(ctx, "PATCH", "11111", patchbody)
 			req.Header.Set("Content-Type", "application/json")
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 		})
 		It("Will Send a valid DELETE towards UDR", func() {
 
-			rr, req := CreateReqForNEF("DELETE", "11111", ctx, nil)
+			rr, req := CreateReqForNEF(ctx, "DELETE", "11111", nil)
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusNoContent))
 		})

@@ -44,7 +44,7 @@ func (udr *UdrClientStub) UdrInfluenceDataCreate(ctx context.Context,
 	log.Infof("UDRs InfluenceDataCreate Entered for %s", string(iid))
 	_ = ctx
 
-	var err error = nil
+	var err error
 	udrPr := UdrInfluenceResponse{}
 	// generated a session id return the same body as provided in the request
 	Tid := body
@@ -114,7 +114,7 @@ func (udr *UdrClientStub) UdrInfluenceDataUpdate(ctx context.Context,
 	log.Infof("UDRs InfluenceDataUpdate Entered for %s", string(iid))
 	_ = ctx
 
-	var err error = nil
+	var err error
 	udrPr := UdrInfluenceResponse{}
 	// check for the presence of the sessid in the database
 	tid, prs := udr.tidDb[string(iid)]
@@ -143,7 +143,7 @@ func (udr *UdrClientStub) UdrInfluenceDataDelete(ctx context.Context,
 	log.Infof("UDRs InfluenceDataDelete for %s", string(iid))
 	_ = ctx
 
-	var err error = nil
+	var err error
 	udrPr := UdrInfluenceResponse{}
 	// check for the presence of the sessid in the database
 	_, prs := udr.tidDb[string(iid)]
@@ -170,7 +170,7 @@ func (udr *UdrClientStub) UdrInfluenceDataGet(ctx context.Context) (
 	log.Infof("UdrInfluenceDataGet Stub Entered")
 	_ = ctx
 	udrPr := UdrInfluenceResponse{}
-	var err error = nil
+	var err error
 	log.Infof("UdrInfluenceDataGet Stub Exited")
 	return udrPr, err
 }
