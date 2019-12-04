@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"golang.org/x/net/http2"
+	"github.com/gorilla/handlers"
 
 	logger "github.com/otcshare/common/log"
 	config "github.com/otcshare/epcforedge/ngc/pkg/config"
@@ -59,6 +60,12 @@ func runServer(ctx context.Context, afCtx *AFContext) error {
 
 	var err error
 
+	uiAddress := []string{"http://localhost:3020"}
+
+	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	originsOK := handlers.AllowedOrigins(uiAddress)
+	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
+
 	afCtx.transactions = make(TransactionIDs)
 	afCtx.subscriptions = make(NotifSubscryptions)
 	afRouter := NewAFRouter(afCtx)
@@ -66,7 +73,7 @@ func runServer(ctx context.Context, afCtx *AFContext) error {
 
 	serverCNCA := &http.Server{
 		Addr:         afCtx.cfg.SrvCfg.CNCAEndpoint,
-		Handler:      afRouter,
+		Handler:      handlers.CORS(headersOK, originsOK, methodsOK)(afRouter),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
