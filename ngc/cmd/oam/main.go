@@ -19,8 +19,10 @@ import (
         "os"
         "log"
         "net/http"
+	"time"
         oam "github.com/otcshare/epcforedge/ngc/pkg/oam"
         config "github.com/otcshare/epcforedge/ngc/pkg/config"
+	"github.com/gorilla/handlers"
 )
 
 type oamCfg struct {
@@ -57,5 +59,20 @@ func main() {
         }
 
 	router := oam.NewRouter()
-	http.ListenAndServe(cfg.OpenEndpoint, router)
+
+	uiAddress := []string{"http://localhost:3020"}
+
+	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	originsOK := handlers.AllowedOrigins(uiAddress)
+	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
+
+	serverOAM := &http.Server{
+		Addr:		cfg.OpenEndpoint,
+		Handler:	handlers.CORS(headersOK, originsOK, methodsOK)(router),
+		ReadTimeout:	5 * time.Second,
+		WriteTimeout:	10 * time.Second,
+	}
+
+	log.Printf("Serving OAM on: %s", cfg.OpenEndpoint)
+	serverOAM.ListenAndServe()
 }
