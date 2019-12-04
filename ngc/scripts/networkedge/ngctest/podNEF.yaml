@@ -46,7 +46,7 @@ spec:
     - containerPort: 8060
     volumeMounts:
     - name: shared-configs
-      mountPath: /etc/configs
+      mountPath: /root/configs
     - name: shared-certs
       mountPath: /etc/certs
   tolerations:
