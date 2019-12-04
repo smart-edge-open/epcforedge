@@ -15,7 +15,7 @@
 ################################################################################
 
 
-export GO115MODULE = on
+export GO111MODULE = on
 
 .PHONY: build af oam oam-test oam-test-flexcore lint test-unit
 TMP_DIR:=$(shell mktemp -d)

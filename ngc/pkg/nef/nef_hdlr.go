@@ -115,7 +115,7 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 	afsub := afSubscription{subid: subIDStr, ti: ti, appSessionID: "",
 		NotifCorreID: "", iid: ""}
 
-	if !ti.AnyUeInd {
+	if len(ti.Gpsi) > 0 || len(ti.Ipv4Addr) > 0 || len(ti.Ipv6Addr) > 0 {
 
 		//Applicable to single UE, PCF case
 
@@ -133,7 +133,8 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 		afsub.NEFSBPatch = nefSBPCFPatch
 		afsub.NEFSBDelete = nefSBPCFDelete
 
-	} else {
+	} else if len(ti.ExternalGroupID) > 0 || ti.AnyUeInd {
+
 		//Applicable to Any UE, UDR case
 
 		rsp, err = nefSBUDRPost(&afsub, nefCtx, ti)
@@ -151,6 +152,11 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 		afsub.NEFSBPatch = nefSBUDRPatch
 		afsub.NEFSBDelete = nefSBUDRDelete
 
+	} else {
+		//Invalid case. Return Error
+		rsp.errorCode = 400
+		rsp.pd.Title = "Invalid Request"
+		return "", rsp, errors.New("Invalid AF Request")
 	}
 
 	//Link the subscription with the AF
