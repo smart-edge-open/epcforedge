@@ -1,16 +1,5 @@
-// Copyright 2019 Intel Corporation, Inc. All rights reserved
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// SPDX-License-Identifier: Apache-2.0
+// Copyright © 2019 Intel Corporation
 
 package ngcaf
 
@@ -34,7 +23,8 @@ type NotifSubscryptions map[string]map[string]TrafficInfluSub
 // ServerConfig struct
 type ServerConfig struct {
 	CNCAEndpoint        string `json:"CNCAEndpoint"`
-	NotifEndpoint       string `json:"NotifEndpoint"`
+        Hostname	    string `json:"Hostname"`
+	NotifPort       string `json:"NotifPort"`
 	NotifServerCertPath string `json:"NotifServerCertPath"`
 	NotifServerKeyPath  string `json:"NotifServerKeyPath"`
 }
@@ -72,7 +62,7 @@ func runServer(ctx context.Context, afCtx *AFContext) error {
 	}
 
 	serverNotif := &http.Server{
-		Addr:         afCtx.cfg.SrvCfg.NotifEndpoint,
+		Addr:         afCtx.cfg.SrvCfg.NotifPort,
 		Handler:      nRouter,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -100,7 +90,7 @@ func runServer(ctx context.Context, afCtx *AFContext) error {
 
 	go func(stopServerCh chan bool) {
 		log.Infof("Serving AF Notifications on: %s",
-			afCtx.cfg.SrvCfg.NotifEndpoint)
+			afCtx.cfg.SrvCfg.NotifPort)
 		if err = serverNotif.ListenAndServeTLS(
 			afCtx.cfg.SrvCfg.NotifServerCertPath,
 			afCtx.cfg.SrvCfg.NotifServerKeyPath); err != http.ErrServerClosed {
@@ -128,7 +118,8 @@ func printConfig(cfg Config) {
 	log.Infoln("-------------------------- CNCA SERVER ----------------------")
 	log.Infoln("CNCAEndpoint: ", cfg.SrvCfg.CNCAEndpoint)
 	log.Infoln("-------------------- NEF NOTIFICATIONS SERVER ---------------")
-	log.Infoln("NotifEndpoint: ", cfg.SrvCfg.NotifEndpoint)
+        log.Infoln("Hostname: ", cfg.SrvCfg.Hostname)
+	log.Infoln("NotifPort: ", cfg.SrvCfg.NotifPort)
 	log.Infoln("NotifServerCertPath: ", cfg.SrvCfg.NotifServerCertPath)
 	log.Infoln("NotifServerKeyPath: ", cfg.SrvCfg.NotifServerKeyPath)
 	log.Infoln("------------------------- CLIENT TO NEF ---------------------")
