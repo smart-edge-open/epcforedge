@@ -25,7 +25,9 @@ const AFServiceIDBaseValue = 123456
 func APIStubInit(apistubTestdatapath string) error {
 	// Init value
 	NewRecordAFServiceID = AFServiceIDBaseValue // BaseValue for new AFServiceID
-
+	if 0 == len(apistubTestdatapath) {
+		return nil 
+	}
 	// Read records from test stub file
 	cfgData, err := ioutil.ReadFile(filepath.Clean(apistubTestdatapath))
 	if err != nil {
@@ -205,7 +207,8 @@ func APIStubUpdate(w http.ResponseWriter, r *http.Request) {
 	log.Infof("[APISTUB MODE] GetRecord with index: %d\n", j)
 	log.Infof("HTTPRequest Body: %s\n", string(body))
 
-	if err := json.Unmarshal(body, &(AllRecords[j].LocationService)); err == nil {
+	if err := json.Unmarshal(body, 
+		&(AllRecords[j].LocationService)); err == nil {
 		w.WriteHeader(http.StatusOK)
 		return
 	}

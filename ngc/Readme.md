@@ -1,6 +1,6 @@
 ```text
 SPDX-License-Identifier: Apache-2.0
-Copyright © 2019 Intel Corporation and Smart-Edge.com, Inc.
+Copyright © 2019 Intel Corporation 
 ```
 # 1. Introduction
 ## Directory Structure
@@ -48,10 +48,10 @@ The configurable parameters list:
 
 To run oam, just execute as below:
 ```sh
-./dist/oam
+./oam
 ```
 
-> NOTE: The OAM bin will load configuration from `ngc/configs/oam.json`.
+> NOTE: The OAM bin will load configuration from `configs/oam.json`, so before execution please have nef configuration file in the configs folder
 
 ### OAM Unit and API Testing
 
@@ -59,7 +59,7 @@ The Unit and API Testing should be performed in a local development environment.
 
 To run only unit tests and generate coverage report:
 ```sh
-make test-unit
+make test-unit-oam
 ```
 
 > NOTE: Before executing unit test, need to install ginkgo as below:
@@ -111,10 +111,10 @@ AF configurable parameters list:
 
 To run af, just execute as below:
 ```sh
-./dist/af
+./af
 ```
 
-> NOTE: The AF bin will load configuration from `configs/af.json`.
+> NOTE: The AF bin will load configuration from `configs/af.json`, so before execution please have nef configuration file in the configs folder
 
 To run AF Ginkgo test suite run
 
@@ -163,7 +163,7 @@ NEF Config Example File - `nef.json` located at `ngc/configs`
 #### Run NEF
 To run nef, just execute as below:
 ```sh
-./dist/nef
+./nef
 ```
 > NOTE: 
 1. The NEF will load configuration from `/configs/nef.json`, so before execution please have nef configuration file in the configs folder
