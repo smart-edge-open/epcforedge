@@ -36,6 +36,7 @@ type NotifSubscryptions map[string]map[string]TrafficInfluSub
 type ServerConfig struct {
 	CNCAEndpoint        string `json:"CNCAEndpoint"`
 	NotifEndpoint       string `json:"NotifEndpoint"`
+	UIEndpoint	    string `json:"UIEndpoint"`
 	NotifServerCertPath string `json:"NotifServerCertPath"`
 	NotifServerKeyPath  string `json:"NotifServerKeyPath"`
 }
@@ -60,10 +61,8 @@ func runServer(ctx context.Context, afCtx *AFContext) error {
 
 	var err error
 
-	uiAddress := []string{"http://localhost:3020"}
-
 	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
-	originsOK := handlers.AllowedOrigins(uiAddress)
+	originsOK := handlers.AllowedOrigins([]string{afCtx.cfg.SrvCfg.UIEndpoint})
 	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
 
 	afCtx.transactions = make(TransactionIDs)

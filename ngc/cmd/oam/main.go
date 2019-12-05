@@ -28,6 +28,7 @@ import (
 type oamCfg struct {
         TLSEndpoint        string        `json:"TlsEndpoint"`
         OpenEndpoint       string        `json:"OpenEndpoint"`
+	UIEndpoint	   string	 `json:"UIEndpoint"`
         NgcEndpoint        string        `json:"NgcEndpoint"`
         NgcType            string        `json:"NgcType"`
         NgcTestData        string        `json:"NgcTestData"`
@@ -47,6 +48,7 @@ func main() {
         log.Printf("LocalConfig: %s, %s, %s, %s, %s\n", 
                cfg.TLSEndpoint, 
                cfg.OpenEndpoint, 
+               cfg.UIEndpoint,
                cfg.NgcEndpoint, 
                cfg.NgcType, 
                cfg.NgcTestData)
@@ -60,10 +62,8 @@ func main() {
 
 	router := oam.NewRouter()
 
-	uiAddress := []string{"http://localhost:3020"}
-
 	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
-	originsOK := handlers.AllowedOrigins(uiAddress)
+	originsOK := handlers.AllowedOrigins([]string{cfg.UIEndpoint})
 	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
 
 	serverOAM := &http.Server{
