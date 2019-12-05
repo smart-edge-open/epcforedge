@@ -37,20 +37,21 @@ Generated bin will be put under `ngc/dist`
 OAM Config Example File - `oam.json` locates at `ngc/configs`
 
 The configurable parameters list:
-|                    |                                                          |
+
+| Param              | Description                                              |
 |--------------------|----------------------------------------------------------|
 | TlsEndpoint        | HTTPS(TLS) EndPoint. (Not support for this release)      |
 | OpenEndpoint       | HTTP EndPoint. Used by CNCA to access OAM via HTTP       |
 | NgcEndpoint        | NGC EndPoint. Used by OAM to access NGC                  |
 | NgcType            | NGC Type. Now only support APISTUB test mode.            |
 | NgcTestData        | NGC TestData Path. Used by APISTUB testdata              |
-|                    |                                                          |
 
 To run oam, just execute as below:
 ```sh
 ./dist/oam
 ```
-NOTE: The OAM bin will load configuration from `ngc/configs/oam.json`.
+
+> NOTE: The OAM bin will load configuration from `ngc/configs/oam.json`.
 
 ### OAM Unit and API Testing
 
@@ -61,7 +62,8 @@ To run only unit tests and generate coverage report:
 make test-unit
 ```
 
-NOTE: Before executing unit test, need to install ginkgo as below:
+> NOTE: Before executing unit test, need to install ginkgo as below:
+
 ```sh
 $ go get github.com/onsi/ginkgo/ginkgo
 $ go get github.com/onsi/gomega/...
@@ -77,7 +79,7 @@ Step 2: Run Curl Test Scripts to simulate HTTP Request to OAM.
 cd ngc/test/oam/cnca-cli-scripts
 ./runAll.sh
 ```
-NOTE: Can use ./runAll.sh to run all methods testing automatically. Also can use ./cliTest.shto run different method manually.
+> NOTE: Can use ./runAll.sh to run all methods testing automatically. Also can use ./cliTest.shto run different method manually.
 
 
 ## AF
@@ -91,8 +93,7 @@ AF sample code, generated bin will be put under ngc/dist
 ```sh
 make lint
 ```
-
-NOTE: Need to install golangci-lint as below:
+> NOTE: Need to install golangci-lint as below:
 ```sh
 curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b $(go env GOPATH)/bin v1.21.0
 ```
