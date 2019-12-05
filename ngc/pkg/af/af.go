@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/http2"
 
 	logger "github.com/otcshare/common/log"
-	config "github.com/otcshare/epcforedge/epcforedge/ngc/pkg/config"
+	config "github.com/otcshare/epcforedge/ngc/pkg/config"
 )
 
 // TransactionIDs type
