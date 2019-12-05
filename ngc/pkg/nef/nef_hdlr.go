@@ -1,16 +1,6 @@
-// Copyright 2019 Intel Corporation. All rights reserved
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/* SPDX-License-Identifier: Apache-2.0
+* Copyright (c) 2019 Intel Corporation
+ */
 
 package ngcnef
 
@@ -115,7 +105,7 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 	afsub := afSubscription{subid: subIDStr, ti: ti, appSessionID: "",
 		NotifCorreID: "", iid: ""}
 
-	if !ti.AnyUeInd {
+	if len(ti.Gpsi) > 0 || len(ti.Ipv4Addr) > 0 || len(ti.Ipv6Addr) > 0 {
 
 		//Applicable to single UE, PCF case
 
@@ -133,7 +123,8 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 		afsub.NEFSBPatch = nefSBPCFPatch
 		afsub.NEFSBDelete = nefSBPCFDelete
 
-	} else {
+	} else if len(ti.ExternalGroupID) > 0 || ti.AnyUeInd {
+
 		//Applicable to Any UE, UDR case
 
 		rsp, err = nefSBUDRPost(&afsub, nefCtx, ti)
@@ -151,6 +142,11 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 		afsub.NEFSBPatch = nefSBUDRPatch
 		afsub.NEFSBDelete = nefSBUDRDelete
 
+	} else {
+		//Invalid case. Return Error
+		rsp.errorCode = 400
+		rsp.pd.Title = "Invalid Request"
+		return "", rsp, errors.New("Invalid AF Request")
 	}
 
 	//Link the subscription with the AF
@@ -312,7 +308,7 @@ func (af *afData) afDeleteSubscription(nefCtx *nefContext,
 
 	//Delete local entry in map
 	delete(af.subs, subID)
-	af.subIDnum--
+	//af.subIDnum--
 
 	return rsp, err
 }
@@ -332,7 +328,7 @@ func (af *afData) afDestroy(afid string) error {
 */
 
 // Generate the notification uri to be provided to PCF/UDR
-func getNefNotificationURL(cfg *Config) URI {
+func getNefNotificationURI(cfg *Config) URI {
 	var uri string
 	// If http2 port is configured use it else http port
 	if cfg.HTTP2Config.Endpoint != "" {
@@ -346,7 +342,7 @@ func getNefNotificationURL(cfg *Config) URI {
 	return URI(uri)
 }
 
-func getNeflocationURLPrefix(cfg *Config) string {
+func getNefLocationURLPrefix(cfg *Config) string {
 
 	var uri string
 	// If http2 port is configured use it else http port
@@ -387,14 +383,14 @@ func (nef *nefData) nefCreate(ctx context.Context, cfg Config) error {
 	}
 
 	// Generate the location url prefix
-	nef.locationURLPrefix = getNeflocationURLPrefix(&cfg)
+	nef.locationURLPrefix = getNefLocationURLPrefix(&cfg)
 	log.Infof("NEF Location URL Prefix :%s", nef.locationURLPrefix)
 
 	// Genereate the notification url
 	if cfg.UpfNotificationResURIPath == "" {
 		return errors.New("UpfNotificationResURIPath is empty")
 	}
-	nef.upfNotificationURL = getNefNotificationURL(&cfg)
+	nef.upfNotificationURL = getNefNotificationURI(&cfg)
 	log.Infof("SMF UPF Notification URL :%s", nef.upfNotificationURL)
 	return nil
 }
@@ -410,7 +406,7 @@ func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData,
 
 	var afe afData
 
-	if nef.afCount == nefCtx.cfg.MaxAFSupport {
+	if len(nef.afs) >= nefCtx.cfg.MaxAFSupport {
 		log.Infoln("MAX AF exceeded ")
 		return af, errors.New("MAX AF exceeded")
 	}
@@ -450,7 +446,7 @@ func (nef *nefData) nefDeleteAf(afID string) (err error) {
 
 	if ok {
 		delete(nef.afs, afID)
-		nef.afCount--
+		//nef.afCount--
 		return nil
 	}
 
@@ -841,7 +837,7 @@ func nefSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
 	//Populating UP Path Chnage Subbscription Data in Traffic Influence Data
 	trafficInfluData.UpPathChgNotifURI = nefCtx.nef.upfNotificationURL
 
-	if len(string(ti.SubscribedEvents[0])) > 0 &&
+	if len(ti.SubscribedEvents) > 0 &&
 		0 == strings.Compare(string(ti.SubscribedEvents[0]), "UP_PATH_CHANGE") {
 		udrSub.NotifCorreID = strconv.Itoa(int(nef.corrID))
 		nef.corrID++
