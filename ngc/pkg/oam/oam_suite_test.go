@@ -119,10 +119,12 @@ var _ = Describe("NGC_APIStub", func() {
 			func() {
 				Expect(APIStubInit("nonexistent-file")).NotTo(BeNil())
 				Expect(APIStubInit("conf")).NotTo(BeNil())
-				Expect(APIStubInit(testdataBasepath + "testdata_00.json")).To(BeNil())
+				tmp := testdataBasepath + "testdata_00.json"
+				Expect(APIStubInit(tmp)).To(BeNil())
 				Expect(len(AllRecords)).To(Equal(0))
 				Expect(NewRecordAFServiceID).To(Equal(AFServiceIDBaseValue))
-				Expect(APIStubInit(testdataBasepath + "testdata_01.json")).To(BeNil())
+				tmp = testdataBasepath + "testdata_01.json"
+				Expect(APIStubInit(tmp)).To(BeNil())
 				Expect(len(AllRecords)).To(Equal(1))
 				Expect(NewRecordAFServiceID).To(Equal(AFServiceIDBaseValue + 1))
 			})
@@ -138,30 +140,33 @@ var _ = Describe("NGC_APIStub", func() {
 	Describe("APISTUB Add", func() {
 		It("Will Add new Record",
 			func() {
-				reqBody, err := ioutil.ReadFile(postdataBasepath + "POST001.json")
+				tmp := postdataBasepath + "POST001.json"
+				reqBody, err := ioutil.ReadFile(tmp)
 				Expect(err).ShouldNot(HaveOccurred())
-				reqBodyBytes := bytes.NewReader(reqBody)
-				req, _ := http.NewRequest(http.MethodPost, "/services", reqBodyBytes)
+				dats := bytes.NewReader(reqBody)
+				req, _ := http.NewRequest(http.MethodPost, "/services", dats)
 				rsp := httptest.NewRecorder()
 				expected := "{\"afServiceId\":\"123457\"}"
 				APIStubAdd(rsp, req)
 				Expect(rsp.Code).To(Equal(http.StatusOK))
 				Expect(rsp.Body.String()).To(Equal(expected))
 
-				reqBody, err = ioutil.ReadFile(postdataBasepath + "POST002.json")
+				tmp = postdataBasepath + "POST002.json"
+				reqBody, err = ioutil.ReadFile(tmp)
 				Expect(err).ShouldNot(HaveOccurred())
-				reqBodyBytes = bytes.NewReader(reqBody)
-				req, _ = http.NewRequest(http.MethodPost, "/services", reqBodyBytes)
+				dats = bytes.NewReader(reqBody)
+				req, _ = http.NewRequest(http.MethodPost, "/services", dats)
 				rsp = httptest.NewRecorder()
 				expected = "{\"afServiceId\":\"123458\"}"
 				APIStubAdd(rsp, req)
 				Expect(rsp.Code).To(Equal(http.StatusOK))
 				Expect(rsp.Body.String()).To(Equal(expected))
 
-				reqBody, err = ioutil.ReadFile(postdataBasepath + "POST003.json")
+				tmp = postdataBasepath + "POST003.json"
+				reqBody, err = ioutil.ReadFile(tmp)
 				Expect(err).ShouldNot(HaveOccurred())
-				reqBodyBytes = bytes.NewReader(reqBody)
-				req, _ = http.NewRequest(http.MethodPost, "/services", reqBodyBytes)
+				dats = bytes.NewReader(reqBody)
+				req, _ = http.NewRequest(http.MethodPost, "/services", dats)
 				rsp = httptest.NewRecorder()
 				expected = "{\"afServiceId\":\"123459\"}"
 				APIStubAdd(rsp, req)
@@ -174,8 +179,10 @@ var _ = Describe("NGC_APIStub", func() {
 	Describe("APISTUB Update", func() {
 		It("Will Update Record",
 			func() {
-				APIStubInit(testdataBasepath + "testdata_01.json")
-				reqBody, err := ioutil.ReadFile(postdataBasepath + "POST001.json")
+				tmp := testdataBasepath + "testdata_01.json"
+				tmpP := postdataBasepath + "POST001.json"
+				APIStubInit(tmp)
+				reqBody, err := ioutil.ReadFile(tmpP)
 				Expect(err).ShouldNot(HaveOccurred())
 				reqBodyBytes := bytes.NewReader(reqBody)
 				req, _ := http.NewRequest("PATCH", "/services/1", reqBodyBytes)
@@ -202,7 +209,8 @@ var _ = Describe("NGC_APIStub", func() {
 	Describe("APISTUB Del", func() {
 		It("Will Delete Record",
 			func() {
-				APIStubInit(testdataBasepath + "testdata_01.json")
+				tmp := testdataBasepath + "testdata_01.json"
+				APIStubInit(tmp)
 				req, _ := http.NewRequest("DELETE", "/services/123457", nil)
 				vars := map[string]string{
 					"afServiceId": "123457",
@@ -228,7 +236,8 @@ var _ = Describe("NGC_APIStub", func() {
 	Describe("APISTUB Get", func() {
 		It("Will Get one Record",
 			func() {
-				APIStubInit(testdataBasepath + "testdata_01.json")
+				tmp := testdataBasepath + "testdata_01.json"
+				APIStubInit(tmp)
 				req, _ := http.NewRequest("GET", "/services/123457", nil)
 				vars := map[string]string{
 					"afServiceId": "123457",
@@ -253,7 +262,8 @@ var _ = Describe("NGC_APIStub", func() {
 	Describe("APISTUB Getll", func() {
 		It("Will GetAll Records",
 			func() {
-				APIStubInit(testdataBasepath + "testdata_01.json")
+				tmp := testdataBasepath + "testdata_01.json"
+				APIStubInit(tmp)
 				req, err := http.NewRequest("GET", "/services", nil)
 				Expect(err).ShouldNot(HaveOccurred())
 				rsp := httptest.NewRecorder()
@@ -263,4 +273,3 @@ var _ = Describe("NGC_APIStub", func() {
 			})
 	})
 })
-

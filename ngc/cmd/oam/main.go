@@ -67,6 +67,6 @@ func main() {
 		WriteTimeout:	10 * time.Second,
 	}
 
-	log.Printf("Serving OAM on: %s", cfg.OpenEndpoint)
+        log.Infof("OAM HTTP Server Listening on:  %s\n",cfg.OpenEndpoint); 
 	serverOAM.ListenAndServe()
 }

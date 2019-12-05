@@ -6,7 +6,7 @@
 
 export GO111MODULE = on
 
-.PHONY: build af oam lint test-unit
+.PHONY: build af oam nef lint test-unit-af test-unit-nef test-unit-af
 TMP_DIR:=$(shell mktemp -d)
 BUILD_DIR ?=dist
 
@@ -29,14 +29,20 @@ oam:
 lint:
 	golangci-lint run ./pkg/oam ./pkg/nef ./pkg/af
 
-test-unit:
+test-unit-af:
+	ginkgo -v -cover ./pkg/af
+
+test-unit-nef:
+	ginkgo -v -cover ./pkg/nef
+
+test-unit-oam:
 	ginkgo -v -cover ./pkg/config ./pkg/oam
 
 test-unit-nef:
 	ginkgo -v -cover ./pkg/nef
 
 test-unit-af:
-    ginkgo -v -cover ./pkg/af
+	ginkgo -v -cover ./pkg/af
 
 clean:
 	rm -rf "${BUILD_DIR}"
@@ -47,11 +53,11 @@ help:
 	@echo "Building Packages:"
 	@echo "  build                  to build all"
 	@echo "  af                     to build the AF"
-	@echo "  oam                    to build the OAM with API-stub backend (default mode)"
-	@echo "  oam-test-stub          to build the OAM with API-stub backend"
-	@echo "  oam-test-flexcore      to build the OAM with Flexcore backend"
 	@echo "  nef                    to build the NEF"
+	@echo "  oam                    to build the OAM"
 	@echo ""
 	@echo "Executing Test:"
 	@echo "  lint                   to run static code analysis with golangci-lint"
-	@echo "  test-unit              to run unit tests with ginkgo"
+	@echo "  test-unit-af           to run AF unit tests with ginkgo"
+	@echo "  test-unit-nef          to run NEF unit tests with ginkgo"
+	@echo "  test-unit-oam          to run OAM unit tests with ginkgo"
