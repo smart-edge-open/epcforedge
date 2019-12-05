@@ -1,15 +1,16 @@
 {
     "AfId": "1",
     "ServerConfig": {
-        "CNCAEndpoint": ":8080",
-        "NotifEndpoint": "localhost:8081",
+        "CNCAEndpoint": ":8050",
+        "Hostname": "localhost",
+        "NotifEndpoint": ":8051",
         "UIEndpoint": "http://localhost:3020",
-        "NotifServerCertPath": "certs/server-cert.pem",
-        "NotifServerKeyPath": "certs/server-key.pem"
+        "NotifServerCertPath": "/etc/certs/server-cert.pem",
+        "NotifServerKeyPath": "/etc/certs/server-key.pem"
     },
     "CliConfig": {
-        "NEFBasePath": "https://localhost:8081/3gpp-traffic-influence/v1",
+        "NEFBasePath": "https://localhost:8060/3gpp-traffic-influence/v1",
         "UserAgent": "NGC-AF",
-        "NEFCliCertPath": "certs/root-ca-cert.pem"
+        "NEFCliCertPath": "/etc/certs/root-ca-cert.pem"
     }
 }

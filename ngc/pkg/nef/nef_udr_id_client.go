@@ -1,16 +1,6 @@
-// Copyright 2019 Intel Corporation. All rights reserved
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/* SPDX-License-Identifier: Apache-2.0
+* Copyright (c) 2019 Intel Corporation
+ */
 
 /* Client implementation of the UDR Stub */
 
@@ -44,7 +34,7 @@ func (udr *UdrClientStub) UdrInfluenceDataCreate(ctx context.Context,
 	log.Infof("UDRs InfluenceDataCreate Entered for %s", string(iid))
 	_ = ctx
 
-	var err error = nil
+	var err error
 	udrPr := UdrInfluenceResponse{}
 	// generated a session id return the same body as provided in the request
 	Tid := body
@@ -114,7 +104,7 @@ func (udr *UdrClientStub) UdrInfluenceDataUpdate(ctx context.Context,
 	log.Infof("UDRs InfluenceDataUpdate Entered for %s", string(iid))
 	_ = ctx
 
-	var err error = nil
+	var err error
 	udrPr := UdrInfluenceResponse{}
 	// check for the presence of the sessid in the database
 	tid, prs := udr.tidDb[string(iid)]
@@ -143,7 +133,7 @@ func (udr *UdrClientStub) UdrInfluenceDataDelete(ctx context.Context,
 	log.Infof("UDRs InfluenceDataDelete for %s", string(iid))
 	_ = ctx
 
-	var err error = nil
+	var err error
 	udrPr := UdrInfluenceResponse{}
 	// check for the presence of the sessid in the database
 	_, prs := udr.tidDb[string(iid)]
@@ -170,7 +160,7 @@ func (udr *UdrClientStub) UdrInfluenceDataGet(ctx context.Context) (
 	log.Infof("UdrInfluenceDataGet Stub Entered")
 	_ = ctx
 	udrPr := UdrInfluenceResponse{}
-	var err error = nil
+	var err error
 	log.Infof("UdrInfluenceDataGet Stub Exited")
 	return udrPr, err
 }

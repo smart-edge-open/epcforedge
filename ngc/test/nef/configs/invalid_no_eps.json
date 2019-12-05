@@ -1,0 +1,16 @@
+{
+    "NefAPIRoot": "localhost",
+    "LocationPrefix": "/3gpp-traffic-influence/v1/",
+    "MaxSubSupport": 10,
+    "MaxAFSupport": 1,
+    "SubStartId": 11111,
+    "UpfNotificationResUriPath": "/3gpp-traffic-influence/v1/notification/upf",
+    "UserAgent": "NEF-OPENNESS-1912",
+    "AfServiceID": [
+        {
+            "id": "id1_value",
+            "dnn": "dnn1_value",
+            "snssai": "snssai1_value"
+        }
+    ]
+}

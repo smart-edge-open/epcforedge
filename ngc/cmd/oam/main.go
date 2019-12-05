@@ -1,25 +1,13 @@
-// Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) 2019 Intel Corporation
 
 package main
 
 import (
         "os"
-        "log"
         "net/http"
         "time"
+        logger "github.com/otcshare/common/log"
         oam "github.com/otcshare/epcforedge/ngc/pkg/oam"
         config "github.com/otcshare/epcforedge/ngc/pkg/config"
         "github.com/gorilla/handlers"
@@ -34,18 +22,24 @@ type oamCfg struct {
         NgcTestData        string        `json:"NgcTestData"`
 }
 
+var log = logger.DefaultLogger.WithField("oam-main", nil)
+
 func main() {
-        log.SetPrefix("[5goam]")
-        log.SetFlags(log.Ldate|log.Ltime |log.LUTC |log.Lshortfile)
-	log.Printf("Server started")
-        
+
+        lvl, err := logger.ParseLevel("info")
+	if err != nil {
+		log.Errf("Failed to parse log level: %s", err.Error())
+		os.Exit(1)
+	}
+	logger.SetLevel(lvl)
+
         var cfg oamCfg
-        err := config.LoadJSONConfig("./configs/oam.json", &cfg)
+        err = config.LoadJSONConfig("./configs/oam.json", &cfg)
         if err != nil {
-                log.Printf("Failed to load config: %#v", err)
+                log.Errf("Failed to load config: %s", err.Error())
                 os.Exit(1)
         }
-        log.Printf("LocalConfig: %s, %s, %s, %s, %s, %s\n", 
+        log.Infof("LocalConfig: %s, %s, %s, %s, %s, %s\n", 
                cfg.TLSEndpoint, 
                cfg.OpenEndpoint, 
                cfg.UIEndpoint,
@@ -56,7 +50,7 @@ func main() {
         // New Http Router
         err = oam.InitProxy(cfg.NgcEndpoint, cfg.NgcType, cfg.NgcTestData)
         if err != nil {
-                log.Printf("Failed to init proxy: %#v", err)
+                log.Infof("Failed to init proxy: %s", err.Error())
                 os.Exit(1)
         }
 
