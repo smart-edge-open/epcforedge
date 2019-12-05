@@ -49,10 +49,13 @@ oam-test-flexcore:
 
 
 lint:
-	golangci-lint run ./pkg/oam
+	golangci-lint run ./pkg/oam ./pkg/nef
 
 test-unit:
 	ginkgo -v -cover ./pkg/config ./pkg/oam
+
+test-unit-nef:
+	ginkgo -v -cover ./pkg/nef
 
 clean:
 	rm -rf "${BUILD_DIR}"
