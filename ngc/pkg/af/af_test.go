@@ -131,10 +131,10 @@ var _ = Describe("AF", func() {
 					"./testdata/100_AF_NB_SUB_POST004.json")
 				Expect(err).ShouldNot(HaveOccurred())
 
-				By("Preparing request")
+				By("Preparing request with subID")
 				reqBodyBytes := bytes.NewReader(reqBody)
 				req, err := http.NewRequest(http.MethodPost,
-					"http://localhost:8080/af/v1/subscriptions",
+					"http://localhost:8080/af/v1/subscriptions/1000",
 					reqBodyBytes)
 				Expect(err).ShouldNot(HaveOccurred())
 
@@ -144,60 +144,14 @@ var _ = Describe("AF", func() {
 					KeyType("af-ctx"), af.AfCtx)
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
-				Expect(resp.Code).To(Equal(http.StatusCreated))
-
-			})
-			Specify("Sending POST 005 request", func() {
-				By("Reading json file")
-				reqBody, err := ioutil.ReadFile(
-					"./testdata/100_AF_NB_SUB_POST005.json")
-				Expect(err).ShouldNot(HaveOccurred())
-
-				By("Preparing request")
-				reqBodyBytes := bytes.NewReader(reqBody)
-				req, err := http.NewRequest(http.MethodPost,
-					"http://localhost:8080/af/v1/subscriptions",
-					reqBodyBytes)
-				Expect(err).ShouldNot(HaveOccurred())
-
-				By("Sending request")
-				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(),
-					KeyType("af-ctx"), af.AfCtx)
-				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
-
-				Expect(resp.Code).To(Equal(http.StatusCreated))
-
-			})
-
-			Specify("Sending POST 006 request", func() {
-				By("Reading json file")
-				reqBody, err := ioutil.ReadFile(
-					"./testdata/100_AF_NB_SUB_POST006.json")
-				Expect(err).ShouldNot(HaveOccurred())
-
-				By("Preparing request")
-				reqBodyBytes := bytes.NewReader(reqBody)
-				req, err := http.NewRequest(http.MethodPost,
-					"http://localhost:8080/af/v1/subscriptions",
-					reqBodyBytes)
-				Expect(err).ShouldNot(HaveOccurred())
-
-				By("Sending request")
-				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(),
-					KeyType("af-ctx"), af.AfCtx)
-				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
-
-				Expect(resp.Code).To(Equal(http.StatusCreated))
+				Expect(resp.Code).To(Equal(http.StatusMethodNotAllowed))
 
 			})
 
 		})
 
 		Context("Subscription GET ALL", func() {
-			Specify("", func() {
-				//time.Sleep(3 * time.Second)
+			Specify("Read all subscriptions", func() {
 
 				req, err := http.NewRequest(http.MethodGet,
 					"http://localhost:8080/af/v1/subscriptions",
@@ -210,6 +164,22 @@ var _ = Describe("AF", func() {
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
+			})
+		
+			Specify("Read all subscriptions", func() {
+				By("sending wrong url")
+				req, err := http.NewRequest(http.MethodGet,
+                                        "http://localhost:8080/af/v2/subscriptions",
+                                        nil)
+                                Expect(err).ShouldNot(HaveOccurred())
+
+                                resp := httptest.NewRecorder()
+                                ctx := context.WithValue(req.Context(),
+                                        KeyType("af-ctx"), af.AfCtx)
+                                af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+                                Expect(resp.Code).To(Equal(http.StatusNotFound))
+	
 			})
 		})
 
@@ -285,7 +255,6 @@ var _ = Describe("AF", func() {
 		Context("Subscription ID DELETE", func() {
 			Specify("DELETE Subcription 01", func() {
 
-				//By("Deleting subID 01")
 				req, err := http.NewRequest(http.MethodDelete,
 					"http://localhost:8080/af/v1/subscriptions/11111",
 					nil)
@@ -299,7 +268,6 @@ var _ = Describe("AF", func() {
 			})
 
 			Specify("DELETE Subcription 02", func() {
-				//By("Deleting SubID 02")
 				req, err := http.NewRequest(http.MethodDelete,
 					"http://localhost:8080/af/v1/subscriptions/11112",
 					nil)
@@ -312,7 +280,6 @@ var _ = Describe("AF", func() {
 				Expect(resp.Code).To(Equal(http.StatusNoContent))
 			})
 			Specify("DELETE Subcription 03", func() {
-				//By("Deleting SubID 03")
 				req, err := http.NewRequest(http.MethodDelete,
 					"http://localhost:8080/af/v1/subscriptions/11113",
 					nil)
@@ -325,7 +292,6 @@ var _ = Describe("AF", func() {
 				Expect(resp.Code).To(Equal(http.StatusNoContent))
 			})
 			Specify("DELETE Subcription 04", func() {
-				//By("Deleting SubID 04")
 				req, err := http.NewRequest(http.MethodDelete,
 					"http://localhost:8080/af/v1/subscriptions/11114",
 					nil)
@@ -335,33 +301,7 @@ var _ = Describe("AF", func() {
 				ctx := context.WithValue(req.Context(),
 					KeyType("af-ctx"), af.AfCtx)
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
-				Expect(resp.Code).To(Equal(http.StatusNoContent))
-			})
-			Specify("DELETE Subcription 05", func() {
-				//By("Deleting SubID 05")
-				req, err := http.NewRequest(http.MethodDelete,
-					"http://localhost:8080/af/v1/subscriptions/11115",
-					nil)
-				Expect(err).ShouldNot(HaveOccurred())
-
-				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(),
-					KeyType("af-ctx"), af.AfCtx)
-				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
-				Expect(resp.Code).To(Equal(http.StatusNoContent))
-			})
-			Specify("DELETE Subcription 06", func() {
-				//By("Deleting SubID 06")
-				req, err := http.NewRequest(http.MethodDelete,
-					"http://localhost:8080/af/v1/subscriptions/11116",
-					nil)
-				Expect(err).ShouldNot(HaveOccurred())
-
-				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(),
-					KeyType("af-ctx"), af.AfCtx)
-				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
-				Expect(resp.Code).To(Equal(http.StatusNoContent))
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
 			})
 		})
 	})
@@ -369,7 +309,6 @@ var _ = Describe("AF", func() {
 	Describe("Stop the AF Server", func() {
 		It("Disconnect AF Server", func() {
 			srvCancel()
-			//time.Sleep(2 * time.Second)
 		})
 	})
 })
