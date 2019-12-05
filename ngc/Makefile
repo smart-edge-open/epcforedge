@@ -6,7 +6,7 @@
 
 export GO111MODULE = on
 
-.PHONY: build af oam nef lint test-unit-af test-unit-nef test-unit-af
+.PHONY: build af oam nef lint test-unit-af test-unit-nef test-unit-oam
 TMP_DIR:=$(shell mktemp -d)
 BUILD_DIR ?=dist
 
@@ -37,12 +37,6 @@ test-unit-nef:
 
 test-unit-oam:
 	ginkgo -v -cover ./pkg/config ./pkg/oam
-
-test-unit-nef:
-	ginkgo -v -cover ./pkg/nef
-
-test-unit-af:
-	ginkgo -v -cover ./pkg/af
 
 clean:
 	rm -rf "${BUILD_DIR}"
