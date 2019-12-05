@@ -308,7 +308,7 @@ func (af *afData) afDeleteSubscription(nefCtx *nefContext,
 
 	//Delete local entry in map
 	delete(af.subs, subID)
-	af.subIDnum--
+	//af.subIDnum--
 
 	return rsp, err
 }
@@ -406,7 +406,7 @@ func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData,
 
 	var afe afData
 
-	if nef.afCount == nefCtx.cfg.MaxAFSupport {
+	if len(nef.afs) >= nefCtx.cfg.MaxAFSupport {
 		log.Infoln("MAX AF exceeded ")
 		return af, errors.New("MAX AF exceeded")
 	}
@@ -446,7 +446,7 @@ func (nef *nefData) nefDeleteAf(afID string) (err error) {
 
 	if ok {
 		delete(nef.afs, afID)
-		nef.afCount--
+		//nef.afCount--
 		return nil
 	}
 
