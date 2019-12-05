@@ -1,6 +1,6 @@
 {
     "TlsEndpoint": ":443",
-    "OpenEndpoint": ":8083",
+    "OpenEndpoint": ":8080",
     "UIEndpoint": "http://localhost:3020",
     "NgcEndpoint": "127.0.0.1:12345",
     "NgcType": "APISTUB",

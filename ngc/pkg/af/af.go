@@ -64,7 +64,7 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 
 	AfCtx.transactions = make(TransactionIDs)
 	AfCtx.subscriptions = make(NotifSubscryptions)
-	AfRouter := NewAFRouter(AfCtx)
+	AfRouter = NewAFRouter(AfCtx)
 	NotifRouter := NewNotifRouter(AfCtx)
 
 	serverCNCA := &http.Server{
