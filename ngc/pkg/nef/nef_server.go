@@ -1,22 +1,14 @@
-// Copyright 2019 Intel Corporation. All rights reserved
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/* SPDX-License-Identifier: Apache-2.0
+* Copyright (c) 2019 Intel Corporation
+ */
 
 package ngcnef
 
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"github.com/gorilla/mux"
 	logtool "github.com/otcshare/common/log"
 	"golang.org/x/net/http2"
 	"io/ioutil"
@@ -24,6 +16,16 @@ import (
 	"path/filepath"
 	"time"
 )
+
+// NefApp structure to store the variables/contexts for access in UT
+type NefApp struct {
+	NefRouter *mux.Router
+	NefCtx    *nefContext
+}
+
+// NefAppG is the NEF App variable which can be used for accessing the
+// global contexts
+var NefAppG NefApp
 
 // Log handler initialized. This is to be used throughout the nef module for
 // logging
@@ -108,6 +110,7 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	 * the HTTP Service Handlers. These hanlders will be called when HTTP
 	 * server receives any HTTP Request */
 	nefRouter := NewNEFRouter(nefCtx)
+	NefAppG.NefRouter = nefRouter
 
 	// 1 for http2, 1 for http and 1 for the os signal
 	numchannels := 3
@@ -149,7 +152,7 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 	}
 	if server == nil && serverHTTP2 == nil {
 		log.Err("HTTP Servers are not configured")
-		return err
+		return errors.New("HTTP Endpoints config missing")
 	}
 
 	stopServerCh := make(chan bool, numchannels)
@@ -237,7 +240,7 @@ func Run(ctx context.Context, cfgPath string) error {
 		log.Errf("NEF Create Failed: %v", err)
 		return err
 	}
-
+	NefAppG.NefCtx = &nefCtx
 	return runServer(ctx, &nefCtx)
 }
 
