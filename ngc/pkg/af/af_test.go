@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Apache-2.0
 //Copyright © 2019 Intel Corporation
 
-package ngcaf_test
+package af_test
 
 import (
 	"bytes"
@@ -15,7 +15,6 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
-	//"github.com/otcshare/epcforedge/ngc/pkg/nef"
 )
 
 func TestAf(t *testing.T) {
@@ -23,6 +22,7 @@ func TestAf(t *testing.T) {
 	RunSpecs(t, "AF Suite")
 }
 
+type KeyType string
 
 var _ = Describe("AF", func() {
 
@@ -43,7 +43,7 @@ var _ = Describe("AF", func() {
 			_ = srvCancel
 			afRunFail := make(chan bool)
 			go func() {
-				err := ngcaf.Run(ctx, "testdata/testconfigs/af.json")
+				err := af.Run(ctx, "testdata/testconfigs/af.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				if err != nil {
 					fmt.Printf("Run() exited with error: %#v", err)
@@ -73,8 +73,9 @@ var _ = Describe("AF", func() {
 
 				By("Sending request")
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusCreated))
 
@@ -94,8 +95,9 @@ var _ = Describe("AF", func() {
 
 				By("Sending request")
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("POST-002"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusCreated))
 
@@ -116,8 +118,9 @@ var _ = Describe("AF", func() {
 
 				By("Sending request")
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("POST-003"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusCreated))
 
@@ -138,8 +141,8 @@ var _ = Describe("AF", func() {
 				By("Sending request")
 				resp := httptest.NewRecorder()
 				ctx := context.WithValue(req.Context(),
-					string("POST-004"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusCreated))
 
@@ -160,8 +163,8 @@ var _ = Describe("AF", func() {
 				By("Sending request")
 				resp := httptest.NewRecorder()
 				ctx := context.WithValue(req.Context(),
-					string("POST-005"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusCreated))
 
@@ -182,8 +185,9 @@ var _ = Describe("AF", func() {
 
 				By("Sending request")
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("POST-006"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusCreated))
 
@@ -202,8 +206,8 @@ var _ = Describe("AF", func() {
 
 				resp := httptest.NewRecorder()
 				ctx := context.WithValue(req.Context(),
-					string("af-ctx"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
 			})
@@ -218,8 +222,8 @@ var _ = Describe("AF", func() {
 
 				resp := httptest.NewRecorder()
 				ctx := context.WithValue(req.Context(),
-					string("af-ctx"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
 
@@ -243,8 +247,8 @@ var _ = Describe("AF", func() {
 				By("Sending request")
 				resp := httptest.NewRecorder()
 				ctx := context.WithValue(req.Context(),
-					string("PUT"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
 
@@ -269,8 +273,8 @@ var _ = Describe("AF", func() {
 				By("Sending request")
 				resp := httptest.NewRecorder()
 				ctx := context.WithValue(
-					req.Context(), string("af-ctx"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+					req.Context(), KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
 
@@ -289,8 +293,8 @@ var _ = Describe("AF", func() {
 
 				resp := httptest.NewRecorder()
 				ctx := context.WithValue(req.Context(),
-					string("af-ctx"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 				Expect(resp.Code).To(Equal(http.StatusNoContent))
 			})
 
@@ -302,8 +306,9 @@ var _ = Describe("AF", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 				Expect(resp.Code).To(Equal(http.StatusNoContent))
 			})
 			Specify("DELETE Subcription 03", func() {
@@ -314,8 +319,9 @@ var _ = Describe("AF", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 				Expect(resp.Code).To(Equal(http.StatusNoContent))
 			})
 			Specify("DELETE Subcription 04", func() {
@@ -326,8 +332,9 @@ var _ = Describe("AF", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 				Expect(resp.Code).To(Equal(http.StatusNoContent))
 			})
 			Specify("DELETE Subcription 05", func() {
@@ -338,8 +345,9 @@ var _ = Describe("AF", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 				Expect(resp.Code).To(Equal(http.StatusNoContent))
 			})
 			Specify("DELETE Subcription 06", func() {
@@ -350,8 +358,9 @@ var _ = Describe("AF", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
-				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 				Expect(resp.Code).To(Equal(http.StatusNoContent))
 			})
 		})
