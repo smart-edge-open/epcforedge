@@ -36,7 +36,7 @@ test-unit-nef:
 	ginkgo -v -cover ./pkg/nef
 
 test-unit-af:
-        ginkgo -v -cover ./pkg/af
+    ginkgo -v -cover ./pkg/af
 
 clean:
 	rm -rf "${BUILD_DIR}"
