@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright © 2019 Intel Corporation
 
-package ngcaf
+package af
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func getAllSubscriptions(cliCtx context.Context, afCtx *AFContext) (
+func getAllSubscriptions(cliCtx context.Context, afCtx *Context) (
 	[]TrafficInfluSub, *http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
@@ -34,7 +34,7 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		tsRespJSON []byte
 	)
 
-	afCtx := r.Context().Value(keyType("af-ctx")).(*AFContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

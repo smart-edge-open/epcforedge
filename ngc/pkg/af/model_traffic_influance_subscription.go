@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright © 2019 Intel Corporation
 
-package ngcaf
+package af
 
 // SubscribedEvent : The possible value is CHANGE_OF_DNAI - the AF requests to
 // be notified when the UP path changes for the PDU isession.

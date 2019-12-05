@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright © 2019 Intel Corporation
 
-package ngcaf
+package af
 
 import (
 	"context"
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"golang.org/x/net/http2"
 
 	logger "github.com/otcshare/common/log"
-	config "github.com/otcshare/epcforedge/ngc/pkg/config"
+	config "github.com/otcshare/epcforedge/epcforedge/ngc/pkg/config"
 )
 
 // TransactionIDs type
@@ -23,8 +24,8 @@ type NotifSubscryptions map[string]map[string]TrafficInfluSub
 // ServerConfig struct
 type ServerConfig struct {
 	CNCAEndpoint        string `json:"CNCAEndpoint"`
-        Hostname	    string `json:"Hostname"`
-	NotifPort       string `json:"NotifPort"`
+	Hostname            string `json:"Hostname"`
+	NotifPort           string `json:"NotifPort"`
 	NotifServerCertPath string `json:"NotifServerCertPath"`
 	NotifServerKeyPath  string `json:"NotifServerKeyPath"`
 }
@@ -36,34 +37,40 @@ type Config struct {
 	CliCfg CliConfig    `json:"CliConfig"`
 }
 
-//AFContext struct
-type AFContext struct {
+//Context struct
+type Context struct {
 	subscriptions NotifSubscryptions
 	transactions  TransactionIDs
 	cfg           Config
 }
 
-var log = logger.DefaultLogger.WithField("ngc-af", nil)
+var (
+	log = logger.DefaultLogger.WithField("ngc-af", nil)
+	//AfCtx public var
+	AfCtx *Context
+	//AfRouter public var
+	AfRouter *mux.Router
+)
 
-func runServer(ctx context.Context, afCtx *AFContext) error {
+func runServer(ctx context.Context, AfCtx *Context) error {
 
 	var err error
 
-	afCtx.transactions = make(TransactionIDs)
-	afCtx.subscriptions = make(NotifSubscryptions)
-	afRouter := NewAFRouter(afCtx)
-	nRouter := NewNotifRouter(afCtx)
+	AfCtx.transactions = make(TransactionIDs)
+	AfCtx.subscriptions = make(NotifSubscryptions)
+	AfRouter = NewAFRouter(AfCtx)
+	NotifRouter := NewNotifRouter(AfCtx)
 
 	serverCNCA := &http.Server{
-		Addr:         afCtx.cfg.SrvCfg.CNCAEndpoint,
-		Handler:      afRouter,
+		Addr:         AfCtx.cfg.SrvCfg.CNCAEndpoint,
+		Handler:      AfRouter,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
 	serverNotif := &http.Server{
-		Addr:         afCtx.cfg.SrvCfg.NotifPort,
-		Handler:      nRouter,
+		Addr:         AfCtx.cfg.SrvCfg.NotifPort,
+		Handler:      NotifRouter,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
@@ -90,17 +97,17 @@ func runServer(ctx context.Context, afCtx *AFContext) error {
 
 	go func(stopServerCh chan bool) {
 		log.Infof("Serving AF Notifications on: %s",
-			afCtx.cfg.SrvCfg.NotifPort)
+			AfCtx.cfg.SrvCfg.NotifPort)
 		if err = serverNotif.ListenAndServeTLS(
-			afCtx.cfg.SrvCfg.NotifServerCertPath,
-			afCtx.cfg.SrvCfg.NotifServerKeyPath); err != http.ErrServerClosed {
+			AfCtx.cfg.SrvCfg.NotifServerCertPath,
+			AfCtx.cfg.SrvCfg.NotifServerKeyPath); err != http.ErrServerClosed {
 
 			log.Errf("AF Notifications server error: " + err.Error())
 		}
 		stopServerCh <- true
 	}(stopServerCh)
 
-	log.Infof("Serving AF on: %s", afCtx.cfg.SrvCfg.CNCAEndpoint)
+	log.Infof("Serving AF on: %s", AfCtx.cfg.SrvCfg.CNCAEndpoint)
 	if err = serverCNCA.ListenAndServe(); err != http.ErrServerClosed {
 		log.Errf("AF CNCA server error: " + err.Error())
 		return err
@@ -118,7 +125,7 @@ func printConfig(cfg Config) {
 	log.Infoln("-------------------------- CNCA SERVER ----------------------")
 	log.Infoln("CNCAEndpoint: ", cfg.SrvCfg.CNCAEndpoint)
 	log.Infoln("-------------------- NEF NOTIFICATIONS SERVER ---------------")
-        log.Infoln("Hostname: ", cfg.SrvCfg.Hostname)
+	log.Infoln("Hostname: ", cfg.SrvCfg.Hostname)
 	log.Infoln("NotifPort: ", cfg.SrvCfg.NotifPort)
 	log.Infoln("NotifServerCertPath: ", cfg.SrvCfg.NotifServerCertPath)
 	log.Infoln("NotifServerKeyPath: ", cfg.SrvCfg.NotifServerKeyPath)
@@ -133,16 +140,16 @@ func printConfig(cfg Config) {
 // Run function
 func Run(parentCtx context.Context, cfgPath string) error {
 
-	var afCtx AFContext
+	var AfCtx Context
 
 	// load AF configuration from file
-	err := config.LoadJSONConfig(cfgPath, &afCtx.cfg)
+	err := config.LoadJSONConfig(cfgPath, &AfCtx.cfg)
 
 	if err != nil {
 		log.Errf("Failed to load AF configuration: %v", err)
 		return err
 	}
-	printConfig(afCtx.cfg)
+	printConfig(AfCtx.cfg)
 
-	return runServer(parentCtx, &afCtx)
+	return runServer(parentCtx, &AfCtx)
 }

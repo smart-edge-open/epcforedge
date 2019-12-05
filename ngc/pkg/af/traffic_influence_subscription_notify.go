@@ -1,8 +1,7 @@
-//SPDX-License-Identifier: Apache-2.0
-//Copyright © 2019 Intel Corporation
+// SPDX-License-Identifier: Apache-2.0
+// Copyright © 2019 Intel Corporation
 
-
-package ngcaf
+package af
 
 import (
 	"encoding/json"
@@ -11,7 +10,7 @@ import (
 	"strconv"
 )
 
-func verifyAFTransID(afCtx *AFContext, transID string, p *ProblemDetails) (int,
+func verifyAFTransID(afCtx *Context, transID string, p *ProblemDetails) (int,
 	error) {
 
 	var (
@@ -81,7 +80,7 @@ func NotificationPost(w http.ResponseWriter, r *http.Request) {
 		problem    = ProblemDetails{}
 	)
 
-	afCtx := r.Context().Value(keyType("af-ctx")).(*AFContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err = json.NewDecoder(r.Body).Decode(&en); err != nil {

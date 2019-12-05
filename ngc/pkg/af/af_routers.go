@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright © 2019 Intel Corporation
 
-package ngcaf
+package af
 
 import (
 	"context"
@@ -28,7 +28,7 @@ type Route struct {
 type Routes []Route
 
 // NewAFRouter function
-func NewAFRouter(afCtx *AFContext) *mux.Router {
+func NewAFRouter(afCtx *Context) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range afRoutes {
 		var handler http.Handler = route.HandlerFunc
@@ -54,7 +54,7 @@ func NewAFRouter(afCtx *AFContext) *mux.Router {
 }
 
 // NewNotifRouter function
-func NewNotifRouter(afCtx *AFContext) *mux.Router {
+func NewNotifRouter(afCtx *Context) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range notifRoutes {
 		var handler http.Handler = route.HandlerFunc

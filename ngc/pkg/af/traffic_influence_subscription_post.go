@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright © 2019 Intel Corporation
 
-package ngcaf
+package af
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 )
 
 func createSubscription(cliCtx context.Context, ts TrafficInfluSub,
-	afCtx *AFContext) (TrafficInfluSub, *http.Response, error) {
+	afCtx *Context) (TrafficInfluSub, *http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
@@ -39,7 +39,7 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		transID        int
 	)
 
-	afCtx := r.Context().Value(keyType("af-ctx")).(*AFContext)
+	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -65,8 +65,8 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 
 	ts.AFTransID = strconv.Itoa(transID)
 	if len(tsResp.SubscribedEvents) == 0 {
-		ts.Self = Link("https://" + afCtx.cfg.SrvCfg.Hostname
-			 + afCtx.cfg.SrvCfg.NotifPort + DefaultNotifURL)
+		ts.Self = Link("https://" + afCtx.cfg.SrvCfg.Hostname +
+			afCtx.cfg.SrvCfg.NotifPort + DefaultNotifURL)
 	}
 	tsResp, resp, err = createSubscription(cliCtx, ts, afCtx)
 	if err != nil {

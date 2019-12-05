@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright © 2019 Intel Corporation
 
-package ngcaf
+package af
 
 import (
 	"encoding/json"
@@ -50,7 +50,7 @@ func genAFTransID(trans TransactionIDs) int {
 	return 0
 }
 
-func genTransactionID(afCtx *AFContext) (int, error) {
+func genTransactionID(afCtx *Context) (int, error) {
 
 	tID := genAFTransID(afCtx.transactions)
 	if tID == 0 {

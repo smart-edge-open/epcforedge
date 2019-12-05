@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright © 2019 Intel Corporation
 
-package ngcaf
+package af
 
 import (
 	"net/http"
@@ -16,7 +16,7 @@ type CliConfig struct {
 }
 
 // NewConfiguration function initializes client configuration
-func NewConfiguration(afCtx *AFContext) *CliConfig {
+func NewConfiguration(afCtx *Context) *CliConfig {
 
 	cfg := &CliConfig{
 		NEFBasePath:    afCtx.cfg.CliCfg.NEFBasePath,
