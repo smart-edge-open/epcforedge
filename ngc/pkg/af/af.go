@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
 	"golang.org/x/net/http2"
 
 	logger "github.com/otcshare/common/log"
@@ -55,6 +56,9 @@ type AFContext struct {
 
 var log = logger.DefaultLogger.WithField("ngc-af", nil)
 
+var AfCtx_g *AFContext
+var AfRouter_g *mux.Router
+
 func runServer(ctx context.Context, afCtx *AFContext) error {
 
 	var err error
@@ -63,6 +67,8 @@ func runServer(ctx context.Context, afCtx *AFContext) error {
 	afCtx.subscriptions = make(NotifSubscryptions)
 	afRouter := NewAFRouter(afCtx)
 	nRouter := NewNotifRouter(afCtx)
+
+	AfRouter_g = afRouter
 
 	serverCNCA := &http.Server{
 		Addr:         afCtx.cfg.SrvCfg.CNCAEndpoint,
@@ -153,5 +159,6 @@ func Run(parentCtx context.Context, cfgPath string) error {
 	}
 	printConfig(afCtx.cfg)
 
+	AfCtx_g = &afCtx
 	return runServer(parentCtx, &afCtx)
 }
