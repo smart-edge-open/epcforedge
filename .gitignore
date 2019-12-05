@@ -10,6 +10,7 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+*.coverprofile
 
 # Ignore the binaries and configurations
 ngc/dist/*
