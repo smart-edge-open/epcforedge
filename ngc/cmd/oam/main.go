@@ -51,5 +51,6 @@ func main() {
         }
 
 	router := oam.NewRouter()
+        log.Infof("OAM HTTP Server Listening on:  %s\n",cfg.OpenEndpoint); 
 	http.ListenAndServe(cfg.OpenEndpoint, router)
 }
