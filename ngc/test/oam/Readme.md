@@ -1,5 +1,4 @@
-api test:
+# `/test/oam`
 
-ngc_stub <---> oam <---> cnca-cli-script
-
+Test apps and test data for 5GOAM API Test.  APITestFlow: cnca-cli-scripts ---> 5GOAM ---> ngc-apistub 
 
