@@ -1,16 +1,5 @@
-# Copyright 2019 Intel Corporation and Smart-Edge.com, Inc. All rights reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
 
 #!/bin/bash
 
@@ -45,9 +34,9 @@ echo "$method"
 echo "$resourceId"
 
 case $method in 
-   "POST") curl -vvv -X POST -i "Content-Type: application/json" --data @./json/POST001.json http://localhost:8080/oam/v1/af/services;;
-   "GET") curl -vvv http://localhost:8080/oam/v1/af/services/$resourceId;;
-   "PATCH") curl -vvv -X PATCH -i "Content-Type: application/json" --data @./json/PATCH001.json http://localhost:8080/oam/v1/af/services/$resourceId;;
-   "DEL") curl -vvv -X DELETE http://localhost:8080/oam/v1/af/services/$resourceId;;
+   "POST") curl -vvv -X POST -i "Content-Type: application/json" --data @./json/POST001.json http://localhost:8080/ngcoam/v1/af/services;;
+   "GET") curl -vvv http://localhost:8080/ngcoam/v1/af/services/$resourceId;;
+   "PATCH") curl -vvv -X PATCH -i "Content-Type: application/json" --data @./json/PATCH001.json http://localhost:8080/ngcoam/v1/af/services/$resourceId;;
+   "DEL") curl -vvv -X DELETE http://localhost:8080/ngcoam/v1/af/services/$resourceId;;
    *) echo "Wrong method!";;
 esac
