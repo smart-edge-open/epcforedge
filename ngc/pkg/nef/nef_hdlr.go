@@ -837,7 +837,7 @@ func nefSBUDRPut(udrSub *afSubscription, nefCtx *nefContext,
 	//Populating UP Path Chnage Subbscription Data in Traffic Influence Data
 	trafficInfluData.UpPathChgNotifURI = nefCtx.nef.upfNotificationURL
 
-	if len(string(ti.SubscribedEvents[0])) > 0 &&
+	if len(ti.SubscribedEvents) > 0 &&
 		0 == strings.Compare(string(ti.SubscribedEvents[0]), "UP_PATH_CHANGE") {
 		udrSub.NotifCorreID = strconv.Itoa(int(nef.corrID))
 		nef.corrID++

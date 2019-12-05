@@ -195,8 +195,6 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 		<-stopServerCh
 	}
 	log.Info("Exiting NEF server")
-	//NefAppG.NefCtx = nil
-	//NefAppG.NefRouter = nil
 	return nil
 
 }
