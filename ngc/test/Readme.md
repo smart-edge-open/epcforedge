@@ -1,5 +1,10 @@
-cli-scripts:
-curl based shell scripts to generate cnca http requests
+```text
+SPDX-License-Identifier: Apache-2.0
+Copyright © 2019 Intel Corporation
+```
+# test
 
-*-stub.go:
-backend simulator when used for api test, should be compiled into oam when not flexcore exist.
+This directory contains test apps, test data and test curl scripts.
+
+Reference: <https://github.com/golang-standards/project-layout/tree/master/test>
+
