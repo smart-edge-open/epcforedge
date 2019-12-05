@@ -27,13 +27,16 @@ oam:
 	GOOS=linux go build -o "${BUILD_DIR}/oam" ./cmd/oam
 
 lint:
-	golangci-lint run ./pkg/oam ./pkg/nef
+	golangci-lint run ./pkg/oam ./pkg/nef ./pkg/af
 
 test-unit:
 	ginkgo -v -cover ./pkg/config ./pkg/oam
 
 test-unit-nef:
 	ginkgo -v -cover ./pkg/nef
+
+test-unit-af:
+        ginkgo -v -cover ./pkg/af
 
 clean:
 	rm -rf "${BUILD_DIR}"
