@@ -26,7 +26,7 @@ func APIStubInit(apistubTestdatapath string) error {
 	// Init value
 	NewRecordAFServiceID = AFServiceIDBaseValue // BaseValue for new AFServiceID
 	if 0 == len(apistubTestdatapath) {
-		return nil 
+		return nil
 	}
 	// Read records from test stub file
 	cfgData, err := ioutil.ReadFile(filepath.Clean(apistubTestdatapath))
@@ -90,7 +90,8 @@ func APIStubGetAll(w http.ResponseWriter, r *http.Request) {
 	if ret != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(ret))
+		_, _ = w.Write(ret)
+		//_, _ = w.Write([]byte(ret))
 		return
 	}
 
@@ -207,7 +208,7 @@ func APIStubUpdate(w http.ResponseWriter, r *http.Request) {
 	log.Infof("[APISTUB MODE] GetRecord with index: %d\n", j)
 	log.Infof("HTTPRequest Body: %s\n", string(body))
 
-	if err := json.Unmarshal(body, 
+	if err := json.Unmarshal(body,
 		&(AllRecords[j].LocationService)); err == nil {
 		w.WriteHeader(http.StatusOK)
 		return

@@ -144,7 +144,7 @@ var _ = Describe("NGC_APIStub", func() {
 				reqBody, err := ioutil.ReadFile(tmp)
 				Expect(err).ShouldNot(HaveOccurred())
 				dats := bytes.NewReader(reqBody)
-				req, _ := http.NewRequest(http.MethodPost,"/services",dats)
+				req, _ := http.NewRequest(http.MethodPost, "/services", dats)
 				rsp := httptest.NewRecorder()
 				expected := "{\"afServiceId\":\"123457\"}"
 				APIStubAdd(rsp, req)
@@ -155,8 +155,7 @@ var _ = Describe("NGC_APIStub", func() {
 				reqBody, err = ioutil.ReadFile(tmp)
 				Expect(err).ShouldNot(HaveOccurred())
 				dats = bytes.NewReader(reqBody)
-				req, _ = http.NewRequest(http.MethodPost, "/services", 
-							dats)
+				req, _ = http.NewRequest(http.MethodPost, "/services", dats)
 				rsp = httptest.NewRecorder()
 				expected = "{\"afServiceId\":\"123458\"}"
 				APIStubAdd(rsp, req)
@@ -167,8 +166,7 @@ var _ = Describe("NGC_APIStub", func() {
 				reqBody, err = ioutil.ReadFile(tmp)
 				Expect(err).ShouldNot(HaveOccurred())
 				dats = bytes.NewReader(reqBody)
-				req, _ = http.NewRequest(http.MethodPost, "/services", 
-							dats)
+				req, _ = http.NewRequest(http.MethodPost, "/services", dats)
 				rsp = httptest.NewRecorder()
 				expected = "{\"afServiceId\":\"123459\"}"
 				APIStubAdd(rsp, req)
@@ -275,4 +273,3 @@ var _ = Describe("NGC_APIStub", func() {
 			})
 	})
 })
-
