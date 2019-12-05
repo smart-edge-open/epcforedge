@@ -83,9 +83,44 @@ cd ngc/test/oam/cnca-cli-scripts
 
 
 ## AF
-### make af
+### Build
+
+To build af:
+
+```sh
+make af
+```
+Generated bin will be put under `ngc/dist`
+
 AF sample code, generated bin will be put under ngc/dist
 
+
+AF configurable parameters list:
+
+| Param              | Description                                               |
+|--------------------|-----------------------------------------------------------|
+| AfID               | AF ID provided by OAM during AF registration              |
+| CNCAEndpoint       | HTTP EndPoint. Used by CNCA to access AF via HTTP         |
+| Hostname           | Provided by AF to NEF. Part of URL used by  notifications |
+| NotifPort          | NGC EndPoint. Used by NEF to send notifications to AF     |
+| NotifServerCertPath| Path to certs used by AF server awaiting notification     |
+| NotifServerKeyPath | Path to keys used for HTTPS connection between AF and NEF |
+| NEFBasePath        | URL used by AF to access NEF                              |
+| UserAgent          | Used by AF client connecting to NEF                       |
+| NEFClientCertPath  | Path to certs used by AF client                           | 
+
+To run af, just execute as below:
+```sh
+./dist/af
+```
+
+> NOTE: The AF bin will load configuration from `configs/af.json`.
+
+To run AF Ginkgo test suite run
+
+```sh
+make test-unit-af
+```
 
 
 ## Lint
