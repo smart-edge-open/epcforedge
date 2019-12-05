@@ -135,7 +135,7 @@ func printConfig(cfg Config) {
 	log.Infoln("NotifPort: ", cfg.SrvCfg.NotifPort)
 	log.Infoln("NotifServerCertPath: ", cfg.SrvCfg.NotifServerCertPath)
 	log.Infoln("NotifServerKeyPath: ", cfg.SrvCfg.NotifServerKeyPath)
-	log.Infoln("UIEndpoint: ", cfg.SrvCfg.UIEnpoint)
+	log.Infoln("UIEndpoint: ", cfg.SrvCfg.UIEndpoint)
 	log.Infoln("------------------------- CLIENT TO NEF ---------------------")
 	log.Infoln("NEFBasePath: ", cfg.CliCfg.NEFBasePath)
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
