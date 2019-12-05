@@ -15,17 +15,14 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
-)
-
-const (
-	host     = "localhost:8080"
-	basePath = "/af/v1"
+	//"github.com/otcshare/epcforedge/ngc/pkg/nef"
 )
 
 func TestAf(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "AF Suite")
 }
+
 
 var _ = Describe("AF", func() {
 
@@ -35,7 +32,7 @@ var _ = Describe("AF", func() {
 		afIsRunning bool
 	)
 
-	ctx, _ = context.WithCancel(context.Background())
+	ctx, srvCancel = context.WithCancel(context.Background())
 
 	Describe("Cnca client request methods to AF : ", func() {
 
@@ -46,7 +43,7 @@ var _ = Describe("AF", func() {
 			_ = srvCancel
 			afRunFail := make(chan bool)
 			go func() {
-				err := ngcaf.Run(ctx, "../../configs/af.json")
+				err := ngcaf.Run(ctx, "testdata/testconfigs/af.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				if err != nil {
 					fmt.Printf("Run() exited with error: %#v", err)
@@ -58,8 +55,141 @@ var _ = Describe("AF", func() {
 		})
 	})
 
-	//var log = logger.DefaultLogger.WithField("ngc-af Test Suite", nil)
 	Describe("Cnca client request methods to AF : ", func() {
+
+		Context("Subscription POST", func() {
+			Specify("Sending POST 001 request", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/subscriptions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusCreated))
+
+			})
+			Specify("Sending POST 002 Request", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST002.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/subscriptions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("POST-002"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusCreated))
+
+			})
+
+			Specify("Sending POST 003 request", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST003.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/subscriptions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("POST-003"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusCreated))
+
+			})
+			Specify("Sending POST 004 request", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST004.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/subscriptions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					string("POST-004"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusCreated))
+
+			})
+			Specify("Sending POST 005 request", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST005.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/subscriptions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					string("POST-005"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusCreated))
+
+			})
+
+			Specify("Sending POST 006 request", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST006.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/subscriptions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("POST-006"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusCreated))
+
+			})
+
+		})
 
 		Context("Subscription GET ALL", func() {
 			Specify("", func() {
@@ -71,63 +201,27 @@ var _ = Describe("AF", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
-				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					string("af-ctx"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
-			})
-		})
-
-		Context("Subscription GET ALL - 2", func() {
-			Specify("", func() {
-				//time.Sleep(3 * time.Second)
-
-				req, err := http.NewRequest(http.MethodGet,
-					"http://localhost:8080/af/v1/subscriptions",
-					nil)
-				Expect(err).ShouldNot(HaveOccurred())
-
-				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
-				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
-				Expect(resp.Code).To(Equal(http.StatusOK))
-			})
-		})
-
-		Context("Subscription POST", func() {
-			Specify("", func() {
-				By("Reading json file")
-				reqBody, err := ioutil.ReadFile("./testdata/100_AF_NB_SUB_POST001.json")
-				Expect(err).ShouldNot(HaveOccurred())
-
-				By("Preparing request")
-				reqBodyBytes := bytes.NewReader(reqBody)
-				req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/af/v1/subscriptions", reqBodyBytes)
-				Expect(err).ShouldNot(HaveOccurred())
-
-				By("Sending request")
-				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
-				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
-
-				Expect(resp.Code).To(Equal(http.StatusCreated))
-
 			})
 		})
 
 		Context("Subscription ID GET", func() {
 			Specify("", func() {
 				req, err := http.NewRequest(http.MethodGet,
-					"http://localhost:8080/af/v1/subscriptions/1",
+					"http://localhost:8080/af/v1/subscriptions/11112",
 					nil)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
-				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					string("af-ctx"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
-				//Expect(resp.Location).NotTo(Equal(""))
 
 			})
 		})
@@ -135,18 +229,22 @@ var _ = Describe("AF", func() {
 		Context("Subscription ID PUT", func() {
 			Specify("", func() {
 				By("Reading json file")
-				reqBody, err := ioutil.ReadFile("./testdata/300_AF_NB_SUB_SUBID_PUT001.json")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/300_AF_NB_SUB_SUBID_PUT001.json")
 				Expect(err).ShouldNot(HaveOccurred())
 
 				By("Preparing request")
 				reqBodyBytes := bytes.NewReader(reqBody)
-				req, err := http.NewRequest(http.MethodPut, "http://localhost:8080/af/v1/subscriptions/1", reqBodyBytes)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/subscriptions/11113",
+					reqBodyBytes)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				By("Sending request")
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
-				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					string("PUT"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
 
@@ -157,18 +255,22 @@ var _ = Describe("AF", func() {
 		Context("Subscription ID PATCH", func() {
 			Specify("", func() {
 				By("Reading json file")
-				reqBody, err := ioutil.ReadFile("./testdata/400_AF_NB_SUB_SUBID_PATCH001.json")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/400_AF_NB_SUB_SUBID_PATCH001.json")
 				Expect(err).ShouldNot(HaveOccurred())
 
 				By("Preparing request")
 				reqBodyBytes := bytes.NewReader(reqBody)
-				req, err := http.NewRequest(http.MethodPatch, "http://localhost:8080/af/v1/subscriptions/1", reqBodyBytes)
+				req, err := http.NewRequest(http.MethodPatch,
+					"http://localhost:8080/af/v1/subscriptions/11112",
+					reqBodyBytes)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				By("Sending request")
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
-				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(
+					req.Context(), string("af-ctx"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
 
@@ -177,24 +279,86 @@ var _ = Describe("AF", func() {
 		})
 
 		Context("Subscription ID DELETE", func() {
-			Specify("", func() {
+			Specify("DELETE Subcription 01", func() {
+
+				//By("Deleting subID 01")
 				req, err := http.NewRequest(http.MethodDelete,
-					"http://localhost:8080/af/v1/subscriptions/1",
+					"http://localhost:8080/af/v1/subscriptions/11111",
 					nil)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				resp := httptest.NewRecorder()
-				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
-				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+				ctx := context.WithValue(req.Context(),
+					string("af-ctx"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
 				Expect(resp.Code).To(Equal(http.StatusNoContent))
 			})
 
+			Specify("DELETE Subcription 02", func() {
+				//By("Deleting SubID 02")
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/subscriptions/11112",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
+			})
+			Specify("DELETE Subcription 03", func() {
+				//By("Deleting SubID 03")
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/subscriptions/11113",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
+			})
+			Specify("DELETE Subcription 04", func() {
+				//By("Deleting SubID 04")
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/subscriptions/11114",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
+			})
+			Specify("DELETE Subcription 05", func() {
+				//By("Deleting SubID 05")
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/subscriptions/11115",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
+			})
+			Specify("DELETE Subcription 06", func() {
+				//By("Deleting SubID 06")
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/subscriptions/11116",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AFCtxG)
+				ngcaf.AFRouterG.ServeHTTP(resp, req.WithContext(ctx))
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
+			})
 		})
 	})
 
-	//another describe to stop
 	Describe("Stop the AF Server", func() {
-		It("Disconnect AF fServer", func() {
+		It("Disconnect AF Server", func() {
 			srvCancel()
 			//time.Sleep(2 * time.Second)
 		})

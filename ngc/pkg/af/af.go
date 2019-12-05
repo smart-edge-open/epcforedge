@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"golang.org/x/net/http2"
 
 	logger "github.com/otcshare/common/log"
@@ -56,8 +55,8 @@ type AFContext struct {
 
 var log = logger.DefaultLogger.WithField("ngc-af", nil)
 
-var AfCtx_g *AFContext
-var AfRouter_g *mux.Router
+var AFCtx_g *AFContext
+var AFRouter_g *mux.Router
 
 func runServer(ctx context.Context, afCtx *AFContext) error {
 
@@ -68,7 +67,7 @@ func runServer(ctx context.Context, afCtx *AFContext) error {
 	afRouter := NewAFRouter(afCtx)
 	nRouter := NewNotifRouter(afCtx)
 
-	AfRouter_g = afRouter
+	AfRouterG = afRouter
 
 	serverCNCA := &http.Server{
 		Addr:         afCtx.cfg.SrvCfg.CNCAEndpoint,
