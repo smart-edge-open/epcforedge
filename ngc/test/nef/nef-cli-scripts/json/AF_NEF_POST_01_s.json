@@ -1,24 +1,23 @@
 {
-    "afServiceId": "ServiceId02",
+    "afServiceId": "ServiceId01",
     "afAppId": "InernetToEdge",
-    "afTransId": "Edge_txid_02",
+    "afTransId": "Edge_txid_01",
     "appReloInd": true,
-    "dnn": "",
     "snssai": {
         "sst": 0,
         "sd": "string"
     },
     "externalGroupId": "string",
-    "anyUeInd": true,
+    "anyUeInd": false,
     "subscribedEvents": [
         "UP_PATH_CHANGE"
     ],
-    "gpsi": "",
-    "ipv4Addr": "",
-    "ipv6Addr": "",
+    "gpsi": "string",
+    "ipv4Addr": "192.168.1.1",
+    "ipv6Addr": "string",
     "macAddr": "string",
     "dnaiChgType": "EARLY",
-    "notificationDestination": "http://example.com:80",
+    "notificationDestination": "https://localhost:9080",
     "requestTestNotification": false,
     "websockNotifConfig": {
         "websocketUri": "",

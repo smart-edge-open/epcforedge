@@ -13,9 +13,9 @@
     "subscribedEvents": [
         "UP_PATH_CHANGE"
     ],
-    "gpsi": "string",
-    "ipv4Addr": "192.168.1.1",
-    "ipv6Addr": "string",
+    "gpsi": "",
+    "ipv4Addr": "",
+    "ipv6Addr": "",
     "macAddr": "string",
     "dnaiChgType": "EARLY",
     "notificationDestination": "http://example.com:80",
