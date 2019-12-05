@@ -36,7 +36,7 @@ type NotifSubscryptions map[string]map[string]TrafficInfluSub
 type ServerConfig struct {
 	CNCAEndpoint        string `json:"CNCAEndpoint"`
 	NotifEndpoint       string `json:"NotifEndpoint"`
-	UIEndpoint	    string `json:"UIEndpoint"`
+	UIEndpoint          string `json:"UIEndpoint"`
 	NotifServerCertPath string `json:"NotifServerCertPath"`
 	NotifServerKeyPath  string `json:"NotifServerKeyPath"`
 }

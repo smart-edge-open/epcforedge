@@ -19,16 +19,16 @@ import (
         "os"
         "log"
         "net/http"
-	"time"
+        "time"
         oam "github.com/otcshare/epcforedge/ngc/pkg/oam"
         config "github.com/otcshare/epcforedge/ngc/pkg/config"
-	"github.com/gorilla/handlers"
+        "github.com/gorilla/handlers"
 )
 
 type oamCfg struct {
         TLSEndpoint        string        `json:"TlsEndpoint"`
         OpenEndpoint       string        `json:"OpenEndpoint"`
-	UIEndpoint	   string	 `json:"UIEndpoint"`
+        UIEndpoint         string        `json:"UIEndpoint"`
         NgcEndpoint        string        `json:"NgcEndpoint"`
         NgcType            string        `json:"NgcType"`
         NgcTestData        string        `json:"NgcTestData"`
@@ -64,7 +64,7 @@ func main() {
 
 	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	originsOK := handlers.AllowedOrigins([]string{cfg.UIEndpoint})
-	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
+	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PATCH", "OPTIONS", "DELETE"})
 
 	serverOAM := &http.Server{
 		Addr:		cfg.OpenEndpoint,
