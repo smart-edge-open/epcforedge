@@ -1,27 +1,21 @@
-//Copyright 2019 Intel Corporation. All rights reserved.
-//
-//Licensed under the Apache License, Version 2.0 (the "License");
-//you may not use this file except in compliance with the License.
-//You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-//Unless required by applicable law or agreed to in writing, software
-//distributed under the License is distributed on an "AS IS" BASIS,
-//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//See the License for the specific language governing permissions and
-//limitations under the License.
+//SPDX-License-Identifier: Apache-2.0
+//Copyright © 2019 Intel Corporation
 
-package main_test
+package ngcaf_test
 
 import (
 	"bytes"
+	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
+	//"time"
+	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/otcshare/epcforedge/ngc/pkg/af"
+	"github.com/otcshare/tls-af-stub/ngc/pkg/af"
 )
 
 const (
@@ -29,73 +23,181 @@ const (
 	basePath = "/af/v1"
 )
 
+func TestAf(t *testing.T) {
+        RegisterFailHandler(Fail)
+        RunSpecs(t, "AF Suite")
+}
+
 var _ = Describe("AF", func() {
 
-	Describe("Create New Subscription", func() {
-		Context("create 1 subscription",
-			func() {
-				Specify("Will return no error and valid status code", func() {
-					client := &http.Client{}
-					reqBody, err := ioutil.ReadFile("./testdata/100_AF_NB_SUB_POST001.json")
-					Expect(err).ShouldNot(HaveOccurred())
-					reqBodyBytes := bytes.NewReader(reqBody)
-					resp, err := client.Post("http://"+host+basePath+"/subscriptions", "application/json", reqBodyBytes)
-					Expect(err).ShouldNot(HaveOccurred())
-					defer resp.Body.Close()
-					Expect(resp.Status).To(Equal("201 Created"))
-				})
-			})
+	var (
+		ctx context.Context
+		srvCancel context.CancelFunc
+		afIsRunning bool
+		)
+
+	ctx, _ = context.WithCancel(context.Background())
+
+	Describe("Cnca client request methods to AF : ", func() {
+
+		Context("Subscription GET ALL", func() {
+
+			By("Starting AF server")
+			ctx, srvCancel = context.WithCancel(context.Background())
+			_ = srvCancel
+			afRunFail := make(chan bool)
+			go func() {
+				err := ngcaf.Run(ctx, "../../configs/af.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				if err != nil {
+					fmt.Printf("Run() exited with error: %#v", err)
+					afIsRunning = false
+					afRunFail <- true
+				}
+			}()
+			_=afIsRunning
+		})
 	})
 
-	/*Describe("Cnca sends POST request", func(){
+	//var log = logger.DefaultLogger.WithField("ngc-af Test Suite", nil)
+	Describe("Cnca client request methods to AF : ", func() {
 
-	                Context("with correct parameters in json body", func() {
-	                        Specify("will return no error and valid status code", func() {
+		Context("Subscription GET ALL", func() {
+			Specify("", func() {
+				//time.Sleep(3 * time.Second)
 
-					client := &http.Client{}
-					resp, err := client.Post("http://" + host + basePath + "/subscriptions", "application/json", buffer)
-					Expect(err).ShouldNot(HaveOccurred())
-					defer resp.Body.Close()
-					Expect(resp.Status).To(Equal("201 Created"))
-				})
-	                })
-			Context("With no parameters in request body", func() {
-				Specify("will return no error and invalid status code", func() {
-					client := &http.Client{}
-					resp, err := client.Post("http://"+host+basePath+"/subscriptions", "application/json", nil)
-					Expect(err).ShouldNot(HaveOccurred())
-					defer resp.Body.Close()
-					Expect(resp.Status).To(Equal("500 Internal Server Error"))
-				})
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/subscriptions",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
+				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusOK))
 			})
-	        })
+		})
 
+		Context("Subscription GET ALL - 2", func() {
+			Specify("", func() {
+				//time.Sleep(3 * time.Second)
 
-		Describe("Cnca sends GET request", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/subscriptions",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
 
-			Context("with correct url", func() {
-				Specify("will return no error and valid status code", func() {
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
+				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+				Expect(resp.Code).To(Equal(http.StatusOK))
+			})
+		})
 
-					client := &http.Client{}
-					resp, err := client.Get("http://" + host + basePath + "/subscriptions")
-					Expect(err).ShouldNot(HaveOccurred())
-					//defer resp.Body.Close()
-					Expect(resp.Status).To(Equal("200 OK"))
+		Context("Subscription POST", func() {
+			Specify("", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile("./testdata/100_AF_NB_SUB_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
 
-				})
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/af/v1/subscriptions", reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
+				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusCreated))
+
+			})
+		})
+
+		Context("Subscription ID GET", func() {
+			Specify("", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/subscriptions/1",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
+				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+		
+				Expect(resp.Code).To(Equal(http.StatusOK))
+				Expect(resp.Location).NotTo(Equal(""))
+			
+			})
+		})
+
+		Context("Subscription ID PUT", func() {
+			Specify("", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile("./testdata/300_AF_NB_SUB_SUBID_PUT001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut, "http://localhost:8080/af/v1/subscriptions/1", reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
+				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusOK))
+
 			})
 
-			Context("with incomplete url", func() {
+		})
 
-				Specify("will return no error and invalid status code", func(){
+		Context("Subscription ID PATCH", func() {
+			Specify("", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile("./testdata/400_AF_NB_SUB_SUBID_PATCH001.json")
+				Expect(err).ShouldNot(HaveOccurred())
 
-					client := &http.Client{}
-					resp, err := client.Get("http://" + host + "/subscriptions")
-					Expect(err).ShouldNot(HaveOccurred())
-					Expect(resp.Status).To(Equal("404 Not Found"))
-				})
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPatch, "http://localhost:8080/af/v1/subscriptions/1", reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
+				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusOK))
+
 			})
 
-		})*/
+		})
 
+		Context("Subscription ID DELETE", func() {
+			Specify("", func() {
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/subscriptions/1",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(), string("af-ctx"), ngcaf.AfCtx_g)
+				ngcaf.AfRouter_g.ServeHTTP(resp, req.WithContext(ctx))
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
+			})
+
+		})
+	})
+
+	//another describe to stop
+	Describe("Stop the AF Server", func() {
+		It("Disconnect AF fServer", func() {
+			srvCancel()
+			//time.Sleep(2 * time.Second)
+		})
+	})
 })
