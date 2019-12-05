@@ -45,7 +45,7 @@ func main() {
                 log.Printf("Failed to load config: %#v", err)
                 os.Exit(1)
         }
-        log.Printf("LocalConfig: %s, %s, %s, %s, %s\n", 
+        log.Printf("LocalConfig: %s, %s, %s, %s, %s, %s\n", 
                cfg.TLSEndpoint, 
                cfg.OpenEndpoint, 
                cfg.UIEndpoint,
