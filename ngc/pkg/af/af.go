@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"golang.org/x/net/http2"
+	"github.com/gorilla/handlers"
 
 	logger "github.com/otcshare/common/log"
 	config "github.com/otcshare/epcforedge/ngc/pkg/config"
@@ -26,6 +27,7 @@ type ServerConfig struct {
 	CNCAEndpoint        string `json:"CNCAEndpoint"`
 	Hostname            string `json:"Hostname"`
 	NotifPort           string `json:"NotifPort"`
+	UIEndpoint          string `json:"UIEndpoint"`
 	NotifServerCertPath string `json:"NotifServerCertPath"`
 	NotifServerKeyPath  string `json:"NotifServerKeyPath"`
 }
@@ -56,6 +58,10 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 
 	var err error
 
+	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	originsOK := handlers.AllowedOrigins([]string{AfCtx.cfg.SrvCfg.UIEndpoint})
+	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
+
 	AfCtx.transactions = make(TransactionIDs)
 	AfCtx.subscriptions = make(NotifSubscryptions)
 	AfRouter = NewAFRouter(AfCtx)
@@ -63,7 +69,7 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 
 	serverCNCA := &http.Server{
 		Addr:         AfCtx.cfg.SrvCfg.CNCAEndpoint,
-		Handler:      AfRouter,
+		Handler:      handlers.CORS(headersOK, originsOK, methodsOK)(AfRouter),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
@@ -129,6 +135,7 @@ func printConfig(cfg Config) {
 	log.Infoln("NotifPort: ", cfg.SrvCfg.NotifPort)
 	log.Infoln("NotifServerCertPath: ", cfg.SrvCfg.NotifServerCertPath)
 	log.Infoln("NotifServerKeyPath: ", cfg.SrvCfg.NotifServerKeyPath)
+	log.Infoln("UIEndpoint: ", cfg.SrvCfg.UIEnpoint)
 	log.Infoln("------------------------- CLIENT TO NEF ---------------------")
 	log.Infoln("NEFBasePath: ", cfg.CliCfg.NEFBasePath)
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
