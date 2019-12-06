@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
@@ -43,7 +42,7 @@ var _ = Describe("AF", func() {
 			_ = srvCancel
 			afRunFail := make(chan bool)
 			go func() {
-				err := af.Run(ctx, "testdata/testconfigs/af.json")
+				err := af.Run(ctx, "./testdata/testconfigs/af.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				if err != nil {
 					fmt.Printf("Run() exited with error: %#v", err)
