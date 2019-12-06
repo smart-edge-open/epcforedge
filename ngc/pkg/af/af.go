@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/http2"
-	"github.com/gorilla/handlers"
 
 	logger "github.com/otcshare/common/log"
 	config "github.com/otcshare/epcforedge/ngc/pkg/config"
@@ -58,9 +58,11 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 
 	var err error
 
-	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With",
+		"Content-Type", "Authorization"})
 	originsOK := handlers.AllowedOrigins([]string{AfCtx.cfg.SrvCfg.UIEndpoint})
-	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
+	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT",
+		"PATCH", "OPTIONS", "DELETE"})
 
 	AfCtx.transactions = make(TransactionIDs)
 	AfCtx.subscriptions = make(NotifSubscryptions)

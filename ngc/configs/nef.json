@@ -7,10 +7,10 @@
     "UpfNotificationResUriPath": "/3gpp-traffic-influence/v1/notification/upf",
     "UserAgent": "NEF-OPENNESS-1912",
     "HTTPConfig": {
-        "Endpoint": ":8091"
+        "Endpoint": ":8061"
     },
     "HTTP2Config": {
-        "Endpoint": ":8090",
+        "Endpoint": ":8060",
         "NefServerCert": "certs/server-cert.pem",
         "NefServerKey": "certs/server-key.pem",
         "AfClientCert": "certs/root-ca-cert.pem"
