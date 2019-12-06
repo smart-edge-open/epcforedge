@@ -30,6 +30,10 @@ oam:
 lint:
 	golangci-lint run ./pkg/oam ./pkg/nef ./pkg/af
 
+# ./scripts/genCerts.sh -t DNS -n <HostName/KubernetesServiceName> -m <HostName/KubernetesServiceName>
+# Replace the "localhost" in test-unit-af with hostname
+# or Kubernetes service name as per user environment
+
 test-unit-af:	nef
 	mkdir -p "${CERTS_DIR}"
 	./scripts/genCerts.sh -t DNS -n localhost -m localhost
