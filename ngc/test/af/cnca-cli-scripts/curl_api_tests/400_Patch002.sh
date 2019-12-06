@@ -1,5 +1,5 @@
-###SPDX-License-Identifier: Apache-2.0
-###Copyright © 2019 Intel Corporation
+#SPDX-License-Identifier: Apache-2.0
+#Copyright © 2019 Intel Corporation
 
 #! /bin/sh
 setup_dir=${PWD}
