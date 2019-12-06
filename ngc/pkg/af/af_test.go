@@ -165,21 +165,21 @@ var _ = Describe("AF", func() {
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
 			})
-		
+
 			Specify("Read all subscriptions", func() {
 				By("sending wrong url")
 				req, err := http.NewRequest(http.MethodGet,
-                                        "http://localhost:8080/af/v2/subscriptions",
-                                        nil)
-                                Expect(err).ShouldNot(HaveOccurred())
+					"http://localhost:8080/af/v2/subscriptions",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
 
-                                resp := httptest.NewRecorder()
-                                ctx := context.WithValue(req.Context(),
-                                        KeyType("af-ctx"), af.AfCtx)
-                                af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
-                                Expect(resp.Code).To(Equal(http.StatusNotFound))
-	
+				Expect(resp.Code).To(Equal(http.StatusNotFound))
+
 			})
 		})
 
