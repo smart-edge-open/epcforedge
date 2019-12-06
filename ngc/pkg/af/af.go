@@ -60,9 +60,10 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 
 	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With",
 		"Content-Type", "Authorization"})
-	originsOK := handlers.AllowedOrigins([]string{AfCtx.cfg.SrvCfg.UIEndpoint})
-	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT",
-		"PATCH", "OPTIONS", "DELETE"})
+	originsOK := handlers.AllowedOrigins(
+		[]string{AfCtx.cfg.SrvCfg.UIEndpoint})
+	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD",
+		"POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
 
 	AfCtx.transactions = make(TransactionIDs)
 	AfCtx.subscriptions = make(NotifSubscryptions)
@@ -139,6 +140,8 @@ func printConfig(cfg Config) {
 	log.Infoln("NotifServerKeyPath: ", cfg.SrvCfg.NotifServerKeyPath)
 	log.Infoln("UIEndpoint: ", cfg.SrvCfg.UIEndpoint)
 	log.Infoln("------------------------- CLIENT TO NEF ---------------------")
+	log.Infoln("Protocol: ", cfg.CliCfg.Protocol)
+	log.Infoln("NEFPort: ", cfg.CliCfg.NEFPort)
 	log.Infoln("NEFBasePath: ", cfg.CliCfg.NEFBasePath)
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
 	log.Infoln("NEFCliCertPath: ", cfg.CliCfg.NEFCliCertPath)

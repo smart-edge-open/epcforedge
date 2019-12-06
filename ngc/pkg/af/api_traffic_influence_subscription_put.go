@@ -59,8 +59,10 @@ func (a *TrafficInfluenceSubscriptionPutAPIService) SubscriptionPut(
 	)
 
 	// create path and map variables
-	path := a.client.cfg.NEFBasePath +
+	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
+		a.client.cfg.NEFPort + a.client.cfg.NEFBasePath +
 		"/{afId}/subscriptions/{subscriptionId}"
+
 	path = strings.Replace(path,
 		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
 	path = strings.Replace(path,

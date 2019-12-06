@@ -9,7 +9,10 @@
         "NotifServerKeyPath": "/etc/certs/server-key.pem"
     },
     "CliConfig": {
-        "NEFBasePath": "https://localhost:8060/3gpp-traffic-influence/v1",
+        "Protocol": "https",
+        "NEFHostname": "localhost",
+        "NEFPort": ":8060",
+        "NEFBasePath": "/3gpp-traffic-influence/v1",
         "UserAgent": "NGC-AF",
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem"
     }
