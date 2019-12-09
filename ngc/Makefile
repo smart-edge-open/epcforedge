@@ -36,9 +36,9 @@ lint:
 
 test-unit-af:	nef
 	@-pkill -f "nef"
-	mkdir -p "${CERTS_DIR}"
+	mkdir -p /etc/"${CERTS_DIR}"
 	./scripts/genCerts.sh -t DNS -n localhost -m localhost
-	mv root-ca-cert.pem root-ca-cert.srl root-ca-key.pem server-cert.pem server-key.pem server-request.csr ./${CERTS_DIR} 
+	mv root-ca-cert.pem root-ca-cert.srl root-ca-key.pem server-cert.pem server-key.pem server-request.csr /etc/${CERTS_DIR} 
 	./dist/nef &
 	ginkgo -v -cover ./pkg/af
 	pkill -f "nef"
@@ -50,7 +50,7 @@ test-unit-oam:
 
 clean:
 	rm -rf "${BUILD_DIR}"
-	rm -rf "${CERTS_DIR}"
+	rm -rf /etc/"${CERTS_DIR}"
 	rm -rf extfile.cnf
 
 help:
