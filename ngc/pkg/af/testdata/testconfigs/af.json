@@ -2,12 +2,17 @@
     "AfId": "1",
     "ServerConfig": {
         "CNCAEndpoint": ":8080",
-        "NotifEndpoint": "localhost:8081",
+	"Hostname": "localhost",
+        "NotifEndpoint": ":8081",
+	"UIEndpoint": "http://localhost:3020",
         "NotifServerCertPath": "./../../certs/server-cert.pem",
         "NotifServerKeyPath": "./../../certs/server-key.pem"
     },
     "CliConfig": {
-        "NEFBasePath": "https://localhost:8060/3gpp-traffic-influence/v1",
+        "Protocol": "https",
+        "NEFHostname": "localhost",
+        "NEFPort": ":8060",
+        "NEFBasePath": "/3gpp-traffic-influence/v1",
         "UserAgent": "NGC-AF",
         "NEFCliCertPath": "./../../certs/root-ca-cert.pem"
     }
