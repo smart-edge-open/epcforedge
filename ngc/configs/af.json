@@ -3,7 +3,7 @@
     "ServerConfig": {
         "CNCAEndpoint": ":8050",
         "Hostname": "localhost",
-        "NotifEndpoint": ":8051",
+        "NotifPort": ":8051",
         "UIEndpoint": "http://localhost:3020",
         "NotifServerCertPath": "/etc/certs/server-cert.pem",
         "NotifServerKeyPath": "/etc/certs/server-key.pem"
