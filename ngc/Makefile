@@ -35,6 +35,7 @@ lint:
 # or Kubernetes service name as per user environment
 
 test-unit-af:	nef
+	@-pkill -f "nef"
 	mkdir -p "${CERTS_DIR}"
 	./scripts/genCerts.sh -t DNS -n localhost -m localhost
 	mv root-ca-cert.pem root-ca-cert.srl root-ca-key.pem server-cert.pem server-key.pem server-request.csr ./${CERTS_DIR} 
