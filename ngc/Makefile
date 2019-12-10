@@ -9,7 +9,7 @@ export GO111MODULE = on
 .PHONY: build af oam nef lint test-unit-af test-unit-nef test-unit-oam
 TMP_DIR:=$(shell mktemp -d)
 BUILD_DIR ?=dist
-CERTS_DIR ?=certs
+CERTS_DIR ?=/etc/certs
 
 VER:=1.0
 
@@ -36,9 +36,9 @@ lint:
 
 test-unit-af:	nef
 	@-pkill -f "nef"
-	mkdir -p /etc/"${CERTS_DIR}"
+	mkdir -p "${CERTS_DIR}"
 	./scripts/genCerts.sh -t DNS -n localhost -m localhost
-	mv root-ca-cert.pem root-ca-cert.srl root-ca-key.pem server-cert.pem server-key.pem server-request.csr /etc/${CERTS_DIR} 
+	mv root-ca-cert.pem root-ca-cert.srl root-ca-key.pem server-cert.pem server-key.pem server-request.csr "${CERTS_DIR}" 
 	./dist/nef &
 	ginkgo -v -cover ./pkg/af
 	pkill -f "nef"
@@ -50,7 +50,7 @@ test-unit-oam:
 
 clean:
 	rm -rf "${BUILD_DIR}"
-	rm -rf /etc/"${CERTS_DIR}"
+	rm -rf "${CERTS_DIR}"
 	rm -rf extfile.cnf
 
 help:
