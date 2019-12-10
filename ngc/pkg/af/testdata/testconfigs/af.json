@@ -5,8 +5,8 @@
 	"Hostname": "localhost",
         "NotifPort": ":8081",
 	"UIEndpoint": "http://localhost:3020",
-        "NotifServerCertPath": "./../../certs/server-cert.pem",
-        "NotifServerKeyPath": "./../../certs/server-key.pem"
+        "NotifServerCertPath": "/etc/certs/server-cert.pem",
+        "NotifServerKeyPath": "/etc/certs/server-key.pem"
     },
     "CliConfig": {
         "Protocol": "https",
@@ -14,7 +14,7 @@
         "NEFPort": ":8060",
         "NEFBasePath": "/3gpp-traffic-influence/v1",
         "UserAgent": "NGC-AF",
-        "NEFCliCertPath": "./../../certs/root-ca-cert.pem"
+        "NEFCliCertPath": "/etc/certs/root-ca-cert.pem"
     }
 }
 
