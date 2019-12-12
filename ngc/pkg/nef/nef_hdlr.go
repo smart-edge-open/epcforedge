@@ -156,13 +156,15 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 	loc = nefCtx.nef.locationURLPrefix + af.afID + "/subscriptions/" +
 		subIDStr
 
+	afsub.ti.Self = Link(loc)
+
 	log.Infoln(" NEW AF Subscription added " + subIDStr)
 
 	return loc, rsp, nil
 }
 
 func (af *afData) afUpdateSubscription(nefCtx *nefContext, subID string,
-	ti TrafficInfluSub) (rsp nefSBRspData, err error) {
+	ti TrafficInfluSub) (rsp nefSBRspData, updtTI TrafficInfluSub, err error) {
 
 	sub, ok := af.subs[subID]
 
@@ -170,19 +172,22 @@ func (af *afData) afUpdateSubscription(nefCtx *nefContext, subID string,
 		rsp.errorCode = 400
 		rsp.pd.Title = subNotFound
 
-		return rsp, errors.New(subNotFound)
+		return rsp, updtTI, errors.New(subNotFound)
 	}
 
 	rsp, err = sub.NEFSBPut(sub, nefCtx, ti)
 
 	if err != nil {
 		log.Err("Failed to Update Subscription")
-		return rsp, err
+		return rsp, updtTI, err
 	}
-	sub.ti = ti
+
+	updtTI = ti
+	updtTI.Self = sub.ti.Self
+	sub.ti = updtTI
 
 	log.Infoln("Update Subscription Successful")
-	return rsp, err
+	return rsp, updtTI, err
 }
 
 func updateTiFromTisp(ti *TrafficInfluSub, tisp TrafficInfluSubPatch) {
