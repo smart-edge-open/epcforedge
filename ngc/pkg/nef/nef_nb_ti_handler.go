@@ -237,15 +237,15 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 			return
 		}
 
-		rsp, err := af.afUpdateSubscription(nefCtx, vars["subscriptionId"],
-			trInBody)
+		rsp, newTI, err := af.afUpdateSubscription(nefCtx,
+			vars["subscriptionId"], trInBody)
 
 		if err != nil {
 			sendErrorResponseToAF(w, rsp)
 			return
 		}
 
-		mdata, err2 := json.Marshal(trInBody)
+		mdata, err2 := json.Marshal(newTI)
 
 		if err2 != nil {
 			log.Err(err2)
@@ -493,7 +493,7 @@ func sendErrorResponseToAF(w http.ResponseWriter, rsp nefSBRspData) {
 	if err != nil {
 		log.Err("NEF ERROR : Failed to send response to AF !!!")
 	}
-	log.Infof("HTTP Response sent: %d", rsp.errorCode)
+	log.Infof("HTTP Response sent: %d", eCode)
 }
 
 func createErrorJSON(rsp nefSBRspData) (mdata []byte, statusCode int) {

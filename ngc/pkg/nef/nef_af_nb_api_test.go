@@ -115,9 +115,11 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 			//Convert the body(json data) into Traffic Influence Struct data
 			var trInBody ngcnef.TrafficInfluSub
 			err := json.Unmarshal(b, &trInBody)
-
-			resp.Body.Close()
 			Expect(err).Should(BeNil())
+
+			fmt.Print("Self in TI Received: ")
+			fmt.Println(trInBody.Self)
+			resp.Body.Close()
 			Expect(trInBody.Self).ShouldNot(Equal(""))
 		})
 		It("Will Send a valid GET all towards PCF", func() {
@@ -185,6 +187,21 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 			req.Header.Set("Content-Type", "application/json")
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusOK))
+
+			//Validate Body of TI
+			//Read Body from response
+			resp := rr.Result()
+			b, _ := ioutil.ReadAll(resp.Body)
+
+			//Convert the body(json data) into Traffic Influence Struct data
+			var trInBody ngcnef.TrafficInfluSub
+			err := json.Unmarshal(b, &trInBody)
+			Expect(err).Should(BeNil())
+
+			fmt.Print("Self in TI Received: ")
+			fmt.Println(trInBody.Self)
+			resp.Body.Close()
+			Expect(trInBody.Self).ShouldNot(Equal(""))
 		})
 		It("Will Send a valid PATCH towards UDR", func() {
 
