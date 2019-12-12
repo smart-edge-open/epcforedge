@@ -46,6 +46,10 @@ func createNewSub(nefCtx *nefContext, afID string,
 func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
 	r *http.Request) {
 
+	var subslist []TrafficInfluSub
+	var rsp nefSBRspData
+	var err error
+
 	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
 	nef := &nefCtx.nef
 
@@ -55,17 +59,16 @@ func ReadAllTrafficInfluenceSubscription(w http.ResponseWriter,
 	af, err := nef.nefGetAf(vars["afId"])
 
 	if err != nil {
+		/* Failure in getting AF with afId received. In this case no
+		 * subscription data will be returned to AF */
 		log.Infoln(err)
-		sendCustomeErrorRspToAF(w, 400, "Failed to find AF records")
-		return
-	}
-
-	rsp, subslist, err := af.afGetSubscriptionList(nefCtx)
-
-	if err != nil {
-		log.Err(err)
-		sendErrorResponseToAF(w, rsp)
-		return
+	} else {
+		rsp, subslist, err = af.afGetSubscriptionList(nefCtx)
+		if err != nil {
+			log.Err(err)
+			sendErrorResponseToAF(w, rsp)
+			return
+		}
 	}
 
 	mdata, err2 := json.Marshal(subslist)
@@ -127,6 +130,8 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 		return
 	}
 	log.Infoln(loc)
+
+	trInBody.Self = Link(loc)
 
 	//Martshal data and send into the body
 	mdata, err2 := json.Marshal(trInBody)
@@ -488,7 +493,7 @@ func sendErrorResponseToAF(w http.ResponseWriter, rsp nefSBRspData) {
 	if err != nil {
 		log.Err("NEF ERROR : Failed to send response to AF !!!")
 	}
-
+	log.Infof("HTTP Response sent: %d", rsp.errorCode)
 }
 
 func createErrorJSON(rsp nefSBRspData) (mdata []byte, statusCode int) {

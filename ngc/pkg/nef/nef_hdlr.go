@@ -156,6 +156,8 @@ func (af *afData) afAddSubscription(nefCtx *nefContext,
 	loc = nefCtx.nef.locationURLPrefix + af.afID + "/subscriptions/" +
 		subIDStr
 
+	afsub.ti.Self = Link(loc)
+
 	log.Infoln(" NEW AF Subscription added " + subIDStr)
 
 	return loc, rsp, nil

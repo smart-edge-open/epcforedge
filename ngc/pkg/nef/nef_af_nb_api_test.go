@@ -6,6 +6,8 @@ package ngcnef_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -79,6 +81,26 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 		putbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PUT_01.json")
 		patchbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PATCH_01.json")
 
+		It("Send valid GET all to NEF -No TI Data in response as no Sub exists",
+			func() {
+				rr, req := CreateReqForNEF(ctx, "GET", "", nil)
+				ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
+				Expect(rr.Code).Should(Equal(http.StatusOK))
+
+				//Validate TI
+				//Read Body from response
+				resp := rr.Result()
+				b, _ := ioutil.ReadAll(resp.Body)
+
+				//Convert the body(json data) into Traffic Influence Struct data
+				var trInBody []ngcnef.TrafficInfluSub
+				err := json.Unmarshal(b, &trInBody)
+				Expect(err).Should(BeNil())
+				fmt.Print("Body Received: ")
+				fmt.Println(trInBody)
+				resp.Body.Close()
+				Expect(len(trInBody)).Should(Equal(0))
+			})
 		It("Send valid POST to NEF towards PCF ", func() {
 			rr, req := CreateReqForNEF(ctx, "POST", "", postbody)
 			req.Header.Set("Content-Type", "application/json")
@@ -86,7 +108,17 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 
 			Expect(rr.Code).Should(Equal(http.StatusCreated))
 			//Validate Body of TI
-			//Expect(bytes.Equal(rr.Body.Bytes(), postbody)).Should(BeTrue())
+			//Read Body from response
+			resp := rr.Result()
+			b, _ := ioutil.ReadAll(resp.Body)
+
+			//Convert the body(json data) into Traffic Influence Struct data
+			var trInBody ngcnef.TrafficInfluSub
+			err := json.Unmarshal(b, &trInBody)
+
+			resp.Body.Close()
+			Expect(err).Should(BeNil())
+			Expect(trInBody.Self).ShouldNot(Equal(""))
 		})
 		It("Will Send a valid GET all towards PCF", func() {
 
