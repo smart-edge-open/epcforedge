@@ -62,10 +62,12 @@ spec:
   ports:
   - port: 8050
     targetPort: 8050
+    nodePort: 30050
     protocol: TCP
     name: cnca
   - port: 8051
     targetPort: 8051
+    nodePort: 30051
     protocol: TCP
     name: nef   
   selector:
