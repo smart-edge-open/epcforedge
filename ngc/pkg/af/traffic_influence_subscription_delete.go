@@ -34,6 +34,13 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
+	if afCtx == nil {
+		log.Errf("Traffic Influance Subscription create: " +
+			"af-ctx retrieved from request is nil")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

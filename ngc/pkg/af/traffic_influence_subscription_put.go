@@ -7,10 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"os"
-	"os/signal"
 	"strconv"
-	"syscall"
 )
 
 func modifySubscriptionByPut(cliCtx context.Context, ts TrafficInfluSub,
@@ -42,15 +39,16 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
-	cliCtx, cancel := context.WithCancel(context.Background())
 
-	osSignals := make(chan os.Signal, 1)
-	signal.Notify(osSignals, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		sig := <-osSignals
-		log.Infof("Received signal: %#v", sig)
-		cancel()
-	}()
+	if afCtx == nil {
+		log.Errf("Traffic Influance Subscription create: " +
+			"af-ctx retrieved from request is nil")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	cliCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 

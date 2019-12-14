@@ -61,10 +61,12 @@ func genTransactionID(afCtx *Context) (int, error) {
 
 func getSubsIDFromURL(u *url.URL) (string, error) {
 
-	sURL := u.String()
 	if u == nil {
 		return "", errors.New("empty URL in the request message")
 	}
+
+	sURL := u.String()
+
 	// It is assumed the URL address
 	// ends with  "/subscriptions/{subscriptionID}"
 	s := strings.Split(sURL, "subscriptions")
