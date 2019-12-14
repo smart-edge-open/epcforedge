@@ -47,6 +47,18 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if afCtx.subscriptions == nil {
+		log.Errf("AF context subscriptions map has not been initialized")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if afCtx.transactions == nil {
+		log.Errf("AF context transactions map been initialized")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

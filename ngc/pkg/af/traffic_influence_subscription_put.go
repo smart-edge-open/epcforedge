@@ -39,10 +39,21 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
-
 	if afCtx == nil {
 		log.Errf("Traffic Influance Subscription create: " +
 			"af-ctx retrieved from request is nil")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if afCtx.subscriptions == nil {
+		log.Errf("AF context subscriptions map has not been initialized")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if afCtx.transactions == nil {
+		log.Errf("AF context transactions map has not been initialized")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

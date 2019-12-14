@@ -62,10 +62,8 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(resp.StatusCode)
 
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(tsRespJSON)
-	if err != nil {
-		log.Errf("Traffic Influance Subscription get all %s", err.Error())
+	if _, err = w.Write(tsRespJSON); err != nil {
+		log.Errf("Traffic Influance Subscription get all: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
