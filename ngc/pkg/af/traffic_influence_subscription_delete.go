@@ -35,7 +35,7 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
-		log.Errf("Traffic Influance Subscription create: " +
+		log.Errf("Traffic Influance Subscription delete: " +
 			"af-ctx retrieved from request is nil")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -48,7 +48,7 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if afCtx.transactions == nil {
-		log.Errf("AF context  nsactions map has not been initialized")
+		log.Errf("AF context  transactions map has not been initialized")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
