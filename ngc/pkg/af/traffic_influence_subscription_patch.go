@@ -36,6 +36,19 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
+	if afCtx == nil {
+		log.Errf("Traffic Influance Subscription patch: " +
+			"af-ctx retrieved from request is nil")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if afCtx.subscriptions == nil {
+		log.Errf("AF context subscriptions map has not been initialized")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -66,11 +79,6 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 		for transID := range interMap {
 			afCtx.subscriptions[subscriptionID][(transID)] = tsResp
 		}
-
-	} else {
-
-		log.Info("Traffic Influence Subscription: "+
-			"subscriptionID %s not found in local memory", subscriptionID)
 	}
 	w.WriteHeader(resp.StatusCode)
 }

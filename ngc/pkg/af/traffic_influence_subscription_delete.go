@@ -34,6 +34,25 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
+	if afCtx == nil {
+		log.Errf("Traffic Influance Subscription delete: " +
+			"af-ctx retrieved from request is nil")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if afCtx.subscriptions == nil {
+		log.Errf("AF context subscriptions map has not been initialized")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if afCtx.transactions == nil {
+		log.Errf("AF context  transactions map has not been initialized")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -51,6 +70,7 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	if interMap, ok := afCtx.subscriptions[subscriptionID]; ok {
 		for transID := range interMap {
 			var i int

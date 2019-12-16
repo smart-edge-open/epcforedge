@@ -47,9 +47,7 @@ type service struct {
 	client *Client
 }
 
-// NewClient creates a new API client. Requires a userAgent string describing
-// the application, optionally a custom http.Client to allow for advanced
-// features such as caching.
+// NewClient creates a new API client.
 func NewClient(cfg *CliConfig) *Client {
 
 	if cfg.HTTPClient == nil {
@@ -258,7 +256,7 @@ func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer,
 	return bodyBuf, nil
 }
 
-// detectContentType method is used to figure out `Request.Body` content
+// detectContentType method is used to get `Request.Body` content
 // type for request header
 func detectContentType(body interface{}) string {
 	contentType := "text/plain; charset=utf-8"

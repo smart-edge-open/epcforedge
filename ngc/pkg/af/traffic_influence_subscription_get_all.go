@@ -35,6 +35,13 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
+	if afCtx == nil {
+		log.Errf("Traffic Influance Subscription get all: " +
+			"af-ctx retrieved from request is nil")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -52,9 +59,11 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	w.WriteHeader(resp.StatusCode)
+
 	if _, err = w.Write(tsRespJSON); err != nil {
-		log.Errf("Traffic Influance Subscriptions get all %s", err.Error())
+		log.Errf("Traffic Influance Subscription get all: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
