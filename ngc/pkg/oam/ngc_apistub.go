@@ -131,7 +131,7 @@ func APIStubAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	_, _ = w.Write(jData)
 }
 
@@ -156,7 +156,7 @@ func APIStubDel(w http.ResponseWriter, r *http.Request) {
 		_ = APIStubReset()
 	}
 	APIStubPrintAll()
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 // APIStubGet : get one from the records

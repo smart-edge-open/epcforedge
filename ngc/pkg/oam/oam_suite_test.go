@@ -148,7 +148,7 @@ var _ = Describe("NGC_APIStub", func() {
 				rsp := httptest.NewRecorder()
 				expected := "{\"afServiceId\":\"123457\"}"
 				APIStubAdd(rsp, req)
-				Expect(rsp.Code).To(Equal(http.StatusOK))
+				Expect(rsp.Code).To(Equal(http.StatusCreated))
 				Expect(rsp.Body.String()).To(Equal(expected))
 
 				tmp = postdataBasepath + "POST002.json"
@@ -159,7 +159,7 @@ var _ = Describe("NGC_APIStub", func() {
 				rsp = httptest.NewRecorder()
 				expected = "{\"afServiceId\":\"123458\"}"
 				APIStubAdd(rsp, req)
-				Expect(rsp.Code).To(Equal(http.StatusOK))
+				Expect(rsp.Code).To(Equal(http.StatusCreated))
 				Expect(rsp.Body.String()).To(Equal(expected))
 
 				tmp = postdataBasepath + "POST003.json"
@@ -170,7 +170,7 @@ var _ = Describe("NGC_APIStub", func() {
 				rsp = httptest.NewRecorder()
 				expected = "{\"afServiceId\":\"123459\"}"
 				APIStubAdd(rsp, req)
-				Expect(rsp.Code).To(Equal(http.StatusOK))
+				Expect(rsp.Code).To(Equal(http.StatusCreated))
 				Expect(rsp.Body.String()).To(Equal(expected))
 
 			})
@@ -218,7 +218,7 @@ var _ = Describe("NGC_APIStub", func() {
 				req = mux.SetURLVars(req, vars)
 				rsp := httptest.NewRecorder()
 				APIStubDel(rsp, req)
-				Expect(rsp.Code).To(Equal(http.StatusOK))
+				Expect(rsp.Code).To(Equal(http.StatusNoContent))
 				Expect(len(AllRecords)).To(Equal(0))
 
 				req, _ = http.NewRequest("DELETE", "/services/123457", nil)
@@ -228,7 +228,7 @@ var _ = Describe("NGC_APIStub", func() {
 				req = mux.SetURLVars(req, vars)
 				rsp = httptest.NewRecorder()
 				APIStubDel(rsp, req)
-				Expect(rsp.Code).NotTo(Equal(http.StatusOK))
+				Expect(rsp.Code).NotTo(Equal(http.StatusNoContent))
 
 			})
 	})
