@@ -581,15 +581,18 @@ func getSubFromCorrID(nefCtx *nefContext, corrID string) (sub *afSubscription,
 func validateAFTrafficInfluenceData(ti TrafficInfluSub) (rsp nefSBRspData,
 	status bool) {
 
-	//In case AfServiceID or AfTransID is not present then DNN has to be
-	//included in TI
-	if len(ti.AfServiceID) == 0 || len(ti.AfTransID) == 0 {
+	if len(ti.AfTransID) == 0 {
+		rsp.errorCode = 400
+		rsp.pd.Title = "Missing AfTransID atttribute"
+		return rsp, false
+	}
 
-		if len(ti.Dnn) == 0 {
-			rsp.errorCode = 400
-			rsp.pd.Title = "Missing afServiceId or AfTransID atttribute"
-			return rsp, false
-		}
+	//In case AfServiceID  is not present then DNN has to be included in TI
+	if len(ti.AfServiceID) == 0 && len(ti.Dnn) == 0 {
+
+		rsp.errorCode = 400
+		rsp.pd.Title = "Missing afServiceId atttribute"
+		return rsp, false
 	}
 
 	if len(ti.AfAppID) == 0 && ti.TrafficFilters == nil &&
