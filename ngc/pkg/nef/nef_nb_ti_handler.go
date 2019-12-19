@@ -120,6 +120,14 @@ func CreateTrafficInfluenceSubscription(w http.ResponseWriter,
 		return
 	}
 
+	//validate the mandatory parameters
+	resRsp, status := validateAFTrafficInfluenceData(trInBody)
+	if !status {
+		log.Err(resRsp.pd.Title)
+		sendErrorResponseToAF(w, resRsp)
+		return
+	}
+
 	loc, rsp, err3 := createNewSub(nefCtx, vars["afId"], trInBody)
 
 	if err3 != nil {
@@ -172,7 +180,7 @@ func ReadTrafficInfluenceSubscription(w http.ResponseWriter, r *http.Request) {
 	af, ok := nef.nefGetAf(vars["afId"])
 
 	if ok != nil {
-		sendCustomeErrorRspToAF(w, 400, "Failed to find AF records")
+		sendCustomeErrorRspToAF(w, 404, "Failed to find AF records")
 		return
 	}
 
@@ -264,7 +272,7 @@ func UpdatePutTrafficInfluenceSubscription(w http.ResponseWriter,
 
 	}
 	log.Infoln(ok)
-	sendCustomeErrorRspToAF(w, 400, "Failed to find AF records")
+	sendCustomeErrorRspToAF(w, 404, "Failed to find AF records")
 
 }
 
@@ -333,7 +341,7 @@ func UpdatePatchTrafficInfluenceSubscription(w http.ResponseWriter,
 	}
 
 	log.Infoln(ok)
-	sendCustomeErrorRspToAF(w, 400, "Failed to find AF records")
+	sendCustomeErrorRspToAF(w, 404, "Failed to find AF records")
 }
 
 // DeleteTrafficInfluenceSubscription : Deletes a traffic influence created by
@@ -352,7 +360,7 @@ func DeleteTrafficInfluenceSubscription(w http.ResponseWriter,
 
 	if err != nil {
 		log.Err(err)
-		sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP DELETE Body")
+		sendCustomeErrorRspToAF(w, 404, "Failed to find AF entry")
 		return
 	}
 	rsp, err := af.afDeleteSubscription(nefCtx, vars["subscriptionId"])
@@ -566,4 +574,30 @@ func getSubFromCorrID(nefCtx *nefContext, corrID string) (sub *afSubscription,
 		}
 	}
 	return sub, errors.New("Subscription Not Found")
+}
+
+//validateAFTrafficInfluenceData: Function to validate mandatory parameters of
+//TrafficInfluence received from AF
+func validateAFTrafficInfluenceData(ti TrafficInfluSub) (rsp nefSBRspData,
+	status bool) {
+
+	//In case AfServiceID or AfTransID is not present then DNN has to be
+	//included in TI
+	if len(ti.AfServiceID) == 0 || len(ti.AfTransID) == 0 {
+
+		if len(ti.Dnn) == 0 {
+			rsp.errorCode = 400
+			rsp.pd.Title = "Missing afServiceId or AfTransID atttribute"
+			return rsp, false
+		}
+	}
+
+	if len(ti.AfAppID) == 0 && ti.TrafficFilters == nil &&
+		ti.EthTrafficFilters == nil {
+		rsp.errorCode = 400
+		rsp.pd.Title = "missing one of afAppId, trafficFilters," +
+			"ethTrafficFilters"
+		return rsp, false
+	}
+	return rsp, true
 }

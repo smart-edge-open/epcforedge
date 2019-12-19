@@ -252,7 +252,7 @@ func (af *afData) afGetSubscription(nefCtx *nefContext,
 	sub, ok := af.subs[subID]
 
 	if !ok {
-		rsp.errorCode = 400
+		rsp.errorCode = 404
 		rsp.pd.Title = subNotFound
 		return rsp, ti, errors.New(subNotFound)
 	}
@@ -299,7 +299,7 @@ func (af *afData) afDeleteSubscription(nefCtx *nefContext,
 	sub, ok := af.subs[subID]
 
 	if !ok {
-		rsp.errorCode = 400
+		rsp.errorCode = 404
 		rsp.pd.Title = subNotFound
 		return rsp, errors.New(subNotFound)
 	}
