@@ -19,7 +19,7 @@ func getAllSubscriptions(cliCtx context.Context, afCtx *Context) (
 		cliCtx, afCtx.cfg.AfID)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, resp, err
 	}
 	return tSubs, resp, nil
 
@@ -49,7 +49,7 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	tsResp, resp, err = getAllSubscriptions(cliCtx, afCtx)
 	if err != nil {
 		log.Errf("Traffic Influence Subscriptions get all : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(resp.StatusCode)
 		return
 	}
 

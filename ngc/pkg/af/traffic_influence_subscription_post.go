@@ -21,7 +21,7 @@ func createSubscription(cliCtx context.Context, ts TrafficInfluSub,
 		afCtx.cfg.AfID, ts)
 
 	if err != nil {
-		return TrafficInfluSub{}, nil, err
+		return TrafficInfluSub{}, resp, err
 	}
 	return tsResp, resp, nil
 }
@@ -92,7 +92,7 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		log.Errf("Traffic Influence Subscription create : %s", err.Error())
 		delete(afCtx.transactions, transID)
 		log.Infof("Deleted transaction ID %v", transID)
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(resp.StatusCode)
 		return
 	}
 

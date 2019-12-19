@@ -300,7 +300,7 @@ var _ = Describe("AF", func() {
 				ctx := context.WithValue(req.Context(),
 					KeyType("af-ctx"), af.AfCtx)
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
-				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+				Expect(resp.Code).To(Equal(http.StatusNotFound))
 			})
 		})
 	})

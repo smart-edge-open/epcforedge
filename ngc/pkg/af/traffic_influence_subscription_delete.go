@@ -19,7 +19,7 @@ func deleteSubscription(cliCtx context.Context, afCtx *Context,
 		afCtx.cfg.AfID, sID)
 
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
 	return resp, nil
 
@@ -67,7 +67,7 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	resp, err = deleteSubscription(cliCtx, afCtx, subscriptionID)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription delete: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(resp.StatusCode)
 		return
 	}
 

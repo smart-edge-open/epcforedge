@@ -19,7 +19,7 @@ func getSubscription(cliCtx context.Context, afCtx *Context,
 		cliCtx, afCtx.cfg.AfID, subscriptionID)
 
 	if err != nil {
-		return TrafficInfluSub{}, nil, err
+		return TrafficInfluSub{}, resp, err
 	}
 	return ts, resp, nil
 }
@@ -58,7 +58,7 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 	tsResp, resp, err = getSubscription(cliCtx, afCtx, subscriptionID)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription get : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(resp.StatusCode)
 		return
 	}
 

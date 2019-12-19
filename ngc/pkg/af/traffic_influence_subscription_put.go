@@ -21,7 +21,7 @@ func modifySubscriptionByPut(cliCtx context.Context, ts TrafficInfluSub,
 		afCtx.cfg.AfID, sID, ts)
 
 	if err != nil {
-		return TrafficInfluSub{}, nil, err
+		return TrafficInfluSub{}, resp, err
 	}
 	return tsResp, resp, nil
 }
@@ -90,7 +90,7 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Errf("Traffic Influence Subscription modify : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(resp.StatusCode)
 		return
 	}
 
