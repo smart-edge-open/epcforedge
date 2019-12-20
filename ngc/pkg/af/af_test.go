@@ -9,7 +9,7 @@ import (
 	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/otcshare/epcforedge/ngc/pkg/af"
+	"github.com/open-ness/epcforedge/ngc/pkg/af"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"

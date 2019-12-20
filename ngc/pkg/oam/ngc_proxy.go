@@ -5,7 +5,7 @@ package oam
 
 import (
 	"errors"
-	logger "github.com/otcshare/common/log"
+	logger "github.com/open-ness/common/log"
 	"net/http"
 )
 
