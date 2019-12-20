@@ -1,0 +1,61 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+apiVersion: v1
+kind: Pod
+metadata: 
+  labels:
+    service: nefservice
+  name: nef
+  namespace: ngc
+spec:
+  volumes:
+  - name: shared-configs
+    hostPath:
+      path: /etc/openness/configs/ngc
+  - name: shared-certs
+    hostPath:
+      path: /etc/openness/certs/ngc
+  containers:
+  - securityContext:
+      privileged: false
+    name: nef-container 
+    image: nef-image:1.0
+    imagePullPolicy: Never
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "./entrypoint.sh" ]
+    resources:
+      requests:
+        memory: 1Gi
+      limits:
+        memory: 1Gi
+    ports:
+    - containerPort: 8060
+    volumeMounts:
+    - name: shared-configs
+      mountPath: /root/configs
+    - name: shared-certs
+      mountPath: /etc/certs
+  restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nefservice
+  labels:
+    service: nefservice
+  namespace: ngc
+spec:
+  type: NodePort
+  ports:
+  - port: 8060
+    targetPort: 8060
+    protocol: TCP
+    name: af 
+  selector:
+    service: nefservice
+
+
+

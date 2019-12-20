@@ -1,0 +1,9 @@
+{
+      "dnai": "c_dnai",
+      "dnn": "c_dnn",
+      "tac": 88,
+      "priDns": "192.168.9.9",
+      "secDns": "192.168.8.8",
+      "upfIp": "192.168.10.18",
+      "snssai": "slice1"
+}

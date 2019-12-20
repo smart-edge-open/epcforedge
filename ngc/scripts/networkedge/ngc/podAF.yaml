@@ -1,0 +1,75 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+apiVersion: v1
+kind: Pod 
+metadata:
+  labels:
+    service: afservice
+  name: af
+  namespace: ngc
+spec:
+  volumes:
+  - name: shared-configs
+    hostPath:
+      path: /etc/openness/configs/ngc
+  - name: shared-certs
+    hostPath:
+      path: /etc/openness/certs/ngc
+  containers:
+  - securityContext:
+      privileged: false
+    name: af-container
+    image: af-image:1.0
+    imagePullPolicy: Never
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "./entrypoint.sh" ]
+    resources:
+      requests:
+        memory: 1Gi
+      limits:
+        memory: 1Gi
+    ports:
+    - containerPort: 8050
+      name: cnca
+    ports:
+    - containerPort: 8051
+      name: nef
+    volumeMounts:
+    - name: shared-configs
+      mountPath: /root/configs
+    - name: shared-certs
+      mountPath: /etc/certs
+  tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: "Exists"
+    effect: "NoSchedule"
+  nodeSelector:
+    5g-openness: "true"
+  restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: afservice
+  labels:
+    service: afservice
+  namespace: ngc
+spec:
+  type: NodePort
+  ports:
+  - port: 8050
+    targetPort: 8050
+    nodePort: 30050
+    protocol: TCP
+    name: cnca
+  - port: 8051
+    targetPort: 8051
+    nodePort: 30051
+    protocol: TCP
+    name: nef   
+  selector:
+    service: afservice
+
