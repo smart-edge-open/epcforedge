@@ -92,7 +92,7 @@ func CreateSubscription(w http.ResponseWriter, r *http.Request) {
 		log.Errf("Traffic Influence Subscription create : %s", err.Error())
 		delete(afCtx.transactions, transID)
 		log.Infof("Deleted transaction ID %v", transID)
-		w.WriteHeader(resp.StatusCode)
+		w.WriteHeader(getStatusCode(resp))
 		return
 	}
 

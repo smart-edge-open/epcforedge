@@ -90,7 +90,7 @@ func ModifySubscriptionPut(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Errf("Traffic Influence Subscription modify : %s", err.Error())
-		w.WriteHeader(resp.StatusCode)
+		w.WriteHeader(getStatusCode(resp))
 		return
 	}
 

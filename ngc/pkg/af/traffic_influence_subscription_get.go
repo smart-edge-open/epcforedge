@@ -58,7 +58,7 @@ func GetSubscription(w http.ResponseWriter, r *http.Request) {
 	tsResp, resp, err = getSubscription(cliCtx, afCtx, subscriptionID)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription get : %s", err.Error())
-		w.WriteHeader(resp.StatusCode)
+		w.WriteHeader(getStatusCode(resp))
 		return
 	}
 

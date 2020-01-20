@@ -67,7 +67,7 @@ func DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	resp, err = deleteSubscription(cliCtx, afCtx, subscriptionID)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription delete: %s", err.Error())
-		w.WriteHeader(resp.StatusCode)
+		w.WriteHeader(getStatusCode(resp))
 		return
 	}
 

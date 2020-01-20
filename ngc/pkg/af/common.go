@@ -17,6 +17,13 @@ import (
 //TransIDMax var
 var TransIDMax = math.MaxInt32
 
+func getStatusCode(r *http.Response) int {
+	if r != nil {
+		return r.StatusCode
+	}
+	return http.StatusInternalServerError
+}
+
 func genAFTransID(trans TransactionIDs) int {
 	var (
 		num   int

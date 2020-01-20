@@ -71,7 +71,7 @@ func ModifySubscriptionPatch(w http.ResponseWriter, r *http.Request) {
 		subscriptionID)
 	if err != nil {
 		log.Errf("Traffic Influence Subscription modify : %s", err.Error())
-		w.WriteHeader(resp.StatusCode)
+		w.WriteHeader(getStatusCode(resp))
 		return
 	}
 	if interMap, ok := afCtx.subscriptions[subscriptionID]; ok {

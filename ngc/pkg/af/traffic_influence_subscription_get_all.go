@@ -49,7 +49,7 @@ func GetAllSubscriptions(w http.ResponseWriter, r *http.Request) {
 	tsResp, resp, err = getAllSubscriptions(cliCtx, afCtx)
 	if err != nil {
 		log.Errf("Traffic Influence Subscriptions get all : %s", err.Error())
-		w.WriteHeader(resp.StatusCode)
+		w.WriteHeader(getStatusCode(resp))
 		return
 	}
 
