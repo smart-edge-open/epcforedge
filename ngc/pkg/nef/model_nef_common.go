@@ -316,16 +316,16 @@ type AccessType string
 // PduSessionID Valid values are 0 to 255
 type PduSessionID uint8
 
-// Unsigned integer identifying a period of time in units of seconds.
+// DurationSec is unsigned integer identifying a period of time in units of seconds.
 type DurationSec uint64
 
-// Unsigned integer identifying a period of time in units of seconds with
+// DurationSecRm is unsigned integer identifying a period of time in units of seconds with
 // "nullable=true" property.
 type DurationSecRm DurationSec
 
-// Unsigned integer identifying a period of time in units of seconds with
+// DurationSecRo is unsigned integer identifying a period of time in units of seconds with
 // "readOnly=true" property.
 type DurationSecRo DurationSec
 
-// String providing an application identifier.
-type ApplicationId string
+// ApplicationID is string providing an application identifier.
+type ApplicationID string

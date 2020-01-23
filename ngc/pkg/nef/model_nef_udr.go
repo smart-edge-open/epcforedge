@@ -110,7 +110,7 @@ type NetworkAreaInfo struct {
 // PfdContent represents the content of a PFD for an application identifier.
 type PfdContent struct {
 	// Identifies a PDF of an application identifier.
-	PfdId string `json:"pfdId,omitempty"`
+	PfdID string `json:"pfdID,omitempty"`
 	// Represents a 3-tuple with protocol, server ip and server port for
 	// UL/DL application traffic.
 	FlowDescriptions []string `json:"flowDescriptions,omitempty"`
@@ -125,7 +125,7 @@ type PfdContent struct {
 // PfdDataForApp represents the PFDs for an application identifier
 type PfdDataForApp struct {
 	// Identifier of an application.
-	AppId ApplicationId `json:"appId"`
+	AppID ApplicationID `json:"appID"`
 	// PFDs for the application identifier.
 	Pfds []PfdContent `json:"pfds"`
 	// Caching time for an application identifier.
