@@ -147,7 +147,7 @@ type TemporalValidity struct {
 // Identifier
 type Pfd struct {
 	// Identifies a PDF of an application identifier.
-	PfdId string `json:"pfdId"`
+	PfdID string `json:"pfdID"`
 	// Represents a 3-tuple with protocol, server ip and server port for UL/DL
 	// application traffic. The content of the string has the same encoding as
 	// the IPFilterRule AVP value as defined in IETFÂ RFCÂ 6733.
@@ -164,7 +164,7 @@ type Pfd struct {
 // PFD(s) for one external application identifier provided by AF
 type PfdData struct {
 	// Each element uniquely identifies external application identifier
-	ExternalAppId string `json:"externalAppId"`
+	ExternalAppID string `json:"externalAppID"`
 	// Link to the resource. This parameter shall be supplied by the NEF in
 	// HTTP responses that include an object of PfdData type
 	Self Link `json:"self,omitempty"`
@@ -196,9 +196,9 @@ type PfdManagement struct {
 	PfdDatas map[string]PfdData `json:"pfdDatas"`
 	// Supplied by the AF and contains the external application identifiers
 	// for which PFD(s) are not added or modified successfully. The failure
-	// reason is also included. Each element provides the related information for
-	// one or more external application identifier(s) and is identified in the
-	// map via the failure identifier as key.
+	// reason is also included. Each element provides the related information
+	// for one or more external application identifier(s) and is identified in
+	// the map via the failure identifier as key.
 	PfdReports map[string]PfdReport `json:"pfdReports,omitempty"`
 }
 
@@ -209,19 +209,19 @@ type FailureCode string
 const (
 	// This value indicates that something functions wrongly in PFD provisioning
 	// or the PFD provisioning does not function at all.
-	MALFUNCTION FailureCode = "MALFUNCTION"
+	Malfunction FailureCode = "MALFUNCTION"
 	// This value indicates there is resource limitation for PFD storage.
-	RESOURCE_LIMITATION = "RESOURCE_LIMITATION"
+	ResourceLimitation = "RESOURCE_LIMITATION"
 	// This value indicates that the allowed delay is too short and PFD(s) are
 	// not stored
-	SHORT_DELAY = "SHORT_DELAY"
+	ShortDelay = "SHORT_DELAY"
 	// The received external application identifier(s) are already provisioned
-	APP_ID_DUPLICATED = "APP_ID_DUPLICATED"
+	AppIDDuplicated = "APP_ID_DUPLICATED"
 	// Other reason specified
-	OTHER_REASON = "OTHER_REASON"
+	OtherReason = "OTHER_REASON"
 )
 
-// PfdRreport is the type that represents a PFD report to indicate the
+// PfdReport is the type that represents a PFD report to indicate the
 // external application identifier(s) which PFD(s) are not added or
 // modified successfully and corresponding failure reason.
 type PfdReport struct {
