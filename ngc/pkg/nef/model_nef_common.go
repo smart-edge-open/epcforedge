@@ -320,9 +320,12 @@ type PduSessionID uint8
 type DurationSec uint64
 
 // Unsigned integer identifying a period of time in units of seconds with
-//"nullable=true" property.
+// "nullable=true" property.
 type DurationSecRm DurationSec
 
 // Unsigned integer identifying a period of time in units of seconds with
 // "readOnly=true" property.
 type DurationSecRo DurationSec
+
+// String providing an application identifier.
+type ApplicationId string
