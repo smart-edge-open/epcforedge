@@ -73,7 +73,7 @@ type nefSBRspData struct {
 	pd        ProblemDetails
 }
 
-//Creates a AF instance
+//Creates an AF instance
 func (af *afData) afCreate(nefCtx *nefContext, afID string) error {
 
 	//Validate afid ??
