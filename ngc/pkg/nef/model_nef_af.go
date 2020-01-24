@@ -171,8 +171,8 @@ type PfdData struct {
 	// Contains the PFDs of the external application identifier. Each PFD is
 	// identified in the map via a key containing the PFD identifier.
 	Pfds map[string]Pfd `json:"pfds"`
-	// Indicates that the list of PFDs in this request should be deployed within
-	// the time interval indicated by the Allowed Delay
+	// Indicates that the list of PFDs in this request should be deployed
+	// within the time interval indicated by the Allowed Delay
 	AllowedDelay DurationSecRm `json:"allowedDelay,omitempty"`
 	// SCEF supplied property, inclusion of this property means the allowed
 	// delayed cannot be satisfied, i.e. it is smaller than the caching time,
@@ -207,8 +207,8 @@ type FailureCode string
 
 // Possible values of FailureCode
 const (
-	// This value indicates that something functions wrongly in PFD provisioning
-	// or the PFD provisioning does not function at all.
+	// This value indicates that something functions wrongly in PFD
+	// provisioning or the PFD provisioning does not function at all.
 	Malfunction FailureCode = "MALFUNCTION"
 	// This value indicates there is resource limitation for PFD storage.
 	ResourceLimitation = "RESOURCE_LIMITATION"
