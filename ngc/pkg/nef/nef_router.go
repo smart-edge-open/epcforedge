@@ -25,6 +25,7 @@ type Route struct {
 // NEFRoutes : NEF Routes lists which contains Routes with different HTTP
 //             Request handlers for NEF
 var NEFRoutes = []Route{
+	// Traffic Influence Routes
 	{
 		"ReadAllTrafficInfluenceSubscription",
 		strings.ToUpper("Get"),
@@ -61,6 +62,68 @@ var NEFRoutes = []Route{
 		"/3gpp-traffic-influence/v1/{afId}/subscriptions/{subscriptionId}",
 		DeleteTrafficInfluenceSubscription,
 	},
+	// PFD Management Routes
+	{
+		"ReadAllPFDManagementTransaction",
+		strings.ToUpper("Get"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions",
+		ReadAllPFDManagementTransaction,
+	},
+
+	{
+		"CreatePFDManagementTransaction",
+		strings.ToUpper("Post"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions",
+		CreatePFDManagementTransaction,
+	},
+	/*
+		{
+			"ReadPFDManagementTransaction",
+			strings.ToUpper("Get"),
+			"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+			ReadPFDManagementTransaction,
+		},
+		{
+			"UpdatePFDManagementTransaction",
+			strings.ToUpper("Put"),
+			"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+			UpdatePFDManagementTransaction,
+		},
+		{
+			"DeletePFDManagementTransaction",
+			strings.ToUpper("Delete"),
+			"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+			DeletePFDManagementTransaction,
+		},
+		{
+			"ReadPFDManagementApplication",
+			strings.ToUpper("Get"),
+			`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/
+			applications/{appId}`,
+			ReadPFDManagementApplication,
+		},
+		{
+			"UpdatePFDManagementApplication",
+			strings.ToUpper("Put"),
+			`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/
+			applications/{appId}`,
+			UpdatePFDManagementApplication,
+		},
+		{
+			"PatchPFDManagementApplication",
+			strings.ToUpper("Patch"),
+			`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/
+			applications/{appId}`,
+			PatchPFDManagementApplication,
+		},
+		{
+			"DeletePFDManagementApplication",
+			strings.ToUpper("Delete"),
+			`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/
+			applications/{appId}`,
+			DeletePFDManagementApplication,
+		},
+	*/
 }
 
 type nefCtxKey string

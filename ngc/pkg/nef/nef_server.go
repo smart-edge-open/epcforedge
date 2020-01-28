@@ -8,13 +8,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
-	logtool "github.com/otcshare/common/log"
-	"golang.org/x/net/http2"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
 	"time"
+
+	"github.com/gorilla/mux"
+	logtool "github.com/otcshare/common/log"
+	"golang.org/x/net/http2"
 )
 
 // NefApp structure to store the variables/contexts for access in UT
@@ -52,6 +53,7 @@ type Config struct {
 	MaxSubSupport             int    `json:"maxSubSupport"`
 	MaxAFSupport              int    `json:"maxAFSupport"`
 	SubStartID                int    `json:"subStartID"`
+	PfdTransStartID           int    `json:"pfdTransStartID"`
 	UpfNotificationResURIPath string `json:"UpfNotificationResUriPath"`
 	UserAgent                 string `json:"UserAgent"`
 	HTTPConfig                HTTPConfig

@@ -42,6 +42,19 @@ type NEFSBPatchFn func(subData *afSubscription, nefCtx *nefContext,
 type NEFSBDeleteFn func(subData *afSubscription, nefCtx *nefContext) (
 	rsp nefSBRspData, err error)
 
+/*
+//NEFSBGetPfdFn is the callback for SB API to get PFD transaction
+type NEFSBGetPfdFn func(transData *afPfdTransaction, nefCtx *nefContext) (
+	trans PfdManagement, rsp nefSBRspData, err error)
+
+//NEFSBPutPfdFn is the callback for SB API to put PFD transaction
+type NEFSBPutPfdFn func(transData *afPfdTransaction, nefCtx *nefContext,
+	trans PfdManagement) (rsp nefSBRspData, err error)
+
+//NEFSBDeletePfdFn is the callback for SB API to delete PFD transaction
+type NEFSBDeletePfdFn func(transData *afPfdTransaction, nefCtx *nefContext) (
+	trans PfdManagement, err error)
+*/
 //PCF Subscription data
 type afSubscription struct {
 	subid string
@@ -60,12 +73,25 @@ type afSubscription struct {
 	NEFSBDelete               NEFSBDeleteFn
 }
 
+//PFD transaction data
+type afPfdTransaction struct {
+	transID       string
+	pfdManagement PfdManagement
+	/*
+		NEFSBPfdGet    NEFSBGetPfdFn
+		NEFSBPfdPut    NEFSBPutPfdFn
+		NEFSBPfdDelete NEFSBDeletePfdFn
+	*/
+}
+
 //AF data
 type afData struct {
 	afID       string
 	subIDnum   int
+	transIDnum int
 	maxSubSupp int
 	subs       map[string]*afSubscription
+	trans      map[string]*afPfdTransaction
 }
 
 type nefSBRspData struct {
@@ -80,8 +106,11 @@ func (af *afData) afCreate(nefCtx *nefContext, afID string) error {
 
 	af.afID = afID
 	af.subIDnum = nefCtx.cfg.SubStartID //Start Number
+	af.transIDnum = nefCtx.cfg.PfdTransStartID
 	af.maxSubSupp = nefCtx.cfg.MaxSubSupport
 	af.subs = make(map[string]*afSubscription)
+	//PFD transaction
+	af.trans = make(map[string]*afPfdTransaction)
 	return nil
 }
 
@@ -1074,4 +1103,100 @@ func getNetworkAreaInfo(cliCtx context.Context, nefCtx *nefContext,
 	nwAreaInfo.Tais[0].Tac = "TAC_01"
 
 	return nil
+}
+
+//PFD Management functions
+func (af *afData) afGetPfdTransaction(nefCtx *nefContext,
+	transID string) (rsp nefSBRspData, trans PfdManagement, err error) {
+
+	transPfd, ok := af.trans[transID]
+
+	if !ok {
+		rsp.errorCode = 404
+		rsp.pd.Title = subNotFound
+		return rsp, trans, errors.New(subNotFound)
+	}
+
+	//ti, rsp, err = sub.NEFSBGet(sub, nefCtx)
+
+	/*
+		if err != nil {
+			log.Infoln("Failed to Get Subscription")
+			return rsp, ti, err
+		}
+
+		return rsp, ti, err
+	*/
+
+	//Return locally
+	return rsp, transPfd.pfdManagement, err
+}
+
+func (af *afData) afGetPfdTransactionList(nefCtx *nefContext) (rsp nefSBRspData,
+	transList []PfdManagement, err error) {
+
+	var transPfd PfdManagement
+
+	if len(af.trans) > 0 {
+
+		for key := range af.subs {
+
+			rsp, transPfd, err = af.afGetPfdTransaction(nefCtx, key)
+
+			if err != nil {
+				return rsp, transList, err
+			}
+			transList = append(transList, transPfd)
+		}
+	}
+	return rsp, transList, err
+}
+
+//Creates a new subscription
+func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
+	trans PfdManagement) (loc string, rsp nefSBRspData, err error) {
+
+	/*Check if max subscription reached */
+	if len(af.trans) >= nefCtx.cfg.MaxSubSupport {
+
+		rsp.errorCode = 400
+		rsp.pd.Title = "MAX Transaction Reached"
+		return "", rsp, errors.New("MAX TRANS Created")
+	}
+
+	//Generate a unique subscription ID string
+	transIDStr := strconv.Itoa(af.transIDnum)
+	af.transIDnum++
+
+	//Create PFD transaction data
+	aftrans := afPfdTransaction{transID: transIDStr, pfdManagement: trans}
+
+	/*rsp, err = nefSBUDRPost(&afsub, nefCtx, ti)
+
+	if err != nil {
+
+		//Return error
+		return "", rsp, err
+	}
+
+	//Store Notification Destination URI
+	afsub.afNotificationDestination = ti.NotificationDestination
+
+	afsub.NEFSBGet = nefSBUDRGet
+	afsub.NEFSBPut = nefSBUDRPut
+	afsub.NEFSBPatch = nefSBUDRPatch
+	afsub.NEFSBDelete = nefSBUDRDelete
+	*/
+	//Link the subscription with the AF
+	af.trans[transIDStr] = &aftrans
+
+	//Create Location URI
+	loc = nefCtx.nef.locationURLPrefix + af.afID + "/transactions/" +
+		transIDStr
+
+	aftrans.pfdManagement.Self = Link(loc)
+
+	log.Infoln(" NEW AF PFD transaction added " + transIDStr)
+
+	return loc, rsp, nil
 }
