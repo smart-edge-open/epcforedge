@@ -34,11 +34,11 @@ type PfdData struct {
 	Pfds map[string]Pfd `json:"pfds"`
 	// Indicates that the list of PFDs in this request should be deployed
 	// within the time interval indicated by the Allowed Delay
-	AllowedDelay DurationSecRm `json:"allowedDelay,omitempty"`
+	AllowedDelay *DurationSecRm `json:"allowedDelay,omitempty"`
 	// SCEF supplied property, inclusion of this property means the allowed
 	// delayed cannot be satisfied, i.e. it is smaller than the caching time,
 	// but the PFD data is still stored.
-	CachingTime DurationSecRo `json:"cachingTime,omitempty"`
+	CachingTime *DurationSecRo `json:"cachingTime,omitempty"`
 }
 
 // PfdManagement resource for a PFD management request
@@ -49,13 +49,13 @@ type PfdManagement struct {
 	// String identifying supported optional features of PFD Management
 	// This attribute shall be provided in the POST request and in the
 	// response of successful resource creation.
-	SuppFeat SupportedFeatures `json:"suppFeat,omitempty"`
+	SuppFeat *SupportedFeatures `json:"suppFeat,omitempty"`
 	// Each element uniquely identifies the PFDs for an external application
 	// identifier. Each element is identified in the map via an external
 	// application identifier as key. The response shall include successfully
 	// provisioned PFD data of application(s).
 	PfdDatas map[string]PfdData `json:"pfdDatas"`
-	// Supplied by the AF and contains the external application identifiers
+	// Supplied by the NEF and contains the external application identifiers
 	// for which PFD(s) are not added or modified successfully. The failure
 	// reason is also included. Each element provides the related information
 	// for one or more external application identifier(s) and is identified in
@@ -93,5 +93,5 @@ type PfdReport struct {
 	FailureCode FailureCode `json:"failureCode"`
 	// It shall be included when the allowed delayed cannot be satisfied, i.e.
 	// it is smaller than the caching time configured in fetching PFD.
-	CachingTime DurationSec `json:"cachingTime,omitempty"`
+	CachingTime *DurationSec `json:"cachingTime,omitempty"`
 }
