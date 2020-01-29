@@ -26,5 +26,5 @@ type PfdDataForApp struct {
 	// PFDs for the application identifier.
 	Pfds []PfdContent `json:"pfds"`
 	// Caching time for an application identifier.
-	CachingTime DateTime `json:"cachingTime,omitempty"`
+	CachingTime *DateTime `json:"cachingTime,omitempty"`
 }
