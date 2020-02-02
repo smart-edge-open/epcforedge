@@ -6,7 +6,9 @@ package ngcnef
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	//"strconv"
 )
 
@@ -88,4 +90,14 @@ func logNef(nef *nefData) {
 		}
 	}
 
+}
+
+// LoadJSONConfig reads a file located at configPath and unmarshals it to
+// config structure
+func loadJSONConfig(configPath string, config interface{}) error {
+	cfgData, err := ioutil.ReadFile(filepath.Clean(configPath))
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(cfgData, config)
 }

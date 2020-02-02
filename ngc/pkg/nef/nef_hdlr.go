@@ -16,14 +16,15 @@ const subNotFound string = "Subscription Not Found"
 
 //NEF context data
 type nefData struct {
-	ctx                context.Context
-	afCount            int
-	locationURLPrefix  string
-	pcfClient          PcfPolicyAuthorization
-	udrClient          UdrInfluenceData
-	corrID             uint
-	afs                map[string]*afData
-	upfNotificationURL URI
+	ctx                  context.Context
+	afCount              int
+	locationURLPrefix    string
+	locationURLPrefixPfd string
+	pcfClient            PcfPolicyAuthorization
+	udrClient            UdrInfluenceData
+	corrID               uint
+	afs                  map[string]*afData
+	upfNotificationURL   URI
 }
 
 //NEFSBGetFn is the callback for SB API
@@ -392,6 +393,23 @@ func getNefLocationURLPrefix(cfg *Config) string {
 
 }
 
+// Generate the notification uri for PFD
+func getNefLocationURLPrefixPfd(cfg *Config) string {
+
+	var uri string
+	// If http2 port is configured use it else http port
+	if cfg.HTTP2Config.Endpoint != "" {
+		uri = "https://" + cfg.NefAPIRoot +
+			cfg.HTTP2Config.Endpoint
+	} else {
+		uri = "http://" + cfg.NefAPIRoot +
+			cfg.HTTPConfig.Endpoint
+	}
+	uri += cfg.LocationPrefixPfd
+	return uri
+
+}
+
 //Initialize the NEF component
 func (nef *nefData) nefCreate(ctx context.Context, cfg Config) error {
 
@@ -419,6 +437,10 @@ func (nef *nefData) nefCreate(ctx context.Context, cfg Config) error {
 	// Generate the location url prefix
 	nef.locationURLPrefix = getNefLocationURLPrefix(&cfg)
 	log.Infof("NEF Location URL Prefix :%s", nef.locationURLPrefix)
+
+	// Generate the location url prefix for PFD
+	nef.locationURLPrefixPfd = getNefLocationURLPrefixPfd(&cfg)
+	log.Infof("NEF Location URL Prefix :%s", nef.locationURLPrefixPfd)
 
 	// Genereate the notification url
 	if cfg.UpfNotificationResURIPath == "" {
@@ -1139,7 +1161,7 @@ func (af *afData) afGetPfdTransactionList(nefCtx *nefContext) (rsp nefSBRspData,
 
 	if len(af.trans) > 0 {
 
-		for key := range af.subs {
+		for key := range af.trans {
 
 			rsp, transPfd, err = af.afGetPfdTransaction(nefCtx, key)
 
@@ -1163,7 +1185,6 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 		rsp.pd.Title = "MAX Transaction Reached"
 		return "", rsp, errors.New("MAX TRANS Created")
 	}
-
 	//Generate a unique subscription ID string
 	transIDStr := strconv.Itoa(af.transIDnum)
 	af.transIDnum++
@@ -1191,7 +1212,7 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	af.trans[transIDStr] = &aftrans
 
 	//Create Location URI
-	loc = nefCtx.nef.locationURLPrefix + af.afID + "/transactions/" +
+	loc = nefCtx.nef.locationURLPrefixPfd + af.afID + "/transactions/" +
 		transIDStr
 
 	aftrans.pfdManagement.Self = Link(loc)
