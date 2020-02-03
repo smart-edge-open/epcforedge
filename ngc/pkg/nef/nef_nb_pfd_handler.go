@@ -6,8 +6,10 @@ package ngcnef
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	//"strconv"
 
@@ -163,5 +165,117 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 	}
 	nef := &nefCtx.nef
 	logNef(nef)
+
+}
+
+//PFD Management functions
+func (af *afData) afGetPfdTransaction(nefCtx *nefContext,
+	transID string) (rsp nefSBRspData, trans PfdManagement, err error) {
+
+	transPfd, ok := af.pfdtrans[transID]
+
+	if !ok {
+		rsp.errorCode = 404
+		rsp.pd.Title = subNotFound
+		return rsp, trans, errors.New(subNotFound)
+	}
+
+	//ti, rsp, err = sub.NEFSBGet(sub, nefCtx)
+
+	/*
+		if err != nil {
+			log.Infoln("Failed to Get Subscription")
+			return rsp, ti, err
+		}
+
+		return rsp, ti, err
+	*/
+
+	//Return locally
+	return rsp, transPfd.pfdManagement, err
+}
+
+func (af *afData) afGetPfdTransactionList(nefCtx *nefContext) (rsp nefSBRspData,
+	transList []PfdManagement, err error) {
+
+	var transPfd PfdManagement
+
+	if len(af.pfdtrans) > 0 {
+
+		for key := range af.pfdtrans {
+
+			rsp, transPfd, err = af.afGetPfdTransaction(nefCtx, key)
+
+			if err != nil {
+				return rsp, transList, err
+			}
+			transList = append(transList, transPfd)
+		}
+	}
+	return rsp, transList, err
+}
+
+//Creates a new subscription
+func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
+	trans PfdManagement) (loc string, rsp nefSBRspData, err error) {
+
+	/*Check if max subscription reached */
+	if len(af.pfdtrans) >= nefCtx.cfg.MaxSubSupport {
+
+		rsp.errorCode = 400
+		rsp.pd.Title = "MAX Transaction Reached"
+		return "", rsp, errors.New("MAX TRANS Created")
+	}
+	//Generate a unique subscription ID string
+	transIDStr := strconv.Itoa(af.transIDnum)
+	af.transIDnum++
+
+	//Create PFD transaction data
+	aftrans := afPfdTransaction{transID: transIDStr, pfdManagement: trans}
+
+	/*rsp, err = nefSBUDRPost(&afsub, nefCtx, ti)
+
+	if err != nil {
+
+		//Return error
+		return "", rsp, err
+	}
+
+	//Store Notification Destination URI
+	afsub.afNotificationDestination = ti.NotificationDestination
+
+	afsub.NEFSBGet = nefSBUDRGet
+	afsub.NEFSBPut = nefSBUDRPut
+	afsub.NEFSBPatch = nefSBUDRPatch
+	afsub.NEFSBDelete = nefSBUDRDelete
+	*/
+	//Link the subscription with the AF
+	af.pfdtrans[transIDStr] = &aftrans
+
+	//Create Location URI
+	loc = nefCtx.nef.locationURLPrefixPfd + af.afID + "/transactions/" +
+		transIDStr
+
+	aftrans.pfdManagement.Self = Link(loc)
+
+	log.Infoln(" NEW AF PFD transaction added " + transIDStr)
+
+	return loc, rsp, nil
+}
+
+// Generate the notification uri for PFD
+func getNefLocationURLPrefixPfd(cfg *Config) string {
+
+	var uri string
+	// If http2 port is configured use it else http port
+	if cfg.HTTP2Config.Endpoint != "" {
+		uri = "https://" + cfg.NefAPIRoot +
+			cfg.HTTP2Config.Endpoint
+	} else {
+		uri = "http://" + cfg.NefAPIRoot +
+			cfg.HTTPConfig.Endpoint
+	}
+	uri += cfg.LocationPrefixPfd
+	return uri
 
 }
