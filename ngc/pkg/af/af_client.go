@@ -91,6 +91,8 @@ func NewClient(cfg *CliConfig) *Client {
 		(*TrafficInfluenceSubscriptionPutAPIService)(&c.common)
 	c.PfdManagementGetAllAPI =
 		(*PfdManagementTransactionGetAllAPIService)(&c.common)
+	c.PfdManagementPostAPI =
+		(*PfdManagementTransactionPostAPIService)(&c.common)
 
 	return c
 }
