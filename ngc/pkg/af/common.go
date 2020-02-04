@@ -114,6 +114,30 @@ func getPfdTransIDFromURL(u *url.URL) (string, error) {
 	}
 }
 
+func getPfdAppIDFromURL(u *url.URL) (string, error) {
+
+	if u == nil {
+		return "", errors.New("empty URL in the request message")
+	}
+
+	pURL := u.String()
+
+	// It is assumed the URL address
+	// ends with  "/applications/{applicationID}"
+	s := strings.Split(pURL, "applications")
+	switch len(s) {
+	case 1:
+		return "", errors.New("applicationID was not found " +
+			"in the URL string")
+	case 2:
+		aID := strings.Replace(s[1], "/", "", -1)
+		return aID, nil
+
+	default:
+		return "", errors.New("wrong URL")
+	}
+}
+
 func handleGetErrorResp(r *http.Response,
 	body []byte) error {
 

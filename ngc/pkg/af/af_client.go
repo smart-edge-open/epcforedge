@@ -35,17 +35,19 @@ type Client struct {
 	// the heap.
 	common service
 	// API Services
-	TrafficInfluSubGetAllAPI *TrafficInfluenceSubscriptionGetAllAPIService
-	TrafficInfluSubDeleteAPI *TrafficInfluenceSubscriptionDeleteAPIService
-	TrafficInfluSubGetAPI    *TrafficInfluenceSubscriptionGetAPIService
-	TrafficInfluSubPatchAPI  *TrafficInfluenceSubscriptionPatchAPIService
-	TrafficInfluSubPostAPI   *TrafficInfluenceSubscriptionPostAPIService
-	TrafficInfluSubPutAPI    *TrafficInfluenceSubscriptionPutAPIService
-	PfdManagementGetAllAPI   *PfdManagementTransactionGetAllAPIService
-	PfdManagementPostAPI     *PfdManagementTransactionPostAPIService
-	PfdManagementGetAPI      *PfdManagementTransactionGetAPIService
-	PfdManagementDeleteAPI   *PfdManagementTransactionDeleteAPIService
-	PfdManagementPutAPI      *PfdManagementTransactionPutAPIService
+	TrafficInfluSubGetAllAPI  *TrafficInfluenceSubscriptionGetAllAPIService
+	TrafficInfluSubDeleteAPI  *TrafficInfluenceSubscriptionDeleteAPIService
+	TrafficInfluSubGetAPI     *TrafficInfluenceSubscriptionGetAPIService
+	TrafficInfluSubPatchAPI   *TrafficInfluenceSubscriptionPatchAPIService
+	TrafficInfluSubPostAPI    *TrafficInfluenceSubscriptionPostAPIService
+	TrafficInfluSubPutAPI     *TrafficInfluenceSubscriptionPutAPIService
+	PfdManagementGetAllAPI    *PfdManagementTransactionGetAllAPIService
+	PfdManagementPostAPI      *PfdManagementTransactionPostAPIService
+	PfdManagementGetAPI       *PfdManagementTransactionGetAPIService
+	PfdManagementDeleteAPI    *PfdManagementTransactionDeleteAPIService
+	PfdManagementPutAPI       *PfdManagementTransactionPutAPIService
+	PfdManagementAppGetAPI    *PfdManagementTransactionAppGetAPIService
+	PfdManagementAppDeleteAPI *PfdManagementTransactionAppDeleteAPIService
 }
 
 type service struct {
@@ -102,6 +104,10 @@ func NewClient(cfg *CliConfig) *Client {
 		(*PfdManagementTransactionDeleteAPIService)(&c.common)
 	c.PfdManagementPutAPI =
 		(*PfdManagementTransactionPutAPIService)(&c.common)
+	c.PfdManagementAppGetAPI =
+		(*PfdManagementTransactionAppGetAPIService)(&c.common)
+	c.PfdManagementAppDeleteAPI =
+		(*PfdManagementTransactionAppDeleteAPIService)(&c.common)
 
 	return c
 }

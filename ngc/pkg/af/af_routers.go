@@ -161,4 +161,18 @@ var afRoutes = Routes{
 		"/af/v1/pfd/transactions/{transactionId}",
 		PutPfdTransaction,
 	},
+
+	Route{
+		"GetPfdAppTransaction",
+		strings.ToUpper("Get"),
+		"/af/v1/pfd/transactions/{transactionId}/applications{applicationId}",
+		GetPfdAppTransaction,
+	},
+
+	Route{
+		"DeletePfdAppTransaction",
+		strings.ToUpper("Delete"),
+		"/af/v1/pfd/transactions/{transactionId}/applications{applicationId}",
+		DeletePfdAppTransaction,
+	},
 }
