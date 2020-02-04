@@ -17,64 +17,56 @@ var (
 	_ context.Context
 )
 
-// PfdManagementTransactionAppDeleteAPIService type
-type PfdManagementTransactionAppDeleteAPIService service
+// PfdManagementTransactionAppPatchAPIService type
+type PfdManagementTransactionAppPatchAPIService service
 
-func (a *PfdManagementTransactionAppDeleteAPIService) handlePfdAppDeleteResp(
-	r *http.Response, body []byte) error {
+func (a *PfdManagementTransactionAppPatchAPIService) handleAppPatchResponse(
+	ts *PfdData, r *http.Response,
+	body []byte) error {
 
-	newErr := GenericError{
-		body:  body,
-		error: r.Status,
-	}
-
-	switch r.StatusCode {
-
-	case 400, 401, 403, 404, 429, 500, 503:
-
-		var v ProblemDetails
-		err := json.Unmarshal(body, &v)
+	if r.StatusCode == 200 {
+		err := json.Unmarshal(body, ts)
 		if err != nil {
-			newErr.error = err.Error()
-			return newErr
+			log.Errf("Error decoding response body %s, ", err.Error())
 		}
-		newErr.model = v
-		return newErr
-
-	default:
-		b, _ := ioutil.ReadAll(r.Body)
-		err := fmt.Errorf("NEF returned error - %s, %s", r.Status, string(b))
 		return err
 	}
+
+	return handlePostPutPatchErrorResp(r, body)
+
 }
 
 /*
-PfdAppTransactionDelete Deletes an already
-existing PFD transaction for an existing application identifier
-Deletes an already existing pfd transaction
+PfdAppTransactionPatch Updates an existing pfd transaction for an app ID
  * @param ctx context.Context - for authentication, logging, cancellation,
- * deadlines, tracing, etc. Passed from http.Request or context.Background().
+ * 	deadlines, tracing, etc. Passed from http.Request or
+ *	context.Background().
  * @param afID Identifier of the AF
- * @param pfdTrans Identifier of the subscription resource
- * @param
+ * @param pfdTransId Identifier of the pfdData
+ * @param appID Identifier of the external application
+ * @param body Provides a pfd data for pfd management identified by
+ *	transaction id and appID
+
+@return PfdData
 */
-func (a *PfdManagementTransactionAppDeleteAPIService) PfdAppTransactionDelete(
-	ctx context.Context, afID string, pfdTrans string, appID string) (
-	*http.Response, error) {
+func (a *PfdManagementTransactionAppPatchAPIService) PfdAppTransactionPatch(
+	ctx context.Context, afID string, pfdTransID string, appID string,
+	body PfdData) (PfdData, *http.Response, error) {
+
 	var (
-		method     = strings.ToUpper("Delete")
-		deleteBody interface{}
+		method    = strings.ToUpper("Patch")
+		patchBody interface{}
+		ret       PfdData
 	)
 
-	// create path and map variables
 	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
 		a.client.cfg.NEFPort + a.client.cfg.NEFPFDPath +
-		"/{afId}/transactions/{transactionId}/applications/{applicationId}"
+		"/{afId}/transactions/{transactionId}/application/{applicationId}"
 
 	path = strings.Replace(path,
 		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
 	path = strings.Replace(path,
-		"{"+"transactionId"+"}", fmt.Sprintf("%v", pfdTrans), -1)
+		"{"+"transactionId"+"}", fmt.Sprintf("%v", pfdTransID), -1)
 	path = strings.Replace(path,
 		"{"+"applicationId"+"}", fmt.Sprintf("%v", appID), -1)
 
@@ -97,15 +89,17 @@ func (a *PfdManagementTransactionAppDeleteAPIService) PfdAppTransactionDelete(
 	if headerAccept != "" {
 		headerParams["Accept"] = headerAccept
 	}
+	// body params
+	patchBody = &body
 	r, err := a.client.prepareRequest(ctx, path, method,
-		deleteBody, headerParams)
+		patchBody, headerParams)
 	if err != nil {
-		return nil, err
+		return ret, nil, err
 	}
 
 	resp, err := a.client.callAPI(r)
 	if err != nil || resp == nil {
-		return resp, err
+		return ret, resp, err
 	}
 
 	respBody, err := ioutil.ReadAll(resp.Body)
@@ -118,16 +112,14 @@ func (a *PfdManagementTransactionAppDeleteAPIService) PfdAppTransactionDelete(
 
 	if err != nil {
 		log.Errf("http response body could not be read")
-		return resp, err
+		return ret, resp, err
 	}
 
-	if resp.StatusCode > 300 {
-		if err = a.handlePfdAppDeleteResp(resp,
-			respBody); err != nil {
+	if err = a.handleAppPatchResponse(&ret, resp,
+		respBody); err != nil {
 
-			return resp, err
-		}
+		return ret, resp, err
 	}
 
-	return resp, nil
+	return ret, resp, nil
 }

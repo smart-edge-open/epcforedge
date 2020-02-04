@@ -182,4 +182,11 @@ var afRoutes = Routes{
 		"/af/v1/pfd/transactions/{transactionId}/applications{applicationId}",
 		PutPfdAppTransaction,
 	},
+
+	Route{
+		"PatchPfdAppTransaction",
+		strings.ToUpper("Patch"),
+		"/af/v1/pfd/transactions/{transactionId}/applications{applicationId}",
+		PatchPfdAppTransaction,
+	},
 }

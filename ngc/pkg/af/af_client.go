@@ -49,6 +49,7 @@ type Client struct {
 	PfdManagementAppGetAPI    *PfdManagementTransactionAppGetAPIService
 	PfdManagementAppDeleteAPI *PfdManagementTransactionAppDeleteAPIService
 	PfdManagementAppPutAPI    *PfdManagementTransactionAppPutAPIService
+	PfdManagementAppPatchAPI  *PfdManagementTransactionAppPatchAPIService
 }
 
 type service struct {
@@ -111,6 +112,8 @@ func NewClient(cfg *CliConfig) *Client {
 		(*PfdManagementTransactionAppDeleteAPIService)(&c.common)
 	c.PfdManagementAppPutAPI =
 		(*PfdManagementTransactionAppPutAPIService)(&c.common)
+	c.PfdManagementAppPatchAPI =
+		(*PfdManagementTransactionAppPatchAPIService)(&c.common)
 
 	return c
 }

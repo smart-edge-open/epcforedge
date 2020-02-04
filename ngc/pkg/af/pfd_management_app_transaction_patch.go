@@ -1,0 +1,79 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright © 2019 Intel Corporation
+
+package af
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+)
+
+func patchPfdAppTransaction(cliCtx context.Context, pfdData PfdData,
+	afCtx *Context, pfdID string, appID string) (PfdData,
+	*http.Response, error) {
+
+	cliCfg := NewConfiguration(afCtx)
+	cli := NewClient(cliCfg)
+
+	tsRet, resp, err := cli.PfdManagementAppPatchAPI.PfdAppTransactionPatch(
+		cliCtx, afCtx.cfg.AfID, pfdID, appID, pfdData)
+
+	if err != nil {
+		return PfdData{}, resp, err
+	}
+	return tsRet, resp, nil
+}
+
+// PatchPfdAppTransaction function
+func PatchPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
+	var (
+		err        error
+		pfdData    PfdData
+		resp       *http.Response
+		pfdTransID string
+		appID      string
+	)
+
+	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
+	if afCtx == nil {
+		log.Errf("Pfd Management Application patch: " +
+			"af-ctx retrieved from request is nil")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	cliCtx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+	if err = json.NewDecoder(r.Body).Decode(&pfdData); err != nil {
+		log.Errf("Pfd Management Application patch %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	pfdTransID, err = getPfdTransIDFromURL(r.URL)
+	if err != nil {
+		log.Errf("Pfd Management Application patch %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	appID, err = getPfdAppIDFromURL(r.URL)
+	if err != nil {
+		log.Errf("Pfd Management Application patch %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	_, resp, err = patchPfdAppTransaction(cliCtx, pfdData, afCtx,
+		pfdTransID, appID)
+	if err != nil {
+		log.Errf("Pfd Management Application patch : %s", err.Error())
+		w.WriteHeader(getStatusCode(resp))
+		return
+	}
+	w.WriteHeader(resp.StatusCode)
+}

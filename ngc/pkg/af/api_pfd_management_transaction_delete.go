@@ -67,7 +67,7 @@ func (a *PfdManagementTransactionDeleteAPIService) PfdTransactionDelete(
 
 	// create path and map variables
 	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
-		a.client.cfg.NEFPort + a.client.cfg.NEFBasePath +
+		a.client.cfg.NEFPort + a.client.cfg.NEFPFDPath +
 		"/{afId}/transactions/{transactionId}"
 
 	path = strings.Replace(path,
