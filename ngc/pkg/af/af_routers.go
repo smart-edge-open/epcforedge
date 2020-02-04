@@ -126,9 +126,16 @@ var afRoutes = Routes{
 	},
 
 	Route{
-		"SubscriptionPut",
-		strings.ToUpper("Put"),
-		"/af/v1/subscriptions/{subscriptionId}",
-		ModifySubscriptionPut,
+		"GetAllPfdTransactions",
+		strings.ToUpper("Get"),
+		"/af/v1/pfd/transactions",
+		GetAllPfdTransactions,
+	},
+
+	Route{
+		"CreatePfdTransaction",
+		strings.ToUpper("Post"),
+		"/af/v1/pfd/transactions",
+		CreatePfdTransaction,
 	},
 }

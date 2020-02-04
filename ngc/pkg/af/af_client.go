@@ -41,6 +41,8 @@ type Client struct {
 	TrafficInfluSubPatchAPI  *TrafficInfluenceSubscriptionPatchAPIService
 	TrafficInfluSubPostAPI   *TrafficInfluenceSubscriptionPostAPIService
 	TrafficInfluSubPutAPI    *TrafficInfluenceSubscriptionPutAPIService
+	PfdManagementGetAllAPI   *PfdManagementTransactionGetAllAPIService
+	PfdManagementPostAPI     *PfdManagementTransactionPostAPIService
 }
 
 type service struct {
@@ -87,6 +89,8 @@ func NewClient(cfg *CliConfig) *Client {
 		(*TrafficInfluenceSubscriptionPostAPIService)(&c.common)
 	c.TrafficInfluSubPutAPI =
 		(*TrafficInfluenceSubscriptionPutAPIService)(&c.common)
+	c.PfdManagementGetAllAPI =
+		(*PfdManagementTransactionGetAllAPIService)(&c.common)
 
 	return c
 }

@@ -143,6 +143,7 @@ func printConfig(cfg Config) {
 	log.Infoln("Protocol: ", cfg.CliCfg.Protocol)
 	log.Infoln("NEFPort: ", cfg.CliCfg.NEFPort)
 	log.Infoln("NEFBasePath: ", cfg.CliCfg.NEFBasePath)
+	log.Infoln("NEFPFDPath: ", cfg.CliCfg.NEFPFDPath)
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
 	log.Infoln("NEFCliCertPath: ", cfg.CliCfg.NEFCliCertPath)
 	log.Infoln("*************************************************************")
