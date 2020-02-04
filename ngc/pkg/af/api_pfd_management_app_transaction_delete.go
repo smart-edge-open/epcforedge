@@ -50,13 +50,13 @@ func (a *PfdManagementTransactionAppDeleteAPIService) handlePfdAppDeleteResp(
 
 /*
 PfdAppTransactionDelete Deletes an already
-existing PFD transaction for an existing application identifier
+existing PFD transaction for an application identifier
 Deletes an already existing pfd transaction
  * @param ctx context.Context - for authentication, logging, cancellation,
  * deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param afID Identifier of the AF
  * @param pfdTrans Identifier of the subscription resource
- * @param
+ * @param appID External application Identifier
 */
 func (a *PfdManagementTransactionAppDeleteAPIService) PfdAppTransactionDelete(
 	ctx context.Context, afID string, pfdTrans string, appID string) (

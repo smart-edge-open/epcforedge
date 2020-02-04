@@ -37,11 +37,12 @@ func (a *PfdManagementTransactionAppGetAPIService) handlePfdAppGetResponse(
 /*
 PfdAppTransactionGet Read an active pfd Data
 for the AF, pfd transcation id and an application ID
-Read an active pfd transactions for the AF and the pfd transaction Id
+Read an active pfd transactions for the AF, pfd transaction Id and app ID
  * @param ctx context.Context - for authentication, logging, cancellation,
  * deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param afID Identifier of the AF
  * @param pfd transaction Identifier of the subscription resource
+ * @param appID Application Identifier
 
 @return PfdData
 */
