@@ -43,6 +43,9 @@ type Client struct {
 	TrafficInfluSubPutAPI    *TrafficInfluenceSubscriptionPutAPIService
 	PfdManagementGetAllAPI   *PfdManagementTransactionGetAllAPIService
 	PfdManagementPostAPI     *PfdManagementTransactionPostAPIService
+	PfdManagementGetAPI      *PfdManagementTransactionGetAPIService
+	PfdManagementDeleteAPI   *PfdManagementTransactionDeleteAPIService
+	PfdManagementPutAPI      *PfdManagementTransactionPutAPIService
 }
 
 type service struct {
@@ -93,6 +96,12 @@ func NewClient(cfg *CliConfig) *Client {
 		(*PfdManagementTransactionGetAllAPIService)(&c.common)
 	c.PfdManagementPostAPI =
 		(*PfdManagementTransactionPostAPIService)(&c.common)
+	c.PfdManagementGetAPI =
+		(*PfdManagementTransactionGetAPIService)(&c.common)
+	c.PfdManagementDeleteAPI =
+		(*PfdManagementTransactionDeleteAPIService)(&c.common)
+	c.PfdManagementPutAPI =
+		(*PfdManagementTransactionPutAPIService)(&c.common)
 
 	return c
 }

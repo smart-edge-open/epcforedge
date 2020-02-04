@@ -90,6 +90,30 @@ func getSubsIDFromURL(u *url.URL) (string, error) {
 	}
 }
 
+func getPfdTransIDFromURL(u *url.URL) (string, error) {
+
+	if u == nil {
+		return "", errors.New("empty URL in the request message")
+	}
+
+	pURL := u.String()
+
+	// It is assumed the URL address
+	// ends with  "/transactions/{transactionID}"
+	s := strings.Split(pURL, "transactions")
+	switch len(s) {
+	case 1:
+		return "", errors.New("transactionID was not found " +
+			"in the URL string")
+	case 2:
+		pID := strings.Replace(s[1], "/", "", -1)
+		return pID, nil
+
+	default:
+		return "", errors.New("wrong URL")
+	}
+}
+
 func handleGetErrorResp(r *http.Response,
 	body []byte) error {
 

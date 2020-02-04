@@ -125,6 +125,8 @@ var afRoutes = Routes{
 		CreateSubscription,
 	},
 
+	// PFD Management routes
+
 	Route{
 		"GetAllPfdTransactions",
 		strings.ToUpper("Get"),
@@ -137,5 +139,26 @@ var afRoutes = Routes{
 		strings.ToUpper("Post"),
 		"/af/v1/pfd/transactions",
 		CreatePfdTransaction,
+	},
+
+	Route{
+		"GetPfdTransaction",
+		strings.ToUpper("Get"),
+		"/af/v1/pfd/transactions/{transactionId}",
+		GetPfdTransaction,
+	},
+
+	Route{
+		"DeletePfdTransaction",
+		strings.ToUpper("Delete"),
+		"/af/v1/pfd/transactions/{transactionId}",
+		DeletePfdTransaction,
+	},
+
+	Route{
+		"PutPfdTransaction",
+		strings.ToUpper("Put"),
+		"/af/v1/pfd/transactions/{transactionId}",
+		PutPfdTransaction,
 	},
 }
