@@ -120,15 +120,7 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 		sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal POST data")
 		return
 	}
-	/*
-		//validate the mandatory parameters
-		resRsp, status := validateAFTrafficInfluenceData(trInBody)
-		if !status {
-			log.Err(resRsp.pd.Title)
-			sendErrorResponseToAF(w, resRsp)
-			return
-		}
-	*/
+	//TBD Validate the params
 	loc, rsp, err3 := createNewPFDTrans(nefCtx, vars["scsAsId"], pfdBody)
 
 	if err3 != nil {
@@ -168,7 +160,335 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 
 }
 
+// ReadPFDManagementTransaction : Read a particular PFD transaction details
+func ReadPFDManagementTransaction(w http.ResponseWriter, r *http.Request) {
+
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	nef := &nefCtx.nef
+
+	vars := mux.Vars(r)
+	log.Infof(" AFID  : %s", vars["scsAsId"])
+	log.Infof(" TRANSACTION ID  : %s", vars["transactionId"])
+
+	af, ok := nef.nefGetAf(vars["scsAsId"])
+
+	if ok != nil {
+		sendCustomeErrorRspToAF(w, 404, "Failed to find AF records")
+		return
+	}
+
+	rsp, pfdTrans, err := af.afGetPfdTransaction(nefCtx, vars["transactionId"])
+
+	if err != nil {
+		log.Err(err)
+		sendErrorResponseToAF(w, rsp)
+		return
+	}
+
+	mdata, err2 := json.Marshal(pfdTrans)
+	if err2 != nil {
+		log.Err(err2)
+		sendCustomeErrorRspToAF(w, 400, "Failed to Marshal GETPFDresponse data")
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	_, err = w.Write(mdata)
+	if err != nil {
+		log.Errf("Write Failed: %v", err)
+		return
+	}
+
+	log.Infof("HTTP Response sent: %d", http.StatusOK)
+}
+
+// ReadPFDManagementApplication : Read a particular PFD transaction details of
+// and external application identifier
+func ReadPFDManagementApplication(w http.ResponseWriter, r *http.Request) {
+
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	nef := &nefCtx.nef
+
+	vars := mux.Vars(r)
+	log.Infof(" AFID  : %s", vars["scsAsId"])
+	log.Infof(" PFD TRANSACTION ID  : %s", vars["transactionId"])
+	log.Infof(" PFD APPLICATION ID : %s", vars["applicationId"])
+
+	af, ok := nef.nefGetAf(vars["scsAsId"])
+
+	if ok != nil {
+		sendCustomeErrorRspToAF(w, 404, "Failed to find AF records")
+		return
+	}
+
+	pfdTransID := vars["transactionId"]
+	appID := vars["appId"]
+	rsp, pfdData, err := af.afGetPfdApplication(nefCtx, pfdTransID, appID)
+
+	if err != nil {
+		log.Err(err)
+		sendErrorResponseToAF(w, rsp)
+		return
+	}
+
+	mdata, err2 := json.Marshal(pfdData)
+	if err2 != nil {
+		log.Err(err2)
+		sendCustomeErrorRspToAF(w, 400, "Failed to Marshal GET response data")
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	_, err = w.Write(mdata)
+	if err != nil {
+		log.Errf("Write Failed: %v", err)
+		return
+	}
+
+	log.Infof("HTTP Response sent: %d", http.StatusOK)
+}
+
+// DeletePFDManagementApplication deletes the existing PFD transaction of
+// an application identifier
+func DeletePFDManagementApplication(w http.ResponseWriter,
+	r *http.Request) {
+
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	nef := &nefCtx.nef
+
+	vars := mux.Vars(r)
+	log.Infof(" AFID  : %s", vars["scsAsId"])
+	log.Infof(" PFD TRANSACTION ID  : %s", vars["transactionId"])
+	log.Infof(" PFD APPLICATION ID  : %s", vars["appId"])
+
+	af, err := nef.nefGetAf(vars["scsAsId"])
+
+	if err != nil {
+		log.Err(err)
+		sendCustomeErrorRspToAF(w, 404, "Failed to find AF entry")
+		return
+	}
+
+	pfdTransID := vars["transactionId"]
+	appID := vars["appId"]
+
+	rsp, err := af.afDeletePfdApplication(nefCtx, pfdTransID, appID)
+
+	if err != nil {
+		log.Err(err)
+		sendErrorResponseToAF(w, rsp)
+		return
+	}
+	// Response should be 204 as per 3GPP 29.522
+	w.WriteHeader(http.StatusNoContent)
+
+	log.Infof("HTTP Response sent: %d", http.StatusNoContent)
+
+	logNef(nef)
+}
+
+// DeletePFDManagementTransaction deletes the existing PFD transaction
+func DeletePFDManagementTransaction(w http.ResponseWriter,
+	r *http.Request) {
+
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	nef := &nefCtx.nef
+
+	vars := mux.Vars(r)
+	log.Infof(" AFID  : %s", vars["scsAsId"])
+	log.Infof(" PFD TRANSACTION ID  : %s", vars["transactionId"])
+
+	af, err := nef.nefGetAf(vars["scsAsId"])
+
+	if err != nil {
+		log.Err(err)
+		sendCustomeErrorRspToAF(w, 404, "Failed to find AF entry")
+		return
+	}
+	rsp, err := af.afDeletePfdTransaction(nefCtx, vars["transactionId"])
+
+	if err != nil {
+		log.Err(err)
+		sendErrorResponseToAF(w, rsp)
+		return
+	}
+
+	// Response should be 204 as per 3GPP 29.522
+	w.WriteHeader(http.StatusNoContent)
+
+	log.Infof("HTTP Response sent: %d", http.StatusNoContent)
+
+	// If the AF subcount and transaction count is 0 delete the AF
+
+	logNef(nef)
+}
+
+// UpdatePutPFDManagementTransaction updates an existing PFD transaction
+func UpdatePutPFDManagementTransaction(w http.ResponseWriter,
+	r *http.Request) {
+
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	nef := &nefCtx.nef
+
+	vars := mux.Vars(r)
+	log.Infof(" AFID  : %s", vars["scsAsId"])
+	log.Infof(" PFD TRANSACTION ID  : %s", vars["transactionId"])
+
+	af, ok := nef.nefGetAf(vars["scsAsId"])
+	if ok == nil {
+
+		b, err := ioutil.ReadAll(r.Body)
+		defer closeReqBody(r)
+
+		if err != nil {
+			log.Err(err)
+			sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP PUT Body")
+			return
+		}
+
+		//PFD Transaction data
+		pfdTrans := PfdManagement{}
+
+		//Convert the json Traffic Influence data into struct
+		err1 := json.Unmarshal(b, &pfdTrans)
+
+		if err1 != nil {
+			log.Err(err1)
+			sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal PUT data")
+			return
+		}
+
+		rsp, newPfdTrans, err := af.afUpdatePutPfdTransaction(nefCtx,
+			vars["transactionId"], pfdTrans)
+
+		if err != nil {
+			sendErrorResponseToAF(w, rsp)
+			return
+		}
+
+		mdata, err2 := json.Marshal(newPfdTrans)
+
+		if err2 != nil {
+			log.Err(err2)
+			sendCustomeErrorRspToAF(w, 400, "Failed to Marshal PUT"+
+				"response data")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+		_, err = w.Write(mdata)
+		if err != nil {
+			log.Errf("Write Failed: %v", err)
+		}
+		return
+
+	}
+	log.Infoln(ok)
+	sendCustomeErrorRspToAF(w, 404, "Failed to find AF records")
+
+}
+
 //PFD Management functions
+
+func (af *afData) afUpdatePutPfdTransaction(nefCtx *nefContext, transID string,
+	trans PfdManagement) (rsp nefSBRspData, updPfd PfdManagement, err error) {
+
+	pfdTrans, ok := af.pfdtrans[transID]
+
+	if !ok {
+		rsp.errorCode = 400
+		rsp.pd.Title = pfdNotFound
+
+		return rsp, updPfd, errors.New(pfdNotFound)
+	}
+
+	/*rsp, err = sub.NEFSBPut(sub, nefCtx, ti)
+
+	if err != nil {
+		log.Err("Failed to Update Subscription")
+		return rsp, updtTI, err
+	}*/
+
+	updPfd = trans
+	updPfd.Self = pfdTrans.pfdManagement.Self
+	pfdTrans.pfdManagement = updPfd
+
+	log.Infoln("Update PFD transaction Successful")
+	return rsp, updPfd, err
+}
+
+func (af *afData) afDeletePfdTransaction(nefCtx *nefContext,
+	pfdTrans string) (rsp nefSBRspData, err error) {
+
+	//Check if PFD transaction is already present
+	_, ok := af.pfdtrans[pfdTrans]
+
+	if !ok {
+		rsp.errorCode = 404
+		rsp.pd.Title = pfdNotFound
+		return rsp, errors.New(pfdNotFound)
+	}
+
+	/*rsp, err = sub.NEFSBDelete(sub, nefCtx)
+
+	if err != nil {
+		log.Err("Failed to Delete Subscription")
+		return rsp, err
+	}*/
+
+	//Delete local entry in map of pfd transactions
+	delete(af.pfdtrans, pfdTrans)
+
+	return rsp, err
+}
+
+func (af *afData) afGetPfdApplication(nefCtx *nefContext,
+	transID string, appID string) (rsp nefSBRspData, trans PfdData, err error) {
+
+	transPfd, ok := af.pfdtrans[transID]
+
+	if !ok {
+		rsp.errorCode = 404
+		rsp.pd.Title = pfdNotFound
+		return rsp, trans, errors.New(pfdNotFound)
+	}
+
+	trans, ok = transPfd.pfdManagement.PfdDatas[appID]
+
+	if !ok {
+		rsp.errorCode = 404
+		rsp.pd.Title = appNotFound
+		return rsp, trans, errors.New(appNotFound)
+	}
+
+	//Return locally
+	return rsp, trans, err
+}
+
+func (af *afData) afDeletePfdApplication(nefCtx *nefContext,
+	transID string, appID string) (rsp nefSBRspData, err error) {
+
+	transPfd, ok := af.pfdtrans[transID]
+
+	if !ok {
+		rsp.errorCode = 404
+		rsp.pd.Title = pfdNotFound
+		return rsp, errors.New(pfdNotFound)
+	}
+
+	_, ok = transPfd.pfdManagement.PfdDatas[appID]
+
+	if !ok {
+		rsp.errorCode = 404
+		rsp.pd.Title = appNotFound
+		return rsp, errors.New(appNotFound)
+	}
+	delete(transPfd.pfdManagement.PfdDatas, appID)
+	//Return locally
+	return rsp, err
+}
+
 func (af *afData) afGetPfdTransaction(nefCtx *nefContext,
 	transID string) (rsp nefSBRspData, trans PfdManagement, err error) {
 
@@ -176,8 +496,8 @@ func (af *afData) afGetPfdTransaction(nefCtx *nefContext,
 
 	if !ok {
 		rsp.errorCode = 404
-		rsp.pd.Title = subNotFound
-		return rsp, trans, errors.New(subNotFound)
+		rsp.pd.Title = pfdNotFound
+		return rsp, trans, errors.New(pfdNotFound)
 	}
 
 	//ti, rsp, err = sub.NEFSBGet(sub, nefCtx)

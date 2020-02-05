@@ -76,32 +76,46 @@ var NEFRoutes = []Route{
 		"/3gpp-pfd-management/v1/{scsAsId}/transactions",
 		CreatePFDManagementTransaction,
 	},
+
+	{
+		"ReadPFDManagementTransaction",
+		strings.ToUpper("Get"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+		ReadPFDManagementTransaction,
+	},
+
+	{
+		"UpdatePutPFDManagementTransaction",
+		strings.ToUpper("Put"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+		UpdatePutPFDManagementTransaction,
+	},
+
+	{
+		"DeletePFDManagementTransaction",
+		strings.ToUpper("Delete"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+		DeletePFDManagementTransaction,
+	},
+
+	{
+		"ReadPFDManagementApplication",
+		strings.ToUpper("Get"),
+		`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/applications/{appId}`,
+		ReadPFDManagementApplication,
+	},
+
+	{
+		"DeletePFDManagementApplication",
+		strings.ToUpper("Delete"),
+		`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/applications/{appId}`,
+		DeletePFDManagementApplication,
+	},
+
+	// TBD
+
 	/*
-		{
-			"ReadPFDManagementTransaction",
-			strings.ToUpper("Get"),
-			"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
-			ReadPFDManagementTransaction,
-		},
-		{
-			"UpdatePFDManagementTransaction",
-			strings.ToUpper("Put"),
-			"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
-			UpdatePFDManagementTransaction,
-		},
-		{
-			"DeletePFDManagementTransaction",
-			strings.ToUpper("Delete"),
-			"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
-			DeletePFDManagementTransaction,
-		},
-		{
-			"ReadPFDManagementApplication",
-			strings.ToUpper("Get"),
-			`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/
-			applications/{appId}`,
-			ReadPFDManagementApplication,
-		},
+
 		{
 			"UpdatePFDManagementApplication",
 			strings.ToUpper("Put"),
@@ -115,13 +129,6 @@ var NEFRoutes = []Route{
 			`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/
 			applications/{appId}`,
 			PatchPFDManagementApplication,
-		},
-		{
-			"DeletePFDManagementApplication",
-			strings.ToUpper("Delete"),
-			`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/
-			applications/{appId}`,
-			DeletePFDManagementApplication,
 		},
 	*/
 }

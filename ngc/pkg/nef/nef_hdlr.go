@@ -11,6 +11,8 @@ import (
 
 const correlationIDOffset = 20
 const subNotFound string = "Subscription Not Found"
+const pfdNotFound string = "PFD transaction Not Found"
+const appNotFound string = "Application in PFD transaction Not Found"
 
 //NEF context data
 type nefData struct {
