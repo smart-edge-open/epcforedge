@@ -389,7 +389,219 @@ func UpdatePutPFDManagementTransaction(w http.ResponseWriter,
 
 }
 
+// UpdatePutPFDManagementApplication updates an existing PFD transaction
+func UpdatePutPFDManagementApplication(w http.ResponseWriter,
+	r *http.Request) {
+
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	nef := &nefCtx.nef
+
+	vars := mux.Vars(r)
+	log.Infof(" AFID  : %s", vars["scsAsId"])
+	log.Infof(" PFD TRANSACTION ID  : %s", vars["transactionId"])
+	log.Infof(" PFD APPLICATION ID  : %s", vars["appId"])
+
+	af, ok := nef.nefGetAf(vars["scsAsId"])
+	if ok == nil {
+
+		b, err := ioutil.ReadAll(r.Body)
+		defer closeReqBody(r)
+
+		if err != nil {
+			log.Err(err)
+			sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP PUT Body")
+			return
+		}
+
+		//PFD Transaction data
+		pfdData := PfdData{}
+
+		//Convert the json PFD Management data into struct
+		err1 := json.Unmarshal(b, &pfdData)
+
+		if err1 != nil {
+			log.Err(err1)
+			sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal PUT data")
+			return
+		}
+
+		rsp, newPfdData, err := af.afUpdatePutPfdApplication(nefCtx,
+			vars["transactionId"], vars["appId"], pfdData)
+
+		if err != nil {
+			sendErrorResponseToAF(w, rsp)
+			return
+		}
+
+		mdata, err2 := json.Marshal(newPfdData)
+
+		if err2 != nil {
+			log.Err(err2)
+			sendCustomeErrorRspToAF(w, 400, "Failed to Marshal PUT"+
+				"response data")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+		_, err = w.Write(mdata)
+		if err != nil {
+			log.Errf("Write Failed: %v", err)
+		}
+		return
+
+	}
+	log.Infoln(ok)
+	sendCustomeErrorRspToAF(w, 404, "Failed to find AF records")
+
+}
+
+// PatchPFDManagementApplication patches the PFD application PFDs
+func PatchPFDManagementApplication(w http.ResponseWriter,
+	r *http.Request) {
+
+	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	nef := &nefCtx.nef
+
+	vars := mux.Vars(r)
+	log.Infof(" AFID  : %s", vars["scsAsId"])
+	log.Infof(" PFD TRANSACTION ID  : %s", vars["transactionId"])
+	log.Infof(" PFD APPLICATION ID  : %s", vars["appId"])
+
+	af, ok := nef.nefGetAf(vars["scsAsId"])
+	if ok == nil {
+
+		b, err := ioutil.ReadAll(r.Body)
+		defer closeReqBody(r)
+
+		if err != nil {
+			log.Err(err)
+			sendCustomeErrorRspToAF(w, 400, "Failed to read HTTP PUT Body")
+			return
+		}
+
+		//PFD Transaction data
+		pfdData := PfdData{}
+
+		//Convert the json PFD Management data into struct
+		err1 := json.Unmarshal(b, &pfdData)
+
+		if err1 != nil {
+			log.Err(err1)
+			sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal PUT data")
+			return
+		}
+
+		rsp, newPfdData, err := af.afUpdatePatchPfdApplication(nefCtx,
+			vars["transactionId"], vars["appId"], pfdData)
+
+		if err != nil {
+			sendErrorResponseToAF(w, rsp)
+			return
+		}
+
+		mdata, err2 := json.Marshal(newPfdData)
+
+		if err2 != nil {
+			log.Err(err2)
+			sendCustomeErrorRspToAF(w, 400, "Failed to Marshal PUT"+
+				"response data")
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+		_, err = w.Write(mdata)
+		if err != nil {
+			log.Errf("Write Failed: %v", err)
+		}
+		return
+
+	}
+	log.Infoln(ok)
+	sendCustomeErrorRspToAF(w, 404, "Failed to find AF records")
+
+}
+
 //PFD Management functions
+
+func (af *afData) afUpdatePutPfdApplication(nefCtx *nefContext, transID string,
+	appID string, pfdData PfdData) (rsp nefSBRspData, updPfd PfdData,
+	err error) {
+
+	pfdTrans, ok := af.pfdtrans[transID]
+
+	if !ok {
+		rsp.errorCode = 400
+		rsp.pd.Title = pfdNotFound
+
+		return rsp, updPfd, errors.New(pfdNotFound)
+	}
+
+	/*rsp, err = sub.NEFSBPut(sub, nefCtx, ti)
+
+	if err != nil {
+		log.Err("Failed to Update Subscription")
+		return rsp, updtTI, err
+	}*/
+
+	trans, ok := pfdTrans.pfdManagement.PfdDatas[appID]
+
+	if !ok {
+		rsp.errorCode = 404
+		rsp.pd.Title = appNotFound
+		return rsp, trans, errors.New(appNotFound)
+	}
+
+	trans = pfdData
+	updPfd = trans
+
+	log.Infoln("Update PFD transaction Successful")
+	return rsp, updPfd, err
+}
+
+func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
+	transID string, appID string, pfdData PfdData) (rsp nefSBRspData,
+	updPfd PfdData, err error) {
+
+	pfdTrans, ok := af.pfdtrans[transID]
+
+	if !ok {
+		rsp.errorCode = 400
+		rsp.pd.Title = pfdNotFound
+
+		return rsp, updPfd, errors.New(pfdNotFound)
+	}
+
+	/*rsp, err = sub.NEFSBPut(sub, nefCtx, ti)
+
+	if err != nil {
+		log.Err("Failed to Update Subscription")
+		return rsp, updtTI, err
+	}*/
+
+	trans, ok := pfdTrans.pfdManagement.PfdDatas[appID]
+
+	if !ok {
+		rsp.errorCode = 404
+		rsp.pd.Title = appNotFound
+		return rsp, trans, errors.New(appNotFound)
+	}
+	// Updating the PFDs present in the
+	for key := range pfdData.Pfds {
+
+		pfd, ok := trans.Pfds[key]
+		if ok {
+			pfd = pfdData.Pfds[key]
+			log.Infof("PFD id %s updated by PATCH ", pfd.PfdID)
+		}
+
+	}
+
+	updPfd = trans
+	log.Infoln("Patch PFD Application PFDs Successful")
+	return rsp, updPfd, err
+}
 
 func (af *afData) afUpdatePutPfdTransaction(nefCtx *nefContext, transID string,
 	trans PfdManagement) (rsp nefSBRspData, updPfd PfdManagement, err error) {

@@ -112,25 +112,19 @@ var NEFRoutes = []Route{
 		DeletePFDManagementApplication,
 	},
 
-	// TBD
+	{
+		"UpdatePutPFDManagementApplication",
+		strings.ToUpper("Put"),
+		`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/applications/{appId}`,
+		UpdatePutPFDManagementApplication,
+	},
 
-	/*
-
-		{
-			"UpdatePFDManagementApplication",
-			strings.ToUpper("Put"),
-			`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/
-			applications/{appId}`,
-			UpdatePFDManagementApplication,
-		},
-		{
-			"PatchPFDManagementApplication",
-			strings.ToUpper("Patch"),
-			`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/
-			applications/{appId}`,
-			PatchPFDManagementApplication,
-		},
-	*/
+	{
+		"PatchPFDManagementApplication",
+		strings.ToUpper("Patch"),
+		`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/applications/{appId}`,
+		PatchPFDManagementApplication,
+	},
 }
 
 type nefCtxKey string
