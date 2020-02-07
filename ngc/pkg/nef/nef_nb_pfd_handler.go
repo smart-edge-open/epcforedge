@@ -553,8 +553,8 @@ func (af *afData) afUpdatePutPfdApplication(nefCtx *nefContext, transID string,
 		return rsp, trans, errors.New(appNotFound)
 	}
 
-	trans = pfdData
-	updPfd = trans
+	pfdTrans.pfdManagement.PfdDatas[appID] = pfdData
+	updPfd = pfdData
 
 	log.Infoln("Update PFD transaction Successful")
 	return rsp, updPfd, err
@@ -593,11 +593,11 @@ func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
 		pfd, ok := trans.Pfds[key]
 		if ok {
 			pfd = pfdData.Pfds[key]
+			trans.Pfds[key] = pfd
 			log.Infof("PFD id %s updated by PATCH ", pfd.PfdID)
 		}
 
 	}
-
 	updPfd = trans
 	log.Infoln("Patch PFD Application PFDs Successful")
 	return rsp, updPfd, err
