@@ -53,7 +53,7 @@ func PutPfdTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pfdTransactionID, err = getPfdTransIDFromURL(r.URL)
+	pfdTransactionID, err = getPfdTransIDFromURL(r)
 	if err != nil {
 		log.Errf("Pfd Management Put: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

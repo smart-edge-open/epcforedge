@@ -57,7 +57,9 @@ func (a *PfdManagementTransactionGetAPIService) PfdTransactionGet(
 	// create path and map variables
 	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
 		a.client.cfg.NEFPort + a.client.cfg.NEFPFDPath +
-		"/{afId}/transactions/{transcationId}"
+		"/{afId}/transactions/{transactionId}"
+
+	log.Infof("pfd transaction id %s", pfdTransaction)
 
 	path = strings.Replace(path,
 		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)

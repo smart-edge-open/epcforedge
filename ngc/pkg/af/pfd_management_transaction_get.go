@@ -10,13 +10,13 @@ import (
 )
 
 func getPfdTransaction(cliCtx context.Context, afCtx *Context,
-	subscriptionID string) (PfdManagement, *http.Response, error) {
+	pfdTrans string) (PfdManagement, *http.Response, error) {
 
 	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
 	pfdTs, resp, err := cli.PfdManagementGetAPI.PfdTransactionGet(
-		cliCtx, afCtx.cfg.AfID, subscriptionID)
+		cliCtx, afCtx.cfg.AfID, pfdTrans)
 
 	if err != nil {
 		return PfdManagement{}, resp, err
@@ -48,7 +48,7 @@ func GetPfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	pfdTransactionID, err = getPfdTransIDFromURL(r.URL)
+	pfdTransactionID, err = getPfdTransIDFromURL(r)
 	if err != nil {
 		log.Errf("Pfd Management get: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

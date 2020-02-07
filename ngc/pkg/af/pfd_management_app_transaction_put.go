@@ -54,14 +54,14 @@ func PutPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pfdTransactionID, err = getPfdTransIDFromURL(r.URL)
+	pfdTransactionID, err = getPfdTransIDFromURL(r)
 	if err != nil {
 		log.Errf("Pfd Management App Put: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	appID, err = getPfdAppIDFromURL(r.URL)
+	appID, err = getPfdAppIDFromURL(r)
 	if err != nil {
 		log.Errf("Pfd Management App Put: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

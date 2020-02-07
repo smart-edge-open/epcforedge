@@ -49,7 +49,7 @@ func GetPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	pfdTransactionID, err = getPfdTransIDFromURL(r.URL)
+	pfdTransactionID, err = getPfdTransIDFromURL(r)
 
 	if err != nil {
 		log.Errf("Pfd Management  Application get: %s", err.Error())
@@ -57,7 +57,8 @@ func GetPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	appID, err = getPfdAppIDFromURL(r.URL)
+	appID, err = getPfdAppIDFromURL(r)
+	log.Infof("Application ID from URL is %s", appID)
 	if err != nil {
 		log.Errf("Pfd Management Application  get: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

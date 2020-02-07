@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 //TransIDMax var
@@ -90,52 +92,28 @@ func getSubsIDFromURL(u *url.URL) (string, error) {
 	}
 }
 
-func getPfdTransIDFromURL(u *url.URL) (string, error) {
+func getPfdTransIDFromURL(u *http.Request) (string, error) {
 
 	if u == nil {
 		return "", errors.New("empty URL in the request message")
 	}
 
-	pURL := u.String()
+	vars := mux.Vars(u)
+	pID := vars["transactionId"]
+	return pID, nil
 
-	// It is assumed the URL address
-	// ends with  "/transactions/{transactionID}"
-	s := strings.Split(pURL, "transactions")
-	switch len(s) {
-	case 1:
-		return "", errors.New("transactionID was not found " +
-			"in the URL string")
-	case 2:
-		pID := strings.Replace(s[1], "/", "", -1)
-		return pID, nil
-
-	default:
-		return "", errors.New("wrong URL")
-	}
 }
 
-func getPfdAppIDFromURL(u *url.URL) (string, error) {
+func getPfdAppIDFromURL(u *http.Request) (string, error) {
 
 	if u == nil {
 		return "", errors.New("empty URL in the request message")
 	}
 
-	pURL := u.String()
+	vars := mux.Vars(u)
+	aID := vars["applicationId"]
+	return aID, nil
 
-	// It is assumed the URL address
-	// ends with  "/applications/{applicationID}"
-	s := strings.Split(pURL, "applications")
-	switch len(s) {
-	case 1:
-		return "", errors.New("applicationID was not found " +
-			"in the URL string")
-	case 2:
-		aID := strings.Replace(s[1], "/", "", -1)
-		return aID, nil
-
-	default:
-		return "", errors.New("wrong URL")
-	}
 }
 
 func handleGetErrorResp(r *http.Response,

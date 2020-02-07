@@ -61,7 +61,7 @@ func (a *PfdManagementTransactionAppPatchAPIService) PfdAppTransactionPatch(
 
 	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
 		a.client.cfg.NEFPort + a.client.cfg.NEFPFDPath +
-		"/{afId}/transactions/{transactionId}/application/{applicationId}"
+		"/{afId}/transactions/{transactionId}/applications/{applicationId}"
 
 	path = strings.Replace(path,
 		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)

@@ -46,14 +46,14 @@ func DeletePfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	pfdTrans, err = getPfdTransIDFromURL(r.URL)
+	pfdTrans, err = getPfdTransIDFromURL(r)
 	if err != nil {
 		log.Errf("Pfd App Transaction delete %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	appID, err = getPfdAppIDFromURL(r.URL)
+	appID, err = getPfdAppIDFromURL(r)
 	if err != nil {
 		log.Errf("Pfd App Transaction delete %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

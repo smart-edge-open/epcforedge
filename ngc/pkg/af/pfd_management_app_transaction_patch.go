@@ -54,14 +54,14 @@ func PatchPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pfdTransID, err = getPfdTransIDFromURL(r.URL)
+	pfdTransID, err = getPfdTransIDFromURL(r)
 	if err != nil {
 		log.Errf("Pfd Management Application patch %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	appID, err = getPfdAppIDFromURL(r.URL)
+	appID, err = getPfdAppIDFromURL(r)
 	if err != nil {
 		log.Errf("Pfd Management Application patch %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
