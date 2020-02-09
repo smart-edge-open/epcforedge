@@ -61,14 +61,14 @@ func (a *PfdManagementTransactionAppPatchAPIService) PfdAppTransactionPatch(
 
 	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
 		a.client.cfg.NEFPort + a.client.cfg.NEFPFDPath +
-		"/{afId}/transactions/{transactionId}/applications/{applicationId}"
+		"/{afId}/transactions/{transactionId}/applications/{appId}"
 
 	path = strings.Replace(path,
 		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
 	path = strings.Replace(path,
 		"{"+"transactionId"+"}", fmt.Sprintf("%v", pfdTransID), -1)
 	path = strings.Replace(path,
-		"{"+"applicationId"+"}", fmt.Sprintf("%v", appID), -1)
+		"{"+"appId"+"}", fmt.Sprintf("%v", appID), -1)
 
 	headerParams := make(map[string]string)
 
