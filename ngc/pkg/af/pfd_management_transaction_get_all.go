@@ -48,14 +48,14 @@ func GetAllPfdTransactions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	tsResp, resp, err = getAllPfdTransactions(cliCtx, afCtx)
 	if err != nil {
-		log.Errf("PFD Management transactions get all 1: %s", err.Error())
+		log.Errf("PFD Management transactions get all : %s", err.Error())
 		w.WriteHeader(getStatusCode(resp))
 		return
 	}
 
 	tsRespJSON, err = json.Marshal(tsResp)
 	if err != nil {
-		log.Errf("PFD Management transactions get all 2: %s", err.Error())
+		log.Errf("PFD Management transactions get all : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -63,7 +63,7 @@ func GetAllPfdTransactions(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(resp.StatusCode)
 
 	if _, err = w.Write(tsRespJSON); err != nil {
-		log.Errf("PFD Management transactions get all 3: %s", err.Error())
+		log.Errf("PFD Management transactions get all : %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

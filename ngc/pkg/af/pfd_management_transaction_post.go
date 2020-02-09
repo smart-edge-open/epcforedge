@@ -29,10 +29,12 @@ func createPfdTransaction(cliCtx context.Context, pfdTrans PfdManagement,
 func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err      error
-		pfdTrans PfdManagement
-		resp     *http.Response
-		url      *url.URL
+		err         error
+		pfdTrans    PfdManagement
+		resp        *http.Response
+		url         *url.URL
+		pfdRespJSON []byte
+		pfdRsp      PfdManagement
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -54,7 +56,7 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, resp, err = createPfdTransaction(cliCtx, pfdTrans, afCtx)
+	pfdRsp, resp, err = createPfdTransaction(cliCtx, pfdTrans, afCtx)
 	// TBD what to validate in response
 	if err != nil {
 		log.Errf("Pfd Management Transaction create: %s", err.Error())
@@ -68,6 +70,20 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pfdRespJSON, err = json.Marshal(pfdRsp)
+	if err != nil {
+		log.Errf("Pfd Management create : %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Location", url.String())
 	w.WriteHeader(resp.StatusCode)
+
+	if _, err = w.Write(pfdRespJSON); err != nil {
+		log.Errf("Pfd Management create: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 }

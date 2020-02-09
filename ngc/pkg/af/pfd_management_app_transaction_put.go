@@ -33,6 +33,8 @@ func PutPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		resp             *http.Response
 		pfdTransactionID string
 		appID            string
+		pfdRsp           PfdData
+		pfdRespJSON      []byte
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -68,7 +70,7 @@ func PutPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, resp, err = putPfdAppTransaction(cliCtx, pfdTs, afCtx,
+	pfdRsp, resp, err = putPfdAppTransaction(cliCtx, pfdTs, afCtx,
 		pfdTransactionID, appID)
 	// TBD how to validate the PUT response
 	if err != nil {
@@ -77,5 +79,19 @@ func PutPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pfdRespJSON, err = json.Marshal(pfdRsp)
+	if err != nil {
+		log.Errf("Pfd Management Application Put: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(resp.StatusCode)
+
+	if _, err = w.Write(pfdRespJSON); err != nil {
+		log.Errf("Pfd Management Application Put: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 }

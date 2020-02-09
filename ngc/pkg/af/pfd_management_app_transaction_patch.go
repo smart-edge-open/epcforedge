@@ -28,11 +28,13 @@ func patchPfdAppTransaction(cliCtx context.Context, pfdData PfdData,
 // PatchPfdAppTransaction function
 func PatchPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 	var (
-		err        error
-		pfdData    PfdData
-		resp       *http.Response
-		pfdTransID string
-		appID      string
+		err         error
+		pfdData     PfdData
+		resp        *http.Response
+		pfdTransID  string
+		appID       string
+		pfdRsp      PfdData
+		pfdRespJSON []byte
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -68,12 +70,26 @@ func PatchPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, resp, err = patchPfdAppTransaction(cliCtx, pfdData, afCtx,
+	pfdRsp, resp, err = patchPfdAppTransaction(cliCtx, pfdData, afCtx,
 		pfdTransID, appID)
 	if err != nil {
 		log.Errf("Pfd Management Application patch : %s", err.Error())
 		w.WriteHeader(getStatusCode(resp))
 		return
 	}
+
+	pfdRespJSON, err = json.Marshal(pfdRsp)
+	if err != nil {
+		log.Errf("Pfd Management Application Patch: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(resp.StatusCode)
+	if _, err = w.Write(pfdRespJSON); err != nil {
+		log.Errf("Pfd Management Application Patch: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 }
