@@ -111,7 +111,7 @@ func getPfdAppIDFromURL(u *http.Request) (string, error) {
 	}
 
 	vars := mux.Vars(u)
-	aID := vars["applicationId"]
+	aID := vars["appId"]
 	return aID, nil
 
 }
