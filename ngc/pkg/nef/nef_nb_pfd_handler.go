@@ -219,7 +219,7 @@ func ReadPFDManagementApplication(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	log.Infof(" AFID  : %s", vars["scsAsId"])
 	log.Infof(" PFD TRANSACTION ID  : %s", vars["transactionId"])
-	log.Infof(" PFD APPLICATION ID : %s", vars["applicationId"])
+	log.Infof(" PFD APPLICATION ID : %s", vars["appId"])
 
 	af, ok := nef.nefGetAf(vars["scsAsId"])
 
@@ -811,21 +811,6 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 
 	}
 
-	//Create Location URI
-	loc = nefCtx.nef.locationURLPrefixPfd + af.afID + "/transactions/" +
-		transIDStr
-
-	trans.Self = Link(loc)
-
-	//Also update the self link in each application
-	for k, v := range trans.PfdDatas {
-
-		/*Assign the application ID in the link */
-		v.Self = Link(loc) + "/applications/" + Link(k)
-		trans.PfdDatas[k] = v
-
-	}
-
 	//Create PFD transaction data
 	aftrans := afPfdTransaction{transID: transIDStr, pfdManagement: trans}
 
@@ -847,6 +832,22 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	*/
 	//Link the subscription with the AF
 	af.pfdtrans[transIDStr] = &aftrans
+
+	//Create Location URI
+	loc = nefCtx.nef.locationURLPrefixPfd + af.afID + "/transactions/" +
+		transIDStr
+
+	af.pfdtrans[transIDStr].pfdManagement.Self = Link(loc)
+
+	//Also update the self link in each application
+	for k, v := range af.pfdtrans[transIDStr].pfdManagement.PfdDatas {
+
+		/*Assign the application ID in the link */
+		v.Self = Link(loc) + "/applications/" + Link(k)
+		log.Infof("Application ID is %s", k)
+		af.pfdtrans[transIDStr].pfdManagement.PfdDatas[k] = v
+
+	}
 
 	log.Infoln(" NEW AF PFD transaction added " + transIDStr)
 
