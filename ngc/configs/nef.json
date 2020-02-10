@@ -1,9 +1,12 @@
 {
     "NefAPIRoot": "localhost",
     "LocationPrefix": "/3gpp-traffic-influence/v1/",
+    "LocationPrefixPfd": "/3gpp-pfd-management/v1/",
     "MaxSubSupport": 10,
+    "MaxPfdTransSupport": 10,
     "MaxAFSupport": 1,
     "SubStartId": 11111,
+    "PfdTransStartID": 10000,
     "UpfNotificationResUriPath": "/3gpp-traffic-influence/v1/notification/upf",
     "UserAgent": "NEF-OPENNESS-1912",
     "HTTPConfig": {

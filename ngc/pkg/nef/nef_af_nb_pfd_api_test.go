@@ -76,7 +76,9 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 				})
 		})
 
-	Describe("REQ to NEF GET ALL", func() {
+	Describe("REQ to NEF GET ALL/POST", func() {
+
+		postbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PFD_POST_01.json")
 
 		It("Send valid GET all to NEF -No Data as no PFD exists",
 			func() {
@@ -98,6 +100,33 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 				resp.Body.Close()
 				Expect(len(pfdBody)).Should(Equal(0))
 			})
+
+		It("Send valid POST to NEF", func() {
+			rr, req := CreatePFDReqForNEF(ctx, "POST", "", "", postbody)
+			req.Header.Set("Content-Type", "application/json")
+			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
+
+			Expect(rr.Code).Should(Equal(http.StatusCreated))
+			//Validate Body of Trans
+			//Read Body from response
+			resp := rr.Result()
+			b, _ := ioutil.ReadAll(resp.Body)
+
+			//Convert the body(json data) into PFD Management Struct data
+			var pfdBody ngcnef.PfdManagement
+			err := json.Unmarshal(b, &pfdBody)
+			Expect(err).Should(BeNil())
+
+			fmt.Print("Self in PFD manageemnt Received: ")
+			fmt.Println(pfdBody.Self)
+			Expect(pfdBody.Self).ShouldNot(Equal(""))
+			for _, v := range pfdBody.PfdDatas {
+				fmt.Println(v.Self)
+				Expect(v.Self).ShouldNot(Equal(""))
+			}
+			resp.Body.Close()
+
+		})
 	})
 
 	Describe("End the NEF Server: To be done to end NEF PFD API testing",
