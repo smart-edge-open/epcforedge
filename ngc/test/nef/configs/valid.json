@@ -1,9 +1,12 @@
 {
     "NefAPIRoot": "localhost",
     "LocationPrefix": "/3gpp-traffic-influence/v1/",
+    "LocationPrefixPfd": "/3gpp-pfd-management/v1/",
     "MaxSubSupport": 10,
+    "MaxPfdTransSupport": 10,
     "MaxAFSupport": 1,
     "SubStartId": 11111,
+    "PfdTransStartID": 10000,
     "UpfNotificationResUriPath": "/3gpp-traffic-influence/v1/notification/upf",
     "UserAgent": "NEF-OPENNESS-1912",
     "HTTPConfig": {
@@ -12,7 +15,7 @@
     "HTTP2Config": {
         "Endpoint": ":8090",
         "NefServerCert": "../../test/nef/certs/server-cert.pem",
-        "NefServerKey": "../../test/nef/certs/server-key.pem",
+        "NefServerKey":  "../../test/nef/certs/server-key.pem",
         "AfClientCert": "../../test/nef/certs/root-ca-cert.pem"
     },
     "AfServiceID": [
