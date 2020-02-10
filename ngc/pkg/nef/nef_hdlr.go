@@ -188,6 +188,22 @@ func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData,
 	return &afe, nil
 }
 
+func (nef *nefData) nefCheckPfdAppIDExists(appID string) bool {
+
+	for _, v := range nef.afs {
+		for _, trans := range v.pfdtrans {
+			for key := range trans.pfdManagement.PfdDatas {
+				if key == appID {
+					return true
+				}
+
+			}
+		}
+	}
+	return false
+
+}
+
 func (nef *nefData) nefGetAf(afID string) (af *afData, err error) {
 
 	//Check if AF is already present

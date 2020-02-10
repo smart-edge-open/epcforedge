@@ -34,9 +34,35 @@ func sendErrorResponseToAF(w http.ResponseWriter, rsp nefSBRspData) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(eCode)
 	_, err := w.Write(mdata)
+
 	if err != nil {
 		log.Err("NEF ERROR : Failed to send response to AF !!!")
 	}
+	log.Infof("HTTP Response sent: %d", eCode)
+}
+
+func send500PFDResponseToAF(w http.ResponseWriter, rsp nefSBRspData,
+	pfdReportList map[string]PfdReport) {
+
+	mdata, eCode := createErrorJSON(rsp)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(eCode)
+	_, err := w.Write(mdata)
+	if err != nil {
+		log.Err("NEF ERROR : Failed to send response to AF !!!")
+	}
+
+	if pfdReportList != nil {
+		body, e := json.Marshal(pfdReportList)
+		if e != nil {
+			log.Err("NEF ERROR : Failed to send response to AF !!!")
+		}
+		_, err = w.Write(body)
+		if err != nil {
+			log.Err("NEF ERROR : Failed to send response to AF !!!")
+		}
+	}
+
 	log.Infof("HTTP Response sent: %d", eCode)
 }
 
@@ -100,4 +126,20 @@ func loadJSONConfig(configPath string, config interface{}) error {
 		return err
 	}
 	return json.Unmarshal(cfgData, config)
+}
+
+func generatePfdReport(appIds []string,
+	failureReason string) PfdReport {
+
+	var reason FailureCode
+	switch failureReason {
+
+	case "APP_ID_DUPLICATED":
+		reason = AppIDDuplicated
+	default:
+		reason = OtherReason
+
+	}
+	pfdReport := PfdReport{ExternalAppIds: appIds, FailureCode: reason}
+	return pfdReport
 }

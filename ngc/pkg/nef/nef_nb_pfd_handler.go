@@ -120,14 +120,21 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 		sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal POST data")
 		return
 	}
+	pfdBody.PfdReports = make(map[string]PfdReport)
 	//TBD Validate the params
 	loc, rsp, err3 := createNewPFDTrans(nefCtx, vars["scsAsId"], pfdBody)
 
 	if err3 != nil {
 		log.Err(err3)
-		// we return bad request here since we have reached the max
-		rsp.errorCode = 400
-		sendErrorResponseToAF(w, rsp)
+
+		if rsp.errorCode == 500 {
+			send500PFDResponseToAF(w, rsp, pfdBody.PfdReports)
+
+		} else {
+
+			sendErrorResponseToAF(w, rsp)
+
+		}
 		return
 	}
 	log.Infoln(loc)
@@ -598,6 +605,7 @@ func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
 		}
 
 	}
+
 	updPfd = trans
 	log.Infoln("Patch PFD Application PFDs Successful")
 	return rsp, updPfd, err
@@ -751,6 +759,7 @@ func (af *afData) afGetPfdTransactionList(nefCtx *nefContext) (rsp nefSBRspData,
 func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	trans PfdManagement) (loc string, rsp nefSBRspData, err error) {
 
+	nef := &nefCtx.nef
 	/*Check if max subscription reached */
 	if len(af.pfdtrans) >= nefCtx.cfg.MaxSubSupport {
 
@@ -758,9 +767,64 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 		rsp.pd.Title = "MAX Transaction Reached"
 		return "", rsp, errors.New("MAX TRANS Created")
 	}
-	//Generate a unique subscription ID string
+	//Generate a unique transaction ID string
 	transIDStr := strconv.Itoa(af.transIDnum)
 	af.transIDnum++
+
+	// TBD Validate for Duplicate Application ID
+
+	var appIds []string
+	var exist, create bool
+	for key := range trans.PfdDatas {
+		if nef.nefCheckPfdAppIDExists(key) {
+			appIds = append(appIds, key)
+			exist = true
+		} else {
+			create = true
+		}
+	}
+	// if exist and !create send 500
+	//else send 200 with pfdreport but without those Pfds.
+	if exist {
+
+		log.Infoln("Duplicate App Ids", appIds)
+
+		pfdReport := generatePfdReport(appIds, "APP_ID_DUPLICATED")
+
+		trans.PfdReports["APP_ID_DUPLICATED"] = pfdReport
+
+		if !create {
+			//remove everything from trans except pfd report as all
+			//appIds have failed
+			rsp.errorCode = 500
+			rsp.pd.Title = "PFD applications provisioning unsuccessful"
+			for key := range trans.PfdDatas {
+				delete(trans.PfdDatas, key)
+			}
+			return "", rsp, errors.New("PFD unsuccessful")
+		}
+
+		for key := range appIds {
+			delete(trans.PfdDatas, appIds[key])
+		}
+		// trans with pfd report added and remove Pfds with appIDs.
+
+	}
+
+	//Create Location URI
+	loc = nefCtx.nef.locationURLPrefixPfd + af.afID + "/transactions/" +
+		transIDStr
+
+	trans.Self = Link(loc)
+
+	//Also update the self link in each application
+	for k, v := range trans.PfdDatas {
+
+		/*Assign the application ID in the link */
+		v.Self = Link(loc) + "/applications/" + Link(k)
+		trans.PfdDatas[k] = v
+
+	}
 
 	//Create PFD transaction data
 	aftrans := afPfdTransaction{transID: transIDStr, pfdManagement: trans}
@@ -783,12 +847,6 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	*/
 	//Link the subscription with the AF
 	af.pfdtrans[transIDStr] = &aftrans
-
-	//Create Location URI
-	loc = nefCtx.nef.locationURLPrefixPfd + af.afID + "/transactions/" +
-		transIDStr
-
-	aftrans.pfdManagement.Self = Link(loc)
 
 	log.Infoln(" NEW AF PFD transaction added " + transIDStr)
 
