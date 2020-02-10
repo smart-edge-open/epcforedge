@@ -26,18 +26,31 @@ func CreatePFDReqForNEF(ctx context.Context, method string, pfdTrans string,
 	var req *http.Request
 	if len(pfdTrans) > 0 {
 		if len(appID) > 0 {
-			//TBD for application level GET, PUT, PATCH, DELETE
+			if body != nil {
+				//PUT/POST
+				req, _ = http.NewRequest(method,
+					basePFDAPIURL+"/"+pfdTrans+"applications/"+appID,
+					bytes.NewBuffer(body))
+			} else {
+				//GET DELETE
+				req, _ = http.NewRequest(method,
+					basePFDAPIURL+"/"+pfdTrans+"applications/"+appID,
+					nil)
+
+			}
+
 		} else {
 			if body != nil {
 				//PUT
 				req, _ = http.NewRequest(method, basePFDAPIURL+"/"+pfdTrans,
 					bytes.NewBuffer(body))
 			} else {
-				//GET PFD
+				//GET PFD/ DELETE
+
 				req, _ = http.NewRequest(method, basePFDAPIURL+"/"+pfdTrans,
 					nil)
 			}
-			//TBD for DELETE
+
 		}
 
 	} else {
@@ -79,6 +92,7 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 	Describe("REQ to NEF GET ALL/POST", func() {
 
 		postbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PFD_POST_01.json")
+		putbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PFD_PUT_01.json")
 
 		It("Send valid GET all to NEF -No Data as no PFD exists",
 			func() {
@@ -127,6 +141,37 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 			resp.Body.Close()
 
 		})
+
+		It("Will Send a valid PFD GET ALL", func() {
+
+			rr, req := CreatePFDReqForNEF(ctx, "GET", "", "", nil)
+			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
+			Expect(rr.Code).Should(Equal(http.StatusOK))
+
+		})
+
+		It("Will Send a valid PFD GET for PFD TRANS 10000", func() {
+
+			rr, req := CreatePFDReqForNEF(ctx, "GET", "10000", "", nil)
+			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
+			Expect(rr.Code).Should(Equal(http.StatusOK))
+		})
+
+		It("Will Send a valid PUT for PFD TRANS 10000", func() {
+
+			rr, req := CreatePFDReqForNEF(ctx, "PUT", "10000", "", putbody)
+			req.Header.Set("Content-Type", "application/json")
+			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
+			Expect(rr.Code).Should(Equal(http.StatusOK))
+		})
+
+		It("Will Send a valid DELETE for PFD TRANS 10000", func() {
+
+			rr, req := CreatePFDReqForNEF(ctx, "DELETE", "10000", "", nil)
+			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
+			Expect(rr.Code).Should(Equal(http.StatusNoContent))
+		})
+
 	})
 
 	Describe("End the NEF Server: To be done to end NEF PFD API testing",
