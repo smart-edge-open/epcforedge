@@ -37,9 +37,9 @@ func (a *PfdManagementTransactionPutAPIService) handlePfdPutResponse(
 }
 
 /*
-PfdTransactionPut updates an existing pfd transaction
+PfdTransactionPut updates an existing PFD transaction
 source
-Updates an existing pfd transaction resource
+Updates an existing PFD transaction resource
  * @param ctx context.Context - for authentication, logging, cancellation,
  * 	deadlines, tracing, etc. Passed from http.Request or
  *	context.Background().

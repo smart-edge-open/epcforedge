@@ -305,8 +305,8 @@ var _ = Describe("AF", func() {
 			})
 		})
 
-		Context("PFD Transaction POST", func() {
-			Specify("Sending PFD POST 001 request", func() {
+		PContext("PFD Transaction POST", func() {
+			PSpecify("Sending PFD POST 001 request", func() {
 				By("Reading json file")
 				reqBody, err := ioutil.ReadFile(
 					"./testdata/AF_NB_PFD_POST001.json")
@@ -331,8 +331,8 @@ var _ = Describe("AF", func() {
 
 		})
 
-		Context("PFD Transaction POST", func() {
-			Specify("Sending PFD POST 002 request", func() {
+		PContext("PFD Transaction POST", func() {
+			PSpecify("Sending PFD POST 002 request", func() {
 				By("Reading json file")
 				reqBody, err := ioutil.ReadFile(
 					"./testdata/AF_NB_PFD_POST002.json")
@@ -357,8 +357,8 @@ var _ = Describe("AF", func() {
 
 		})
 
-		Context("PFD  GET ALL", func() {
-			Specify("Read all PFD transactions", func() {
+		PContext("PFD  GET ALL", func() {
+			PSpecify("Read all PFD transactions", func() {
 
 				req, err := http.NewRequest(http.MethodGet,
 					"http://localhost:8080/af/v1/pfd/transactions",
@@ -373,7 +373,7 @@ var _ = Describe("AF", func() {
 				Expect(resp.Code).To(Equal(http.StatusOK))
 			})
 
-			Specify("Read all PFD transactions", func() {
+			PSpecify("Read all PFD transactions", func() {
 				By("sending wrong url")
 				req, err := http.NewRequest(http.MethodGet,
 					"http://localhost:8080/af/v2/pfd/transactions",
@@ -390,8 +390,8 @@ var _ = Describe("AF", func() {
 			})
 		})
 
-		Context("PFD transaction ID GET", func() {
-			Specify("", func() {
+		PContext("PFD transaction ID GET", func() {
+			PSpecify("", func() {
 				req, err := http.NewRequest(http.MethodGet,
 					"http://localhost:8080/af/v1/pfd/transactions/10000",
 					nil)
@@ -407,8 +407,8 @@ var _ = Describe("AF", func() {
 			})
 		})
 
-		Context("PFD Transcation ID PUT", func() {
-			Specify("", func() {
+		PContext("PFD Transcation ID PUT", func() {
+			PSpecify("", func() {
 				By("Reading json file")
 				reqBody, err := ioutil.ReadFile(
 					"./testdata/AF_NB_PFD_PUT001.json")
@@ -433,8 +433,8 @@ var _ = Describe("AF", func() {
 
 		})
 
-		Context("PFD Transcation DELETE", func() {
-			Specify("DELETE PFD Transaction 02", func() {
+		PContext("PFD Transcation DELETE", func() {
+			PSpecify("DELETE PFD Transaction 02", func() {
 
 				req, err := http.NewRequest(http.MethodDelete,
 					"http://localhost:8080/af/v1/pfd/transactions/10001",
@@ -450,8 +450,8 @@ var _ = Describe("AF", func() {
 
 		})
 
-		Context("PFD transaction Application GET", func() {
-			Specify("", func() {
+		PContext("PFD transaction Application GET", func() {
+			PSpecify("", func() {
 				req, err := http.NewRequest(http.MethodGet,
 					"http://localhost:8080/af/v1/pfd/transactions/10000/applications/app1",
 					nil)
@@ -467,8 +467,8 @@ var _ = Describe("AF", func() {
 			})
 		})
 
-		Context("PFD transaction Application PUT", func() {
-			Specify("", func() {
+		PContext("PFD transaction Application PUT", func() {
+			PSpecify("", func() {
 
 				By("Reading json file")
 				reqBody, err := ioutil.ReadFile(
@@ -493,8 +493,8 @@ var _ = Describe("AF", func() {
 			})
 		})
 
-		Context("PFD transaction Application PATCH", func() {
-			Specify("", func() {
+		PContext("PFD transaction Application PATCH", func() {
+			PSpecify("", func() {
 
 				By("Reading json file")
 				reqBody, err := ioutil.ReadFile(
@@ -519,8 +519,8 @@ var _ = Describe("AF", func() {
 			})
 		})
 
-		Context("PFD transaction Application DELETE", func() {
-			Specify("", func() {
+		PContext("PFD transaction Application DELETE", func() {
+			PSpecify("", func() {
 				req, err := http.NewRequest(http.MethodDelete,
 					"http://localhost:8080/af/v1/pfd/transactions/10000/applications/app1",
 					nil)

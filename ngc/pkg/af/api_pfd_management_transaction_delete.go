@@ -55,7 +55,7 @@ Deletes an already existing pfd transaction
  * @param ctx context.Context - for authentication, logging, cancellation,
  * deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param afID Identifier of the AF
- * @param pfdTrans Identifier of the subscription resource
+ * @param pfdTrans Identifier of the PFD transaction resource
 */
 func (a *PfdManagementTransactionDeleteAPIService) PfdTransactionDelete(
 	ctx context.Context, afID string, pfdTrans string) (*http.Response,

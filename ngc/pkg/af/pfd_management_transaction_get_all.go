@@ -25,7 +25,7 @@ func getAllPfdTransactions(cliCtx context.Context, afCtx *Context) (
 
 }
 
-//GetAllPfdTransactions function
+// GetAllPfdTransactions - Function to read all PFD transactions
 func GetAllPfdTransactions(w http.ResponseWriter, r *http.Request) {
 	var (
 		err        error

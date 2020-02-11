@@ -41,7 +41,7 @@ Read an active pfd transactions for the AF and the pfd transaction Id
  * @param ctx context.Context - for authentication, logging, cancellation,
  * deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param afID Identifier of the AF
- * @param pfd transaction Identifier of the subscription resource
+ * @param pfd transaction Identifier of the PFD transaction resource
 
 @return PfdManagenent
 */

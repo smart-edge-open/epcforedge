@@ -25,7 +25,7 @@ func putPfdTransaction(cliCtx context.Context, pfdTs PfdManagement,
 	return tsRet, resp, nil
 }
 
-// PutPfdTransaction function
+// PutPfdTransaction function - To update the PFD transcation
 func PutPfdTransaction(w http.ResponseWriter, r *http.Request) {
 	var (
 		err              error

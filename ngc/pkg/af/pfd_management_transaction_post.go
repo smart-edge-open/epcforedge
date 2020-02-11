@@ -25,7 +25,7 @@ func createPfdTransaction(cliCtx context.Context, pfdTrans PfdManagement,
 	return pfdResp, resp, nil
 }
 
-// CreatePfdTransaction function
+// CreatePfdTransaction function - Create a PFD transaction
 func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	var (

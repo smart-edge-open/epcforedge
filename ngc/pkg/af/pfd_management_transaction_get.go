@@ -24,7 +24,7 @@ func getPfdTransaction(cliCtx context.Context, afCtx *Context,
 	return pfdTs, resp, nil
 }
 
-// GetPfdTransaction function
+// GetPfdTransaction function - Read a particular PFD transaction
 func GetPfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	var (

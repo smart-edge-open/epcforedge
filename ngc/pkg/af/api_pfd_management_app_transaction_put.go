@@ -37,7 +37,7 @@ func (a *PfdManagementTransactionAppPutAPIService) handlePfdAppPutResponse(
 }
 
 /*
-PfdAppTransactionPut updates an existing pfd transaction for an external app ID
+PfdAppTransactionPut updates an existing PFD transaction for an external app ID
 source
 Updates an existing pfd transaction resource for an external application id
  * @param ctx context.Context - for authentication, logging, cancellation,
@@ -46,7 +46,7 @@ Updates an existing pfd transaction resource for an external application id
  * @param afID Identifier of the AF
  * @param pfdTransactionID Identifier of the pfd Transaction resource
  * @param appID Identifier of the external application id
- * @param body Provides the  pfd data structure identified by
+ * @param body Provides the  PfdData structure identified by
  *	pfdTransaction ID and appID
 
 @return PfdData
