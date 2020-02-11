@@ -125,6 +125,13 @@ var afRoutes = Routes{
 		CreateSubscription,
 	},
 
+	Route{
+		"SubscriptionPut",
+		strings.ToUpper("Put"),
+		"/af/v1/subscriptions/{subscriptionId}",
+		ModifySubscriptionPut,
+	},
+
 	// PFD Management routes
 
 	Route{
