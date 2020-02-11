@@ -7,13 +7,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"github.com/otcshare/epcforedge/ngc/pkg/af"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"github.com/otcshare/epcforedge/ngc/pkg/af"
 )
 
 func TestAf(t *testing.T) {
@@ -303,6 +304,238 @@ var _ = Describe("AF", func() {
 				Expect(resp.Code).To(Equal(http.StatusNotFound))
 			})
 		})
+
+		Context("PFD Transaction POST", func() {
+			Specify("Sending PFD POST 001 request", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusCreated))
+
+			})
+
+		})
+
+		Context("PFD Transaction POST", func() {
+			Specify("Sending PFD POST 002 request", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/AF_NB_PFD_POST002.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusCreated))
+
+			})
+
+		})
+
+		Context("PFD  GET ALL", func() {
+			Specify("Read all PFD transactions", func() {
+
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusOK))
+			})
+
+			Specify("Read all PFD transactions", func() {
+				By("sending wrong url")
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v2/pfd/transactions",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusNotFound))
+
+			})
+		})
+
+		Context("PFD transaction ID GET", func() {
+			Specify("", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions/10000",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusOK))
+
+			})
+		})
+
+		Context("PFD Transcation ID PUT", func() {
+			Specify("", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/AF_NB_PFD_PUT001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/pfd/transactions/10000",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusOK))
+
+			})
+
+		})
+
+		Context("PFD Transcation DELETE", func() {
+			Specify("DELETE PFD Transaction 02", func() {
+
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/pfd/transactions/10001",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
+			})
+
+		})
+
+		Context("PFD transaction Application GET", func() {
+			Specify("", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/applications/app1",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusOK))
+
+			})
+		})
+
+		Context("PFD transaction Application PUT", func() {
+			Specify("", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/AF_NEF_PFD_APP_PUT_01.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/applications/app1",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusOK))
+
+			})
+		})
+
+		Context("PFD transaction Application PATCH", func() {
+			Specify("", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/AF_NEF_PFD_APP_PATCH_01.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPatch,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/applications/app1",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusOK))
+
+			})
+		})
+
+		Context("PFD transaction Application DELETE", func() {
+			Specify("", func() {
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/applications/app1",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
+
+			})
+		})
+
 	})
 
 	Describe("Stop the AF Server", func() {
