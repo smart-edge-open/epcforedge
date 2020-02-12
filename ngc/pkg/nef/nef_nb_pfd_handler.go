@@ -5,6 +5,7 @@
 package ngcnef
 
 import (
+	//"context"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -791,8 +792,8 @@ func (af *afData) afGetPfdTransaction(nefCtx *nefContext,
 	return rsp, transPfd.pfdManagement, err
 }
 
-func (af *afData) afGetPfdTransactionList(nefCtx *nefContext) (rsp nefPFDSBRspData,
-	transList []PfdManagement, err error) {
+func (af *afData) afGetPfdTransactionList(nefCtx *nefContext) (
+	rsp nefPFDSBRspData, transList []PfdManagement, err error) {
 
 	var transPfd PfdManagement
 
@@ -1010,11 +1011,30 @@ func validatePfd(pfd Pfd) (rsp nefPFDSBRspData,
 	return rsp, true
 }
 
+func nefSBUDRAPPPFDGet(transData *afPfdTransaction, nefCtx *nefContext,
+	appID ApplicationID) (app PfdData, rsp nefPFDSBRspData, err error) {
+
+	//nef := &nefCtx.nef
+	//var pfdApp PfdDataForApp
+
+	//cliCtx, cancel := context.WithCancel(nef.ctx)
+	//defer cancel()
+
+	//r, e := nef.udrClient.UdrPfdDataGet(cliCtx, UdrAppID(appID))
+	//if e != nil {
+
+	//}
+	//translation
+	//pfdApp = r.
+
+	//rsp.result
+
+	return app, rsp, err
+}
+
 //NEFSBGetPfdFn is the callback for SB API to get PFD transaction
 func nefSBUDRPFDGet(transData *afPfdTransaction, nefCtx *nefContext) (
 	trans PfdManagement, rsp nefPFDSBRspData, err error) {
-
-	//NEF stored the PFD information so the data is not fetched
 
 	return trans, rsp, nil
 }
@@ -1023,7 +1043,11 @@ func nefSBUDRPFDGet(transData *afPfdTransaction, nefCtx *nefContext) (
 func nefSBUDRAPPPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
 	app PfdData) (rsp nefPFDSBRspData, err error) {
 
+	//nef := &nefCtx.nef
 	var pfdApp PfdDataForApp
+
+	//cliCtx, cancel := context.WithCancel(nef.ctx)
+	//defer cancel()
 
 	/*Timer for pfdApp.AllowedDelay can be started here, not supported
 	currently */
@@ -1053,8 +1077,13 @@ func nefSBUDRAPPPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
 		*/
 		pfdApp.Pfds = append(pfdApp.Pfds, c)
 	}
-	// We got One Application data Now post it to UDR as it expects
-	// one application at a time, As stub implementation return success
+
+	//r, e := nef.udrClient.UdrPfdDataCreate(cliCtx, pfdApp)
+
+	//if e != nil {
+	//	rsp.result.errorCode = 400
+	//	return rsp, e
+	//}
 
 	rsp.result.errorCode = 200
 
@@ -1082,6 +1111,19 @@ func nefSBUDRPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
 		rspDetails[k] = r
 	}
 	return rspDetails, nil
+}
+
+//NEFSBDeletePfdFn is the callback for SB API to delete PFD transaction
+func nefSBUDRAPPPFDDelete(transData *afPfdTransaction, nefCtx *nefContext,
+	appID ApplicationID) (rsp nefPFDSBRspData, err error) {
+
+	//nef := &nefCtx.nef
+	//cliCtx, cancel := context.WithCancel(nef.ctx)
+	//defer cancel()
+
+	//r, e := nef.udrClient.UdrPfdDataDelete(cliCtx, UdrAppID(appID))
+
+	return rsp, nil
 }
 
 //NEFSBDeletePfdFn is the callback for SB API to delete PFD transaction

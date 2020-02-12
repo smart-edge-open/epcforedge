@@ -21,7 +21,7 @@ type nefData struct {
 	locationURLPrefix    string
 	locationURLPrefixPfd string
 	pcfClient            PcfPolicyAuthorization
-	udrClient            UdrInfluenceData
+	udrClient            UdrData
 	corrID               uint
 	afs                  map[string]*afData
 	upfNotificationURL   URI

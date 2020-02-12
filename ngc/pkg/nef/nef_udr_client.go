@@ -15,6 +15,8 @@ type UdrClientStub struct {
 	udr string
 	// database to store the contents of the udr influence data
 	tidDb map[string]TrafficInfluData
+	//database to store content of udr PFD data
+	appPfd map[string]PfdDataForApp
 }
 
 // NewUDRClient creates a new Udr Client
@@ -23,6 +25,7 @@ func NewUDRClient(cfg *Config) *UdrClientStub {
 	c := &UdrClientStub{}
 	c.udr = "UDR Stub"
 	c.tidDb = make(map[string]TrafficInfluData)
+	c.appPfd = make(map[string]PfdDataForApp)
 	log.Info("UDR Stub Client created")
 	return c
 }
@@ -163,4 +166,44 @@ func (udr *UdrClientStub) UdrInfluenceDataGet(ctx context.Context) (
 	var err error
 	log.Infof("UdrInfluenceDataGet Stub Exited")
 	return udrPr, err
+}
+
+// UdrPfdDataCreate is a stub implementation
+func (udr *UdrClientStub) UdrPfdDataCreate(ctx context.Context,
+	body PfdDataForApp) (rsp UdrPfdResponse, err error) {
+
+	log.Infof("UdrPfdDataCreate Stub Entered")
+	_ = ctx
+
+	log.Info(body)
+
+	log.Infof("UdrPfdDataCreate Stub Exited")
+
+	return rsp, err
+}
+
+// UdrPfdDataGet is a stub implementation
+func (udr *UdrClientStub) UdrPfdDataGet(ctx context.Context,
+	appID UdrAppID) (rsp UdrPfdResponse, err error) {
+	log.Infof("UdrPfdDataGet Stub Entered")
+	_ = ctx
+
+	appPfd := PfdDataForApp{}
+
+	rsp.AppPfd = &appPfd
+
+	log.Infof("UdrPfdDataGet Stub Exited")
+
+	return rsp, err
+}
+
+// UdrPfdDataDelete is a stub implementation
+func (udr *UdrClientStub) UdrPfdDataDelete(ctx context.Context,
+	appID UdrAppID) (rsp UdrPfdResponse, err error) {
+	log.Infof("UdrPfdDataDelete Stub Entered")
+	_ = ctx
+
+	log.Infof("UdrPfdDataDelete Stub Exited")
+
+	return rsp, err
 }
