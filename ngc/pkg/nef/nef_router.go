@@ -101,28 +101,32 @@ var NEFRoutes = []Route{
 	{
 		"ReadPFDManagementApplication",
 		strings.ToUpper("Get"),
-		`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/applications/{appId}`,
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
 		ReadPFDManagementApplication,
 	},
 
 	{
 		"DeletePFDManagementApplication",
 		strings.ToUpper("Delete"),
-		`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/applications/{appId}`,
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
 		DeletePFDManagementApplication,
 	},
 
 	{
 		"UpdatePutPFDManagementApplication",
 		strings.ToUpper("Put"),
-		`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/applications/{appId}`,
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
 		UpdatePutPFDManagementApplication,
 	},
 
 	{
 		"PatchPFDManagementApplication",
 		strings.ToUpper("Patch"),
-		`/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/applications/{appId}`,
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
 		PatchPFDManagementApplication,
 	},
 }

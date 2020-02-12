@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
 	//"strconv"
 
@@ -17,7 +18,8 @@ import (
 )
 
 func createNewPFDTrans(nefCtx *nefContext, afID string,
-	trans PfdManagement) (loc string, rsp nefSBRspData, err error) {
+	trans PfdManagement) (loc string, rsp map[string]nefPFDSBRspData,
+	err error) {
 
 	var af *afData
 	nef := &nefCtx.nef
@@ -48,7 +50,7 @@ func ReadAllPFDManagementTransaction(w http.ResponseWriter,
 	r *http.Request) {
 
 	var pfdTrans []PfdManagement
-	var rsp nefSBRspData
+	var rsp nefPFDSBRspData
 	var err error
 
 	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
@@ -67,7 +69,8 @@ func ReadAllPFDManagementTransaction(w http.ResponseWriter,
 		rsp, pfdTrans, err = af.afGetPfdTransactionList(nefCtx)
 		if err != nil {
 			log.Err(err)
-			sendErrorResponseToAF(w, rsp)
+			rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
+			sendErrorResponseToAF(w, rsp1)
 			return
 		}
 	}
@@ -121,20 +124,49 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 		return
 	}
 	pfdBody.PfdReports = make(map[string]PfdReport)
-	//TBD Validate the params
+
+	// Validate the mandatory parameters
+	resRsp, status := validateAFPfdManagementData(pfdBody)
+	if !status {
+		log.Err(resRsp.result.pd.Title)
+		rsp1 := nefSBRspData{errorCode: resRsp.result.errorCode}
+		sendErrorResponseToAF(w, rsp1)
+		return
+	}
+
+	for key, pfdData := range pfdBody.PfdDatas {
+		for _, pfd := range pfdData.Pfds {
+			rspPfd, status := validateAFPfdData(pfd)
+			if !status {
+				// Prepare Pfd report and remove the apps from pfdBody
+				_ = key //app ID
+				_ = rspPfd
+
+			}
+		}
+
+	}
+
 	loc, rsp, err3 := createNewPFDTrans(nefCtx, vars["scsAsId"], pfdBody)
 
 	if err3 != nil {
 		log.Err(err3)
 
-		if rsp.errorCode == 500 {
-			send500PFDResponseToAF(w, rsp, pfdBody.PfdReports)
+		// TBD to update the PFD report on rsp
+		_ = rsp
 
-		} else {
+		// we return bad request here since we have reached the max
+		rsp1 := nefSBRspData{errorCode: 400}
+		/*
+			if rsperrorCode == 500 {
+				send500PFDResponseToAF(w, rsp, pfdBody.PfdReports)
 
-			sendErrorResponseToAF(w, rsp)
+			} else {
 
-		}
+		*/
+
+		sendErrorResponseToAF(w, rsp1)
+
 		return
 	}
 	log.Infoln(loc)
@@ -188,7 +220,8 @@ func ReadPFDManagementTransaction(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Err(err)
-		sendErrorResponseToAF(w, rsp)
+		rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
+		sendErrorResponseToAF(w, rsp1)
 		return
 	}
 
@@ -316,7 +349,8 @@ func DeletePFDManagementTransaction(w http.ResponseWriter,
 
 	if err != nil {
 		log.Err(err)
-		sendErrorResponseToAF(w, rsp)
+		rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
+		sendErrorResponseToAF(w, rsp1)
 		return
 	}
 
@@ -368,8 +402,12 @@ func UpdatePutPFDManagementTransaction(w http.ResponseWriter,
 		rsp, newPfdTrans, err := af.afUpdatePutPfdTransaction(nefCtx,
 			vars["transactionId"], pfdTrans)
 
+		// TBD to update the pfd report on rsp
+		_ = rsp
 		if err != nil {
-			sendErrorResponseToAF(w, rsp)
+			// TBD how to send the error code
+			rsp1 := nefSBRspData{errorCode: 400}
+			sendErrorResponseToAF(w, rsp1)
 			return
 		}
 
@@ -436,7 +474,9 @@ func UpdatePutPFDManagementApplication(w http.ResponseWriter,
 			vars["transactionId"], vars["appId"], pfdData)
 
 		if err != nil {
-			sendErrorResponseToAF(w, rsp)
+
+			rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
+			sendErrorResponseToAF(w, rsp1)
 			return
 		}
 
@@ -503,7 +543,10 @@ func PatchPFDManagementApplication(w http.ResponseWriter,
 			vars["transactionId"], vars["appId"], pfdData)
 
 		if err != nil {
-			sendErrorResponseToAF(w, rsp)
+
+			rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
+			sendErrorResponseToAF(w, rsp1)
+
 			return
 		}
 
@@ -533,31 +576,30 @@ func PatchPFDManagementApplication(w http.ResponseWriter,
 //PFD Management functions
 
 func (af *afData) afUpdatePutPfdApplication(nefCtx *nefContext, transID string,
-	appID string, pfdData PfdData) (rsp nefSBRspData, updPfd PfdData,
+	appID string, pfdData PfdData) (rsp nefPFDSBRspData, updPfd PfdData,
 	err error) {
 
 	pfdTrans, ok := af.pfdtrans[transID]
 
 	if !ok {
-		rsp.errorCode = 400
-		rsp.pd.Title = pfdNotFound
+		rsp.result.errorCode = 400
+		rsp.result.pd.Title = pfdNotFound
 
 		return rsp, updPfd, errors.New(pfdNotFound)
 	}
-
-	/*rsp, err = sub.NEFSBPut(sub, nefCtx, ti)
-
-	if err != nil {
-		log.Err("Failed to Update Subscription")
-		return rsp, updtTI, err
-	}*/
-
 	trans, ok := pfdTrans.pfdManagement.PfdDatas[appID]
 
 	if !ok {
-		rsp.errorCode = 404
-		rsp.pd.Title = appNotFound
+		rsp.result.errorCode = 404
+		rsp.result.pd.Title = appNotFound
 		return rsp, trans, errors.New(appNotFound)
+	}
+
+	rsp, err = pfdTrans.NEFSBAppPfdPut(pfdTrans, nefCtx, pfdData)
+
+	if err != nil {
+		log.Err("Failed to Update the PFD Application")
+		return rsp, pfdData, err
 	}
 
 	pfdTrans.pfdManagement.PfdDatas[appID] = pfdData
@@ -568,14 +610,14 @@ func (af *afData) afUpdatePutPfdApplication(nefCtx *nefContext, transID string,
 }
 
 func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
-	transID string, appID string, pfdData PfdData) (rsp nefSBRspData,
+	transID string, appID string, pfdData PfdData) (rsp nefPFDSBRspData,
 	updPfd PfdData, err error) {
 
 	pfdTrans, ok := af.pfdtrans[transID]
 
 	if !ok {
-		rsp.errorCode = 400
-		rsp.pd.Title = pfdNotFound
+		rsp.result.errorCode = 400
+		rsp.result.pd.Title = pfdNotFound
 
 		return rsp, updPfd, errors.New(pfdNotFound)
 	}
@@ -590,9 +632,17 @@ func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
 	trans, ok := pfdTrans.pfdManagement.PfdDatas[appID]
 
 	if !ok {
-		rsp.errorCode = 404
-		rsp.pd.Title = appNotFound
+		rsp.result.errorCode = 404
+		rsp.result.pd.Title = appNotFound
 		return rsp, trans, errors.New(appNotFound)
+
+	}
+
+	rsp, err = pfdTrans.NEFSBAppPfdPut(pfdTrans, nefCtx, pfdData)
+
+	if err != nil {
+		log.Err("Failed to Update the PFD Application")
+		return rsp, pfdData, err
 	}
 	// Updating the PFDs present in the
 	for key := range pfdData.Pfds {
@@ -612,15 +662,26 @@ func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
 }
 
 func (af *afData) afUpdatePutPfdTransaction(nefCtx *nefContext, transID string,
-	trans PfdManagement) (rsp nefSBRspData, updPfd PfdManagement, err error) {
+	trans PfdManagement) (rsp map[string]nefPFDSBRspData, updPfd PfdManagement,
+	err error) {
 
 	pfdTrans, ok := af.pfdtrans[transID]
 
 	if !ok {
-		rsp.errorCode = 400
-		rsp.pd.Title = pfdNotFound
+
+		// TBD how to send the error code
+		//rsp.result.errorCode = 400
+		//rsp.result.pd.Title = pfdNotFound
 
 		return rsp, updPfd, errors.New(pfdNotFound)
+	}
+
+	rsp, err = pfdTrans.NEFSBPfdPut(pfdTrans, nefCtx, trans)
+
+	if err != nil {
+
+		//Return error
+		return rsp, trans, err
 	}
 
 	/*rsp, err = sub.NEFSBPut(sub, nefCtx, ti)
@@ -639,23 +700,23 @@ func (af *afData) afUpdatePutPfdTransaction(nefCtx *nefContext, transID string,
 }
 
 func (af *afData) afDeletePfdTransaction(nefCtx *nefContext,
-	pfdTrans string) (rsp nefSBRspData, err error) {
+	pfdTrans string) (rsp nefPFDSBRspData, err error) {
 
 	//Check if PFD transaction is already present
-	_, ok := af.pfdtrans[pfdTrans]
+	trans, ok := af.pfdtrans[pfdTrans]
 
 	if !ok {
-		rsp.errorCode = 404
-		rsp.pd.Title = pfdNotFound
+		rsp.result.errorCode = 404
+		rsp.result.pd.Title = pfdNotFound
 		return rsp, errors.New(pfdNotFound)
 	}
 
-	/*rsp, err = sub.NEFSBDelete(sub, nefCtx)
-
+	rsp, err = trans.NEFSBPfdDelete(trans, nefCtx)
 	if err != nil {
-		log.Err("Failed to Delete Subscription")
+		log.Err("Failed to Delete PFD transaction")
+		rsp.result.errorCode = 400
 		return rsp, err
-	}*/
+	}
 
 	//Delete local entry in map of pfd transactions
 	delete(af.pfdtrans, pfdTrans)
@@ -710,32 +771,27 @@ func (af *afData) afDeletePfdApplication(nefCtx *nefContext,
 }
 
 func (af *afData) afGetPfdTransaction(nefCtx *nefContext,
-	transID string) (rsp nefSBRspData, trans PfdManagement, err error) {
+	transID string) (rsp nefPFDSBRspData, trans PfdManagement, err error) {
 
 	transPfd, ok := af.pfdtrans[transID]
 
 	if !ok {
-		rsp.errorCode = 404
-		rsp.pd.Title = pfdNotFound
+		rsp.result.errorCode = 404
+		rsp.result.pd.Title = pfdNotFound
 		return rsp, trans, errors.New(pfdNotFound)
 	}
 
-	//ti, rsp, err = sub.NEFSBGet(sub, nefCtx)
-
-	/*
-		if err != nil {
-			log.Infoln("Failed to Get Subscription")
-			return rsp, ti, err
-		}
-
-		return rsp, ti, err
-	*/
+	_, rsp, err = transPfd.NEFSBPfdGet(transPfd, nefCtx)
+	if err != nil {
+		log.Infoln("Failed to Get PFD transaction")
+		return rsp, transPfd.pfdManagement, err
+	}
 
 	//Return locally
 	return rsp, transPfd.pfdManagement, err
 }
 
-func (af *afData) afGetPfdTransactionList(nefCtx *nefContext) (rsp nefSBRspData,
+func (af *afData) afGetPfdTransactionList(nefCtx *nefContext) (rsp nefPFDSBRspData,
 	transList []PfdManagement, err error) {
 
 	var transPfd PfdManagement
@@ -757,14 +813,15 @@ func (af *afData) afGetPfdTransactionList(nefCtx *nefContext) (rsp nefSBRspData,
 
 //Creates a new subscription
 func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
-	trans PfdManagement) (loc string, rsp nefSBRspData, err error) {
+	trans PfdManagement) (loc string, rsp map[string]nefPFDSBRspData,
+	err error) {
 
 	nef := &nefCtx.nef
 	/*Check if max subscription reached */
 	if len(af.pfdtrans) >= nefCtx.cfg.MaxSubSupport {
 
-		rsp.errorCode = 400
-		rsp.pd.Title = "MAX Transaction Reached"
+		//rsp.errorCode = 400
+		//rsp.pd.Title = "MAX Transaction Reached"
 		return "", rsp, errors.New("MAX TRANS Created")
 	}
 	//Generate a unique transaction ID string
@@ -796,8 +853,8 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 		if !create {
 			//remove everything from trans except pfd report as all
 			//appIds have failed
-			rsp.errorCode = 500
-			rsp.pd.Title = "PFD applications provisioning unsuccessful"
+			//rsp.errorCode = 500
+			//rsp.pd.Title = "PFD applications provisioning unsuccessful"
 			for key := range trans.PfdDatas {
 				delete(trans.PfdDatas, key)
 			}
@@ -814,7 +871,12 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	//Create PFD transaction data
 	aftrans := afPfdTransaction{transID: transIDStr, pfdManagement: trans}
 
-	/*rsp, err = nefSBUDRPost(&afsub, nefCtx, ti)
+	aftrans.NEFSBPfdGet = nefSBUDRPFDGet
+	aftrans.NEFSBAppPfdPut = nefSBUDRAPPPFDPut
+	aftrans.NEFSBPfdPut = nefSBUDRPFDPut
+	aftrans.NEFSBPfdDelete = nefSBUDRPFDDelete
+
+	rsp, err = aftrans.NEFSBPfdPut(&aftrans, nefCtx, trans)
 
 	if err != nil {
 
@@ -823,14 +885,9 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	}
 
 	//Store Notification Destination URI
-	afsub.afNotificationDestination = ti.NotificationDestination
+	//afsub.afNotificationDestination = ti.NotificationDestination
 
-	afsub.NEFSBGet = nefSBUDRGet
-	afsub.NEFSBPut = nefSBUDRPut
-	afsub.NEFSBPatch = nefSBUDRPatch
-	afsub.NEFSBDelete = nefSBUDRDelete
-	*/
-	//Link the subscription with the AF
+	//Link the PFD transaction with the AF
 	af.pfdtrans[transIDStr] = &aftrans
 
 	//Create Location URI
@@ -869,4 +926,167 @@ func getNefLocationURLPrefixPfd(cfg *Config) string {
 	uri += cfg.LocationPrefixPfd
 	return uri
 
+}
+
+// validateAFPfdManagementData Function to validate mandatory parameters of
+// PFD Management received from AF
+func validateAFPfdManagementData(pfdTrans PfdManagement) (rsp nefPFDSBRspData,
+	status bool) {
+
+	if len(pfdTrans.PfdDatas) == 0 {
+		rsp.result.errorCode = 400
+		rsp.result.pd.Title = "Missing PFD Data"
+		return rsp, false
+	}
+
+	//Validation of Individual PFD
+	for _, v := range pfdTrans.PfdDatas {
+		if len(v.Pfds) == 0 {
+			rsp.result.errorCode = 400
+			rsp.result.pd.Title = "Missing PFD Data"
+			return rsp, false
+		}
+
+		if len(v.ExternalAppID) == 0 {
+			rsp.result.errorCode = 400
+			rsp.result.pd.Title = "Missing Application ID"
+			return rsp, false
+		}
+
+	}
+	return rsp, true
+}
+
+// validateAFPfdData Function to validate mandatory parameters of
+// PFD  received from AF
+func validateAFPfdData(pfd Pfd) (rsp nefPFDSBRspData,
+	status bool) {
+
+	if len(pfd.PfdID) == 0 {
+		rsp.result.errorCode = 400
+		rsp.result.pd.Title = "PFD ID missing"
+		return rsp, false
+	}
+	if len(pfd.DomainNames) == 0 && len(pfd.FlowDescriptions) == 0 &&
+		len(pfd.Urls) == 0 {
+		rsp.result.errorCode = 400
+		rsp.result.pd.Title = "No domainNames" +
+			"FlowDescriptions and Urls present for PFD"
+		return rsp, false
+	}
+	rspPfd, result := validatePfd(pfd)
+	return rspPfd, result
+}
+
+// validateAFPfd Function to validate mandatory parameters of
+// PFD
+func validatePfd(pfd Pfd) (rsp nefPFDSBRspData,
+	status bool) {
+	if len(pfd.DomainNames) != 0 {
+		if len(pfd.FlowDescriptions) != 0 || len(pfd.Urls) != 0 {
+			rsp.result.errorCode = 400
+			rsp.result.pd.Title = "only one of domainNames" +
+				"FlowDescriptions and Urls present for PFD"
+			return rsp, false
+		}
+	}
+	if len(pfd.Urls) != 0 {
+		if len(pfd.FlowDescriptions) != 0 || len(pfd.DomainNames) != 0 {
+			rsp.result.errorCode = 400
+			rsp.result.pd.Title = "only one of domainNames" +
+				"FlowDescriptions and Urls present for PFD"
+			return rsp, false
+		}
+	}
+	if len(pfd.FlowDescriptions) != 0 {
+		if len(pfd.Urls) != 0 || len(pfd.DomainNames) != 0 {
+			rsp.result.errorCode = 400
+			rsp.result.pd.Title = "only one of domainNames" +
+				"FlowDescriptions and Urls present for PFD"
+			return rsp, false
+		}
+	}
+
+	return rsp, true
+}
+
+//NEFSBGetPfdFn is the callback for SB API to get PFD transaction
+func nefSBUDRPFDGet(transData *afPfdTransaction, nefCtx *nefContext) (
+	trans PfdManagement, rsp nefPFDSBRspData, err error) {
+
+	//NEF stored the PFD information so the data is not fetched
+
+	return trans, rsp, nil
+}
+
+//NEFSBPutPfdFn is the callback for SB API to put PFD transaction
+func nefSBUDRAPPPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
+	app PfdData) (rsp nefPFDSBRspData, err error) {
+
+	var pfdApp PfdDataForApp
+
+	/*Timer for pfdApp.AllowedDelay can be started here, not supported
+	currently */
+	pfdApp.AppID = ApplicationID(app.ExternalAppID)
+
+	if app.CachingTime != nil {
+
+		i := time.Duration(*app.CachingTime)
+		timeLater := DateTime(time.Now().Add(time.Second * i).String())
+		pfdApp.CachingTime = &timeLater
+
+	}
+
+	for _, pfdv := range app.Pfds {
+
+		var c PfdContent
+		c.PfdID = pfdv.PfdID
+		c.DomainNames = pfdv.DomainNames
+		c.FlowDescriptions = pfdv.FlowDescriptions
+		c.Urls = pfdv.Urls
+
+		/*
+			c := PfdContent{PfdID: pfdv.PfdID,
+				FlowDescriptions: pfdv.FlowDescriptions,
+				Urls:             pfdv.Urls,
+				DomainNames:      pfdv.DomainNames}
+		*/
+		pfdApp.Pfds = append(pfdApp.Pfds, c)
+	}
+	// We got One Application data Now post it to UDR as it expects
+	// one application at a time, As stub implementation return success
+
+	rsp.result.errorCode = 200
+
+	log.Info("PUT to UDR PFD -> ", app)
+	log.Info(pfdApp)
+
+	return rsp, err
+
+}
+
+// nefSBUDRPFDPut is the callback for SB API to put PFD transaction
+func nefSBUDRPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
+	trans PfdManagement) (rsp map[string]nefPFDSBRspData, err error) {
+
+	rspDetails := make(map[string]nefPFDSBRspData)
+
+	for k, v := range trans.PfdDatas {
+
+		r, e := nefSBUDRAPPPFDPut(transData, nefCtx, v)
+		if e != nil {
+			//fatal error return
+			return rsp, e
+		}
+		/*Update the map with the response*/
+		rspDetails[k] = r
+	}
+	return rspDetails, nil
+}
+
+//NEFSBDeletePfdFn is the callback for SB API to delete PFD transaction
+func nefSBUDRPFDDelete(transData *afPfdTransaction, nefCtx *nefContext) (
+	rsp nefPFDSBRspData, err error) {
+
+	return rsp, nil
 }

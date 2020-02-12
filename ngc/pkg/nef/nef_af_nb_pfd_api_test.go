@@ -96,8 +96,10 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 
 		postbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PFD_POST_01.json")
 		putbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PFD_PUT_01.json")
-		putappbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PFD_APP_PUT_01.json")
-		patchappbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PFD_APP_PATCH_01.json")
+		putappbody, _ := ioutil.ReadFile(testJSONPath +
+			"AF_NEF_PFD_APP_PUT_01.json")
+		patchappbody, _ := ioutil.ReadFile(testJSONPath +
+			"AF_NEF_PFD_APP_PATCH_01.json")
 
 		It("Send valid GET all to NEF -No Data as no PFD exists",
 			func() {
@@ -179,14 +181,16 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 
 		It("Will Send a valid PFD PUT for PFD TRANS 10000 and app1", func() {
 
-			rr, req := CreatePFDReqForNEF(ctx, "PUT", "10000", "app1", putappbody)
+			rr, req := CreatePFDReqForNEF(ctx, "PUT", "10000", "app1",
+				putappbody)
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 		})
 
 		It("Will Send a valid PFD PATCH for PFD TRANS 10000 and app1", func() {
 
-			rr, req := CreatePFDReqForNEF(ctx, "PATCH", "10000", "app1", patchappbody)
+			rr, req := CreatePFDReqForNEF(ctx, "PATCH", "10000", "app1",
+				patchappbody)
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusOK))
 		})

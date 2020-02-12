@@ -43,19 +43,28 @@ type NEFSBPatchFn func(subData *afSubscription, nefCtx *nefContext,
 type NEFSBDeleteFn func(subData *afSubscription, nefCtx *nefContext) (
 	rsp nefSBRspData, err error)
 
-/*
-//NEFSBGetPfdFn is the callback for SB API to get PFD transaction
+/**********************************/
+/* PFD handler function type  	  */
+/**********************************/
+
+// NEFSBGetPfdFn is the callback for SB API to get PFD transaction
 type NEFSBGetPfdFn func(transData *afPfdTransaction, nefCtx *nefContext) (
-	trans PfdManagement, rsp nefSBRspData, err error)
+	trans PfdManagement, rsp nefPFDSBRspData, err error)
 
-//NEFSBPutPfdFn is the callback for SB API to put PFD transaction
+// NEFSBPutPfdFn is the callback for SB API to put PFD transaction
 type NEFSBPutPfdFn func(transData *afPfdTransaction, nefCtx *nefContext,
-	trans PfdManagement) (rsp nefSBRspData, err error)
+	trans PfdManagement) (rsp map[string]nefPFDSBRspData, err error)
 
-//NEFSBDeletePfdFn is the callback for SB API to delete PFD transaction
+// NEFSBAppPutPfdFn is the callback for SB API to put PFD transaction
+type NEFSBAppPutPfdFn func(transData *afPfdTransaction, nefCtx *nefContext,
+	app PfdData) (rsp nefPFDSBRspData, err error)
+
+// NEFSBDeletePfdFn is the callback for SB API to delete PFD transaction
 type NEFSBDeletePfdFn func(transData *afPfdTransaction, nefCtx *nefContext) (
-	trans PfdManagement, err error)
-*/
+	rsp nefPFDSBRspData, err error)
+
+/**********************************/
+
 //PCF Subscription data
 type afSubscription struct {
 	subid string
@@ -78,11 +87,11 @@ type afSubscription struct {
 type afPfdTransaction struct {
 	transID       string
 	pfdManagement PfdManagement
-	/*
-		NEFSBPfdGet    NEFSBGetPfdFn
-		NEFSBPfdPut    NEFSBPutPfdFn
-		NEFSBPfdDelete NEFSBDeletePfdFn
-	*/
+
+	NEFSBPfdGet    NEFSBGetPfdFn
+	NEFSBPfdPut    NEFSBPutPfdFn
+	NEFSBAppPfdPut NEFSBAppPutPfdFn
+	NEFSBPfdDelete NEFSBDeletePfdFn
 }
 
 //AF data
@@ -98,6 +107,11 @@ type afData struct {
 type nefSBRspData struct {
 	errorCode int
 	pd        ProblemDetails
+}
+
+type nefPFDSBRspData struct {
+	result nefSBRspData
+	//fc     *FailureCode
 }
 
 //Creates a AF instance

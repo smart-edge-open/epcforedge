@@ -41,6 +41,7 @@ func sendErrorResponseToAF(w http.ResponseWriter, rsp nefSBRspData) {
 	log.Infof("HTTP Response sent: %d", eCode)
 }
 
+/*
 func send500PFDResponseToAF(w http.ResponseWriter, rsp nefSBRspData,
 	pfdReportList map[string]PfdReport) {
 
@@ -66,6 +67,7 @@ func send500PFDResponseToAF(w http.ResponseWriter, rsp nefSBRspData,
 	log.Infof("HTTP Response sent: %d", eCode)
 }
 
+*/
 func createErrorJSON(rsp nefSBRspData) (mdata []byte, statusCode int) {
 
 	var err error
