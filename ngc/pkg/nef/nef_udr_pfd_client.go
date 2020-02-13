@@ -14,7 +14,7 @@ import (
 type UdrPfdClientStub struct {
 	udr string
 	//database to store content of udr PFD data
-	appPfd map[string]PfdDataForApp
+	appPfd map[string]*PfdDataForApp
 }
 
 // NewUDRPfdClient creates a new Udr Client
@@ -22,7 +22,7 @@ func NewUDRPfdClient(cfg *Config) *UdrPfdClientStub {
 
 	c := &UdrPfdClientStub{}
 	c.udr = "UDR Pfd Stub"
-	c.appPfd = make(map[string]PfdDataForApp)
+	c.appPfd = make(map[string]*PfdDataForApp)
 	log.Info("UDR PFD Stub Client created")
 	return c
 }
@@ -35,7 +35,7 @@ func (udr *UdrPfdClientStub) UdrPfdDataCreate(ctx context.Context,
 	_ = ctx
 
 	log.Info("UdrPfdDataCreate: Invoke UDR SB PUT -> ")
-
+	udr.appPfd[string(body.AppID)] = &body
 	log.Infof("UdrPfdDataCreate Stub Exited")
 
 	return rsp, err
@@ -47,9 +47,7 @@ func (udr *UdrPfdClientStub) UdrPfdDataGet(ctx context.Context,
 	log.Infof("UdrPfdDataGet Stub Entered")
 	_ = ctx
 
-	appPfd := PfdDataForApp{}
-
-	rsp.AppPfd = &appPfd
+	rsp.AppPfd = udr.appPfd[string(appID)]
 	log.Info("Get PFD for AppId : ", appID)
 	log.Info("UdrPfdDataGet: Invoke UDR SB GET -> ")
 
@@ -66,6 +64,7 @@ func (udr *UdrPfdClientStub) UdrPfdDataDelete(ctx context.Context,
 	log.Info("Deleted PFD AppId : ", appID)
 	log.Info("UdrPfdDataDelete: Invoke UDR SB DELETE -> ")
 
+	delete(udr.appPfd, string(appID))
 	log.Infof("UdrPfdDataDelete Stub Exited")
 
 	return rsp, err

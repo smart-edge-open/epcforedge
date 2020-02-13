@@ -2,8 +2,8 @@
     "self": "string",
     "supportedFeatures": "string",
     "pfdDatas": {
-        "appId01": {
-            "externalAppId": "appId01",
+        "appId04": {
+            "externalAppId": "appId04",
             "self": "string",
             "pfds": {
                 "additionalProp1": {
@@ -45,8 +45,8 @@
             },
             "allowedDelay": 0
         },
-        "appId02": {
-            "externalAppId": "appId01",
+        "appId05": {
+            "externalAppId": "appId05",
             "self": "string",
             "pfds": {
                 "additionalProp1": {
@@ -88,8 +88,8 @@
             },
             "allowedDelay": 0
         },
-        "appId03": {
-            "externalAppId": "appId03",
+        "appId06": {
+            "externalAppId": "appId06",
             "self": "string",
             "pfds": {
                 "additionalProp1": {

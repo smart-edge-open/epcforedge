@@ -2,8 +2,8 @@
     "self": "string",
     "supportedFeatures": "string",
     "pfdDatas": {
-        "appId01": {
-            "externalAppId": "appId01",
+        "appId07": {
+            "externalAppId": "appId07",
             "self": "string",
             "pfds": {
                 "additionalProp1": {
@@ -45,51 +45,8 @@
             },
             "allowedDelay": 0
         },
-        "appId02": {
-            "externalAppId": "appId01",
-            "self": "string",
-            "pfds": {
-                "additionalProp1": {
-                    "pfdId": "string",
-                    "flowDescriptions": [
-                        "string"
-                    ],
-                    "urls": [
-                        "string"
-                    ],
-                    "domainNames": [
-                        "string"
-                    ]
-                },
-                "additionalProp2": {
-                    "pfdId": "string",
-                    "flowDescriptions": [
-                        "string"
-                    ],
-                    "urls": [
-                        "string"
-                    ],
-                    "domainNames": [
-                        "string"
-                    ]
-                },
-                "additionalProp3": {
-                    "pfdId": "string",
-                    "flowDescriptions": [
-                        "string"
-                    ],
-                    "urls": [
-                        "string"
-                    ],
-                    "domainNames": [
-                        "string"
-                    ]
-                }
-            },
-            "allowedDelay": 0
-        },
-        "appId03": {
-            "externalAppId": "appId03",
+        "appId08": {
+            "externalAppId": "appId08",
             "self": "string",
             "pfds": {
                 "additionalProp1": {

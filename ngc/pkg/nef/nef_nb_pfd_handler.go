@@ -1014,6 +1014,7 @@ func nefSBUDRAPPPFDGet(transData *afPfdTransaction, nefCtx *nefContext,
 	}
 	appPfd.ExternalAppID = string(r.AppPfd.AppID)
 
+	appPfd.Pfds = make(map[string]Pfd)
 	for _, ele := range r.AppPfd.Pfds {
 		var conData = Pfd{}
 
@@ -1033,12 +1034,15 @@ func nefSBUDRAPPPFDGet(transData *afPfdTransaction, nefCtx *nefContext,
 func nefSBUDRPFDGet(transData *afPfdTransaction, nefCtx *nefContext) (
 	trans PfdManagement, rsp nefPFDSBRspData, err error) {
 
+	trans.PfdDatas = make(map[string]PfdData)
+
 	for k, v := range transData.pfdManagement.PfdDatas {
 		appPfd, r, e := nefSBUDRAPPPFDGet(transData, nefCtx,
 			ApplicationID(v.ExternalAppID))
 		if e != nil {
 			return trans, r, e
 		}
+
 		trans.PfdDatas[k] = appPfd
 	}
 
