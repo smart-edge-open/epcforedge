@@ -101,6 +101,7 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 	r *http.Request) {
 
 	nefCtx := r.Context().Value(nefCtxKey("nefCtx")).(*nefContext)
+	nef := &nefCtx.nef
 
 	vars := mux.Vars(r)
 	log.Infof(" AFID  : %s", vars["scsAsId"])
@@ -135,18 +136,40 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 		return
 	}
 
+	//Validation of parameters in PfdDatas where AppID is the key
 	for key, pfdData := range pfdBody.PfdDatas {
+
+		if len(pfdData.Pfds) == 0 {
+
+			// prepare pfd report with OTHER REASON
+			generatePfdReport(key, "OTHER_REASON", pfdBody.PfdReports)
+			delete(pfdBody.PfdDatas, key)
+		}
+
+		// TBD Validate for Duplicate Application ID
+		if nef.nefCheckPfdAppIDExists(key) {
+
+			// Prepare Pfd report APP ID DUPLICATED
+			generatePfdReport(key, "APP_ID_DUPLICATED", pfdBody.PfdReports)
+			delete(pfdBody.PfdDatas, key)
+		}
+
 		for _, pfd := range pfdData.Pfds {
 			rspPfd, status := validateAFPfdData(pfd)
 			if !status {
-				// Prepare Pfd report and remove the apps from pfdBody
+				// Prepare Pfd report OTHER REASON
+				// delete app and break
 				_ = key //app ID
 				_ = rspPfd
+				//delete(pfdBody.PfdDatas, key)
 
 			}
 		}
 
 	}
+
+	// TBD check if all the apps are deleted then send 500 response with
+	// pFD reports otherwise create
 
 	loc, rsp, err3 := createNewPFDTrans(nefCtx, vars["scsAsId"], pfdBody)
 
@@ -195,7 +218,6 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 		log.Errf("Write Failed: %v", err)
 		return
 	}
-	nef := &nefCtx.nef
 	logNef(nef)
 
 }
@@ -722,6 +744,8 @@ func (af *afData) afDeletePfdTransaction(nefCtx *nefContext,
 	//Delete local entry in map of pfd transactions
 	delete(af.pfdtrans, pfdTrans)
 
+	// TBD check if all trans and sub deleted for AF then delete AF
+
 	return rsp, err
 }
 
@@ -766,7 +790,11 @@ func (af *afData) afDeletePfdApplication(nefCtx *nefContext,
 		rsp.pd.Title = appNotFound
 		return rsp, errors.New(appNotFound)
 	}
+
 	delete(transPfd.pfdManagement.PfdDatas, appID)
+
+	// TBD check if all app deleted for trans then delete trans
+	// check if all trans and sub deleted for AF, delete AF
 	//Return locally
 	return rsp, err
 }
@@ -817,9 +845,8 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	trans PfdManagement) (loc string, rsp map[string]nefPFDSBRspData,
 	err error) {
 
-	nef := &nefCtx.nef
 	/*Check if max subscription reached */
-	if len(af.pfdtrans) >= nefCtx.cfg.MaxSubSupport {
+	if len(af.pfdtrans) >= nefCtx.cfg.MaxPfdTransSupport {
 
 		//rsp.errorCode = 400
 		//rsp.pd.Title = "MAX Transaction Reached"
@@ -828,46 +855,6 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	//Generate a unique transaction ID string
 	transIDStr := strconv.Itoa(af.transIDnum)
 	af.transIDnum++
-
-	// TBD Validate for Duplicate Application ID
-
-	var appIds []string
-	var exist, create bool
-	for key := range trans.PfdDatas {
-		if nef.nefCheckPfdAppIDExists(key) {
-			appIds = append(appIds, key)
-			exist = true
-		} else {
-			create = true
-		}
-	}
-	// if exist and !create send 500
-	//else send 200 with pfdreport but without those Pfds.
-	if exist {
-
-		log.Infoln("Duplicate App Ids", appIds)
-
-		pfdReport := generatePfdReport(appIds, "APP_ID_DUPLICATED")
-
-		trans.PfdReports["APP_ID_DUPLICATED"] = pfdReport
-
-		if !create {
-			//remove everything from trans except pfd report as all
-			//appIds have failed
-			//rsp.errorCode = 500
-			//rsp.pd.Title = "PFD applications provisioning unsuccessful"
-			for key := range trans.PfdDatas {
-				delete(trans.PfdDatas, key)
-			}
-			return "", rsp, errors.New("PFD unsuccessful")
-		}
-
-		for key := range appIds {
-			delete(trans.PfdDatas, appIds[key])
-		}
-		// trans with pfd report added and remove Pfds with appIDs.
-
-	}
 
 	//Create PFD transaction data
 	aftrans := afPfdTransaction{transID: transIDStr, pfdManagement: trans}

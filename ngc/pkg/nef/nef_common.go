@@ -130,18 +130,30 @@ func loadJSONConfig(configPath string, config interface{}) error {
 	return json.Unmarshal(cfgData, config)
 }
 
-func generatePfdReport(appIds []string,
-	failureReason string) PfdReport {
+func generatePfdReport(appID string,
+	failureReason string, pfdReportList map[string]PfdReport) {
 
-	var reason FailureCode
-	switch failureReason {
+	// TBD Prepare the pfd report
+	/*
+		switch failureReason {
 
-	case "APP_ID_DUPLICATED":
-		reason = AppIDDuplicated
-	default:
-		reason = OtherReason
+		case "APP_ID_DUPLICATED":
 
-	}
-	pfdReport := PfdReport{ExternalAppIds: appIds, FailureCode: reason}
-	return pfdReport
+			if val, ok := pfdReportList["APP_ID_DUPLICATED"]; !ok {
+				// Create the first PFD report
+				var appIds []string
+				appIds = append(appIds, appId)
+				pfdReport := PfdReport{ExternalAppIds: appIds,
+					FailureCode: AppIDDuplicated}
+				PfdReport["APP_ID_DUPLICATED"] = pfdReport
+
+			} else {
+				pfdReportList["APP_ID_DUPLICATED"].ExternalAppIds =
+					append(pfdReportList["APP_ID_DUPLICATED"].ExternalAppIds,
+					 appId)
+			}
+
+		}
+	*/
+
 }
