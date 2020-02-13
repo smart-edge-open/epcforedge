@@ -453,8 +453,8 @@ var _ = Describe("AF", func() {
 		PContext("PFD transaction Application GET", func() {
 			PSpecify("", func() {
 				req, err := http.NewRequest(http.MethodGet,
-					"http://localhost:8080/af/v1/pfd/transactions/10000/applications/app1",
-					nil)
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", nil)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				resp := httptest.NewRecorder()
@@ -478,8 +478,8 @@ var _ = Describe("AF", func() {
 				By("Preparing request")
 				reqBodyBytes := bytes.NewReader(reqBody)
 				req, err := http.NewRequest(http.MethodPut,
-					"http://localhost:8080/af/v1/pfd/transactions/10000/applications/app1",
-					reqBodyBytes)
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", reqBodyBytes)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				By("Sending request")
@@ -504,8 +504,8 @@ var _ = Describe("AF", func() {
 				By("Preparing request")
 				reqBodyBytes := bytes.NewReader(reqBody)
 				req, err := http.NewRequest(http.MethodPatch,
-					"http://localhost:8080/af/v1/pfd/transactions/10000/applications/app1",
-					reqBodyBytes)
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", reqBodyBytes)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				By("Sending request")
@@ -522,8 +522,8 @@ var _ = Describe("AF", func() {
 		PContext("PFD transaction Application DELETE", func() {
 			PSpecify("", func() {
 				req, err := http.NewRequest(http.MethodDelete,
-					"http://localhost:8080/af/v1/pfd/transactions/10000/applications/app1",
-					nil)
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", nil)
 				Expect(err).ShouldNot(HaveOccurred())
 
 				resp := httptest.NewRecorder()

@@ -55,7 +55,7 @@ func (a *PfdManagementTransactionGetAllAPIService) PfdTransactionsGetAll(
 
 	// create path and map variables
 	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
-		a.client.cfg.NEFPort + a.client.cfg.NEFPFDPath +
+		a.client.cfg.NEFPort + a.client.cfg.NEFPFDBasePath +
 		"/{afId}/transactions"
 
 	path = strings.Replace(path, "{"+"afId"+"}",

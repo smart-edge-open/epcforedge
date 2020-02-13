@@ -62,7 +62,7 @@ func (a *PfdManagementTransactionAppPutAPIService) PfdAppTransactionPut(
 	)
 
 	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
-		a.client.cfg.NEFPort + a.client.cfg.NEFPFDPath +
+		a.client.cfg.NEFPort + a.client.cfg.NEFPFDBasePath +
 		"/{afId}/transactions/{transactionId}/applications/{appId}"
 
 	path = strings.Replace(path,

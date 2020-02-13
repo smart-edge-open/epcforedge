@@ -13,7 +13,7 @@ type CliConfig struct {
 	NEFHostname    string `json:"NEFHostname"`
 	NEFPort        string `json:"NEFPort"`
 	NEFBasePath    string `json:"NEFBasePath"`
-	NEFPFDPath     string `json:"NEFPFDPath"`
+	NEFPFDBasePath string `json:"NEFPFDBasePath"`
 	UserAgent      string `json:"UserAgent"`
 	NEFCliCertPath string `json:"NEFCliCertPath"`
 	HTTPClient     *http.Client
@@ -27,7 +27,7 @@ func NewConfiguration(afCtx *Context) *CliConfig {
 		NEFPort:        afCtx.cfg.CliCfg.NEFPort,
 		NEFHostname:    afCtx.cfg.CliCfg.NEFHostname,
 		NEFBasePath:    afCtx.cfg.CliCfg.NEFBasePath,
-		NEFPFDPath:     afCtx.cfg.CliCfg.NEFPFDPath,
+		NEFPFDBasePath: afCtx.cfg.CliCfg.NEFPFDBasePath,
 		UserAgent:      afCtx.cfg.CliCfg.UserAgent,
 		NEFCliCertPath: afCtx.cfg.CliCfg.NEFCliCertPath,
 	}
