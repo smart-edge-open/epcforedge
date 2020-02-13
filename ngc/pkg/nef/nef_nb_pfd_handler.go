@@ -5,7 +5,7 @@
 package ngcnef
 
 import (
-	//"context"
+	"context"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -999,29 +999,48 @@ func validatePfd(pfd Pfd) (rsp nefPFDSBRspData,
 }
 
 func nefSBUDRAPPPFDGet(transData *afPfdTransaction, nefCtx *nefContext,
-	appID ApplicationID) (app PfdData, rsp nefPFDSBRspData, err error) {
+	appID ApplicationID) (appPfd PfdData, rsp nefPFDSBRspData, err error) {
 
-	//nef := &nefCtx.nef
-	//var pfdApp PfdDataForApp
+	log.Info("nefSBUDRAPPPFDGet Entered ")
+	nef := &nefCtx.nef
 
-	//cliCtx, cancel := context.WithCancel(nef.ctx)
-	//defer cancel()
+	cliCtx, cancel := context.WithCancel(nef.ctx)
+	defer cancel()
 
-	//r, e := nef.udrClient.UdrPfdDataGet(cliCtx, UdrAppID(appID))
-	//if e != nil {
+	r, e := nef.udrPfdClient.UdrPfdDataGet(cliCtx, UdrAppID(appID))
+	if e != nil {
 
-	//}
-	//translation
-	//pfdApp = r.
+		return appPfd, rsp, e
+	}
+	appPfd.ExternalAppID = string(r.AppPfd.AppID)
 
-	//rsp.result
+	for _, ele := range r.AppPfd.Pfds {
+		var conData = Pfd{}
 
-	return app, rsp, err
+		conData.PfdID = ele.PfdID
+		conData.DomainNames = ele.DomainNames
+		conData.FlowDescriptions = ele.FlowDescriptions
+		conData.Urls = ele.Urls
+
+		appPfd.Pfds[ele.PfdID] = conData
+	}
+	log.Info("nefSBUDRAPPPFDGet Exited ")
+
+	return appPfd, rsp, err
 }
 
 //NEFSBGetPfdFn is the callback for SB API to get PFD transaction
 func nefSBUDRPFDGet(transData *afPfdTransaction, nefCtx *nefContext) (
 	trans PfdManagement, rsp nefPFDSBRspData, err error) {
+
+	for k, v := range transData.pfdManagement.PfdDatas {
+		appPfd, r, e := nefSBUDRAPPPFDGet(transData, nefCtx,
+			ApplicationID(v.ExternalAppID))
+		if e != nil {
+			return trans, r, e
+		}
+		trans.PfdDatas[k] = appPfd
+	}
 
 	return trans, rsp, nil
 }
@@ -1030,22 +1049,22 @@ func nefSBUDRPFDGet(transData *afPfdTransaction, nefCtx *nefContext) (
 func nefSBUDRAPPPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
 	app PfdData) (rsp nefPFDSBRspData, err error) {
 
-	//nef := &nefCtx.nef
+	nef := &nefCtx.nef
 	var pfdApp PfdDataForApp
 
-	//cliCtx, cancel := context.WithCancel(nef.ctx)
-	//defer cancel()
+	cliCtx, cancel := context.WithCancel(nef.ctx)
+	defer cancel()
 
 	/*Timer for pfdApp.AllowedDelay can be started here, not supported
 	currently */
 	pfdApp.AppID = ApplicationID(app.ExternalAppID)
 
+	log.Info("nefSBUDRAPPPFDPut ->  ")
 	if app.CachingTime != nil {
 
 		i := time.Duration(*app.CachingTime)
 		timeLater := DateTime(time.Now().Add(time.Second * i).String())
 		pfdApp.CachingTime = &timeLater
-
 	}
 
 	for _, pfdv := range app.Pfds {
@@ -1055,27 +1074,17 @@ func nefSBUDRAPPPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
 		c.DomainNames = pfdv.DomainNames
 		c.FlowDescriptions = pfdv.FlowDescriptions
 		c.Urls = pfdv.Urls
-
-		/*
-			c := PfdContent{PfdID: pfdv.PfdID,
-				FlowDescriptions: pfdv.FlowDescriptions,
-				Urls:             pfdv.Urls,
-				DomainNames:      pfdv.DomainNames}
-		*/
 		pfdApp.Pfds = append(pfdApp.Pfds, c)
 	}
 
-	//r, e := nef.udrClient.UdrPfdDataCreate(cliCtx, pfdApp)
+	_, e := nef.udrPfdClient.UdrPfdDataCreate(cliCtx, pfdApp)
 
-	//if e != nil {
-	//	rsp.result.errorCode = 400
-	//	return rsp, e
-	//}
+	if e != nil {
+		rsp.result.errorCode = 400
+		return rsp, e
+	}
 
 	rsp.result.errorCode = 200
-
-	log.Info("PUT to UDR PFD -> ", app)
-	log.Info(pfdApp)
 
 	return rsp, err
 
@@ -1092,7 +1101,7 @@ func nefSBUDRPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
 		r, e := nefSBUDRAPPPFDPut(transData, nefCtx, v)
 		if e != nil {
 			//fatal error return
-			return rsp, e
+			return rspDetails, e
 		}
 		/*Update the map with the response*/
 		rspDetails[k] = r
@@ -1104,11 +1113,15 @@ func nefSBUDRPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
 func nefSBUDRAPPPFDDelete(transData *afPfdTransaction, nefCtx *nefContext,
 	appID ApplicationID) (rsp nefPFDSBRspData, err error) {
 
-	//nef := &nefCtx.nef
-	//cliCtx, cancel := context.WithCancel(nef.ctx)
-	//defer cancel()
+	nef := &nefCtx.nef
+	cliCtx, cancel := context.WithCancel(nef.ctx)
+	defer cancel()
 
-	//r, e := nef.udrClient.UdrPfdDataDelete(cliCtx, UdrAppID(appID))
+	_, e := nef.udrPfdClient.UdrPfdDataDelete(cliCtx, UdrAppID(appID))
+
+	if e != nil {
+		return rsp, e
+	}
 
 	return rsp, nil
 }
@@ -1117,5 +1130,12 @@ func nefSBUDRAPPPFDDelete(transData *afPfdTransaction, nefCtx *nefContext,
 func nefSBUDRPFDDelete(transData *afPfdTransaction, nefCtx *nefContext) (
 	rsp nefPFDSBRspData, err error) {
 
+	for _, v := range transData.pfdManagement.PfdDatas {
+		r, e := nefSBUDRAPPPFDDelete(transData, nefCtx,
+			ApplicationID(v.ExternalAppID))
+		if e != nil {
+			return r, e
+		}
+	}
 	return rsp, nil
 }

@@ -21,7 +21,8 @@ type nefData struct {
 	locationURLPrefix    string
 	locationURLPrefixPfd string
 	pcfClient            PcfPolicyAuthorization
-	udrClient            UdrData
+	udrClient            UdrInfluenceData
+	udrPfdClient         UdrPfdData
 	corrID               uint
 	afs                  map[string]*afData
 	upfNotificationURL   URI
@@ -139,6 +140,7 @@ func (nef *nefData) nefCreate(ctx context.Context, cfg Config) error {
 		return errors.New("PCF Client creation failed")
 	}
 	nef.udrClient = NewUDRClient(&cfg)
+	nef.udrPfdClient = NewUDRPfdClient(&cfg)
 	if nef.udrClient == nil {
 		return errors.New("PCF Client creation failed")
 	}
