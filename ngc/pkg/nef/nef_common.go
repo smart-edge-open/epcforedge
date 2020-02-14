@@ -41,20 +41,29 @@ func sendErrorResponseToAF(w http.ResponseWriter, rsp nefSBRspData) {
 	log.Infof("HTTP Response sent: %d", eCode)
 }
 
-/*
-func send500PFDResponseToAF(w http.ResponseWriter, rsp nefSBRspData,
-	pfdReportList map[string]PfdReport) {
+func sendPFDErrorResponseToAF(w http.ResponseWriter,
+	rsp nefSBRspData, pfdReports map[string]PfdReport) {
 
 	mdata, eCode := createErrorJSON(rsp)
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set("Content-Type", "application/problem+json; charset=UTF-8")
 	w.WriteHeader(eCode)
 	_, err := w.Write(mdata)
 	if err != nil {
 		log.Err("NEF ERROR : Failed to send response to AF !!!")
 	}
 
-	if pfdReportList != nil {
-		body, e := json.Marshal(pfdReportList)
+	if eCode == 500 {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(eCode)
+
+		//Making the array of PfdReport from map
+		pfdList := make([]PfdReport, len(pfdReports))
+		idx := 0
+		for _, value := range pfdReports {
+			pfdList[idx] = value
+			idx++
+		}
+		body, e := json.Marshal(pfdList)
 		if e != nil {
 			log.Err("NEF ERROR : Failed to send response to AF !!!")
 		}
@@ -65,9 +74,9 @@ func send500PFDResponseToAF(w http.ResponseWriter, rsp nefSBRspData,
 	}
 
 	log.Infof("HTTP Response sent: %d", eCode)
+
 }
 
-*/
 func createErrorJSON(rsp nefSBRspData) (mdata []byte, statusCode int) {
 
 	var err error
@@ -133,27 +142,38 @@ func loadJSONConfig(configPath string, config interface{}) error {
 func generatePfdReport(appID string,
 	failureReason string, pfdReportList map[string]PfdReport) {
 
-	// TBD Prepare the pfd report
-	/*
-		switch failureReason {
+	switch failureReason {
 
-		case "APP_ID_DUPLICATED":
+	case "APP_ID_DUPLICATED":
+		if _, ok := pfdReportList[failureReason]; !ok {
+			// Create the first PFD report
+			var appIds []string
+			appIds = append(appIds, appID)
+			pfdReport := PfdReport{ExternalAppIds: appIds,
+				FailureCode: AppIDDuplicated}
+			pfdReportList[failureReason] = pfdReport
 
-			if val, ok := pfdReportList["APP_ID_DUPLICATED"]; !ok {
-				// Create the first PFD report
-				var appIds []string
-				appIds = append(appIds, appId)
-				pfdReport := PfdReport{ExternalAppIds: appIds,
-					FailureCode: AppIDDuplicated}
-				PfdReport["APP_ID_DUPLICATED"] = pfdReport
-
-			} else {
-				pfdReportList["APP_ID_DUPLICATED"].ExternalAppIds =
-					append(pfdReportList["APP_ID_DUPLICATED"].ExternalAppIds,
-					 appId)
-			}
-
+		} else {
+			pfdReport := pfdReportList[failureReason]
+			pfdReport.ExternalAppIds = append(pfdReport.ExternalAppIds,
+				appID)
+			pfdReportList[failureReason] = pfdReport
 		}
-	*/
+	case "OTHER_REASON":
+		if _, ok := pfdReportList[failureReason]; !ok {
+			// Create the first PFD report
+			var appIds []string
+			appIds = append(appIds, appID)
+			pfdReport := PfdReport{ExternalAppIds: appIds,
+				FailureCode: OtherReason}
+			pfdReportList[failureReason] = pfdReport
+
+		} else {
+			pfdReport := pfdReportList[failureReason]
+			pfdReport.ExternalAppIds = append(pfdReport.ExternalAppIds,
+				appID)
+			pfdReportList[failureReason] = pfdReport
+		}
+	}
 
 }

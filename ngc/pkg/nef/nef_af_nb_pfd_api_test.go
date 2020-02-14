@@ -20,6 +20,7 @@ import (
 
 const basePFDAPIURL = "http://localhost:8091/3gpp-pfd-management/" +
 	"v1/AF_01/transactions"
+const testJSONPFDPath = "../../test/nef/nef-cli-scripts/pfd/json/"
 
 func CreatePFDReqForNEF(ctx context.Context, method string, pfdTrans string,
 	appID string, body []byte) (*httptest.ResponseRecorder, *http.Request) {
@@ -94,12 +95,14 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 
 	Describe("VALID REQ to NEF GET/POST/PUT/PATCH/DELETE", func() {
 
-		postbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PFD_POST_01.json")
-		putbody, _ := ioutil.ReadFile(testJSONPath + "AF_NEF_PFD_PUT_01.json")
-		putappbody, _ := ioutil.ReadFile(testJSONPath +
-			"AF_NEF_PFD_APP_PUT_01.json")
-		patchappbody, _ := ioutil.ReadFile(testJSONPath +
-			"AF_NEF_PFD_APP_PATCH_01.json")
+		postbody, _ := ioutil.ReadFile(testJSONPFDPath +
+			"AF_NEF_PFD_POST_001.json")
+		putbody, _ := ioutil.ReadFile(testJSONPFDPath +
+			"AF_NEF_PFD_PUT_001.json")
+		putappbody, _ := ioutil.ReadFile(testJSONPFDPath +
+			"AF_NEF_PFD_APP_PUT_001.json")
+		patchappbody, _ := ioutil.ReadFile(testJSONPFDPath +
+			"AF_NEF_PFD_APP_PATCH_001.json")
 
 		It("Send valid GET all to NEF -No Data as no PFD exists",
 			func() {

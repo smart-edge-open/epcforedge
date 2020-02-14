@@ -128,75 +128,39 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 	pfdBody.PfdReports = make(map[string]PfdReport)
 
 	// Validate the mandatory parameters
-	resRsp, status := validateAFPfdManagementData(pfdBody)
+	resRsp, status := validateAFPfdManagementData(nefCtx, pfdBody, "POST")
 	if !status {
 		log.Err(resRsp.result.pd.Title)
 		rsp1 := nefSBRspData{errorCode: resRsp.result.errorCode}
-		sendErrorResponseToAF(w, rsp1)
+		sendPFDErrorResponseToAF(w, rsp1, pfdBody.PfdReports)
 		return
 	}
 
-	//Validation of parameters in PfdDatas where AppID is the key
-	for key, pfdData := range pfdBody.PfdDatas {
+	if len(pfdBody.PfdDatas) == 0 {
 
-		if len(pfdData.Pfds) == 0 {
-
-			// prepare pfd report with OTHER REASON
-			generatePfdReport(key, "OTHER_REASON", pfdBody.PfdReports)
-			delete(pfdBody.PfdDatas, key)
-		}
-
-		// TBD Validate for Duplicate Application ID
-		if nef.nefCheckPfdAppIDExists(key) {
-
-			// Prepare Pfd report APP ID DUPLICATED
-			generatePfdReport(key, "APP_ID_DUPLICATED", pfdBody.PfdReports)
-			delete(pfdBody.PfdDatas, key)
-		}
-
-		for _, pfd := range pfdData.Pfds {
-			rspPfd, status := validateAFPfdData(pfd)
-			if !status {
-				// Prepare Pfd report OTHER REASON
-				// delete app and break
-				_ = key //app ID
-				_ = rspPfd
-				//delete(pfdBody.PfdDatas, key)
-
-			}
-		}
-
+		pd := ProblemDetails{Title: "All App PFDs failed"}
+		rsp1 := nefSBRspData{errorCode: 500, pd: pd}
+		sendPFDErrorResponseToAF(w, rsp1, pfdBody.PfdReports)
+		return
 	}
-
-	// TBD check if all the apps are deleted then send 500 response with
-	// pFD reports otherwise create
-
 	loc, rsp, err3 := createNewPFDTrans(nefCtx, vars["scsAsId"], pfdBody)
 
 	if err3 != nil {
 		log.Err(err3)
-
-		// TBD to update the PFD report on rsp
-		_ = rsp
-
-		// we return bad request here since we have reached the max
+		// Check error code and create pd also
 		rsp1 := nefSBRspData{errorCode: 400}
-		/*
-			if rsperrorCode == 500 {
-				send500PFDResponseToAF(w, rsp, pfdBody.PfdReports)
-
-			} else {
-
-		*/
-
-		sendErrorResponseToAF(w, rsp1)
+		sendPFDErrorResponseToAF(w, rsp1, pfdBody.PfdReports)
 
 		return
 	}
+	//work on rsp from UDR generate pfd report
+	_ = rsp
+
 	log.Infoln(loc)
 
 	pfdBody.Self = Link(loc)
 
+	log.Info(pfdBody)
 	//Martshal data and send into the body
 	mdata, err2 := json.Marshal(pfdBody)
 
@@ -422,6 +386,15 @@ func UpdatePutPFDManagementTransaction(w http.ResponseWriter,
 			return
 		}
 
+		// Validate the mandatory parameters
+		resRsp, status := validateAFPfdManagementData(nefCtx, pfdTrans, "PUT")
+		if !status {
+			log.Err(resRsp.result.pd.Title)
+			rsp1 := nefSBRspData{errorCode: resRsp.result.errorCode}
+			sendPFDErrorResponseToAF(w, rsp1, pfdTrans.PfdReports)
+			return
+		}
+
 		rsp, newPfdTrans, err := af.afUpdatePutPfdTransaction(nefCtx,
 			vars["transactionId"], pfdTrans)
 
@@ -484,6 +457,8 @@ func UpdatePutPFDManagementApplication(w http.ResponseWriter,
 		//PFD Transaction data
 		pfdData := PfdData{}
 
+		pfdReportList := make(map[string]PfdReport)
+
 		//Convert the json PFD Management data into struct
 		err1 := json.Unmarshal(b, &pfdData)
 
@@ -491,6 +466,20 @@ func UpdatePutPFDManagementApplication(w http.ResponseWriter,
 			log.Err(err1)
 			sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal PUT data")
 			return
+		}
+
+		for _, pfd := range pfdData.Pfds {
+			rsp, status := validateAFPfdData(pfd)
+			if !status {
+				log.Infof("PFD %s is invalid in Application %s", pfd.PfdID,
+					pfdData.ExternalAppID)
+				generatePfdReport(pfdData.ExternalAppID, "OTHER_REASON",
+					pfdReportList)
+				rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
+				sendPFDErrorResponseToAF(w, rsp1, pfdReportList)
+				break
+
+			}
 		}
 
 		rsp, newPfdData, err := af.afUpdatePutPfdApplication(nefCtx,
@@ -552,6 +541,7 @@ func PatchPFDManagementApplication(w http.ResponseWriter,
 
 		//PFD Transaction data
 		pfdData := PfdData{}
+		pfdReportList := make(map[string]PfdReport)
 
 		//Convert the json PFD Management data into struct
 		err1 := json.Unmarshal(b, &pfdData)
@@ -560,6 +550,20 @@ func PatchPFDManagementApplication(w http.ResponseWriter,
 			log.Err(err1)
 			sendCustomeErrorRspToAF(w, 400, "Failed UnMarshal PUT data")
 			return
+		}
+
+		for _, pfd := range pfdData.Pfds {
+			rsp, status := validateAFPfdData(pfd)
+			if !status {
+				log.Infof("PFD %s is invalid in Application %s", pfd.PfdID,
+					pfdData.ExternalAppID)
+				generatePfdReport(pfdData.ExternalAppID, "OTHER_REASON",
+					pfdReportList)
+				rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
+				sendPFDErrorResponseToAF(w, rsp1, pfdReportList)
+				break
+
+			}
 		}
 
 		rsp, newPfdData, err := af.afUpdatePatchPfdApplication(nefCtx,
@@ -845,13 +849,13 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	trans PfdManagement) (loc string, rsp map[string]nefPFDSBRspData,
 	err error) {
 
+	rsp = make(map[string]nefPFDSBRspData)
 	/*Check if max subscription reached */
 	if len(af.pfdtrans) >= nefCtx.cfg.MaxPfdTransSupport {
 
-		//rsp.errorCode = 400
-		//rsp.pd.Title = "MAX Transaction Reached"
 		return "", rsp, errors.New("MAX TRANS Created")
 	}
+
 	//Generate a unique transaction ID string
 	transIDStr := strconv.Itoa(af.transIDnum)
 	af.transIDnum++
@@ -918,9 +922,10 @@ func getNefLocationURLPrefixPfd(cfg *Config) string {
 
 // validateAFPfdManagementData Function to validate mandatory parameters of
 // PFD Management received from AF
-func validateAFPfdManagementData(pfdTrans PfdManagement) (rsp nefPFDSBRspData,
-	status bool) {
+func validateAFPfdManagementData(nefCtx *nefContext,
+	pfdTrans PfdManagement, method string) (rsp nefPFDSBRspData, status bool) {
 
+	nef := &nefCtx.nef
 	if len(pfdTrans.PfdDatas) == 0 {
 		rsp.result.errorCode = 400
 		rsp.result.pd.Title = "Missing PFD Data"
@@ -942,6 +947,42 @@ func validateAFPfdManagementData(pfdTrans PfdManagement) (rsp nefPFDSBRspData,
 		}
 
 	}
+
+	//Validation of parameters in PfdDatas where AppID is the key
+	for key, pfdData := range pfdTrans.PfdDatas {
+
+		if len(pfdData.Pfds) == 0 {
+
+			// prepare pfd report with OTHER REASON
+			log.Infof("PFDs not present in Application %s", key)
+			generatePfdReport(key, "OTHER_REASON", pfdTrans.PfdReports)
+			delete(pfdTrans.PfdDatas, key)
+		}
+
+		if method == "POST" {
+			// TBD Validate for Duplicate Application ID
+			if nef.nefCheckPfdAppIDExists(key) {
+
+				// Prepare Pfd report APP ID DUPLICATED
+				log.Infof("Application ID %s Duplicate", key)
+				generatePfdReport(key, "APP_ID_DUPLICATED", pfdTrans.PfdReports)
+				delete(pfdTrans.PfdDatas, key)
+			}
+		}
+
+		for _, pfd := range pfdData.Pfds {
+			_, status := validateAFPfdData(pfd)
+			if !status {
+				log.Infof("PFD %s is invalid in Application %s", pfd.PfdID, key)
+				generatePfdReport(key, "OTHER_REASON", pfdTrans.PfdReports)
+				delete(pfdTrans.PfdDatas, key)
+				break
+
+			}
+		}
+
+	}
+
 	return rsp, true
 }
 
@@ -953,6 +994,7 @@ func validateAFPfdData(pfd Pfd) (rsp nefPFDSBRspData,
 	if len(pfd.PfdID) == 0 {
 		rsp.result.errorCode = 400
 		rsp.result.pd.Title = "PFD ID missing"
+		log.Info(rsp.result.pd.Title)
 		return rsp, false
 	}
 	if len(pfd.DomainNames) == 0 && len(pfd.FlowDescriptions) == 0 &&
@@ -960,6 +1002,7 @@ func validateAFPfdData(pfd Pfd) (rsp nefPFDSBRspData,
 		rsp.result.errorCode = 400
 		rsp.result.pd.Title = "No domainNames" +
 			"FlowDescriptions and Urls present for PFD"
+		log.Info(rsp.result.pd.Title)
 		return rsp, false
 	}
 	rspPfd, result := validatePfd(pfd)
@@ -973,24 +1016,27 @@ func validatePfd(pfd Pfd) (rsp nefPFDSBRspData,
 	if len(pfd.DomainNames) != 0 {
 		if len(pfd.FlowDescriptions) != 0 || len(pfd.Urls) != 0 {
 			rsp.result.errorCode = 400
-			rsp.result.pd.Title = "only one of domainNames" +
-				"FlowDescriptions and Urls present for PFD"
+			rsp.result.pd.Title = "domainNames present" +
+				"FlowDescriptions and Urls should not be present for PFD"
+			log.Info(rsp.result.pd.Title)
 			return rsp, false
 		}
 	}
 	if len(pfd.Urls) != 0 {
 		if len(pfd.FlowDescriptions) != 0 || len(pfd.DomainNames) != 0 {
 			rsp.result.errorCode = 400
-			rsp.result.pd.Title = "only one of domainNames" +
-				"FlowDescriptions and Urls present for PFD"
+			rsp.result.pd.Title = "Urls present ," +
+				"FlowDescriptions and DomainNames should not be present for PFD"
+			log.Info(rsp.result.pd.Title)
 			return rsp, false
 		}
 	}
 	if len(pfd.FlowDescriptions) != 0 {
 		if len(pfd.Urls) != 0 || len(pfd.DomainNames) != 0 {
 			rsp.result.errorCode = 400
-			rsp.result.pd.Title = "only one of domainNames" +
-				"FlowDescriptions and Urls present for PFD"
+			rsp.result.pd.Title = "FlowDescriptions present," +
+				"DomainNames and Urls should not be present for PFD"
+			log.Info(rsp.result.pd.Title)
 			return rsp, false
 		}
 	}
