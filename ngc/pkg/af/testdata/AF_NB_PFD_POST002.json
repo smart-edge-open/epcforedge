@@ -11,28 +11,20 @@
           "flowDescriptions": [
             "permit in ip from 10.11.12.130 80 to any"
           ],
-          "urls": [
-            ""
-          ],
-          "domainNames": [
-            ""
-          ]
+          "urls": [],
+          "domainNames": []
         },
         "pfd6": {
           "pfdId": "pfd6",
-          "flowDescriptions": [
-            ""
-          ],
-          "urls": [
-            ""
-          ],
+          "flowDescriptions": [],
+          "urls": [],
           "domainNames": [
             "www.newexample.com"
           ]
         }
       }
     },
-   "app4": {
+    "app4": {
       "externalAppId": "app4",
       "self": "",
       "pfds": {
@@ -41,12 +33,8 @@
           "flowDescriptions": [
             "^http://test.example2.net(/\\S*)?$"
           ],
-          "urls": [
-            ""
-          ],
-          "domainNames": [
-            ""
-          ]
+          "urls": [],
+          "domainNames": []
         }
       }
     }

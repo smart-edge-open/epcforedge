@@ -11,28 +11,20 @@
           "flowDescriptions": [
             "permit in ip from 10.11.12.123 443 to any"
           ],
-          "urls": [
-            ""
-          ],
-          "domainNames": [
-            ""
-          ]
+          "urls": [],
+          "domainNames": []
         },
         "pfd2": {
           "pfdId": "pfd2",
-          "flowDescriptions": [
-            ""
-          ],
-          "urls": [
-            ""
-          ],
+          "flowDescriptions": [],
+          "urls": [],
           "domainNames": [
             "www.example.com"
           ]
         }
       }
     },
-   "app2": {
+    "app2": {
       "externalAppId": "app2",
       "self": "",
       "pfds": {
@@ -41,12 +33,8 @@
           "flowDescriptions": [
             "permit in ip from 10.11.12.125 80 to any"
           ],
-          "urls": [
-            ""
-          ],
-          "domainNames": [
-            ""
-          ]
+          "urls": [],
+          "domainNames": []
         }
       }
     }
