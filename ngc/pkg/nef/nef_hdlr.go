@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0
-* Copyright (c) 2019 Intel Corporation
+* Copyright (c) 2019-2020 Intel Corporation
  */
 
 package ngcnef
@@ -232,6 +232,15 @@ func (nef *nefData) nefGetAf(afID string) (af *afData, err error) {
 	return afe, err
 }
 
+func (nef *nefData) nefCheckDeleteAf(afID string) {
+
+	af, _ := nef.nefGetAf(afID)
+
+	// If the AF subcount and transaction count is 0 delete the AF
+	if af.afGetSubCount() == 0 && af.afGetPfdTransCount() == 0 {
+		_ = nef.nefDeleteAf(afID)
+	}
+}
 func (nef *nefData) nefDeleteAf(afID string) (err error) {
 
 	//Check if AF is already present

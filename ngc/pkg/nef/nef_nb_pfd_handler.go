@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0
-* Copyright (c) 2019 Intel Corporation
+* Copyright (c) 2020 Intel Corporation
  */
 
 package ngcnef
@@ -306,6 +306,8 @@ func DeletePFDManagementApplication(w http.ResponseWriter,
 		sendErrorResponseToAF(w, rsp)
 		return
 	}
+
+	nef.nefCheckDeleteAf(vars["scsAsId"])
 	// Response should be 204 as per 3GPP 29.522
 	w.WriteHeader(http.StatusNoContent)
 
@@ -341,14 +343,18 @@ func DeletePFDManagementTransaction(w http.ResponseWriter,
 		return
 	}
 
+	nef.nefCheckDeleteAf(vars["scsAsId"])
 	// Response should be 204 as per 3GPP 29.522
 	w.WriteHeader(http.StatusNoContent)
 
 	log.Infof("HTTP Response sent: %d", http.StatusNoContent)
 
-	// If the AF subcount and transaction count is 0 delete the AF
-
 	logNef(nef)
+}
+
+func (af *afData) afGetPfdTransCount() (afPfdCount int) {
+
+	return len(af.pfdtrans)
 }
 
 // UpdatePutPFDManagementTransaction updates an existing PFD transaction
@@ -797,9 +803,11 @@ func (af *afData) afDeletePfdApplication(nefCtx *nefContext,
 
 	delete(transPfd.pfdManagement.PfdDatas, appID)
 
-	// TBD check if all app deleted for trans then delete trans
-	// check if all trans and sub deleted for AF, delete AF
-	//Return locally
+	// If all apps in trans are deleted, delete the trans
+	if len(transPfd.pfdManagement.PfdDatas) == 0 {
+		delete(af.pfdtrans, transID)
+	}
+
 	return rsp, err
 }
 
