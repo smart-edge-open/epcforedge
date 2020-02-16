@@ -97,6 +97,10 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 
 		postbody, _ := ioutil.ReadFile(testJSONPFDPath +
 			"AF_NEF_PFD_POST_001.json")
+		postbody500, _ := ioutil.ReadFile(testJSONPFDPath +
+			"AF_NEF_PFD_POST_002.json")
+		postbody201, _ := ioutil.ReadFile(testJSONPFDPath +
+			"AF_NEF_PFD_POST_003.json")
 		putbody, _ := ioutil.ReadFile(testJSONPFDPath +
 			"AF_NEF_PFD_PUT_001.json")
 		putappbody, _ := ioutil.ReadFile(testJSONPFDPath +
@@ -148,6 +152,48 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 				fmt.Println(v.Self)
 				Expect(v.Self).ShouldNot(Equal(""))
 			}
+			resp.Body.Close()
+
+		})
+
+		It("Send invalid POST to NEF (500 error response)", func() {
+			rr, req := CreatePFDReqForNEF(ctx, "POST", "", "", postbody500)
+			req.Header.Set("Content-Type", "application/json")
+			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
+
+			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+			//Validate Body in response ?
+
+			resp := rr.Result()
+			resp.Body.Close()
+
+		})
+		It("Send POST to NEF with one application invalid", func() {
+			rr, req := CreatePFDReqForNEF(ctx, "POST", "", "", postbody201)
+			req.Header.Set("Content-Type", "application/json")
+			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
+
+			Expect(rr.Code).Should(Equal(http.StatusCreated))
+			//Validate Body in response ?
+
+			resp := rr.Result()
+			b, _ := ioutil.ReadAll(resp.Body)
+
+			//Convert the body(json data) into PFD Management Struct data
+			var pfdBody ngcnef.PfdManagement
+
+			err := json.Unmarshal(b, &pfdBody)
+			Expect(err).Should(BeNil())
+
+			fmt.Print("Self in PFD manageemnt Received: ")
+			fmt.Println(pfdBody.Self)
+			Expect(pfdBody.Self).ShouldNot(Equal(""))
+
+			for _, v := range pfdBody.PfdReports {
+				fmt.Printf("Failure Code is %s", v.FailureCode)
+				Expect(string(v.FailureCode)).Should(Equal("OTHER_REASON"))
+			}
+
 			resp.Body.Close()
 
 		})
