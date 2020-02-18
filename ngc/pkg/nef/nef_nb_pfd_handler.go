@@ -413,7 +413,14 @@ func UpdatePutPFDManagementTransaction(w http.ResponseWriter,
 			sendPFDErrorResponseToAF(w, rsp1, "", pfdTrans.PfdReports)
 			return
 		}
+		// All PFDs have failed, 500 response
+		if len(pfdTrans.PfdDatas) == 0 {
 
+			pd := ProblemDetails{Title: pfdAppsFailed}
+			rsp1 := nefSBRspData{errorCode: 500, pd: pd}
+			sendPFDErrorResponseToAF(w, rsp1, "", pfdTrans.PfdReports)
+			return
+		}
 		_, newPfdTrans, err := af.afUpdatePutPfdTransaction(nefCtx,
 			vars["transactionId"], pfdTrans)
 
