@@ -24,8 +24,8 @@
         }
       }
     },
-    "app4": {
-      "externalAppId": "app4",
+    "app2": {
+      "externalAppId": "app2",
       "self": "",
       "pfds": {
         "pfd1": {
@@ -34,9 +34,7 @@
             "permit in ip from 10.11.12.124 80 to any"
           ],
           "urls": [],
-          "domainNames": [
-            ""
-          ]
+          "domainNames": []
         },
         "pfd4": {
           "pfdId": "pfd4",

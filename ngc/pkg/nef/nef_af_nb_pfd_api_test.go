@@ -193,7 +193,7 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 
 			for _, v := range pfdBody.PfdReports {
 				fmt.Printf("Failure Code is %s", v.FailureCode)
-				Expect(string(v.FailureCode)).Should(Equal("OTHER_REASON"))
+				Expect(string(v.FailureCode)).Should(Equal("APP_ID_DUPLICATED"))
 			}
 
 			resp.Body.Close()
@@ -235,7 +235,7 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 			rr, req := CreatePFDReqForNEF(ctx, "PUT", "10000", "", putbody500)
 			req.Header.Set("Content-Type", "application/json")
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
-			Expect(rr.Code).Should(Equal(http.StatusInternalServerError))
+			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
 		})
 
 		It("Will Send a valid PFD GET for PFD TRANS 10000 and app1", func() {

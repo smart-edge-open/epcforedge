@@ -131,8 +131,9 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 	resRsp, status := validateAFPfdManagementData(nefCtx, pfdBody, "POST")
 	if !status {
 		log.Err(resRsp.result.pd.Title)
-		rsp1 := nefSBRspData{errorCode: resRsp.result.errorCode}
-		sendPFDErrorResponseToAF(w, rsp1, "", pfdBody.PfdReports)
+		rsp1 := nefSBRspData{errorCode: resRsp.result.errorCode,
+			pd: resRsp.result.pd}
+		sendErrorResponseToAF(w, rsp1)
 		return
 	}
 
@@ -410,7 +411,7 @@ func UpdatePutPFDManagementTransaction(w http.ResponseWriter,
 		if !status {
 			log.Err(resRsp.result.pd.Title)
 			rsp1 := nefSBRspData{errorCode: resRsp.result.errorCode}
-			sendPFDErrorResponseToAF(w, rsp1, "", pfdTrans.PfdReports)
+			sendErrorResponseToAF(w, rsp1)
 			return
 		}
 		// All PFDs have failed, 500 response
@@ -967,7 +968,6 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	rsp, err = aftrans.NEFSBPfdPut(&aftrans, nefCtx, trans)
 
 	if err != nil {
-
 		//Return fatal  error
 		return "", rsp, err
 	}
@@ -977,9 +977,7 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	err = updatePfdTransOnRsp(rsp, trans)
 
 	if err != nil {
-
 		return "", rsp, errors.New(pfdAppsFailed)
-
 	}
 
 	//Link the PFD transaction with the AF
@@ -1023,12 +1021,19 @@ func getNefLocationURLPrefixPfd(cfg *Config) string {
 
 }
 
-// validateAFPfdManagementData Function to validate mandatory parameters of
-// PFD Management received from AF
+/* validateAFPfdManagementData Function to validate mandatory parameters of
+PFD Management received from AF
+
+	- Atleast one PfdData should be present
+	- appID in pfdData should be present
+	- If the method is POST, check the appID should be unique
+	- pfdID should be present in PFD
+	- In PFD, only one of the params - FlowDescription, urls or domainnames
+	   should be present
+*/
 func validateAFPfdManagementData(nefCtx *nefContext,
 	pfdTrans PfdManagement, method string) (rsp nefPFDSBRspData, status bool) {
 
-	nef := &nefCtx.nef
 	if len(pfdTrans.PfdDatas) == 0 {
 		rsp.result.errorCode = 400
 		rsp.result.pd.Title = "Missing PFD Data"
@@ -1054,17 +1059,9 @@ func validateAFPfdManagementData(nefCtx *nefContext,
 	//Validation of parameters in PfdDatas where AppID is the key
 	for key, pfdData := range pfdTrans.PfdDatas {
 
-		if len(pfdData.Pfds) == 0 {
-
-			// prepare pfd report with OTHER REASON
-			log.Infof("PFDs not present in Application %s", key)
-			generatePfdReport(key, "OTHER_REASON", pfdTrans.PfdReports)
-			delete(pfdTrans.PfdDatas, key)
-		}
-
 		if method == "POST" {
-			// TBD Validate for Duplicate Application ID
-			if nef.nefCheckPfdAppIDExists(key) {
+			// Validate for Duplicate Application ID
+			if nefCheckPfdAppIDExists(key, nefCtx) {
 
 				// Prepare Pfd report APP ID DUPLICATED
 				log.Infof("Application ID %s Duplicate", key)
@@ -1074,12 +1071,10 @@ func validateAFPfdManagementData(nefCtx *nefContext,
 		}
 
 		for _, pfd := range pfdData.Pfds {
-			_, status := validateAFPfdData(pfd)
+			rsp1, status := validateAFPfdData(pfd)
 			if !status {
 				log.Infof("PFD %s is invalid in Application %s", pfd.PfdID, key)
-				generatePfdReport(key, "OTHER_REASON", pfdTrans.PfdReports)
-				delete(pfdTrans.PfdDatas, key)
-				break
+				return rsp1, status
 
 			}
 		}
@@ -1296,9 +1291,12 @@ func nefSBUDRPFDDelete(transData *afPfdTransaction, nefCtx *nefContext) (
 func updatePfdTransOnRsp(rsp map[string]nefPFDSBRspData,
 	pfdTrans PfdManagement) (err error) {
 	for key, v := range rsp {
-		if v.result.errorCode != 200 {
+		if v.result.errorCode != 200 && v.fc == nil {
 			delete(pfdTrans.PfdDatas, key)
 			generatePfdReport(key, "OTHER_REASON", pfdTrans.PfdReports)
+		} else if v.result.errorCode != 200 && v.fc != nil {
+			generatePfdReport(key, string(*(v.fc)), pfdTrans.PfdReports)
+			return errors.New(pfdAppsFailed)
 		}
 	}
 	if len(pfdTrans.PfdDatas) == 0 {
@@ -1310,9 +1308,124 @@ func updatePfdTransOnRsp(rsp map[string]nefPFDSBRspData,
 func updatePfdAppOnRsp(rsp nefPFDSBRspData, pfdData PfdData,
 	appID string, pfdReportList map[string]PfdReport) (err error) {
 
-	if rsp.result.errorCode != 200 {
+	if rsp.result.errorCode != 200 && rsp.fc == nil {
 		generatePfdReport(appID, "OTHER_REASON", pfdReportList)
 		return errors.New(pfdAppsFailed)
+	} else if rsp.result.errorCode != 200 && rsp.fc != nil {
+		generatePfdReport(appID, string(*(rsp.fc)), pfdReportList)
+		return errors.New(pfdAppsFailed)
+
 	}
 	return err
+}
+
+func generatePfdReport(appID string,
+	failureReason string, pfdReportList map[string]PfdReport) {
+
+	switch failureReason {
+
+	case "APP_ID_DUPLICATED":
+		if _, ok := pfdReportList[failureReason]; !ok {
+			// Create the first PFD report
+			var appIds []string
+			appIds = append(appIds, appID)
+			pfdReport := PfdReport{ExternalAppIds: appIds,
+				FailureCode: AppIDDuplicated}
+			pfdReportList[failureReason] = pfdReport
+
+		} else {
+			pfdReport := pfdReportList[failureReason]
+			pfdReport.ExternalAppIds = append(pfdReport.ExternalAppIds,
+				appID)
+			pfdReportList[failureReason] = pfdReport
+		}
+	case "OTHER_REASON":
+		if _, ok := pfdReportList[failureReason]; !ok {
+			// Create the first PFD report
+			var appIds []string
+			appIds = append(appIds, appID)
+			pfdReport := PfdReport{ExternalAppIds: appIds,
+				FailureCode: OtherReason}
+			pfdReportList[failureReason] = pfdReport
+
+		} else {
+			pfdReport := pfdReportList[failureReason]
+			pfdReport.ExternalAppIds = append(pfdReport.ExternalAppIds,
+				appID)
+			pfdReportList[failureReason] = pfdReport
+		}
+
+	case "MALFUNCTION":
+		log.Infoln("MALFUNCTION failure Code is not handled")
+
+	case "RESOURCE_LIMITATION":
+		log.Infoln("RESOURCE_LIMITATION failure code not handled")
+
+	case "SHORT_DELAY":
+		log.Infoln("SHORT_DELAY failure code is not handled")
+	}
+
+}
+
+func sendPFDErrorResponseToAF(w http.ResponseWriter,
+	rsp nefSBRspData, method string, pfdReports map[string]PfdReport) {
+
+	mdata, eCode := createErrorJSON(rsp)
+	w.Header().Set("Content-Type", "application/problem+json; charset=UTF-8")
+	w.WriteHeader(eCode)
+	_, err := w.Write(mdata)
+	if err != nil {
+		log.Err("NEF ERROR : Failed to send response to AF !!!")
+	}
+
+	if eCode == 500 {
+		var e error
+		var body []byte
+		var pfdReport PfdReport
+
+		// TBD writing a second header??
+		// If single APP UPdate then only one pfd report else array of reports
+		if method == "SINGLE_APP" {
+			for _, value := range pfdReports {
+				pfdReport = value
+			}
+			body, e = json.Marshal(pfdReport)
+		} else {
+			//Making the array of PfdReport from map
+			pfdList := make([]PfdReport, len(pfdReports))
+			idx := 0
+			for _, value := range pfdReports {
+				pfdList[idx] = value
+				idx++
+			}
+			body, e = json.Marshal(pfdList)
+		}
+		if e != nil {
+			log.Err("NEF ERROR : Failed to send response to AF !!!")
+		}
+		_, err = w.Write(body)
+		if err != nil {
+			log.Err("NEF ERROR : Failed to send response to AF !!!")
+		}
+	}
+
+	log.Infof("HTTP Response sent: %d", eCode)
+
+}
+
+func nefCheckPfdAppIDExists(appID string, nefCtx *nefContext) bool {
+
+	nef := &nefCtx.nef
+	for _, v := range nef.afs {
+		for _, trans := range v.pfdtrans {
+			for key := range trans.pfdManagement.PfdDatas {
+				if key == appID {
+					return true
+				}
+
+			}
+		}
+	}
+	return false
+
 }

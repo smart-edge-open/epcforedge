@@ -11,9 +11,7 @@
           "flowDescriptions": [
             "permit in ip from 10.11.12.123 80 to any"
           ],
-          "urls": [
-            ""
-          ],
+          "urls": [],
           "domainNames": []
         },
         "pfd2": {
@@ -36,9 +34,7 @@
             "permit in ip from 10.11.12.124 80 to any"
           ],
           "urls": [],
-          "domainNames": [
-            ""
-          ]
+          "domainNames": []
         },
         "pfd4": {
           "pfdId": "pfd4",
