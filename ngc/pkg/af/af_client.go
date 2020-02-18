@@ -23,6 +23,8 @@ import (
 	"golang.org/x/net/http2"
 )
 
+const contentTypePfd string = "application/json"
+
 var (
 	jsonCheck = regexp.MustCompile("(?i:[application|text]/json)")
 	xmlCheck  = regexp.MustCompile("(?i:[application|text]/xml)")

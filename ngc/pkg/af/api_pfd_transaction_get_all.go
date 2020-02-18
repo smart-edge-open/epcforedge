@@ -6,7 +6,6 @@ package af
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -54,29 +53,16 @@ func (a *PfdManagementTransactionGetAllAPIService) PfdTransactionsGetAll(
 	)
 
 	// create path and map variables
-	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
-		a.client.cfg.NEFPort + a.client.cfg.NEFPFDBasePath +
-		"/{afId}/transactions"
 
-	path = strings.Replace(path, "{"+"afId"+"}",
-		fmt.Sprintf("%v", afID), -1)
+	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
+		a.client.cfg.NEFPort + a.client.cfg.NEFPFDBasePath + "/" + afID +
+		"/transactions"
 
 	headerParams := make(map[string]string)
-	// to determine the Content-Type header
-	contentTypes := []string{"application/json"}
-	// set Content-Type header
-	contentType := selectHeaderContentType(contentTypes)
-	if contentType != "" {
-		headerParams["Content-Type"] = contentType
-	}
 
-	// to determine the Accept header
-	headerAccepts := []string{"application/json"}
-	// set Accept header
-	headerAccept := selectHeaderAccept(headerAccepts)
-	if headerAccept != "" {
-		headerParams["Accept"] = headerAccept
-	}
+	headerParams["Content-Type"] = contentTypePfd
+	headerParams["Accept"] = contentTypePfd
+
 	r, err := a.client.prepareRequest(ctx, path, method,
 		getBody, headerParams)
 

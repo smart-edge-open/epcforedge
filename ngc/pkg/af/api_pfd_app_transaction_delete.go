@@ -68,35 +68,14 @@ func (a *PfdManagementTransactionAppDeleteAPIService) PfdAppTransactionDelete(
 
 	// create path and map variables
 	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
-		a.client.cfg.NEFPort + a.client.cfg.NEFPFDBasePath +
-		"/{afId}/transactions/{transactionId}/applications/{appId}"
-
-	path = strings.Replace(path,
-		"{"+"afId"+"}", fmt.Sprintf("%v", afID), -1)
-	path = strings.Replace(path,
-		"{"+"transactionId"+"}", fmt.Sprintf("%v", pfdTrans), -1)
-	path = strings.Replace(path,
-		"{"+"appId"+"}", fmt.Sprintf("%v", appID), -1)
+		a.client.cfg.NEFPort + a.client.cfg.NEFPFDBasePath + "/" + afID +
+		"/transactions/" + pfdTrans + "/applications/" + appID
 
 	headerParams := make(map[string]string)
 
-	// to determine the Content-Type header
-	contentTypes := []string{"application/json"}
+	headerParams["Content-Type"] = contentTypePfd
+	headerParams["Accept"] = contentTypePfd
 
-	// set Content-Type header
-	contentType := selectHeaderContentType(contentTypes)
-	if contentType != "" {
-		headerParams["Content-Type"] = contentType
-	}
-
-	// to determine the Accept header
-	headerAccepts := []string{"application/json"}
-
-	// set Accept header
-	headerAccept := selectHeaderAccept(headerAccepts)
-	if headerAccept != "" {
-		headerParams["Accept"] = headerAccept
-	}
 	r, err := a.client.prepareRequest(ctx, path, method,
 		deleteBody, headerParams)
 	if err != nil {
