@@ -13,6 +13,7 @@ const correlationIDOffset = 20
 const subNotFound string = "Subscription Not Found"
 const pfdNotFound string = "PFD transaction Not Found"
 const appNotFound string = "Application in PFD transaction Not Found"
+const pfdAppsFailed string = "ALL PFD Apps Failed"
 
 //NEF context data
 type nefData struct {

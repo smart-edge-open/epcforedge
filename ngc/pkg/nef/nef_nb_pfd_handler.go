@@ -127,34 +127,45 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 	}
 	pfdBody.PfdReports = make(map[string]PfdReport)
 
-	// Validate the mandatory parameters
+	// Validate the mandatory parameters and generate Pfd Report if  failure
 	resRsp, status := validateAFPfdManagementData(nefCtx, pfdBody, "POST")
 	if !status {
 		log.Err(resRsp.result.pd.Title)
 		rsp1 := nefSBRspData{errorCode: resRsp.result.errorCode}
-		sendPFDErrorResponseToAF(w, rsp1, pfdBody.PfdReports)
+		sendPFDErrorResponseToAF(w, rsp1, "", pfdBody.PfdReports)
 		return
 	}
 
+	// All PFDs have failed, 500 response
 	if len(pfdBody.PfdDatas) == 0 {
 
-		pd := ProblemDetails{Title: "All App PFDs failed"}
+		pd := ProblemDetails{Title: pfdAppsFailed}
 		rsp1 := nefSBRspData{errorCode: 500, pd: pd}
-		sendPFDErrorResponseToAF(w, rsp1, pfdBody.PfdReports)
+		sendPFDErrorResponseToAF(w, rsp1, "", pfdBody.PfdReports)
 		return
 	}
-	loc, rsp, err3 := createNewPFDTrans(nefCtx, vars["scsAsId"], pfdBody)
+	loc, _, err3 := createNewPFDTrans(nefCtx, vars["scsAsId"], pfdBody)
 
 	if err3 != nil {
 		log.Err(err3)
-		// Check error code and create pd also
+
+		// All PFDs failed at UDR
+		if err3.Error() == pfdAppsFailed {
+
+			// fatal error return
+			rsp1 := nefSBRspData{errorCode: 500}
+			rsp1.pd.Title = pfdAppsFailed
+
+			sendPFDErrorResponseToAF(w, rsp1, "", pfdBody.PfdReports)
+			return
+		}
+		// fatal error return
 		rsp1 := nefSBRspData{errorCode: 400}
-		sendPFDErrorResponseToAF(w, rsp1, pfdBody.PfdReports)
+		rsp1.pd.Title = "UDR Error in creating PFD transaction"
+		sendErrorResponseToAF(w, rsp1)
 
 		return
 	}
-	//work on rsp from UDR generate pfd report
-	_ = rsp
 
 	log.Infoln(loc)
 
@@ -383,7 +394,7 @@ func UpdatePutPFDManagementTransaction(w http.ResponseWriter,
 		//PFD Transaction data
 		pfdTrans := PfdManagement{}
 
-		//Convert the json Traffic Influence data into struct
+		//Convert the json PFD Management data into struct
 		err1 := json.Unmarshal(b, &pfdTrans)
 
 		if err1 != nil {
@@ -392,24 +403,38 @@ func UpdatePutPFDManagementTransaction(w http.ResponseWriter,
 			return
 		}
 
-		// Validate the mandatory parameters
+		pfdTrans.PfdReports = make(map[string]PfdReport)
+		// Validate the mandatory parameters and generate pfd reports if
+		// failure
 		resRsp, status := validateAFPfdManagementData(nefCtx, pfdTrans, "PUT")
 		if !status {
 			log.Err(resRsp.result.pd.Title)
 			rsp1 := nefSBRspData{errorCode: resRsp.result.errorCode}
-			sendPFDErrorResponseToAF(w, rsp1, pfdTrans.PfdReports)
+			sendPFDErrorResponseToAF(w, rsp1, "", pfdTrans.PfdReports)
 			return
 		}
 
-		rsp, newPfdTrans, err := af.afUpdatePutPfdTransaction(nefCtx,
+		_, newPfdTrans, err := af.afUpdatePutPfdTransaction(nefCtx,
 			vars["transactionId"], pfdTrans)
 
-		// TBD to update the pfd report on rsp
-		_ = rsp
 		if err != nil {
-			// TBD how to send the error code
+			log.Err(err)
+			// All PFDs failed at UDR
+			if err.Error() == "ALL PFD APP FAILED" {
+
+				// fatal error return
+				rsp1 := nefSBRspData{errorCode: 500}
+				rsp1.pd.Title = "ALL PFD APP FAILED TO PROVISION"
+
+				sendPFDErrorResponseToAF(w, rsp1, "", pfdTrans.PfdReports)
+				return
+			}
+
+			// fatal error return
 			rsp1 := nefSBRspData{errorCode: 400}
+			rsp1.pd.Title = "UDR Error in updating PFD transaction"
 			sendErrorResponseToAF(w, rsp1)
+
 			return
 		}
 
@@ -482,19 +507,45 @@ func UpdatePutPFDManagementApplication(w http.ResponseWriter,
 				generatePfdReport(pfdData.ExternalAppID, "OTHER_REASON",
 					pfdReportList)
 				rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
-				sendPFDErrorResponseToAF(w, rsp1, pfdReportList)
+				sendPFDErrorResponseToAF(w, rsp1, "SINGLE_APP", pfdReportList)
 				break
 
 			}
 		}
 
 		rsp, newPfdData, err := af.afUpdatePutPfdApplication(nefCtx,
-			vars["transactionId"], vars["appId"], pfdData)
+			vars["transactionId"], vars["appId"], pfdData, pfdReportList)
 
 		if err != nil {
+			log.Err(err)
 
-			rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
+			if err.Error() == pfdAppsFailed {
+				// fatal error return
+				rsp1 := nefSBRspData{errorCode: 500}
+				rsp1.pd.Title = pfdAppsFailed
+
+				sendPFDErrorResponseToAF(w, rsp1, "SINGLE_APP",
+					pfdReportList)
+				return
+
+			}
+			// fatal error return
+			rsp1 := nefSBRspData{errorCode: 400}
+			rsp1.pd.Title = "UDR Error in updating PFD Application"
 			sendErrorResponseToAF(w, rsp1)
+
+			return
+		}
+
+		err = updatePfdAppOnRsp(rsp, pfdData, vars["appId"], pfdReportList)
+		if err != nil {
+			log.Err(err)
+
+			// fatal error return
+			rsp1 := nefSBRspData{errorCode: 500}
+
+			sendPFDErrorResponseToAF(w, rsp1, "SINGLE_APP", pfdReportList)
+
 			return
 		}
 
@@ -566,19 +617,42 @@ func PatchPFDManagementApplication(w http.ResponseWriter,
 				generatePfdReport(pfdData.ExternalAppID, "OTHER_REASON",
 					pfdReportList)
 				rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
-				sendPFDErrorResponseToAF(w, rsp1, pfdReportList)
+				sendPFDErrorResponseToAF(w, rsp1, "SINGLE_APP", pfdReportList)
 				break
 
 			}
 		}
 
 		rsp, newPfdData, err := af.afUpdatePatchPfdApplication(nefCtx,
-			vars["transactionId"], vars["appId"], pfdData)
+			vars["transactionId"], vars["appId"], pfdData, pfdReportList)
 
 		if err != nil {
+			log.Err(err)
+			if err.Error() == pfdAppsFailed {
+				// fatal error return
+				rsp1 := nefSBRspData{errorCode: 500}
+				rsp1.pd.Title = pfdAppsFailed
 
-			rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
+				sendPFDErrorResponseToAF(w, rsp1, "SINGLE_APP",
+					pfdReportList)
+				return
+
+			}
+			// fatal error return
+			rsp1 := nefSBRspData{errorCode: 400}
+			rsp1.pd.Title = "UDR Error in updating PFD Application"
 			sendErrorResponseToAF(w, rsp1)
+
+			return
+		}
+		err = updatePfdAppOnRsp(rsp, pfdData, vars["appId"], pfdReportList)
+		if err != nil {
+			log.Err(err)
+
+			// fatal error return
+			rsp1 := nefSBRspData{errorCode: 500}
+
+			sendPFDErrorResponseToAF(w, rsp1, "SINGLE_APP", pfdReportList)
 
 			return
 		}
@@ -609,7 +683,8 @@ func PatchPFDManagementApplication(w http.ResponseWriter,
 //PFD Management functions
 
 func (af *afData) afUpdatePutPfdApplication(nefCtx *nefContext, transID string,
-	appID string, pfdData PfdData) (rsp nefPFDSBRspData, updPfd PfdData,
+	appID string, pfdData PfdData,
+	pfdReportList map[string]PfdReport) (rsp nefPFDSBRspData, updPfd PfdData,
 	err error) {
 
 	pfdTrans, ok := af.pfdtrans[transID]
@@ -635,6 +710,14 @@ func (af *afData) afUpdatePutPfdApplication(nefCtx *nefContext, transID string,
 		return rsp, pfdData, err
 	}
 
+	err = updatePfdAppOnRsp(rsp, pfdData, appID, pfdReportList)
+
+	if err != nil {
+
+		return rsp, updPfd, err
+
+	}
+
 	pfdTrans.pfdManagement.PfdDatas[appID] = pfdData
 	updPfd = pfdData
 
@@ -643,7 +726,8 @@ func (af *afData) afUpdatePutPfdApplication(nefCtx *nefContext, transID string,
 }
 
 func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
-	transID string, appID string, pfdData PfdData) (rsp nefPFDSBRspData,
+	transID string, appID string, pfdData PfdData,
+	pfdReportList map[string]PfdReport) (rsp nefPFDSBRspData,
 	updPfd PfdData, err error) {
 
 	pfdTrans, ok := af.pfdtrans[transID]
@@ -654,13 +738,6 @@ func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
 
 		return rsp, updPfd, errors.New(pfdNotFound)
 	}
-
-	/*rsp, err = sub.NEFSBPut(sub, nefCtx, ti)
-
-	if err != nil {
-		log.Err("Failed to Update Subscription")
-		return rsp, updtTI, err
-	}*/
 
 	trans, ok := pfdTrans.pfdManagement.PfdDatas[appID]
 
@@ -677,6 +754,15 @@ func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
 		log.Err("Failed to Update the PFD Application")
 		return rsp, pfdData, err
 	}
+
+	err = updatePfdAppOnRsp(rsp, pfdData, appID, pfdReportList)
+
+	if err != nil {
+
+		return rsp, updPfd, errors.New(pfdAppsFailed)
+
+	}
+
 	// Updating the PFDs present in the
 	for key := range pfdData.Pfds {
 
@@ -702,10 +788,6 @@ func (af *afData) afUpdatePutPfdTransaction(nefCtx *nefContext, transID string,
 
 	if !ok {
 
-		// TBD how to send the error code
-		//rsp.result.errorCode = 400
-		//rsp.result.pd.Title = pfdNotFound
-
 		return rsp, updPfd, errors.New(pfdNotFound)
 	}
 
@@ -716,14 +798,13 @@ func (af *afData) afUpdatePutPfdTransaction(nefCtx *nefContext, transID string,
 		//Return error
 		return rsp, trans, err
 	}
-
-	/*rsp, err = sub.NEFSBPut(sub, nefCtx, ti)
+	err = updatePfdTransOnRsp(rsp, trans)
 
 	if err != nil {
-		log.Err("Failed to Update Subscription")
-		return rsp, updtTI, err
-	}*/
 
+		return rsp, updPfd, errors.New(pfdAppsFailed)
+
+	}
 	updPfd = trans
 	updPfd.Self = pfdTrans.pfdManagement.Self
 	pfdTrans.pfdManagement = updPfd
@@ -852,7 +933,7 @@ func (af *afData) afGetPfdTransactionList(nefCtx *nefContext) (
 	return rsp, transList, err
 }
 
-//Creates a new subscription
+//Creates a new PFD Transaction
 func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 	trans PfdManagement) (loc string, rsp map[string]nefPFDSBRspData,
 	err error) {
@@ -880,12 +961,19 @@ func (af *afData) afAddPFDTransaction(nefCtx *nefContext,
 
 	if err != nil {
 
-		//Return error
+		//Return fatal  error
 		return "", rsp, err
 	}
 
-	//Store Notification Destination URI
-	//afsub.afNotificationDestination = ti.NotificationDestination
+	// Check the rsp from UDR and generate PFD reports ,
+	// if all failed then err (500)
+	err = updatePfdTransOnRsp(rsp, trans)
+
+	if err != nil {
+
+		return "", rsp, errors.New(pfdAppsFailed)
+
+	}
 
 	//Link the PFD transaction with the AF
 	af.pfdtrans[transIDStr] = &aftrans
@@ -1196,4 +1284,28 @@ func nefSBUDRPFDDelete(transData *afPfdTransaction, nefCtx *nefContext) (
 		}
 	}
 	return rsp, nil
+}
+
+func updatePfdTransOnRsp(rsp map[string]nefPFDSBRspData,
+	pfdTrans PfdManagement) (err error) {
+	for key, v := range rsp {
+		if v.result.errorCode != 200 {
+			delete(pfdTrans.PfdDatas, key)
+			generatePfdReport(key, "OTHER_REASON", pfdTrans.PfdReports)
+		}
+	}
+	if len(pfdTrans.PfdDatas) == 0 {
+		return errors.New(pfdAppsFailed)
+	}
+	return err
+}
+
+func updatePfdAppOnRsp(rsp nefPFDSBRspData, pfdData PfdData,
+	appID string, pfdReportList map[string]PfdReport) (err error) {
+
+	if rsp.result.errorCode != 200 {
+		generatePfdReport(appID, "OTHER_REASON", pfdReportList)
+		return errors.New(pfdAppsFailed)
+	}
+	return err
 }

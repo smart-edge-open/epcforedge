@@ -42,7 +42,7 @@ func sendErrorResponseToAF(w http.ResponseWriter, rsp nefSBRspData) {
 }
 
 func sendPFDErrorResponseToAF(w http.ResponseWriter,
-	rsp nefSBRspData, pfdReports map[string]PfdReport) {
+	rsp nefSBRspData, method string, pfdReports map[string]PfdReport) {
 
 	mdata, eCode := createErrorJSON(rsp)
 	w.Header().Set("Content-Type", "application/problem+json; charset=UTF-8")
@@ -53,17 +53,27 @@ func sendPFDErrorResponseToAF(w http.ResponseWriter,
 	}
 
 	if eCode == 500 {
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-		w.WriteHeader(eCode)
+		var e error
+		var body []byte
+		var pfdReport PfdReport
 
-		//Making the array of PfdReport from map
-		pfdList := make([]PfdReport, len(pfdReports))
-		idx := 0
-		for _, value := range pfdReports {
-			pfdList[idx] = value
-			idx++
+		// TBD writing a second header??
+		// If single APP UPdate then only one pfd report else array of reports
+		if method == "SINGLE_APP" {
+			for _, value := range pfdReports {
+				pfdReport = value
+			}
+			body, e = json.Marshal(pfdReport)
+		} else {
+			//Making the array of PfdReport from map
+			pfdList := make([]PfdReport, len(pfdReports))
+			idx := 0
+			for _, value := range pfdReports {
+				pfdList[idx] = value
+				idx++
+			}
+			body, e = json.Marshal(pfdList)
 		}
-		body, e := json.Marshal(pfdList)
 		if e != nil {
 			log.Err("NEF ERROR : Failed to send response to AF !!!")
 		}
