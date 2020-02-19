@@ -171,3 +171,121 @@ func handlePostPutPatchErrorResp(r *http.Response,
 		return err
 	}
 }
+
+func handlePfdPostPutPatchErrorResp(r *http.Response,
+	body []byte) error {
+
+	newErr := GenericError{
+		body:  body,
+		error: r.Status,
+	}
+
+	switch r.StatusCode {
+	case 400, 401, 403, 404, 411, 413, 415, 429, 503:
+
+		var v ProblemDetails
+		err := json.Unmarshal(body, &v)
+		if err != nil {
+			newErr.error = err.Error()
+			return newErr
+		}
+		newErr.model = v
+		log.Errf("NEF returned error - %s", r.Status)
+		return newErr
+
+	default:
+		b, _ := ioutil.ReadAll(r.Body)
+		err := fmt.Errorf("NEF returned error - %s, %s", r.Status, string(b))
+		return err
+	}
+}
+
+// TBD pfdReport List in case of 500 response
+/*
+func getPfdReportList(r *http.Response) ([]PfdReport, error) {
+	var pfdReportList []PfdReport
+	b, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(b, &pfdReportList)
+	if err != nil {
+		log.Infoln("Pfd Report List unmarshalling Failed")
+		return pfdReportList, err
+	}
+	return pfdReportList, err
+
+}
+
+
+func getPfdReport(r *http.Response) (PfdReport, error) {
+	var pfdReport PfdReport
+	b, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(b, &pfdReport)
+	if err != nil {
+
+		return pfdReport, err
+	}
+	return pfdReport, err
+
+}
+*/
+
+func updatePfdURL(cfg Config, r *http.Request, resURL string) string {
+
+	res := strings.Split(resURL, "transactions")
+
+	afURL := "http" + "://" + cfg.SrvCfg.Hostname +
+		cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
+		"transactions" + res[1]
+
+	return afURL
+
+}
+
+func updateSelfLink(cfg Config, r *http.Request,
+	pfdTrans PfdManagement) (string, error) {
+
+	nefSelf := pfdTrans.Self
+	if nefSelf == "" {
+		return "", errors.New("NEF Self Link Not Present")
+	}
+	res := strings.Split(string(nefSelf), "transactions")
+	pID := strings.Split(res[1], "/")
+
+	afSelf := "http" + "://" + cfg.SrvCfg.Hostname +
+		cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
+		"transactions/" + pID[1]
+
+	return afSelf, nil
+}
+
+func updateAppsLink(cfg Config, r *http.Request,
+	pfdTrans PfdManagement) error {
+	for key, v := range pfdTrans.PfdDatas {
+
+		appSelf, err := updateAppLink(cfg, r, v)
+		if err != nil {
+			return err
+		}
+		v.Self = Link(appSelf)
+		pfdTrans.PfdDatas[key] = v
+	}
+	return nil
+}
+
+func updateAppLink(cfg Config, r *http.Request,
+	pfdData PfdData) (string, error) {
+
+	self := pfdData.Self
+	if self == "" {
+		return "", errors.New("NEF App Self Link Not Present")
+	}
+	res := strings.Split(string(self), "transactions")
+	pID := strings.Split(res[1], "/")
+	app := strings.Split(string(self), "applications")
+
+	appSelf := "http" + "://" + cfg.SrvCfg.Hostname +
+		cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
+		"transactions/" + pID[1] + "/applications" + app[1]
+
+	return appSelf, nil
+
+}

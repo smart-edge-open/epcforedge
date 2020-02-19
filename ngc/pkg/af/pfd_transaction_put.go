@@ -71,6 +71,22 @@ func PutPfdTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Updating the Self Link and Applications Self Link in AF
+
+	self, err := updateSelfLink(afCtx.cfg, r, pfdRsp)
+	if err != nil {
+		log.Errf("Pfd Management put : %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	pfdRsp.Self = Link(self)
+	err = updateAppsLink(afCtx.cfg, r, pfdRsp)
+	if err != nil {
+		log.Errf("Pfd Management put : %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	pfdRespJSON, err = json.Marshal(pfdRsp)
 	if err != nil {
 		log.Errf("Pfd Management put : %s", err.Error())

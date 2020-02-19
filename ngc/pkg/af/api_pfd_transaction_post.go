@@ -32,7 +32,7 @@ func (a *PfdManagementTransactionPostAPIService) handlePfdPostResponse(
 		return err
 	}
 
-	return handlePostPutPatchErrorResp(r, body)
+	return handlePfdPostPutPatchErrorResp(r, body)
 }
 
 /*

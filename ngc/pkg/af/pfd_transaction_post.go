@@ -57,10 +57,11 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pfdRsp, resp, err = createPfdTransaction(cliCtx, pfdTrans, afCtx)
-	// TBD what to validate in response
+
 	if err != nil {
 		log.Errf("Pfd Management Transaction create: %s", err.Error())
 		w.WriteHeader(getStatusCode(resp))
+
 		return
 	}
 
@@ -70,6 +71,22 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Updating the location url, Self Link and Application Self Link in AF
+	afURL := updatePfdURL(afCtx.cfg, r, url.String())
+
+	self, err := updateSelfLink(afCtx.cfg, r, pfdRsp)
+	if err != nil {
+		log.Errf("Pfd Management create : %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	pfdRsp.Self = Link(self)
+	err = updateAppsLink(afCtx.cfg, r, pfdRsp)
+	if err != nil {
+		log.Errf("Pfd Management create : %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	pfdRespJSON, err = json.Marshal(pfdRsp)
 	if err != nil {
 		log.Errf("Pfd Management create : %s", err.Error())
@@ -77,7 +94,7 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Location", url.String())
+	w.Header().Set("Location", afURL)
 	w.WriteHeader(resp.StatusCode)
 
 	if _, err = w.Write(pfdRespJSON); err != nil {

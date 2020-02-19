@@ -34,9 +34,11 @@ type ServerConfig struct {
 
 //Config struct
 type Config struct {
-	AfID   string       `json:"AfId"`
-	SrvCfg ServerConfig `json:"ServerConfig"`
-	CliCfg CliConfig    `json:"CliConfig"`
+	AfID              string       `json:"AfId"`
+	AfAPIRoot         string       `json:"AfAPIRoot"`
+	LocationPrefixPfd string       `json:"LocationPrefixPfd"`
+	SrvCfg            ServerConfig `json:"ServerConfig"`
+	CliCfg            CliConfig    `json:"CliConfig"`
 }
 
 //Context struct
@@ -131,6 +133,7 @@ func printConfig(cfg Config) {
 
 	log.Infoln("********************* NGC AF CONFIGURATION ******************")
 	log.Infoln("AfID: ", cfg.AfID)
+	log.Infoln("LocationPrefixPfd ", cfg.LocationPrefixPfd)
 	log.Infoln("-------------------------- CNCA SERVER ----------------------")
 	log.Infoln("CNCAEndpoint: ", cfg.SrvCfg.CNCAEndpoint)
 	log.Infoln("-------------------- NEF NOTIFICATIONS SERVER ---------------")

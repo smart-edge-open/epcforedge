@@ -53,6 +53,25 @@ func GetAllPfdTransactions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for key, v := range tsResp {
+		// Updating the Self Link and Applications Self Link in AF
+		var self string
+		self, err = updateSelfLink(afCtx.cfg, r, v)
+		if err != nil {
+			log.Errf("PFD Management transactions get all : %s", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		v.Self = Link(self)
+		err = updateAppsLink(afCtx.cfg, r, v)
+		if err != nil {
+			log.Errf("PFD Management transactions get all : %s", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		tsResp[key] = v
+	}
+
 	tsRespJSON, err = json.Marshal(tsResp)
 	if err != nil {
 		log.Errf("PFD Management transactions get all : %s", err.Error())

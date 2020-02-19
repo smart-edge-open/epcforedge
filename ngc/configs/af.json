@@ -1,5 +1,6 @@
 {
     "AfId": "1",
+    "LocationPrefixPfd": "/af/v1/pfd/",
     "ServerConfig": {
         "CNCAEndpoint": ":8050",
         "Hostname": "localhost",

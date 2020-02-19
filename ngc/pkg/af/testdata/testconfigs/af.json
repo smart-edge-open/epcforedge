@@ -1,10 +1,11 @@
 {
     "AfId": "1",
+    "LocationPrefixPfd": "/af/v1/pfd/",
     "ServerConfig": {
         "CNCAEndpoint": ":8080",
-	"Hostname": "localhost",
+        "Hostname": "localhost",
         "NotifPort": ":8081",
-	"UIEndpoint": "http://localhost:3020",
+        "UIEndpoint": "http://localhost:3020",
         "NotifServerCertPath": "/etc/certs/server-cert.pem",
         "NotifServerKeyPath": "/etc/certs/server-key.pem"
     },
@@ -13,9 +14,8 @@
         "NEFHostname": "localhost",
         "NEFPort": ":8060",
         "NEFBasePath": "/3gpp-traffic-influence/v1",
-	"NEFPFDBasePath": "/3gpp-pfd-management/v1",
+        "NEFPFDBasePath": "/3gpp-pfd-management/v1",
         "UserAgent": "NGC-AF",
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem"
     }
 }
-

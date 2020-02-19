@@ -72,6 +72,15 @@ func GetPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Updating the Self Application Link
+	self, err := updateAppLink(afCtx.cfg, r, pfdResp)
+	if err != nil {
+		log.Errf("Pfd Management Application get : %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	pfdResp.Self = Link(self)
+
 	pfdRespJSON, err = json.Marshal(pfdResp)
 	if err != nil {
 		log.Errf("Pfd Management Application get : %s", err.Error())
