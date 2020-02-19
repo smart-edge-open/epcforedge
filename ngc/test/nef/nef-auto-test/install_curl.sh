@@ -12,29 +12,18 @@
 set -x
 
 #install nghttp2
-sudo yum -y install nghttp2
-
-# installing nghttp2 library, required for building curl.
-git clone https://github.com/nghttp2/nghttp2.git
-cd nghttp2
-autoreconf -i
-automake
-autoconf
-./configure
-make
-sudo make install
-cd ../
-rm -rf nghttp2
+sudo yum -y install nghttp2 libnghttp2 libnghttp2-devel
 
 #install curl 7.68.0
 wget https://curl.haxx.se/download/curl-7.68.0.tar.gz
 tar -xf curl-7.68.0.tar.gz
 rm curl-7.68.0.tar.gz
 cd curl-7.68.0
-./configure --with-nghttp2=/usr/local --with-ssl
+./configure --with-nghttp2 --with-ssl
 make -j
 
 ./src/curl --version
 set +x
-echo "Curl 7.68.0 is installed in `pwd`/src"
-echo "run ./src/curl --version # it should print http2 as a feature"
+cd ../
+echo -e "Curl 7.68.0 is installed in \033[0;32m `pwd`/src \033[0m"
+echo -e "\033[0;33mrun ./curl-7.68.0/src/curl --version # it should print http2 as a feature\033[0m"
