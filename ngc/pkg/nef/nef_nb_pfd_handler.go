@@ -726,7 +726,9 @@ func (af *afData) afUpdatePutPfdApplication(nefCtx *nefContext, transID string,
 
 	}
 
+	pfdData.Self = trans.Self
 	pfdTrans.pfdManagement.PfdDatas[appID] = pfdData
+
 	updPfd = pfdData
 
 	log.Infoln("Update PFD transaction Successful")
@@ -782,8 +784,11 @@ func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
 		}
 
 	}
+	pfdData.Self = trans.Self
+	pfdTrans.pfdManagement.PfdDatas[appID] = pfdData
 
-	updPfd = trans
+	updPfd = pfdData
+
 	log.Infoln("Patch PFD Application PFDs Successful")
 	return rsp, updPfd, err
 }
@@ -815,6 +820,10 @@ func (af *afData) afUpdatePutPfdTransaction(nefCtx *nefContext, transID string,
 	}
 	updPfd = trans
 	updPfd.Self = pfdTrans.pfdManagement.Self
+	for key, v := range updPfd.PfdDatas {
+		v.Self = pfdTrans.pfdManagement.PfdDatas[key].Self
+		updPfd.PfdDatas[key] = v
+	}
 	pfdTrans.pfdManagement = updPfd
 
 	log.Infoln("Update PFD transaction Successful")
@@ -1373,6 +1382,7 @@ func sendPFDErrorResponseToAF(w http.ResponseWriter,
 	mdata, eCode := createErrorJSON(rsp)
 	w.Header().Set("Content-Type", "application/problem+json; charset=UTF-8")
 	w.WriteHeader(eCode)
+
 	_, err := w.Write(mdata)
 	if err != nil {
 		log.Err("NEF ERROR : Failed to send response to AF !!!")
@@ -1383,7 +1393,6 @@ func sendPFDErrorResponseToAF(w http.ResponseWriter,
 		var body []byte
 		var pfdReport PfdReport
 
-		// TBD writing a second header??
 		// If single APP UPdate then only one pfd report else array of reports
 		if method == "SINGLE_APP" {
 			for _, value := range pfdReports {
@@ -1403,7 +1412,7 @@ func sendPFDErrorResponseToAF(w http.ResponseWriter,
 		if e != nil {
 			log.Err("NEF ERROR : Failed to send response to AF !!!")
 		}
-		_, err = w.Write(body)
+		_, err := w.Write(body)
 		if err != nil {
 			log.Err("NEF ERROR : Failed to send response to AF !!!")
 		}
