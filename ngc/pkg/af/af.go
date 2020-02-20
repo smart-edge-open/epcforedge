@@ -16,6 +16,11 @@ import (
 	config "github.com/otcshare/epcforedge/ngc/pkg/config"
 )
 
+const (
+	// Enable/Disable HTTP2 Flag
+	Http2Enabled = true
+)
+
 // TransactionIDs type
 type TransactionIDs map[int]TrafficInfluSub
 
@@ -24,12 +29,12 @@ type NotifSubscryptions map[string]map[string]TrafficInfluSub
 
 // ServerConfig struct
 type ServerConfig struct {
-	CNCAEndpoint        string `json:"CNCAEndpoint"`
-	Hostname            string `json:"Hostname"`
-	NotifPort           string `json:"NotifPort"`
-	UIEndpoint          string `json:"UIEndpoint"`
-	NotifServerCertPath string `json:"NotifServerCertPath"`
-	NotifServerKeyPath  string `json:"NotifServerKeyPath"`
+	CNCAEndpoint   string `json:"CNCAEndpoint"`
+	Hostname       string `json:"Hostname"`
+	NotifPort      string `json:"NotifPort"`
+	UIEndpoint     string `json:"UIEndpoint"`
+	ServerCertPath string `json:"ServerCertPath"`
+	ServerKeyPath  string `json:"ServerKeyPath"`
 }
 
 //Config struct
@@ -73,19 +78,26 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 	serverCNCA := &http.Server{
 		Addr:         AfCtx.cfg.SrvCfg.CNCAEndpoint,
 		Handler:      handlers.CORS(headersOK, originsOK, methodsOK)(AfRouter),
-		ReadTimeout:  5 * time.Second,
+		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
+	if Http2Enabled == true {
+		if err = http2.ConfigureServer(
+			serverCNCA, &http2.Server{}); err != nil {
+			log.Errf("AF failed at configuring HTTP2 server (CNCA Server)")
+			return err
+		}
+	}
 	serverNotif := &http.Server{
 		Addr:         AfCtx.cfg.SrvCfg.NotifPort,
 		Handler:      NotifRouter,
-		ReadTimeout:  5 * time.Second,
+		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
 	if err = http2.ConfigureServer(serverNotif, &http2.Server{}); err != nil {
-		log.Errf("AF failed at configuring HTTP2 server")
+		log.Errf("AF failed at configuring HTTP2 server (NEF Server)")
 		return err
 	}
 
@@ -108,16 +120,25 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 		log.Infof("Serving AF Notifications on: %s",
 			AfCtx.cfg.SrvCfg.NotifPort)
 		if err = serverNotif.ListenAndServeTLS(
-			AfCtx.cfg.SrvCfg.NotifServerCertPath,
-			AfCtx.cfg.SrvCfg.NotifServerKeyPath); err != http.ErrServerClosed {
+			AfCtx.cfg.SrvCfg.ServerCertPath,
+			AfCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
 
 			log.Errf("AF Notifications server error: " + err.Error())
 		}
 		stopServerCh <- true
 	}(stopServerCh)
 
-	log.Infof("Serving AF on: %s", AfCtx.cfg.SrvCfg.CNCAEndpoint)
-	if err = serverCNCA.ListenAndServe(); err != http.ErrServerClosed {
+	if Http2Enabled == true {
+		log.Infof("Serving AF (CNCA HTTP2 Requests) on: %s",
+			AfCtx.cfg.SrvCfg.CNCAEndpoint)
+		err = serverCNCA.ListenAndServeTLS(AfCtx.cfg.SrvCfg.ServerCertPath,
+			AfCtx.cfg.SrvCfg.ServerKeyPath)
+	} else {
+		log.Infof("Serving AF (CNCA HTTP Requests) on: %s",
+			AfCtx.cfg.SrvCfg.CNCAEndpoint)
+		err = serverCNCA.ListenAndServe()
+	}
+	if err != http.ErrServerClosed {
 		log.Errf("AF CNCA server error: " + err.Error())
 		return err
 	}
@@ -136,8 +157,8 @@ func printConfig(cfg Config) {
 	log.Infoln("-------------------- NEF NOTIFICATIONS SERVER ---------------")
 	log.Infoln("Hostname: ", cfg.SrvCfg.Hostname)
 	log.Infoln("NotifPort: ", cfg.SrvCfg.NotifPort)
-	log.Infoln("NotifServerCertPath: ", cfg.SrvCfg.NotifServerCertPath)
-	log.Infoln("NotifServerKeyPath: ", cfg.SrvCfg.NotifServerKeyPath)
+	log.Infoln("ServerCertPath: ", cfg.SrvCfg.ServerCertPath)
+	log.Infoln("ServerKeyPath: ", cfg.SrvCfg.ServerKeyPath)
 	log.Infoln("UIEndpoint: ", cfg.SrvCfg.UIEndpoint)
 	log.Infoln("------------------------- CLIENT TO NEF ---------------------")
 	log.Infoln("Protocol: ", cfg.CliCfg.Protocol)

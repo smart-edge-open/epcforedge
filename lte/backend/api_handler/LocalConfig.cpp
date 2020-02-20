@@ -36,6 +36,9 @@ string localcfg_sgw_port       = "10000";
 string localcfg_nginx_hostip   = "127.0.0.1"; 
 string localcfg_nginx_port     = "8080"; 
 string localcfg_nginx_fcgipass = "127.0.0.1:9999";
+string localcfg_http2_enabled = "true";
+string localcfg_https_enabled = "true";
+string localcfg_ssl_cainfo = "/etc/certs/root-ca-cert.pem";
 
 
 int oamReadCfgJsonFile(void)
@@ -76,6 +79,17 @@ int oamReadCfgJsonFile(void)
         OAMAGENT_LOG(INFO, " [NGINX] port     = %s\n", localcfg_nginx_port.c_str());
         OAMAGENT_LOG(INFO, " [NGINX] fcgipass = %s!\n", localcfg_nginx_fcgipass.c_str());
 
+        // get configuration on whether HTTP2 is to be used
+        localcfg_http2_enabled   = root["http2_enabled"].asString();
+        OAMAGENT_LOG(INFO, " [HTTP2_ENABLED] = %s\n", localcfg_http2_enabled.c_str());
+
+        // get configuration on whether HTTPS is to be used
+        localcfg_https_enabled   = root["https_enabled"].asString();
+        OAMAGENT_LOG(INFO, " [HTTPS_ENABLED] = %s\n", localcfg_https_enabled.c_str());
+
+        // get SSL CA Certificate Data. This is used in case of http2_enabled is true
+        localcfg_ssl_cainfo   = root["ssl_cainfo"].asString();
+        OAMAGENT_LOG(INFO, " [SSL_CAINFO] = %s\n", localcfg_ssl_cainfo.c_str());
     }
     else
     {
