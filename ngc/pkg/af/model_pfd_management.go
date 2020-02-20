@@ -37,7 +37,7 @@ type Pfd struct {
 type PfdData struct {
 	// Each element uniquely identifies external application identifier
 	ExternalAppID string `json:"externalAppID"`
-	// Link to the resource. This parameter shall be supplied by the NEF in
+	// Link to the resource. This parameter shall be supplied by the AF in
 	// HTTP responses that include an object of PfdData type
 	Self Link `json:"self,omitempty"`
 	// Contains the PFDs of the external application identifier. Each PFD is
@@ -55,7 +55,7 @@ type PfdData struct {
 // PfdManagement resource for a PFD management request
 type PfdManagement struct {
 	// Link to the resource "Individual PFD Management Transaction".
-	// This parameter shall be supplied by the NEF in HTTP responses.
+	// This parameter shall be supplied by the AF in HTTP responses.
 	Self Link `json:"self,omitempty"`
 	// String identifying supported optional features of PFD Management
 	// This attribute shall be provided in the POST request and in the
