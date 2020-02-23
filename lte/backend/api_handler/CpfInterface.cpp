@@ -286,11 +286,14 @@ int cpfCurlPost(string &url, string &postData, stringstream &responseData)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
     
     // Set options for using HTTP2 or HTTPS
+#if CURL_HTTP2
     if (0 == localcfg_http2_enabled.compare("true")) {
         curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    } else if (0 == localcfg_https_enabled.compare("true")) {
+    } else
+#endif
+    if (0 == localcfg_https_enabled.compare("true")) {
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
     }
@@ -430,11 +433,14 @@ int cpfCurlGet(string &url, stringstream &responseData)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
 
     // Set options for using HTTP2 or HTTPS
+#if CURL_HTTP2
     if (0 == localcfg_http2_enabled.compare("true")) {
         curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    } else if (0 == localcfg_https_enabled.compare("true")) {
+    } else 
+#endif
+    if (0 == localcfg_https_enabled.compare("true")) {
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
     }
@@ -555,11 +561,14 @@ int cpfCurlDelete(string &url, bool &successFlg)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
 
     // Set options for using HTTP2 or HTTPS
+#if CURL_HTTP2
     if (0 == localcfg_http2_enabled.compare("true")) {
         curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    } else if (0 == localcfg_https_enabled.compare("true")) {
+    } else
+#endif
+    if (0 == localcfg_https_enabled.compare("true")) {
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
     }
@@ -691,11 +700,14 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
 
     // Set options for using HTTP2 or HTTPS
+#if CURL_HTTP2
     if (0 == localcfg_http2_enabled.compare("true")) {
         curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    } else if (0 == localcfg_https_enabled.compare("true")) {
+    } else 
+#endif
+    if (0 == localcfg_https_enabled.compare("true")) {
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
     }

@@ -2,11 +2,11 @@
     "AfId": "1",
     "ServerConfig": {
         "CNCAEndpoint": ":8080",
-	"Hostname": "localhost",
+        "Hostname": "localhost",
         "NotifPort": ":8081",
-	"UIEndpoint": "http://localhost:3020",
-        "NotifServerCertPath": "/etc/certs/server-cert.pem",
-        "NotifServerKeyPath": "/etc/certs/server-key.pem"
+        "UIEndpoint": "http://localhost:3020",
+        "ServerCertPath": "/etc/certs/server-cert.pem",
+        "ServerKeyPath": "/etc/certs/server-key.pem"
     },
     "CliConfig": {
         "Protocol": "https",
@@ -17,4 +17,3 @@
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem"
     }
 }
-
