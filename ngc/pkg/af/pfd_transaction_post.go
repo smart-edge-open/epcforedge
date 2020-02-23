@@ -11,18 +11,19 @@ import (
 )
 
 func createPfdTransaction(cliCtx context.Context, pfdTrans PfdManagement,
-	afCtx *Context) (PfdManagement, *http.Response, error) {
+	afCtx *Context) (PfdManagement, *http.Response, []byte, error) {
 
 	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
-	pfdResp, resp, err := cli.PfdManagementPostAPI.PfdTransactionPost(cliCtx,
-		afCtx.cfg.AfID, pfdTrans)
+	pfdResp, resp, respBody, err :=
+		cli.PfdManagementPostAPI.PfdTransactionPost(cliCtx,
+			afCtx.cfg.AfID, pfdTrans)
 
 	if err != nil {
-		return PfdManagement{}, resp, err
+		return PfdManagement{}, resp, respBody, err
 	}
-	return pfdResp, resp, nil
+	return pfdResp, resp, respBody, nil
 }
 
 // CreatePfdTransaction function - Create a PFD transaction
@@ -35,6 +36,7 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 		url         *url.URL
 		pfdRespJSON []byte
 		pfdRsp      PfdManagement
+		respBody    []byte
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -53,14 +55,20 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 	if err = json.NewDecoder(r.Body).Decode(&pfdTrans); err != nil {
 		log.Errf("Pfd Management Transcation create: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
+
 		return
 	}
 
-	pfdRsp, resp, err = createPfdTransaction(cliCtx, pfdTrans, afCtx)
+	pfdRsp, resp, respBody, err = createPfdTransaction(cliCtx, pfdTrans, afCtx)
 
 	if err != nil {
 		log.Errf("Pfd Management Transaction create: %s", err.Error())
 		w.WriteHeader(getStatusCode(resp))
+
+		if _, err = w.Write(respBody); err != nil {
+			log.Errf("PFD create error handling error reposnse")
+			return
+		}
 
 		return
 	}

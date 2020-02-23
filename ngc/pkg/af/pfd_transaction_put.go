@@ -11,18 +11,19 @@ import (
 
 func putPfdTransaction(cliCtx context.Context, pfdTs PfdManagement,
 	afCtx *Context, sID string) (PfdManagement,
-	*http.Response, error) {
+	*http.Response, []byte, error) {
 
 	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
-	tsRet, resp, err := cli.PfdManagementPutAPI.PfdTransactionPut(cliCtx,
-		afCtx.cfg.AfID, sID, pfdTs)
+	tsRet, resp, respBody, err :=
+		cli.PfdManagementPutAPI.PfdTransactionPut(cliCtx,
+			afCtx.cfg.AfID, sID, pfdTs)
 
 	if err != nil {
-		return PfdManagement{}, resp, err
+		return PfdManagement{}, resp, respBody, err
 	}
-	return tsRet, resp, nil
+	return tsRet, resp, respBody, nil
 }
 
 // PutPfdTransaction function - To update the PFD transcation
@@ -34,6 +35,7 @@ func PutPfdTransaction(w http.ResponseWriter, r *http.Request) {
 		pfdTransactionID string
 		pfdRsp           PfdManagement
 		pfdRespJSON      []byte
+		resBody          []byte
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -62,12 +64,17 @@ func PutPfdTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pfdRsp, resp, err = putPfdTransaction(cliCtx, pfdTs, afCtx,
+	pfdRsp, resp, resBody, err = putPfdTransaction(cliCtx, pfdTs, afCtx,
 		pfdTransactionID)
 	// TBD how to validate the PUT response
 	if err != nil {
 		log.Errf("Pfd Management Put : %s", err.Error())
 		w.WriteHeader(getStatusCode(resp))
+		if _, err = w.Write(resBody); err != nil {
+			log.Errf("Pfd Management put: %s", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 

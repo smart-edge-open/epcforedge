@@ -31,7 +31,7 @@ func (a *PfdManagementTransactionAppPatchAPIService) handleAppPatchResponse(
 		return err
 	}
 
-	return handlePostPutPatchErrorResp(r, body)
+	return handlePfdPostPutPatchErrorResp(r, body)
 
 }
 
@@ -50,12 +50,13 @@ PfdAppTransactionPatch Updates an existing pfd transaction for an app ID
 */
 func (a *PfdManagementTransactionAppPatchAPIService) PfdAppTransactionPatch(
 	ctx context.Context, afID string, pfdTransID string, appID string,
-	body PfdData) (PfdData, *http.Response, error) {
+	body PfdData) (PfdData, *http.Response, []byte, error) {
 
 	var (
 		method    = strings.ToUpper("Patch")
 		patchBody interface{}
 		ret       PfdData
+		respBody  []byte
 	)
 
 	path := a.client.cfg.Protocol + "://" + a.client.cfg.NEFHostname +
@@ -72,15 +73,15 @@ func (a *PfdManagementTransactionAppPatchAPIService) PfdAppTransactionPatch(
 	r, err := a.client.prepareRequest(ctx, path, method,
 		patchBody, headerParams)
 	if err != nil {
-		return ret, nil, err
+		return ret, nil, respBody, err
 	}
 
 	resp, err := a.client.callAPI(r)
 	if err != nil || resp == nil {
-		return ret, resp, err
+		return ret, resp, respBody, err
 	}
 
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err = ioutil.ReadAll(resp.Body)
 	defer func() {
 		err = resp.Body.Close()
 		if err != nil {
@@ -90,14 +91,14 @@ func (a *PfdManagementTransactionAppPatchAPIService) PfdAppTransactionPatch(
 
 	if err != nil {
 		log.Errf("http response body could not be read")
-		return ret, resp, err
+		return ret, resp, respBody, err
 	}
 
 	if err = a.handleAppPatchResponse(&ret, resp,
 		respBody); err != nil {
 
-		return ret, resp, err
+		return ret, resp, respBody, err
 	}
 
-	return ret, resp, nil
+	return ret, resp, respBody, nil
 }

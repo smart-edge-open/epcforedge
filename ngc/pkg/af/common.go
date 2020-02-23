@@ -192,41 +192,14 @@ func handlePfdPostPutPatchErrorResp(r *http.Response,
 		newErr.model = v
 		log.Errf("NEF returned error - %s", r.Status)
 		return newErr
-
+	case 500:
+		return newErr
 	default:
 		b, _ := ioutil.ReadAll(r.Body)
 		err := fmt.Errorf("NEF returned error - %s, %s", r.Status, string(b))
 		return err
 	}
 }
-
-// TBD pfdReport List in case of 500 response
-/*
-func getPfdReportList(r *http.Response) ([]PfdReport, error) {
-	var pfdReportList []PfdReport
-	b, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(b, &pfdReportList)
-	if err != nil {
-		log.Infoln("Pfd Report List unmarshalling Failed")
-		return pfdReportList, err
-	}
-	return pfdReportList, err
-
-}
-
-
-func getPfdReport(r *http.Response) (PfdReport, error) {
-	var pfdReport PfdReport
-	b, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(b, &pfdReport)
-	if err != nil {
-
-		return pfdReport, err
-	}
-	return pfdReport, err
-
-}
-*/
 
 func updatePfdURL(cfg Config, r *http.Request, resURL string) string {
 

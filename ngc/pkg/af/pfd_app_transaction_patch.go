@@ -11,18 +11,19 @@ import (
 
 func patchPfdAppTransaction(cliCtx context.Context, pfdData PfdData,
 	afCtx *Context, pfdID string, appID string) (PfdData,
-	*http.Response, error) {
+	*http.Response, []byte, error) {
 
 	cliCfg := NewConfiguration(afCtx)
 	cli := NewClient(cliCfg)
 
-	tsRet, resp, err := cli.PfdManagementAppPatchAPI.PfdAppTransactionPatch(
-		cliCtx, afCtx.cfg.AfID, pfdID, appID, pfdData)
+	tsRet, resp, respBody, err :=
+		cli.PfdManagementAppPatchAPI.PfdAppTransactionPatch(
+			cliCtx, afCtx.cfg.AfID, pfdID, appID, pfdData)
 
 	if err != nil {
-		return PfdData{}, resp, err
+		return PfdData{}, resp, respBody, err
 	}
-	return tsRet, resp, nil
+	return tsRet, resp, respBody, nil
 }
 
 // PatchPfdAppTransaction function
@@ -35,6 +36,7 @@ func PatchPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		appID       string
 		pfdRsp      PfdData
 		pfdRespJSON []byte
+		respBody    []byte
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -70,11 +72,16 @@ func PatchPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pfdRsp, resp, err = patchPfdAppTransaction(cliCtx, pfdData, afCtx,
+	pfdRsp, resp, respBody, err = patchPfdAppTransaction(cliCtx, pfdData, afCtx,
 		pfdTransID, appID)
 	if err != nil {
 		log.Errf("Pfd Management Application patch : %s", err.Error())
 		w.WriteHeader(getStatusCode(resp))
+		if _, err = w.Write(respBody); err != nil {
+			log.Errf("Pfd Management App put: %s", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
