@@ -8,7 +8,11 @@ package ngcnef
 
 import (
 	"context"
+	"errors"
 )
+
+// TestClient variable is only for UnitTesting purpose to inject errors in stub
+var TestClient = false
 
 // UdrPfdClientStub is an implementation of the Udr Influence data
 type UdrPfdClientStub struct {
@@ -38,6 +42,10 @@ func (udr *UdrPfdClientStub) UdrPfdDataCreate(ctx context.Context,
 	udr.appPfd[string(body.AppID)] = &body
 	log.Infof("UdrPfdDataCreate Stub Exited")
 
+	if TestClient {
+		rsp.ResponseCode = 400
+		return rsp, errors.New("Error in UDR SB PUT")
+	}
 	return rsp, err
 }
 
@@ -53,6 +61,10 @@ func (udr *UdrPfdClientStub) UdrPfdDataGet(ctx context.Context,
 
 	log.Infof("UdrPfdDataGet Stub Exited")
 
+	if TestClient {
+		rsp.ResponseCode = 404
+		return rsp, errors.New("Error in UDR SB GET")
+	}
 	return rsp, err
 }
 
@@ -66,6 +78,11 @@ func (udr *UdrPfdClientStub) UdrPfdDataDelete(ctx context.Context,
 
 	delete(udr.appPfd, string(appID))
 	log.Infof("UdrPfdDataDelete Stub Exited")
+
+	if TestClient {
+		rsp.ResponseCode = 400
+		return rsp, errors.New("Error in UDR SB DELETE")
+	}
 
 	return rsp, err
 }

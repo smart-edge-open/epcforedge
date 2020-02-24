@@ -2,8 +2,7 @@
   "self": "",
   "suppFeat": "",
   "pfdDatas": {
-    "app1": {
-      "externalAppId": "app1",
+    "app_1": {
       "self": "",
       "pfds": {
         "pfd1": {

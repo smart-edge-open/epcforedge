@@ -2,8 +2,8 @@
   "self": "",
   "suppFeat": "",
   "pfdDatas": {
-    "app1": {
-      "externalAppId": "app1",
+    "app20": {
+      "externalAppId": "app20",
       "self": "",
       "pfds": {
         "pfd1": {
@@ -11,7 +11,7 @@
           "flowDescriptions": [
             "permit in ip from 10.11.12.123 80 to any"
           ],
-          "urls": [],
+          "urls": [""],
           "domainNames": []
         },
         "pfd2": {
@@ -22,11 +22,10 @@
             "www.google.com"
           ]
         }
-      },
-      "cachingTime": 1000
+      }
     },
-    "app2": {
-      "externalAppId": "app2",
+    "app21": {
+      "externalAppId": "app21",
       "self": "",
       "pfds": {
         "pfd1": {
@@ -35,7 +34,7 @@
             "permit in ip from 10.11.12.124 80 to any"
           ],
           "urls": [],
-          "domainNames": []
+          "domainNames": [""]
         },
         "pfd4": {
           "pfdId": "pfd4",

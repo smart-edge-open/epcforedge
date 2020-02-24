@@ -2,8 +2,8 @@
   "self": "",
   "suppFeat": "",
   "pfdDatas": {
-    "app1": {
-      "externalAppId": "app1",
+    "app20": {
+      "externalAppId": "app20",
       "self": "",
       "pfds": {
         "pfd1": {
@@ -22,11 +22,10 @@
             "www.google.com"
           ]
         }
-      },
-      "cachingTime": 1000
+      }
     },
-    "app2": {
-      "externalAppId": "app2",
+    "app21": {
+      "externalAppId": "app21",
       "self": "",
       "pfds": {
         "pfd1": {

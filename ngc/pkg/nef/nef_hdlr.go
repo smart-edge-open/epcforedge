@@ -189,13 +189,6 @@ func (nef *nefData) nefAddAf(nefCtx *nefContext, afID string) (af *afData,
 		return af, errors.New("MAX AF exceeded")
 	}
 
-	//Check if AF is already present
-	_, ok := nef.afs[afID]
-
-	if ok {
-		return nef.afs[afID], errors.New("AF already present")
-	}
-
 	//Create a new entry of AF
 
 	_ = afe.afCreate(nefCtx, afID)

@@ -1,0 +1,27 @@
+{
+  "self": "",
+  "suppFeat": "",
+  "pfdDatas": {
+    "app1": {
+      "externalAppId": "app1",
+      "self": "",
+      "pfds": {
+        }
+      }
+
+      },
+    "app2": {
+      "externalAppId": "app2",
+      "self": "",
+      "pfds": {
+        "pfd1": {
+          "pfdId": "pfd3",
+          "flowDescriptions": [
+            "permit in ip from 10.11.12.130 80 to any"
+          ],
+          "urls": []
+        }
+      }
+    }
+  }
+}

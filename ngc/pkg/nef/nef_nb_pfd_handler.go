@@ -18,6 +18,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// TestNEFSB is the Test variable for injecting errors in NEF SB APIs
+var TestNEFSB = false
+
 func createNewPFDTrans(nefCtx *nefContext, afID string,
 	trans PfdManagement) (loc string, rsp map[string]nefPFDSBRspData,
 	err error) {
@@ -414,21 +417,14 @@ func UpdatePutPFDManagementTransaction(w http.ResponseWriter,
 			sendErrorResponseToAF(w, rsp1)
 			return
 		}
-		// All PFDs have failed, 500 response
-		if len(pfdTrans.PfdDatas) == 0 {
 
-			pd := ProblemDetails{Title: pfdAppsFailed}
-			rsp1 := nefSBRspData{errorCode: 500, pd: pd}
-			sendPFDErrorResponseToAF(w, rsp1, "", pfdTrans.PfdReports)
-			return
-		}
 		_, newPfdTrans, err := af.afUpdatePutPfdTransaction(nefCtx,
 			vars["transactionId"], pfdTrans)
 
 		if err != nil {
 			log.Err(err)
 			// All PFDs failed at UDR
-			if err.Error() == "ALL PFD APP FAILED" {
+			if err.Error() == pfdAppsFailed {
 
 				// fatal error return
 				rsp1 := nefSBRspData{errorCode: 500}
@@ -535,21 +531,9 @@ func UpdatePutPFDManagementApplication(w http.ResponseWriter,
 
 			}
 			// fatal error return
-			rsp1 := nefSBRspData{errorCode: 400}
+			rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
 			rsp1.pd.Title = "UDR Error in updating PFD Application"
 			sendErrorResponseToAF(w, rsp1)
-
-			return
-		}
-
-		err = updatePfdAppOnRsp(rsp, pfdData, vars["appId"], pfdReportList)
-		if err != nil {
-			log.Err(err)
-
-			// fatal error return
-			rsp1 := nefSBRspData{errorCode: 500}
-
-			sendPFDErrorResponseToAF(w, rsp1, "SINGLE_APP", pfdReportList)
 
 			return
 		}
@@ -641,20 +625,9 @@ func PatchPFDManagementApplication(w http.ResponseWriter,
 
 			}
 			// fatal error return
-			rsp1 := nefSBRspData{errorCode: 400}
+			rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
 			rsp1.pd.Title = "UDR Error in updating PFD Application"
 			sendErrorResponseToAF(w, rsp1)
-
-			return
-		}
-		err = updatePfdAppOnRsp(rsp, pfdData, vars["appId"], pfdReportList)
-		if err != nil {
-			log.Err(err)
-
-			// fatal error return
-			rsp1 := nefSBRspData{errorCode: 500}
-
-			sendPFDErrorResponseToAF(w, rsp1, "SINGLE_APP", pfdReportList)
 
 			return
 		}
@@ -692,7 +665,7 @@ func (af *afData) afUpdatePutPfdApplication(nefCtx *nefContext, transID string,
 	pfdTrans, ok := af.pfdtrans[transID]
 
 	if !ok {
-		rsp.result.errorCode = 400
+		rsp.result.errorCode = 404
 		rsp.result.pd.Title = pfdNotFound
 
 		return rsp, updPfd, errors.New(pfdNotFound)
@@ -737,7 +710,7 @@ func (af *afData) afUpdatePatchPfdApplication(nefCtx *nefContext,
 	pfdTrans, ok := af.pfdtrans[transID]
 
 	if !ok {
-		rsp.result.errorCode = 400
+		rsp.result.errorCode = 404
 		rsp.result.pd.Title = pfdNotFound
 
 		return rsp, updPfd, errors.New(pfdNotFound)
@@ -1101,7 +1074,7 @@ func validateAFPfdData(pfd Pfd) (rsp nefPFDSBRspData,
 	if len(pfd.DomainNames) == 0 && len(pfd.FlowDescriptions) == 0 &&
 		len(pfd.Urls) == 0 {
 		rsp.result.errorCode = 400
-		rsp.result.pd.Title = "No domainNames" +
+		rsp.result.pd.Title = "No domainNames " +
 			"FlowDescriptions and Urls present for PFD"
 		log.Info(rsp.result.pd.Title)
 		return rsp, false
@@ -1132,15 +1105,17 @@ func validatePfd(pfd Pfd) (rsp nefPFDSBRspData,
 			return rsp, false
 		}
 	}
-	if len(pfd.FlowDescriptions) != 0 {
-		if len(pfd.Urls) != 0 || len(pfd.DomainNames) != 0 {
-			rsp.result.errorCode = 400
-			rsp.result.pd.Title = "FlowDescriptions present," +
-				"DomainNames and Urls should not be present for PFD"
-			log.Info(rsp.result.pd.Title)
-			return rsp, false
-		}
-	}
+	// Not required as covered in previous
+	/*
+		if len(pfd.FlowDescriptions) != 0 {
+			if len(pfd.Urls) != 0 || len(pfd.DomainNames) != 0 {
+				rsp.result.errorCode = 400
+				rsp.result.pd.Title = "FlowDescriptions present," +
+					"DomainNames and Urls should not be present for PFD"
+				log.Info(rsp.result.pd.Title)
+				return rsp, false
+			}
+		} */
 
 	return rsp, true
 }
@@ -1196,7 +1171,7 @@ func nefSBUDRPFDGet(transData *afPfdTransaction, nefCtx *nefContext) (
 	return trans, rsp, nil
 }
 
-//NEFSBPutPfdFn is the callback for SB API to put PFD transaction
+// NEFSBAppPutPfdFn is the callback for SB API to put PFD transaction
 func nefSBUDRAPPPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
 	app PfdData) (rsp nefPFDSBRspData, err error) {
 
@@ -1235,8 +1210,13 @@ func nefSBUDRAPPPFDPut(transData *afPfdTransaction, nefCtx *nefContext,
 		return rsp, e
 	}
 
-	rsp.result.errorCode = 200
-
+	if TestNEFSB {
+		rsp.result.errorCode = 400
+		var fc FailureCode = OtherReason
+		rsp.fc = &fc
+	} else {
+		rsp.result.errorCode = 200
+	}
 	return rsp, err
 
 }
@@ -1298,8 +1278,9 @@ func updatePfdTransOnRsp(rsp map[string]nefPFDSBRspData,
 			delete(pfdTrans.PfdDatas, key)
 			generatePfdReport(key, "OTHER_REASON", pfdTrans.PfdReports)
 		} else if v.result.errorCode != 200 && v.fc != nil {
+			delete(pfdTrans.PfdDatas, key)
 			generatePfdReport(key, string(*(v.fc)), pfdTrans.PfdReports)
-			return errors.New(pfdAppsFailed)
+
 		}
 	}
 	if len(pfdTrans.PfdDatas) == 0 {
