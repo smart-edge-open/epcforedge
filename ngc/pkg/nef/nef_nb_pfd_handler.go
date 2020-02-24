@@ -510,13 +510,10 @@ func UpdatePutPFDManagementApplication(w http.ResponseWriter,
 		for _, pfd := range pfdData.Pfds {
 			rsp, status := validateAFPfdData(pfd)
 			if !status {
-				log.Infof("PFD %s is invalid in Application %s", pfd.PfdID,
-					pfdData.ExternalAppID)
-				generatePfdReport(pfdData.ExternalAppID, "OTHER_REASON",
-					pfdReportList)
+				log.Err(rsp.result.pd.Title)
 				rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
-				sendPFDErrorResponseToAF(w, rsp1, "SINGLE_APP", pfdReportList)
-				break
+				sendErrorResponseToAF(w, rsp1)
+				return
 
 			}
 		}
@@ -622,12 +619,9 @@ func PatchPFDManagementApplication(w http.ResponseWriter,
 			if !status {
 				log.Infof("PFD %s is invalid in Application %s", pfd.PfdID,
 					pfdData.ExternalAppID)
-				generatePfdReport(pfdData.ExternalAppID, "OTHER_REASON",
-					pfdReportList)
 				rsp1 := nefSBRspData{errorCode: rsp.result.errorCode}
-				sendPFDErrorResponseToAF(w, rsp1, "SINGLE_APP", pfdReportList)
-				break
-
+				sendErrorResponseToAF(w, rsp1)
+				return
 			}
 		}
 
