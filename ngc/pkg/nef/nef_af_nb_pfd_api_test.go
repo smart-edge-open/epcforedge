@@ -183,6 +183,8 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 			"AF_NEF_PFD_APP_PATCH_002.json")
 		patchappbodyMissingPfd, _ := ioutil.ReadFile(testJSONPFDPath +
 			"AF_NEF_PFD_APP_PATCH_003.json")
+		patchappbodyUnmarshall, _ := ioutil.ReadFile(testJSONPFDPath +
+			"AF_NEF_PFD_APP_PATCH_004.json")
 		putappbody400, _ := ioutil.ReadFile(testJSONPFDPath +
 			"AF_NEF_PFD_APP_PUT_002.json")
 
@@ -650,6 +652,14 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 
 				rr, req := CreatePFDReqForNEF(ctx, "PATCH", "11000", "app1",
 					patchappbodyMissingPfd)
+				ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
+				Expect(rr.Code).Should(Equal(http.StatusBadRequest))
+			})
+		It("Will Send a invalid PFD PATCH - Unmarsahll error",
+			func() {
+
+				rr, req := CreatePFDReqForNEF(ctx, "PATCH", "10000", "app1",
+					patchappbodyUnmarshall)
 				ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 				Expect(rr.Code).Should(Equal(http.StatusBadRequest))
 			})
