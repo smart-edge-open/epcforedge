@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0
-* Copyright (c) 2019 Intel Corporation
+* Copyright (c) 2019-2020 Intel Corporation
  */
 
 package ngcnef
@@ -315,3 +315,18 @@ type AccessType string
 
 // PduSessionID Valid values are 0 to 255
 type PduSessionID uint8
+
+// DurationSec is unsigned integer identifying a period of time in units of
+// seconds.
+type DurationSec uint64
+
+// DurationSecRm is unsigned integer identifying a period of time in units of
+// seconds with "nullable=true" property.
+type DurationSecRm DurationSec
+
+// DurationSecRo is unsigned integer identifying a period of time in units of
+// seconds with "readOnly=true" property.
+type DurationSecRo DurationSec
+
+// ApplicationID is string providing an application identifier.
+type ApplicationID string
