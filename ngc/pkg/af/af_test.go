@@ -357,6 +357,32 @@ var _ = Describe("AF", func() {
 
 		})
 
+		PContext("PFD Transaction INVALID POST", func() {
+			PSpecify("Sending INVALID PFD POST request", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+		})
+
 		PContext("PFD  GET ALL", func() {
 			PSpecify("Read all PFD transactions", func() {
 
