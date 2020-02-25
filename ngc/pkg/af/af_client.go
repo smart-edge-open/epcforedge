@@ -15,15 +15,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"reflect"
 	"regexp"
-	"strings"
 	"time"
 
 	"golang.org/x/net/http2"
 )
 
-const contentTypePfd string = "application/json"
+const contentType string = "application/json"
 
 var (
 	jsonCheck = regexp.MustCompile("(?i:[application|text]/json)")
@@ -120,41 +118,6 @@ func NewClient(cfg *CliConfig) *Client {
 	return c
 }
 
-// selectHeaderContentType select a content type from the available list.
-func selectHeaderContentType(contentTypes []string) string {
-	if len(contentTypes) == 0 {
-		return ""
-	}
-	if contains(contentTypes, "application/json") {
-		return "application/json"
-	}
-	// use the first content type specified in 'consumes'
-	return contentTypes[0]
-}
-
-// selectHeaderAccept join all accept types and return
-func selectHeaderAccept(accepts []string) string {
-	if len(accepts) == 0 {
-		return ""
-	}
-
-	if contains(accepts, "application/json") {
-		return "application/json"
-	}
-
-	return strings.Join(accepts, ",")
-}
-
-// contains is a case insenstive match, finding needle in a haystack
-func contains(words []string, word string) bool {
-	for _, a := range words {
-		if strings.EqualFold(strings.ToLower(a), strings.ToLower(word)) {
-			return true
-		}
-	}
-	return false
-}
-
 // callAPI do the request.
 func (c *Client) callAPI(request *http.Request) (*http.Response, error) {
 	return c.cfg.HTTPClient.Do(request)
@@ -186,13 +149,8 @@ func genBody(postBody interface{},
 	)
 
 	if postBody != nil {
-		contentType := headerParams["Content-Type"]
-		if contentType == "" {
-			contentType = detectContentType(postBody)
-			headerParams["Content-Type"] = contentType
-		}
-
-		body, err = setBody(postBody, contentType)
+		contenttype := headerParams["Content-Type"]
+		body, err = setBody(postBody, contenttype)
 		if err != nil {
 			return nil, err
 		}
@@ -283,28 +241,6 @@ func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer,
 		return nil, err
 	}
 	return bodyBuf, nil
-}
-
-// detectContentType method is used to get `Request.Body` content
-// type for request header
-func detectContentType(body interface{}) string {
-	contentType := "text/plain; charset=utf-8"
-	kind := reflect.TypeOf(body).Kind()
-
-	switch kind {
-	case reflect.Struct, reflect.Map, reflect.Ptr:
-		contentType = "application/json; charset=utf-8"
-	case reflect.String:
-		contentType = "text/plain; charset=utf-8"
-	default:
-		if b, ok := body.([]byte); ok {
-			contentType = http.DetectContentType(b)
-		} else if kind == reflect.Slice {
-			contentType = "application/json; charset=utf-8"
-		}
-	}
-
-	return contentType
 }
 
 // GenericError Provides access to the body,

@@ -37,9 +37,8 @@ func GetPfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
-		log.Errf("Pfd Management get: " +
-			"af-ctx retrieved from request is nil")
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "GET", "af-ctx retrieved from request is nil",
+			http.StatusInternalServerError)
 		return
 	}
 
@@ -48,17 +47,11 @@ func GetPfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	pfdTransactionID, err = getPfdTransIDFromURL(r)
-	if err != nil {
-		log.Errf("Pfd Management get: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	pfdTransactionID = getPfdTransIDFromURL(r)
 
 	pfdResp, resp, err = getPfdTransaction(cliCtx, afCtx, pfdTransactionID)
 	if err != nil {
-		log.Errf("Pfd Management get : %s", err.Error())
-		w.WriteHeader(getStatusCode(resp))
+		errRspHeader(&w, "GET", err.Error(), getStatusCode(resp))
 		return
 	}
 
@@ -66,30 +59,27 @@ func GetPfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	self, err := updateSelfLink(afCtx.cfg, r, pfdResp)
 	if err != nil {
-		log.Errf("Pfd Management get : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "GET", err.Error(),
+			http.StatusInternalServerError)
 		return
 	}
 	pfdResp.Self = Link(self)
 	err = updateAppsLink(afCtx.cfg, r, pfdResp)
 	if err != nil {
-		log.Errf("Pfd Management get : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "GET", err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	pfdRespJSON, err = json.Marshal(pfdResp)
 	if err != nil {
-		log.Errf("Pfd Management get : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "GET", err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(resp.StatusCode)
 
 	if _, err = w.Write(pfdRespJSON); err != nil {
-		log.Errf("Pfd Management get: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "GET", err.Error(), http.StatusInternalServerError)
 		return
 	}
 }

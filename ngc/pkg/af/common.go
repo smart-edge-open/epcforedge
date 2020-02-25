@@ -92,27 +92,19 @@ func getSubsIDFromURL(u *url.URL) (string, error) {
 	}
 }
 
-func getPfdTransIDFromURL(u *http.Request) (string, error) {
-
-	if u == nil {
-		return "", errors.New("empty URL in the request message")
-	}
+func getPfdTransIDFromURL(u *http.Request) string {
 
 	vars := mux.Vars(u)
 	pID := vars["transactionId"]
-	return pID, nil
+	return pID
 
 }
 
-func getPfdAppIDFromURL(u *http.Request) (string, error) {
-
-	if u == nil {
-		return "", errors.New("empty URL in the request message")
-	}
+func getPfdAppIDFromURL(u *http.Request) string {
 
 	vars := mux.Vars(u)
 	aID := vars["appId"]
-	return aID, nil
+	return aID
 
 }
 
@@ -217,9 +209,11 @@ func updateSelfLink(cfg Config, r *http.Request,
 	pfdTrans PfdManagement) (string, error) {
 
 	nefSelf := pfdTrans.Self
+
 	if nefSelf == "" {
 		return "", errors.New("NEF Self Link Not Present")
 	}
+
 	res := strings.Split(string(nefSelf), "transactions")
 	pID := strings.Split(res[1], "/")
 
@@ -260,5 +254,12 @@ func updateAppLink(cfg Config, r *http.Request,
 		"transactions/" + pID[1] + "/applications" + app[1]
 
 	return appSelf, nil
+
+}
+
+func errRspHeader(w *http.ResponseWriter, method string,
+	errString string, statusCode int) {
+	log.Errf("Pfd Management %s : %s", method, errString)
+	(*w).WriteHeader(statusCode)
 
 }

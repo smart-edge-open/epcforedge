@@ -36,9 +36,8 @@ func GetAllPfdTransactions(w http.ResponseWriter, r *http.Request) {
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
-		log.Errf("Pfd Management get all: " +
-			"af-ctx retrieved from request is nil")
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "GET ALL", "af-ctx retrieved from request is nil",
+			http.StatusInternalServerError)
 		return
 	}
 
@@ -48,8 +47,7 @@ func GetAllPfdTransactions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	tsResp, resp, err = getAllPfdTransactions(cliCtx, afCtx)
 	if err != nil {
-		log.Errf("PFD Management transactions get all : %s", err.Error())
-		w.WriteHeader(getStatusCode(resp))
+		errRspHeader(&w, "GET ALL", err.Error(), resp.StatusCode)
 		return
 	}
 
@@ -58,15 +56,15 @@ func GetAllPfdTransactions(w http.ResponseWriter, r *http.Request) {
 		var self string
 		self, err = updateSelfLink(afCtx.cfg, r, v)
 		if err != nil {
-			log.Errf("PFD Management transactions get all : %s", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
+			errRspHeader(&w, "GET ALL", err.Error(),
+				http.StatusInternalServerError)
 			return
 		}
 		v.Self = Link(self)
 		err = updateAppsLink(afCtx.cfg, r, v)
 		if err != nil {
-			log.Errf("PFD Management transactions get all : %s", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
+			errRspHeader(&w, "GET ALL", err.Error(),
+				http.StatusInternalServerError)
 			return
 		}
 		tsResp[key] = v
@@ -74,16 +72,16 @@ func GetAllPfdTransactions(w http.ResponseWriter, r *http.Request) {
 
 	tsRespJSON, err = json.Marshal(tsResp)
 	if err != nil {
-		log.Errf("PFD Management transactions get all : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "GET ALL", err.Error(),
+			http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(resp.StatusCode)
 
 	if _, err = w.Write(tsRespJSON); err != nil {
-		log.Errf("PFD Management transactions get all : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "GET ALL", err.Error(),
+			http.StatusInternalServerError)
 		return
 	}
 }

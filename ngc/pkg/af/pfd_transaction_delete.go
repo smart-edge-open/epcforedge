@@ -34,9 +34,8 @@ func DeletePfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
-		log.Errf("Pfd Transaction delete: " +
-			"af-ctx retrieved from request is nil")
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "DELETE", "af-ctx retrieved from request is nil",
+			http.StatusInternalServerError)
 		return
 	}
 
@@ -45,16 +44,11 @@ func DeletePfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	pfdTrans, err = getPfdTransIDFromURL(r)
-	if err != nil {
-		log.Errf("Pfd Transaction delete %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	pfdTrans = getPfdTransIDFromURL(r)
+
 	resp, err = deletePfdTransaction(cliCtx, afCtx, pfdTrans)
 	if err != nil {
-		log.Errf("Pfd Transaction delete %s", err.Error())
-		w.WriteHeader(getStatusCode(resp))
+		errRspHeader(&w, "DELETE", err.Error(), resp.StatusCode)
 		return
 	}
 

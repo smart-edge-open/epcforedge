@@ -38,9 +38,8 @@ func GetPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
-		log.Errf("Pfd Management Application get: " +
-			"af-ctx retrieved from request is nil")
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "APP GET", "af-ctx retrieved from request is nil",
+			http.StatusInternalServerError)
 		return
 	}
 
@@ -49,50 +48,35 @@ func GetPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	pfdTransactionID, err = getPfdTransIDFromURL(r)
+	pfdTransactionID = getPfdTransIDFromURL(r)
 
-	if err != nil {
-		log.Errf("Pfd Management  Application get: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	appID = getPfdAppIDFromURL(r)
 
-	appID, err = getPfdAppIDFromURL(r)
-	log.Infof("Application ID from URL is %s", appID)
-	if err != nil {
-		log.Errf("Pfd Management Application  get: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 	pfdResp, resp, err = getPfdAppTransaction(cliCtx, afCtx, pfdTransactionID,
 		appID)
 	if err != nil {
-		log.Errf("Pfd Management Application get : %s", err.Error())
-		w.WriteHeader(getStatusCode(resp))
+		errRspHeader(&w, "APP GET", err.Error(), getStatusCode(resp))
 		return
 	}
 
 	// Updating the Self Application Link
 	self, err := updateAppLink(afCtx.cfg, r, pfdResp)
 	if err != nil {
-		log.Errf("Pfd Management Application get : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "APP GET", err.Error(), http.StatusInternalServerError)
 		return
 	}
 	pfdResp.Self = Link(self)
 
 	pfdRespJSON, err = json.Marshal(pfdResp)
 	if err != nil {
-		log.Errf("Pfd Management Application get : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "APP GET", err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(resp.StatusCode)
 
 	if _, err = w.Write(pfdRespJSON); err != nil {
-		log.Errf("Pfd Management Application get: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "APP GET", err.Error(), http.StatusInternalServerError)
 		return
 	}
 }

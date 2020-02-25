@@ -41,9 +41,8 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
-		log.Errf("Pfd Management Transaction create: " +
-			"af-ctx retrieved from request is nil")
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "POST", "af-ctx retrieved from request is nil",
+			http.StatusInternalServerError)
 		return
 	}
 
@@ -53,9 +52,7 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err = json.NewDecoder(r.Body).Decode(&pfdTrans); err != nil {
-		log.Errf("Pfd Management Transcation create: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-
+		errRspHeader(&w, "POST", err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -74,8 +71,7 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if url, err = resp.Location(); err != nil {
-		log.Errf("Pfd Management Transaction create: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "POST", err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -84,21 +80,18 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	self, err := updateSelfLink(afCtx.cfg, r, pfdRsp)
 	if err != nil {
-		log.Errf("Pfd Management create : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "POST", err.Error(), http.StatusInternalServerError)
 		return
 	}
 	pfdRsp.Self = Link(self)
 	err = updateAppsLink(afCtx.cfg, r, pfdRsp)
 	if err != nil {
-		log.Errf("Pfd Management create : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "POST", err.Error(), http.StatusInternalServerError)
 		return
 	}
 	pfdRespJSON, err = json.Marshal(pfdRsp)
 	if err != nil {
-		log.Errf("Pfd Management create : %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "POST", err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -106,8 +99,7 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(resp.StatusCode)
 
 	if _, err = w.Write(pfdRespJSON); err != nil {
-		log.Errf("Pfd Management create: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "POST", err.Error(), http.StatusInternalServerError)
 		return
 	}
 

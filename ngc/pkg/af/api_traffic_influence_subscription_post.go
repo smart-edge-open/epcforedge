@@ -66,25 +66,9 @@ func (a *TrafficInfluenceSubscriptionPostAPIService) SubscriptionPost(
 
 	headerParams := make(map[string]string)
 
-	// to determine the Content-Type header
-	contentTypes := []string{"application/json"}
+	headerParams["Content-Type"] = contentType
+	headerParams["Accept"] = contentType
 
-	// set Content-Type header
-	contentType :=
-		selectHeaderContentType(contentTypes)
-	if contentType != "" {
-		headerParams["Content-Type"] = contentType
-	}
-
-	// to determine the Accept header
-	headerAccepts := []string{"application/json"}
-
-	// set Accept header
-	headerAccept :=
-		selectHeaderAccept(headerAccepts)
-	if headerAccept != "" {
-		headerParams["Accept"] = headerAccept
-	}
 	// body params
 	postBody = &body
 	r, err := a.client.prepareRequest(ctx, path, method,

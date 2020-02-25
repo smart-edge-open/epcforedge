@@ -73,8 +73,8 @@ func (a *PfdManagementTransactionAppDeleteAPIService) PfdAppTransactionDelete(
 
 	headerParams := make(map[string]string)
 
-	headerParams["Content-Type"] = contentTypePfd
-	headerParams["Accept"] = contentTypePfd
+	headerParams["Content-Type"] = contentType
+	headerParams["Accept"] = contentType
 
 	r, err := a.client.prepareRequest(ctx, path, method,
 		deleteBody, headerParams)

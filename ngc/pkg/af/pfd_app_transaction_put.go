@@ -41,9 +41,8 @@ func PutPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
-		log.Errf("Pfd Management App Put: " +
-			"af-ctx retrieved from request is nil")
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "APP PUT", "af-ctx retrieved from request is nil",
+			http.StatusInternalServerError)
 		return
 	}
 
@@ -53,24 +52,13 @@ func PutPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err = json.NewDecoder(r.Body).Decode(&pfdTs); err != nil {
-		log.Errf("Pfd Management App Put: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "APP PUT", err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	pfdTransactionID, err = getPfdTransIDFromURL(r)
-	if err != nil {
-		log.Errf("Pfd Management App Put: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	pfdTransactionID = getPfdTransIDFromURL(r)
 
-	appID, err = getPfdAppIDFromURL(r)
-	if err != nil {
-		log.Errf("Pfd Management App Put: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	appID = getPfdAppIDFromURL(r)
 
 	pfdRsp, resp, respBody, err = putPfdAppTransaction(cliCtx, pfdTs, afCtx,
 		pfdTransactionID, appID)
@@ -79,8 +67,8 @@ func PutPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		log.Errf("Pfd Management App Put : %s", err.Error())
 		w.WriteHeader(getStatusCode(resp))
 		if _, err = w.Write(respBody); err != nil {
-			log.Errf("Pfd Management App put: %s", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
+			errRspHeader(&w, "APP PUT", err.Error(),
+				http.StatusInternalServerError)
 			return
 		}
 		return
@@ -89,24 +77,21 @@ func PutPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 	// Updating the Self Application Link
 	self, err := updateAppLink(afCtx.cfg, r, pfdRsp)
 	if err != nil {
-		log.Errf("Pfd Management Application Put: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "APP PUT", err.Error(), http.StatusInternalServerError)
 		return
 	}
 	pfdRsp.Self = Link(self)
 
 	pfdRespJSON, err = json.Marshal(pfdRsp)
 	if err != nil {
-		log.Errf("Pfd Management Application Put: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "APP PUT", err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(resp.StatusCode)
 
 	if _, err = w.Write(pfdRespJSON); err != nil {
-		log.Errf("Pfd Management Application Put: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
+		errRspHeader(&w, "APP PUT", err.Error(), http.StatusInternalServerError)
 		return
 	}
 

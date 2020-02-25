@@ -65,8 +65,8 @@ func (a *PfdManagementTransactionAppPatchAPIService) PfdAppTransactionPatch(
 
 	headerParams := make(map[string]string)
 
-	headerParams["Content-Type"] = contentTypePfd
-	headerParams["Accept"] = contentTypePfd
+	headerParams["Content-Type"] = contentType
+	headerParams["Accept"] = contentType
 
 	// body params
 	patchBody = &body

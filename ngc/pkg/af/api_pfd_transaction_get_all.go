@@ -60,8 +60,8 @@ func (a *PfdManagementTransactionGetAllAPIService) PfdTransactionsGetAll(
 
 	headerParams := make(map[string]string)
 
-	headerParams["Content-Type"] = contentTypePfd
-	headerParams["Accept"] = contentTypePfd
+	headerParams["Content-Type"] = contentType
+	headerParams["Accept"] = contentType
 
 	r, err := a.client.prepareRequest(ctx, path, method,
 		getBody, headerParams)
