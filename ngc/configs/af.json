@@ -15,5 +15,6 @@
         "NEFBasePath": "/3gpp-traffic-influence/v1",
         "UserAgent": "NGC-AF",
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem"
-    }
+    },
+    "OAuth2Support": "true"
 }

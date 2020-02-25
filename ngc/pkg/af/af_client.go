@@ -220,6 +220,15 @@ func (c *Client) prepareRequest(
 
 	}
 
+	if c.cfg.OAuth2Support {
+		auth, err := GetNEFAuthorizationToken()
+		if err != nil {
+			return nil, err
+		}
+		// Add the Authorization header to the request.
+		localVarRequest.Header.Add("Authorization", "Bearer "+auth)
+	}
+
 	return localVarRequest, nil
 }
 

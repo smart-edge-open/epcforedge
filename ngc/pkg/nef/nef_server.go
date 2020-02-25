@@ -57,6 +57,7 @@ type Config struct {
 	HTTPConfig                HTTPConfig
 	HTTP2Config               HTTP2Config
 	AfServiceIDs              []interface{} `json:"afServiceIDs"`
+	OAuth2Support             bool          `json:"OAuth2Support"`
 }
 
 // NEF Module Context Data Structure

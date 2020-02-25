@@ -16,6 +16,7 @@ type CliConfig struct {
 	UserAgent      string `json:"UserAgent"`
 	NEFCliCertPath string `json:"NEFCliCertPath"`
 	HTTPClient     *http.Client
+	OAuth2Support  bool `json:"OAuth2Support"`
 }
 
 // NewConfiguration function initializes client configuration
@@ -28,6 +29,7 @@ func NewConfiguration(afCtx *Context) *CliConfig {
 		NEFBasePath:    afCtx.cfg.CliCfg.NEFBasePath,
 		UserAgent:      afCtx.cfg.CliCfg.UserAgent,
 		NEFCliCertPath: afCtx.cfg.CliCfg.NEFCliCertPath,
+		OAuth2Support:  afCtx.cfg.CliCfg.OAuth2Support,
 	}
 
 	return cfg

@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	oauth2 "github.com/otcshare/epcforedge/ngc/pkg/oauth2"
 	"golang.org/x/net/http2"
 
 	logger "github.com/otcshare/common/log"
@@ -21,6 +22,9 @@ type TransactionIDs map[int]TrafficInfluSub
 
 // NotifSubscryptions type
 type NotifSubscryptions map[string]map[string]TrafficInfluSub
+
+// Store the  Access token
+var NefAccessToken string
 
 // ServerConfig struct
 type ServerConfig struct {
@@ -87,6 +91,11 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 	if err = http2.ConfigureServer(serverNotif, &http2.Server{}); err != nil {
 		log.Errf("AF failed at configuring HTTP2 server")
 		return err
+	}
+
+	if AfCtx.cfg.CliCfg.OAuth2Support {
+		log.Infoln("Fetching NEF access token")
+		FetchNEFAuthorizationToken()
 	}
 
 	stopServerCh := make(chan bool, 2)
@@ -164,4 +173,17 @@ func Run(parentCtx context.Context, cfgPath string) error {
 	printConfig(AfCtx.cfg)
 
 	return runServer(parentCtx, &AfCtx)
+}
+
+func FetchNEFAuthorizationToken() (err error) {
+
+	NefAccessToken, _ = oauth2.GetAccessToken()
+	log.Errf("Got Access Token ", NefAccessToken)
+
+	return nil
+}
+
+func GetNEFAuthorizationToken() (token string, err error) {
+
+	return NefAccessToken, nil
 }
