@@ -29,7 +29,7 @@
       "externalAppId": "app2",
       "self": "",
       "pfds": {
-        "pfd1": {
+        "pfd3": {
           "pfdId": "pfd3",
           "flowDescriptions": [
             "permit in ip from 10.11.12.124 80 to any"

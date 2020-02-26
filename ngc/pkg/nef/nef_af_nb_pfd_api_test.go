@@ -153,8 +153,6 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 
 		postbody, _ := ioutil.ReadFile(testJSONPFDPath +
 			"AF_NEF_PFD_POST_001.json")
-		postbody500, _ := ioutil.ReadFile(testJSONPFDPath +
-			"AF_NEF_PFD_POST_002.json")
 		postbody201, _ := ioutil.ReadFile(testJSONPFDPath +
 			"AF_NEF_PFD_POST_003.json")
 		postbodyUDR, _ := ioutil.ReadFile(testJSONPFDPath +
@@ -237,7 +235,7 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 		})
 
 		It("Send invalid POST to NEF (500 error response)", func() {
-			rr, req := CreatePFDReqForNEF(ctx, "POST", "", "", postbody500)
+			rr, req := CreatePFDReqForNEF(ctx, "POST", "", "", postbody)
 			req.Header.Set("Content-Type", "application/json")
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 
