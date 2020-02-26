@@ -424,7 +424,7 @@ var _ = Describe("AF", func() {
 					KeyType("af-ctx"), af.AfCtx)
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
-				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
 
 			})
 
@@ -563,7 +563,7 @@ var _ = Describe("AF", func() {
 					KeyType("af-ctx"), af.AfCtx)
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
-				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
 
 			})
 
@@ -701,7 +701,7 @@ var _ = Describe("AF", func() {
 					KeyType("af-ctx"), af.AfCtx)
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
-				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
 
 			})
 
@@ -776,7 +776,7 @@ var _ = Describe("AF", func() {
 					KeyType("af-ctx"), af.AfCtx)
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
-				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
 
 			})
 

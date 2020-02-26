@@ -52,7 +52,7 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err = json.NewDecoder(r.Body).Decode(&pfdTrans); err != nil {
-		errRspHeader(&w, "POST", err.Error(), http.StatusInternalServerError)
+		errRspHeader(&w, "POST", err.Error(), http.StatusBadRequest)
 		return
 	}
 

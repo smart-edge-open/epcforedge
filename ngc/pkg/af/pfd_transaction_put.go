@@ -51,7 +51,7 @@ func PutPfdTransaction(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	if err = json.NewDecoder(r.Body).Decode(&pfdTs); err != nil {
-		errRspHeader(&w, "PUT", err.Error(), http.StatusInternalServerError)
+		errRspHeader(&w, "PUT", err.Error(), http.StatusBadRequest)
 		return
 	}
 

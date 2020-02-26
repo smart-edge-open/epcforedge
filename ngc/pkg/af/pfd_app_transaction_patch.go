@@ -53,7 +53,7 @@ func PatchPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 
 	if err = json.NewDecoder(r.Body).Decode(&pfdData); err != nil {
 		errRspHeader(&w, "APP-PATCH", err.Error(),
-			http.StatusInternalServerError)
+			http.StatusBadRequest)
 		return
 	}
 
