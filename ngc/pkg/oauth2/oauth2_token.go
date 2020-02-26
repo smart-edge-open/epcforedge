@@ -43,15 +43,17 @@ type PlmnID struct {
 	Mnc string `json:"mnc" yaml:"mnc" bson:"mnc" mapstructure:"Mnc"`
 }
 
+//NfType Network Function type
 type NfType string
 
+//AccessTokenReq NRF access token request
 type AccessTokenReq struct {
 	GrantType          string  `json:"grant_type"`
-	NfInstanceId       string  `json:"nfInstanceId"`
+	NfInstanceID       string  `json:"nfInstanceId"`
 	NfType             NfType  `json:"nfType,omitempty"`
 	TargetNfType       NfType  `json:"targetNfType,omitempty"`
 	Scope              string  `json:"scope"`
-	TargetNfInstanceId string  `json:"targetNfInstanceId,omitempty"`
+	TargetNfInstanceID string  `json:"targetNfInstanceId,omitempty"`
 	RequesterPlmn      *PlmnID `json:"requesterPlmn,omitempty"`
 	TargetPlmn         *PlmnID `json:"targetPlmn,omitempty"`
 }
@@ -96,9 +98,9 @@ func GetNEFAccessTokenFromNRF(accessTokenReq AccessTokenReq) (
 
 	// Create AccessToken
 	var accessTokenClaims = AccessTokenClaims{
-		"1234567",                         // TODO: NF instance id of the NRF
-		accessTokenReq.NfInstanceId,       // nfInstanceId of service consumer
-		accessTokenReq.TargetNfInstanceId, // nfInstanceId of service producer
+		"1",                               // Ramdom val
+		accessTokenReq.NfInstanceID,       // nfInstanceId of service consumer
+		accessTokenReq.TargetNfInstanceID, // nfInstanceId of service producer
 		accessTokenReq.Scope,              // TODO: the name of the NF services
 		// for which the access_token is
 		// authorized for use
@@ -124,11 +126,11 @@ func fetchNEFAccessTokenFromNRF() (token string, err error) {
 	accessTokenReq.GrantType = "client_credentials"
 
 	//Dont have it right now added static UUID
-	accessTokenReq.NfInstanceId = "0"
+	accessTokenReq.NfInstanceID = "0"
 	accessTokenReq.NfType = "AF"
 	accessTokenReq.TargetNfType = "NEF"
 	accessTokenReq.Scope = "nnrf-nfm"
-	accessTokenReq.TargetNfInstanceId = "0" //Instance of NEF
+	accessTokenReq.TargetNfInstanceID = "0" //Instance of NEF
 
 	//POST AccessTokenRequest to NRF /oauth2/token
 	return GetNEFAccessTokenFromNRF(accessTokenReq)
