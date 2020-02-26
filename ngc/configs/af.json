@@ -14,7 +14,7 @@
         "NEFPort": ":8060",
         "NEFBasePath": "/3gpp-traffic-influence/v1",
         "UserAgent": "NGC-AF",
-        "NEFCliCertPath": "/etc/certs/root-ca-cert.pem"
+        "NEFCliCertPath": "/etc/certs/root-ca-cert.pem",
+        "OAuth2Support": true
     },
-    "OAuth2Support": "true"
 }

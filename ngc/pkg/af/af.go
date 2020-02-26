@@ -96,6 +96,8 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 	if AfCtx.cfg.CliCfg.OAuth2Support {
 		log.Infoln("Fetching NEF access token")
 		FetchNEFAuthorizationToken()
+	} else {
+		log.Infoln("OAuth2 DISABLED")
 	}
 
 	stopServerCh := make(chan bool, 2)
@@ -154,6 +156,7 @@ func printConfig(cfg Config) {
 	log.Infoln("NEFBasePath: ", cfg.CliCfg.NEFBasePath)
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
 	log.Infoln("NEFCliCertPath: ", cfg.CliCfg.NEFCliCertPath)
+	log.Infoln("OAuth2Support: ", cfg.CliCfg.OAuth2Support)
 	log.Infoln("*************************************************************")
 
 }

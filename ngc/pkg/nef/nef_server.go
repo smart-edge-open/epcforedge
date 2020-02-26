@@ -252,6 +252,7 @@ func printConfig(cfg Config) {
 	log.Infoln("LocationPrefix: ", cfg.LocationPrefix)
 	log.Infoln("UpfNotificationResUriPath:", cfg.UpfNotificationResURIPath)
 	log.Infoln("UserAgent:", cfg.UserAgent)
+	log.Infoln("OAuth2Support:", cfg.OAuth2Support)
 	log.Infoln("-------------------------- NEF SERVER ----------------------")
 	log.Infoln("EndPoint(HTTP): ", cfg.HTTPConfig.Endpoint)
 	log.Infoln("EndPoint(HTTP2): ", cfg.HTTP2Config.Endpoint)

@@ -33,7 +33,7 @@ const (
 
 //Config OAuth2 config struct
 type Config struct {
-	SigningKey string `json:"signingKey"`
+	SigningKey string `json:"signingkey"`
 	Expiration int32  `json:"expiration"`
 }
 
@@ -45,25 +45,24 @@ type PlmnID struct {
 
 type NfType string
 
-//AccessTokenReq Access token request sent to NRF
 type AccessTokenReq struct {
-	GrantType          string  `form:"grant_type" json:"grant_type" bson:"grant_type"`
-	NfInstanceId       string  `form:"grant_type" json:"nfInstanceId" bson:"nfInstanceId"`
-	NfType             NfType  `form:"nfType,omitempty" json:"nfType,omitempty" bson:"nfType"`
-	TargetNfType       NfType  `form:"targetNfType,omitempty" json:"targetNfType,omitempty" bson:"targetNfType"`
-	Scope              string  `form:"scope" json:"scope" bson:"scope"`
-	TargetNfInstanceId string  `form:"targetNfInstanceId,omitempty" json:"targetNfInstanceId,omitempty" bson:"targetNfInstanceId"`
-	RequesterPlmn      *PlmnID `json:"requesterPlmn,omitempty" bson:"requesterPlmn"`
-	TargetPlmn         *PlmnID `json:"targetPlmn,omitempty" bson:"targetPlmn"`
+	GrantType          string  `json:"grant_type"`
+	NfInstanceId       string  `json:"nfInstanceId"`
+	NfType             NfType  `json:"nfType,omitempty"`
+	TargetNfType       NfType  `json:"targetNfType,omitempty"`
+	Scope              string  `json:"scope"`
+	TargetNfInstanceId string  `json:"targetNfInstanceId,omitempty"`
+	RequesterPlmn      *PlmnID `json:"requesterPlmn,omitempty"`
+	TargetPlmn         *PlmnID `json:"targetPlmn,omitempty"`
 }
 
 //AccessTokenClaims struct
 type AccessTokenClaims struct {
-	Issuer     string      `json:"issuer" bson:"issuer"`
-	Subject    string      `json:"subject" bson:"subject"`
-	Audience   interface{} `json:"audience" bson:"audience"`
-	Scope      string      `json:"scope" bson:"scope"`
-	Expiration int32       `json:"expiration" bson:"expiration"`
+	Issuer     string      `json:"issuer"`
+	Subject    string      `json:"subject"`
+	Audience   interface{} `json:"audience"`
+	Scope      string      `json:"scope"`
+	Expiration int32       `json:"expiration"`
 	jwt.StandardClaims
 }
 
@@ -72,6 +71,7 @@ type AccessTokenClaims struct {
 func loadJSONConfig(configPath string, config interface{}) error {
 	cfgData, err := ioutil.ReadFile(filepath.Clean(configPath))
 	if err != nil {
+		log.Infoln(err)
 		return err
 	}
 	return json.Unmarshal(cfgData, config)

@@ -133,7 +133,6 @@ func nefValidateAccessToken(w http.ResponseWriter, r *http.Request) bool {
 	//Get the token
 	splitToken := strings.Split(reqToken, "Bearer ")
 	reqToken = splitToken[1]
-	log.Infoln(reqToken)
 
 	status, err := oauth2.ValidateAccessToken(reqToken)
 

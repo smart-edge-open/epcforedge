@@ -22,5 +22,5 @@
             "snssai": "snssai1_value"
         }
     ],
-    "OAuth2Support": "true"
+    "OAuth2Support": true
 }

@@ -1,4 +1,4 @@
 {
     "SigningKey": "OPENNESS",
-    "expiration": "100000"
+    "expiration": 100000
 }
