@@ -39,6 +39,9 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) handleDeleteResponse(
 			return newErr
 		}
 		newErr.model = v
+		if r.StatusCode == 401 {
+			fetchNEFAuthorizationToken()
+		}
 		return newErr
 
 	default:

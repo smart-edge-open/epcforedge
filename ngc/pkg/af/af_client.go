@@ -221,7 +221,7 @@ func (c *Client) prepareRequest(
 	}
 
 	if c.cfg.OAuth2Support {
-		auth, err := GetNEFAuthorizationToken()
+		auth, err := getNEFAuthorizationToken()
 		if err != nil {
 			return nil, err
 		}

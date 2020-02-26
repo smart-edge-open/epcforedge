@@ -24,7 +24,7 @@ type TransactionIDs map[int]TrafficInfluSub
 type NotifSubscryptions map[string]map[string]TrafficInfluSub
 
 // Store the  Access token
-var NefAccessToken string
+var nefAccessToken string
 
 // ServerConfig struct
 type ServerConfig struct {
@@ -95,7 +95,7 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 
 	if AfCtx.cfg.CliCfg.OAuth2Support {
 		log.Infoln("Fetching NEF access token")
-		FetchNEFAuthorizationToken()
+		fetchNEFAuthorizationToken()
 	} else {
 		log.Infoln("OAuth2 DISABLED")
 	}
@@ -178,15 +178,19 @@ func Run(parentCtx context.Context, cfgPath string) error {
 	return runServer(parentCtx, &AfCtx)
 }
 
-func FetchNEFAuthorizationToken() (err error) {
+func fetchNEFAuthorizationToken() {
 
-	NefAccessToken, _ = oauth2.GetAccessToken()
-	log.Errf("Got Access Token ", NefAccessToken)
+	var err error
 
-	return nil
+	nefAccessToken, err = oauth2.GetAccessToken()
+	if err != nil {
+		log.Errf("Failed to Fetch Access Token ")
+		return
+	}
+	log.Errf("Got Access Token ", nefAccessToken)
 }
 
-func GetNEFAuthorizationToken() (token string, err error) {
+func getNEFAuthorizationToken() (token string, err error) {
 
-	return NefAccessToken, nil
+	return nefAccessToken, nil
 }

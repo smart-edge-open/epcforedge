@@ -109,6 +109,10 @@ func handleGetErrorResp(r *http.Response,
 			return newErr
 		}
 		newErr.model = v
+		if r.StatusCode == 401 {
+			fetchNEFAuthorizationToken()
+		}
+
 		return newErr
 
 	default:
@@ -137,6 +141,10 @@ func handlePostPutPatchErrorResp(r *http.Response,
 		}
 		newErr.model = v
 		log.Errf("NEF returned error - %s", r.Status)
+		if r.StatusCode == 401 {
+			fetchNEFAuthorizationToken()
+		}
+
 		return newErr
 
 	default:
