@@ -9,6 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"path/filepath"
+	"time"
 
 	logger "github.com/otcshare/common/log"
 )
@@ -34,7 +35,7 @@ const (
 //Config OAuth2 config struct
 type Config struct {
 	SigningKey string `json:"signingkey"`
-	Expiration int32  `json:"expiration"`
+	Expiration int64  `json:"expiration"`
 }
 
 //PlmnID PLMN ID struct
@@ -64,7 +65,7 @@ type AccessTokenClaims struct {
 	Subject    string      `json:"subject"`
 	Audience   interface{} `json:"audience"`
 	Scope      string      `json:"scope"`
-	Expiration int32       `json:"expiration"`
+	Expiration int64       `json:"expiration"`
 	jwt.StandardClaims
 }
 
@@ -93,9 +94,14 @@ func GetNEFAccessTokenFromNRF(accessTokenReq AccessTokenReq) (
 		return NefAccessToken, err
 	}
 
-	expiration := oAuth2Cfg.Expiration
+	expiration := time.Now().Add(
+		time.Second * time.Duration(oAuth2Cfg.Expiration)).Unix()
+
+	log.Infoln("Token expires in : ", oAuth2Cfg.Expiration, " seconds")
+
 	var mySigningKey = []byte(oAuth2Cfg.SigningKey)
 
+	//log.Infoln("Expiration Set to ", expiration)
 	// Create AccessToken
 	var accessTokenClaims = AccessTokenClaims{
 		"1",                               // Ramdom val
@@ -104,8 +110,8 @@ func GetNEFAccessTokenFromNRF(accessTokenReq AccessTokenReq) (
 		accessTokenReq.Scope,              // TODO: the name of the NF services
 		// for which the access_token is
 		// authorized for use
-		expiration,
-		jwt.StandardClaims{},
+		oAuth2Cfg.Expiration,
+		jwt.StandardClaims{ExpiresAt: expiration},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
@@ -176,15 +182,24 @@ func ValidateAccessToken(reqToken string) (status TokenVerificationResult,
 
 	if err != nil {
 		log.Info(err)
+
 		if err == jwt.ErrSignatureInvalid {
 			log.Info("Token is invalid, ErrSignatureInvalid")
 			return StatusInvalidToken, err
 		}
+		//Check for Validation error
+		validationErr, ok := err.(*jwt.ValidationError)
+
+		if !ok || validationErr.Errors == jwt.ValidationErrorExpired {
+			return StatusInvalidToken, err
+		}
+
 		return StatusBadRequest, err
 	}
 	if !tkn.Valid {
 		log.Info("Token is invalid")
 		return StatusInvalidToken, errors.New("Token is Invalid")
 	}
+
 	return StatusSuccess, nil
 }
