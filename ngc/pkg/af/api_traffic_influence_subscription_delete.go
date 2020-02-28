@@ -40,7 +40,9 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) handleDeleteResponse(
 		}
 		newErr.model = v
 		if r.StatusCode == 401 {
-			fetchNEFAuthorizationToken()
+			if fetchNEFAuthorizationToken() != nil {
+				log.Infoln("Token refresh failed")
+			}
 		}
 		return newErr
 

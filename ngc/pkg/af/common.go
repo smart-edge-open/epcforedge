@@ -110,7 +110,9 @@ func handleGetErrorResp(r *http.Response,
 		}
 		newErr.model = v
 		if r.StatusCode == 401 {
-			fetchNEFAuthorizationToken()
+			if fetchNEFAuthorizationToken() != nil {
+				log.Infoln("Token refresh failed")
+			}
 		}
 
 		return newErr
@@ -142,7 +144,9 @@ func handlePostPutPatchErrorResp(r *http.Response,
 		newErr.model = v
 		log.Errf("NEF returned error - %s", r.Status)
 		if r.StatusCode == 401 {
-			fetchNEFAuthorizationToken()
+			if fetchNEFAuthorizationToken() != nil {
+				log.Infoln("Token refresh failed")
+			}
 		}
 
 		return newErr

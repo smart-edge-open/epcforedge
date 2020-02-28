@@ -95,7 +95,10 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 
 	if AfCtx.cfg.CliCfg.OAuth2Support {
 		log.Infoln("Fetching NEF access token")
-		fetchNEFAuthorizationToken()
+		if fetchNEFAuthorizationToken() != nil {
+			log.Infoln("Failed to get access token")
+			return err
+		}
 	} else {
 		log.Infoln("OAuth2 DISABLED")
 	}
@@ -178,16 +181,17 @@ func Run(parentCtx context.Context, cfgPath string) error {
 	return runServer(parentCtx, &AfCtx)
 }
 
-func fetchNEFAuthorizationToken() {
+func fetchNEFAuthorizationToken() error {
 
 	var err error
 
 	nefAccessToken, err = oauth2.GetAccessToken()
 	if err != nil {
 		log.Errf("Failed to Fetch Access Token ")
-		return
+		return err
 	}
 	log.Errf("Got Access Token ", nefAccessToken)
+	return nil
 }
 
 func getNEFAuthorizationToken() (token string, err error) {
