@@ -1,0 +1,49 @@
+{
+  "self": "",
+  "suppFeat": "",
+  "pfdDatas": {
+    "app5": {
+      "externalAppId": "app5",
+      "self": "",
+      "pfds": {
+        "pfd1": {
+          "pfdId": "pfd1",
+          "flowDescriptions": [
+            "permit in ip from 10.11.12.123 80 to any"
+          ],
+          "urls": [],
+          "domainNames": []
+        },
+        "pfd2": {
+          "pfdId": "pfd2",
+          "flowDescriptions": [],
+          "urls": [],
+          "domainNames": [
+            "www.google.com"
+          }
+        ]
+      }
+    },
+    "app6": {
+      "externalAppId": "app6",
+      "self": "",
+      "pfds": {
+        "pfd1": {
+          "pfdId": "pfd3",
+          "flowDescriptions": [
+            "permit in ip from 10.11.12.124 80 to any"
+          ],
+          "urls": [],
+          "domainNames": []
+        },
+        "pfd4": {
+          "pfdId": "pfd4",
+          "flowDescriptions": [],
+          "domainNames": [
+            "www.google.com"
+          }
+        ]
+      }
+    }
+  }
+}

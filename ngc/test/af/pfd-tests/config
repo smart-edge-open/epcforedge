@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# A simple bash script which export the configured variables. 
+
+
+# Http/https port on which nef is listening
+export http_port=8050
+export https_port=8051
+
+# Directory where curl with http2 is installed
+export curl_path=/home/soniabha/go/src/github.com/otcshare/epcforedge/ngc/test/nef/nef-auto-test/curl-7.68.0/src/curl
+
+# NEF node id or hostname
+export nef_host=localhost
+
+# Use https or http only
+export https=false
+
+# Subscription url it is the nef API url  
+export sub_url=af/v1/pfd/transactions
+
