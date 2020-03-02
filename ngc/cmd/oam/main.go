@@ -71,5 +71,8 @@ func main() {
 	}
 
 	log.Infof("OAM HTTP Server Listening on:  %s\n", cfg.OpenEndpoint)
-	serverOAM.ListenAndServe()
+	if err = serverOAM.ListenAndServe(); err != http.ErrServerClosed {
+		log.Errf("HTTP: OAM CNCA server error: " + err.Error())
+		os.Exit(1)
+	}
 }
