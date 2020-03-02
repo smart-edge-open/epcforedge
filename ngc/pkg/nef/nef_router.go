@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0
-* Copyright (c) 2019 Intel Corporation
+* Copyright (c) 2019-2020 Intel Corporation
  */
 
 package ngcnef
@@ -25,6 +25,7 @@ type Route struct {
 // NEFRoutes : NEF Routes lists which contains Routes with different HTTP
 //             Request handlers for NEF
 var NEFRoutes = []Route{
+	// Traffic Influence Routes
 	{
 		"ReadAllTrafficInfluenceSubscription",
 		strings.ToUpper("Get"),
@@ -60,6 +61,73 @@ var NEFRoutes = []Route{
 		strings.ToUpper("Delete"),
 		"/3gpp-traffic-influence/v1/{afId}/subscriptions/{subscriptionId}",
 		DeleteTrafficInfluenceSubscription,
+	},
+	// PFD Management Routes
+	{
+		"ReadAllPFDManagementTransaction",
+		strings.ToUpper("Get"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions",
+		ReadAllPFDManagementTransaction,
+	},
+
+	{
+		"CreatePFDManagementTransaction",
+		strings.ToUpper("Post"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions",
+		CreatePFDManagementTransaction,
+	},
+
+	{
+		"ReadPFDManagementTransaction",
+		strings.ToUpper("Get"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+		ReadPFDManagementTransaction,
+	},
+
+	{
+		"UpdatePutPFDManagementTransaction",
+		strings.ToUpper("Put"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+		UpdatePutPFDManagementTransaction,
+	},
+
+	{
+		"DeletePFDManagementTransaction",
+		strings.ToUpper("Delete"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+		DeletePFDManagementTransaction,
+	},
+
+	{
+		"ReadPFDManagementApplication",
+		strings.ToUpper("Get"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
+		ReadPFDManagementApplication,
+	},
+
+	{
+		"DeletePFDManagementApplication",
+		strings.ToUpper("Delete"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
+		DeletePFDManagementApplication,
+	},
+
+	{
+		"UpdatePutPFDManagementApplication",
+		strings.ToUpper("Put"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
+		UpdatePutPFDManagementApplication,
+	},
+
+	{
+		"PatchPFDManagementApplication",
+		strings.ToUpper("Patch"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
+		PatchPFDManagementApplication,
 	},
 }
 

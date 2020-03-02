@@ -1,0 +1,14 @@
+{
+  "externalAppId": "app1",
+  "self": "",
+  "pfds": {
+    "pfd2": {
+      "pfdId": "pfd2",
+      "flowDescriptions": [
+        "permit in ip from 10.11.12.140 85 to any"
+      ],
+      "urls": [""],
+      "domainNames": []
+    }
+  }
+}

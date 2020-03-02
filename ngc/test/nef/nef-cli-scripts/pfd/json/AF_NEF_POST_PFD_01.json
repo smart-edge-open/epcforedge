@@ -1,0 +1,141 @@
+{
+    "self": "string",
+    "supportedFeatures": "string",
+    "pfdDatas": {
+        "appId01": {
+            "externalAppId": "appId01",
+            "self": "string",
+            "pfds": {
+                "additionalProp1": {
+                    "pfdId": "string",
+                    "flowDescriptions": [
+                        "string"
+                    ],
+                    "urls": [
+                        "string"
+                    ],
+                    "domainNames": [
+                        "string"
+                    ]
+                },
+                "additionalProp2": {
+                    "pfdId": "string",
+                    "flowDescriptions": [
+                        "string"
+                    ],
+                    "urls": [
+                        "string"
+                    ],
+                    "domainNames": [
+                        "string"
+                    ]
+                },
+                "additionalProp3": {
+                    "pfdId": "string",
+                    "flowDescriptions": [
+                        "string"
+                    ],
+                    "urls": [
+                        "string"
+                    ],
+                    "domainNames": [
+                        "string"
+                    ]
+                }
+            },
+            "allowedDelay": 0
+        },
+        "appId02": {
+            "externalAppId": "appId01",
+            "self": "string",
+            "pfds": {
+                "additionalProp1": {
+                    "pfdId": "string",
+                    "flowDescriptions": [
+                        "string"
+                    ],
+                    "urls": [
+                        "string"
+                    ],
+                    "domainNames": [
+                        "string"
+                    ]
+                },
+                "additionalProp2": {
+                    "pfdId": "string",
+                    "flowDescriptions": [
+                        "string"
+                    ],
+                    "urls": [
+                        "string"
+                    ],
+                    "domainNames": [
+                        "string"
+                    ]
+                },
+                "additionalProp3": {
+                    "pfdId": "string",
+                    "flowDescriptions": [
+                        "string"
+                    ],
+                    "urls": [
+                        "string"
+                    ],
+                    "domainNames": [
+                        "string"
+                    ]
+                }
+            },
+            "allowedDelay": 0
+        },
+        "appId03": {
+            "externalAppId": "appId03",
+            "self": "string",
+            "pfds": {
+                "additionalProp1": {
+                    "pfdId": "string",
+                    "flowDescriptions": [
+                        "string"
+                    ],
+                    "urls": [
+                        "string"
+                    ],
+                    "domainNames": [
+                        "string"
+                    ]
+                },
+                "additionalProp2": {
+                    "pfdId": "string",
+                    "flowDescriptions": [
+                        "string"
+                    ],
+                    "urls": [
+                        "string"
+                    ],
+                    "domainNames": [
+                        "string"
+                    ]
+                },
+                "additionalProp3": {
+                    "pfdId": "string",
+                    "flowDescriptions": [
+                        "string"
+                    ],
+                    "urls": [
+                        "string"
+                    ],
+                    "domainNames": [
+                        "string"
+                    ]
+                }
+            },
+            "allowedDelay": 0
+        }
+    },
+    "notificationDestination": "string",
+    "requestTestNotification": true,
+    "websockNotifConfig": {
+        "websocketUri": "string",
+        "requestWebsocketUri": true
+    }
+}
