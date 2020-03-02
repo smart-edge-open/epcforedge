@@ -11,6 +11,9 @@
 # 8) GET 001,app1 (deleted app)
 # 9) DELETE 001,app10
 # 10) DELETE trans 001
+
+source ../../auto-test/test_api.sh
+source ../../auto-test/test_pfd.sh
  
 appId=0
 echo -e "\n\n\\tAPPLICATION PATCH/GET/PUT/DELETE TESTS"

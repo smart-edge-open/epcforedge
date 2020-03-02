@@ -15,6 +15,9 @@
 # 12) PFD DELETE <invalid_trans>
 # 13) PFD GET <trans_id>
 
+source ../../auto-test/test_api.sh
+source ../../auto-test/test_pfd.sh
+
 echo -e "\n\n\tTRANSACTION POST/GET/PUT/DELETE TESTS"
 echo -e "\t-----------------------------------------------"
 

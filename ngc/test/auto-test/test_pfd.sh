@@ -6,7 +6,8 @@
 # Before calling any function of the script make sure appropriate values are set
 # in the config file.
 trans_id=0
-
+count_pass=0
+count_fail=0
 # GET ALL - array of PFD trans, get trans ids from self
 get_all_trans()
 {

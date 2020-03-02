@@ -5,6 +5,10 @@
 # 2) PFD GET ALL 
 # 3) PFD DELETE <all transactions>
 
+# Sets the config  and includes all the lib functions
+source ../../auto-test/test_api.sh
+source ../../auto-test/test_pfd.sh
+
 num=1
 echo -e "\n\n\tPFD MAX TRANSACTIONS TESTS"
 echo -e "\t-----------------------------------------------"
