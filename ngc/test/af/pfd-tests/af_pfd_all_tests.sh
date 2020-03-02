@@ -7,9 +7,13 @@
 # in the response body. Similarly , the applicaion id is extracted from self 
 # link of application. The individual test scenario files list the test cases
 
+count_pass=0
+count_fail=0
+
 # Sets the config  and includes all the lib functions
 source ../../auto-test/test_api.sh
 source ../../auto-test/test_pfd.sh
+
 
 # Tests for transaction GET/POST/PUT/DELETE
 . ./af_pfd_trans_tests.sh
