@@ -14,11 +14,11 @@ To configure the test framework put the appropriate values in the config file.
 This config file is a simple shell script which exports configured variable.
 The variables which needed to be configured are:
 
- 1. http_port: Port number on which NEF http server is listening.
- 2. https_port: Port number on which NEF https server is listening.
+ 1. http_port: Port number on which AF/NEF http server is listening.
+ 2. https_port: Port number on which AF/NEF https server is listening.
  3. curl_dir: Curl installation directory, it should contain whole path like
 	 /home/ahameed/workspace/curl-7.68.0/src/curl
- 4. nef_host: The hostname of IP address of NEF server.
+ 4. nef_host: The hostname of IP address of AF/NEF server.
  5. https: Set this to true if https should be used for sending requests.
  6. subs_url: This is the subscription path which is the url after port number. 
 	[http://nef_host:http_port/subs_url] 
@@ -26,11 +26,11 @@ The variables which needed to be configured are:
 
 Writing test case:
 ------------------
-The script test_nef.sh provide a generic function "send_req" which is used to 
+The script test_api.sh provide a generic function "send_req" which is used to 
 build and send requests based on the arguments passed. To write a test case 
 first import the function from test_nef script by adding a line on top of test 
 script
-"source test_nef.sh".
+"source test_api.sh".
 
 The send_req function takes 4 arguments as
 	send_req <method> <sub_id> <body> <expected_response_code>
@@ -63,7 +63,7 @@ Running:
 Before running test script make sure:
  1. Curl with http2 support is installed.
  2. Appropriate values are setted in config file.
- 3. NEF server is reachable from testing machine [Some time proxy might cause
+ 3. AF/NEF server is reachable from testing machine [Some time proxy might cause
 	issue]
 
 To run a test script just execute it

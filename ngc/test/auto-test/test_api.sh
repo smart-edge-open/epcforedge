@@ -42,13 +42,21 @@ post()
 		return 1
 	fi
 	if [[ $https == "true" ]]; then
-		out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 -X POST -H "Content-Type: application/json" --data @$1 https://$nef_host:$https_port/$sub_url 2>/dev/null`
+		out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 -X \
+			POST -H "Content-Type: application/json" --data @$1 \
+			https://$nef_host:$https_port/$sub_url 2>/dev/null`
 	else
-		out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X POST -H "Content-Type: application/json" --data @$1 http://$nef_host:$http_port/$sub_url 2>/dev/null`
+		out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X POST -H \
+		"Content-Type: application/json" --data @$1 \
+		http://$nef_host:$http_port/$sub_url 2>/dev/null`
 	fi
-	status_code=`echo $out | grep "Response Status"  | awk 'BEGIN { FS="=" } // {print $2}'`
-	body=`echo $out | sed 's/ Response Status.*//g'`
-	sub_id=`echo $body | jq -r '.self' | awk 'BEGIN {FS="/"} // {print $(NF)}'`
+	status_code=`echo $out | grep "Response Status"  | \
+	awk 'BEGIN { FS="=" } // {print $2}'`
+	if [[ $status_code == 201 ]]; then
+		body=`echo $out | sed 's/ Response Status.*//g'`
+		sub_id=`echo $body | jq -r '.self' | awk 'BEGIN {FS="/"} \
+		// {print $(NF)}'`
+	fi
 	return 0
 }
 
@@ -61,11 +69,15 @@ get()
 	sub_id=$1
 	if [[ $sub_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -k --http2 -X GET https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
+			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -k \
+			--http2 -X GET https://$nef_host:$https_port/$sub_url/$sub_id \
+			2>/dev/null`
 		else
-			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X GET http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
+			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X \
+			GET http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
 		fi
-		status_code=`echo $out | grep "Response Status"  | awk 'BEGIN { FS="=" } // {print $2}'`
+		status_code=`echo $out | grep "Response Status"  | awk \
+		'BEGIN { FS="=" } // {print $2}'`
 		body=`echo $out | sed 's/ Response Status.*//g'`
 	else
 		echo "Invalid sub_id"
@@ -80,11 +92,14 @@ get()
 get_all()
 {
 	if [[ $https == "true" ]]; then
-		out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -k --http2 -X GET https://$nef_host:$https_port/$sub_id 2>/dev/null`
+		out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -k \
+		--http2 -X GET https://$nef_host:$https_port/$sub_url 2>/dev/null`
 	else
-		out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X GET http://$nef_host:$http_port/$sub_id 2>/dev/null`
+		out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X GET \
+		http://$nef_host:$http_port/$sub_url 2>/dev/null`
 	fi
-	status_code=`echo $out | grep "Response Status"  | awk 'BEGIN { FS="=" } // {print $2}'`
+	status_code=`echo $out | grep "Response Status"  | awk 'BEGIN \
+	{ FS="=" } // {print $2}'`
 	body=`echo $out | sed 's/ Response Status.*//g'`
 	return 0
 }
@@ -103,11 +118,16 @@ put()
 
 	if [[ $sub_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 -X PUT -H "Content-Type: application/json" --data @$1 https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k \
+			--http2 -X PUT -H "Content-Type: application/json" --data @$1 \
+			https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
 		else
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X PUT -H "Content-Type: application/json" --data @$1 http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X PUT -H \
+			"Content-Type: application/json" --data @$1 \
+			http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
 		fi
-		status_code=`echo $out | grep "Response Status"  | awk 'BEGIN { FS="=" } // {print $2}'`
+		status_code=`echo $out | grep "Response Status"  | awk 'BEGIN \
+		{ FS="=" } // {print $2}'`
 		body=`echo $out | sed 's/ Response Status.*//g'`
 	else
 		echo "Invalid sub_id"
@@ -131,11 +151,16 @@ patch()
 	sub_id=$2
 	if [[ $sub_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 -X PATCH -H "Content-Type: application/json" --data @$1 https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 \
+			-X PATCH -H "Content-Type: application/json" --data @$1 \
+			https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
 		else
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X PATCH -H "Content-Type: application/json" --data @$1 http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X PATCH -H \
+			"Content-Type: application/json" --data @$1 \
+			http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
 		fi
-		status_code=`echo $out | grep "Response Status"  | awk 'BEGIN { FS="=" } // {print $2}'`
+		status_code=`echo $out | grep "Response Status"  | awk 'BEGIN \
+		 FS="=" } // {print $2}'`
 		body=`echo $out | sed 's/ Response Status.*//g'`
 	else
 		echo "Invalid sub_id"
@@ -153,11 +178,14 @@ delete()
 	sub_id=$1
 	if [[ $sub_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 -X DELETE https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 \
+			-X DELETE https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
 		else
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X DELETE http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X DELETE \
+			http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
 		fi
-		status_code=`echo $out | grep "Response Status"  | awk 'BEGIN { FS="=" } // {print $2}'`
+		status_code=`echo $out | grep "Response Status"  | awk 'BEGIN \
+		{ FS="=" } // {print $2}'`
 		body=`echo $out | sed 's/ Response Status.*//g'`
 	else
 		echo "Invalid sub_id"
@@ -198,6 +226,9 @@ send_req()
 			;;
 		"put")
 			put $data $sub_id
+			;;
+		"get_all")
+			get_all 
 			;;
 		*)
 			echo "Invalid Method"
