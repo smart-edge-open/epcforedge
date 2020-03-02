@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# A simple bash script which export the configured variables. 
+
+
+# Http/https port on which nef is listening
+export http_port=8061
+export https_port=8060
+
+# Directory where curl with http2 is installed
+export curl_dir=/home/ahameed/workspace/curl-7.68.0/src/curl
+
+# NEF node id or hostname
+export nef_host=localhost
+
+# Use https or http only
+export https=true
+
+# Subscription url it is the nef API url  
+export subs_url=3gpp-traffic-influence/v1/AF_01/subscriptions
+
