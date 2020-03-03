@@ -1,9 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0
-<<<<<<< HEAD
-* Copyright (c) 2019 Intel Corporation
-=======
 * Copyright (c) 2020 Intel Corporation
->>>>>>> OP_2209
  */
 
 package ngcnef

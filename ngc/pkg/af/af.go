@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	oauth2 "github.com/otcshare/epcforedge/ngc/pkg/oauth2"
 	"golang.org/x/net/http2"
 
 	logger "github.com/otcshare/common/log"
@@ -21,6 +22,9 @@ type TransactionIDs map[int]TrafficInfluSub
 
 // NotifSubscryptions type
 type NotifSubscryptions map[string]map[string]TrafficInfluSub
+
+// Store the  Access token
+var nefAccessToken string
 
 // ServerConfig struct
 type ServerConfig struct {
@@ -91,6 +95,16 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 		return err
 	}
 
+	if AfCtx.cfg.CliCfg.OAuth2Support {
+		log.Infoln("Fetching NEF access token")
+		if fetchNEFAuthorizationToken() != nil {
+			log.Infoln("Failed to get access token")
+			return err
+		}
+	} else {
+		log.Infoln("OAuth2 DISABLED")
+	}
+
 	stopServerCh := make(chan bool, 2)
 	go func(stopServerCh chan bool) {
 		<-ctx.Done()
@@ -149,6 +163,7 @@ func printConfig(cfg Config) {
 	log.Infoln("NEFPFDBasePath: ", cfg.CliCfg.NEFPFDBasePath)
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
 	log.Infoln("NEFCliCertPath: ", cfg.CliCfg.NEFCliCertPath)
+	log.Infoln("OAuth2Support: ", cfg.CliCfg.OAuth2Support)
 	log.Infoln("*************************************************************")
 
 }
@@ -168,4 +183,22 @@ func Run(parentCtx context.Context, cfgPath string) error {
 	printConfig(AfCtx.cfg)
 
 	return runServer(parentCtx, &AfCtx)
+}
+
+func fetchNEFAuthorizationToken() error {
+
+	var err error
+
+	nefAccessToken, err = oauth2.GetAccessToken()
+	if err != nil {
+		log.Errf("Failed to Fetch Access Token ")
+		return err
+	}
+	log.Errf("Got Access Token ", nefAccessToken)
+	return nil
+}
+
+func getNEFAuthorizationToken() (token string, err error) {
+
+	return nefAccessToken, nil
 }

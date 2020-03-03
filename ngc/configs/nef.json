@@ -24,5 +24,6 @@
             "dnn": "dnn1_value",
             "snssai": "snssai1_value"
         }
-    ]
+    ],
+    "OAuth2Support": true
 }

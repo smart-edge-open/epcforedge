@@ -58,6 +58,7 @@ type Config struct {
 	HTTPConfig                HTTPConfig
 	HTTP2Config               HTTP2Config
 	AfServiceIDs              []interface{} `json:"afServiceIDs"`
+	OAuth2Support             bool          `json:"OAuth2Support"`
 }
 
 // NEF Module Context Data Structure
@@ -244,6 +245,7 @@ func printConfig(cfg Config) {
 	log.Infoln("UpfNotificationResUriPath:", cfg.UpfNotificationResURIPath)
 	log.Infoln("Trans Start ID", cfg.PfdTransStartID)
 	log.Infoln("UserAgent:", cfg.UserAgent)
+	log.Infoln("OAuth2Support:", cfg.OAuth2Support)
 	log.Infoln("-------------------------- NEF SERVER ----------------------")
 	log.Infoln("EndPoint(HTTP): ", cfg.HTTPConfig.Endpoint)
 	log.Infoln("EndPoint(HTTP2): ", cfg.HTTP2Config.Endpoint)

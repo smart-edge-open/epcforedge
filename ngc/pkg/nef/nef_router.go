@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	oauth2 "github.com/otcshare/epcforedge/ngc/pkg/oauth2"
 )
 
 // Route : Structure which describes HTTP Request Handler type and other
@@ -170,12 +171,53 @@ func NewNEFRouter(nefCtx *nefContext) *mux.Router {
 				r.Context(),
 				nefCtxKey("nefCtx"),
 				nefCtx)
-			next.ServeHTTP(w, r.WithContext(ctx))
 
+			if nefCtx.cfg.OAuth2Support {
+				if nefValidateAccessToken(w, r) {
+					next.ServeHTTP(w, r.WithContext(ctx))
+				}
+			} else {
+				//OAuth2 disabled
+				next.ServeHTTP(w, r.WithContext(ctx))
+			}
 		})
 	})
-
 	return router
+}
+
+func nefValidateAccessToken(w http.ResponseWriter, r *http.Request) bool {
+
+	reqToken := r.Header.Get("Authorization")
+
+	if len(reqToken) == 0 {
+		log.Info("Authorization header missing")
+		//Authorization header is not present
+		w.Header().Set("WWW-Authenticate", "Bearer realm="+r.RequestURI)
+
+		w.WriteHeader(http.StatusUnauthorized)
+		return false
+	}
+
+	//Get the token
+	splitToken := strings.Split(reqToken, "Bearer ")
+	reqToken = splitToken[1]
+
+	status, err := oauth2.ValidateAccessToken(reqToken)
+
+	if err != nil {
+		log.Infoln("Token Validation failed")
+		if status == oauth2.StatusInvalidToken {
+			w.Header().Set("WWW-Authenticate", "Bearer realm="+r.RequestURI)
+			w.WriteHeader(http.StatusUnauthorized)
+			return false
+		} else if status == oauth2.StatusBadRequest {
+			w.WriteHeader(http.StatusBadRequest)
+			return false
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		return false
+	}
+	return true
 }
 
 // nefRouteLogger : This function logs data received in HTTP request.
