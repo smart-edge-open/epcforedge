@@ -6,26 +6,29 @@
 helpPrint()
 {
    echo ""
-   echo "Usage: $0 -t sanType -n subj1 -m subj2"
+   echo "Usage: $0 -t sanType -n subj1 -m subj2 -r subj3 -s subj4"
    echo -e "\t-t SAN type: could be IP or DNS"
-   echo -e "\t-n subject alternative name 1: could be IP address or domain name for NEF."
-   echo -e "\t-m subject alternative name 2: could be IP address or domain name for AF."
+   echo -e "\t-n subject alternative name 1: could be IP address or domain name for AF."
+   echo -e "\t-m subject alternative name 2: could be IP address or domain name for NEF."
+   echo -e "\t-r subject alternative name 3: could be IP address or domain name for OAM."
+   echo -e "\t-s subject alternative name 4: could be IP address or domain name for localhost."
    exit 1 # Exit with help
 }
 
 
-while getopts "t:n:m:" opt
+while getopts "t:n:m:r:s:" opt
 do
    case "$opt" in
       t ) sanType="$OPTARG" ;;
       n ) subj1="$OPTARG" ;;
       m ) subj2="$OPTARG" ;;
+      r ) subj3="$OPTARG" ;;
+      s ) subj4="$OPTARG" ;;
       ? ) helpPrint ;; # Print help
    esac
 done
 
-
-if [ -z "$subj1" ] || [ -z "$subj2" ] || [ -z "$sanType" ]
+if [ -z "$subj1" ] || [ -z "$subj2" ] || [ -z "$subj3" ] || [ -z "$subj4" ] || [ -z "$sanType" ]
 then
    echo "Some input parameters empty"
    helpPrint
@@ -45,6 +48,8 @@ echo "Running with input parameters:"
 echo "$sanType"
 echo "$subj1"
 echo "$subj2"
+echo "$subj3"
+echo "$subj4"
 
 ROOT_CA_NAME=OpenNESS-5G-Root
 
@@ -78,7 +83,7 @@ then
    exit 1
 fi
 rm -f extfile.cnf
-echo "subjectAltName = $sanType.1:$subj1,$sanType.2:$subj2" >> extfile.cnf
+echo "subjectAltName = $sanType.1:$subj1,$sanType.2:$subj2,$sanType.3:$subj3,$sanType.4:$subj4" >> extfile.cnf
 openssl x509 -req -extfile extfile.cnf -in "server-request.csr" -CA "root-ca-cert.pem" -CAkey "root-ca-key.pem" -days 90 -out "server-cert.pem" -CAcreateserial
 if (($?))
 then 

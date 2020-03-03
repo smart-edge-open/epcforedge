@@ -36,6 +36,9 @@ extern string localcfg_sgw_port;
 extern string localcfg_nginx_hostip;
 extern string localcfg_nginx_port;
 extern string localcfg_nginx_fcgipass;
+extern string localcfg_http2_enabled;
+extern string localcfg_https_enabled;
+extern string localcfg_ssl_cainfo;
 
 /* ------------------------------------------------------------------------- */
 /* Public Functions */

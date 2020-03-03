@@ -4,5 +4,7 @@
     "UIEndpoint": "http://localhost:3020",
     "NgcEndpoint": "127.0.0.1:12345",
     "NgcType": "APISTUB",
-    "NgcTestData": "" 
+    "NgcTestData": "",
+    "ServerCertPath": "/etc/certs/server-cert.pem",
+    "ServerKeyPath": "/etc/certs/server-key.pem"
 }

@@ -47,7 +47,7 @@ log "Extract $pkg_name"
 tar -xvmf $pkg_name.tar.gz > /dev/null
 cd $setup_dir/$pkg_name
 log "Build $pkg_name"
-./configure --with-http_ssl_module && make install
+./configure --with-http_ssl_module --with-http_v2_module && make install
 if [ $? -ne 0 ]; then
         log "Compiled [ $pkg_name ] failed."
         exit 1

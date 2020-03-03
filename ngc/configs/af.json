@@ -6,8 +6,8 @@
         "Hostname": "localhost",
         "NotifPort": ":8051",
         "UIEndpoint": "http://localhost:3020",
-        "NotifServerCertPath": "/etc/certs/server-cert.pem",
-        "NotifServerKeyPath": "/etc/certs/server-key.pem"
+        "ServerCertPath": "/etc/certs/server-cert.pem",
+        "ServerKeyPath": "/etc/certs/server-key.pem"
     },
     "CliConfig": {
         "Protocol": "https",
