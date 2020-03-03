@@ -71,9 +71,8 @@ get_app()
 	app_id=$2
 	if [[ $trans_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -k --http2 \
-			-X GET 
-	https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id \
+			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
+			-X GET https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id \
 			2>/dev/null`
 		else
 			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X GET \
@@ -106,7 +105,7 @@ put_app()
 
 	if [[ $trans_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 \
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
 			-X PUT -H "Content-Type: application/json" --data @$1 \
 		https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id \
 			2>/dev/null`
@@ -143,7 +142,7 @@ patch_app()
 	app_id=$3
 	if [[ $trans_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 \
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
 			-X PATCH -H "Content-Type: application/json" --data @$1 \
 		https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id \
 			2>/dev/null`
@@ -173,7 +172,7 @@ delete_app()
 	app_id=$2
 	if [[ $trans_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 \
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
 			-X DELETE \
 		https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id \
 			2>/dev/null`

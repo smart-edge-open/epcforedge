@@ -12,6 +12,7 @@ curl_path=/home/ahameed/workspace/curl-7.68.0/src/curl
 sub_url=3gpp-traffic-influence/v1/AF_01/subscriptions
 nef_host=localhost
 https=false
+cert_path=/etc/certs/root-ca-cert.pem
 
 # Import the configuration variable from config file.
 configure()
@@ -42,7 +43,7 @@ post()
 		return 1
 	fi
 	if [[ $https == "true" ]]; then
-		out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 -X \
+		out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 -X \
 			POST -H "Content-Type: application/json" --data @$1 \
 			https://$nef_host:$https_port/$sub_url 2>/dev/null`
 	else
@@ -69,7 +70,7 @@ get()
 	sub_id=$1
 	if [[ $sub_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -k \
+			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' --cacert $cert_path \
 			--http2 -X GET https://$nef_host:$https_port/$sub_url/$sub_id \
 			2>/dev/null`
 		else
@@ -92,7 +93,7 @@ get()
 get_all()
 {
 	if [[ $https == "true" ]]; then
-		out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -k \
+		out=`$curl_path  -w '\nResponse Status=%{http_code}\n' --cacert $cert_path \
 		--http2 -X GET https://$nef_host:$https_port/$sub_url 2>/dev/null`
 	else
 		out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X GET \
@@ -118,7 +119,7 @@ put()
 
 	if [[ $sub_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k \
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path \
 			--http2 -X PUT -H "Content-Type: application/json" --data @$1 \
 			https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
 		else
@@ -151,7 +152,7 @@ patch()
 	sub_id=$2
 	if [[ $sub_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 \
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
 			-X PATCH -H "Content-Type: application/json" --data @$1 \
 			https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
 		else
@@ -178,7 +179,7 @@ delete()
 	sub_id=$1
 	if [[ $sub_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -k --http2 \
+			out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
 			-X DELETE https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
 		else
 			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X DELETE \
