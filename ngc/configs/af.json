@@ -18,5 +18,5 @@
         "UserAgent": "NGC-AF",
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem",
         "OAuth2Support": true
-    },
+    }
 }
