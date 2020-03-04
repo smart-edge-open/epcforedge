@@ -6,10 +6,11 @@ package oauth2
 import (
 	"encoding/json"
 	"errors"
-	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"path/filepath"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 
 	logger "github.com/otcshare/common/log"
 )
@@ -85,14 +86,15 @@ func loadJSONConfig(configPath string, config interface{}) error {
 func GetNEFAccessTokenFromNRF(accessTokenReq AccessTokenReq) (
 	NefAccessToken string, err error) {
 
-	var oAuth2Cfg = Config{}
-
+	var oAuth2Cfg = Config{SigningKey: "OPENNESS", Expiration: 100000}
+	/* TBD workaround for config error
 	//Read Json config
 	err = loadJSONConfig(cfgPath, &oAuth2Cfg)
 	if err != nil {
 		log.Errln("Failed to load OAuth2 configuration")
 		return NefAccessToken, err
 	}
+	*/
 
 	expiration := time.Now().Add(
 		time.Second * time.Duration(oAuth2Cfg.Expiration)).Unix()
