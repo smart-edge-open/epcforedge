@@ -47,7 +47,12 @@ func GetAllPfdTransactions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	tsResp, resp, err = getAllPfdTransactions(cliCtx, afCtx)
 	if err != nil {
-		errRspHeader(&w, "GET ALL", err.Error(), resp.StatusCode)
+		if resp != nil {
+			errRspHeader(&w, "GET ALL", err.Error(), resp.StatusCode)
+		} else {
+			errRspHeader(&w, "GET ALL", err.Error(),
+				http.StatusInternalServerError)
+		}
 		return
 	}
 

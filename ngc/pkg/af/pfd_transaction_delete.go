@@ -48,7 +48,12 @@ func DeletePfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	resp, err = deletePfdTransaction(cliCtx, afCtx, pfdTrans)
 	if err != nil {
-		errRspHeader(&w, "DELETE", err.Error(), resp.StatusCode)
+		if resp != nil {
+			errRspHeader(&w, "DELETE", err.Error(), resp.StatusCode)
+		} else {
+			errRspHeader(&w, "DELETE", err.Error(),
+				http.StatusInternalServerError)
+		}
 		return
 	}
 

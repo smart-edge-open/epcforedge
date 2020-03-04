@@ -60,11 +60,16 @@ func CreatePfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Errf("Pfd Management Transaction create: %s", err.Error())
-		w.WriteHeader(getStatusCode(resp))
+		if resp != nil {
+			w.WriteHeader(getStatusCode(resp))
 
-		if _, err = w.Write(respBody); err != nil {
-			log.Errf("PFD create error handling error reposnse")
-			return
+			if _, err = w.Write(respBody); err != nil {
+				log.Errf("PFD create error handling error reposnse")
+				return
+			}
+		} else {
+
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 
 		return

@@ -62,10 +62,14 @@ func PutPfdTransaction(w http.ResponseWriter, r *http.Request) {
 	// TBD how to validate the PUT response
 	if err != nil {
 		log.Errf("Pfd Management Put : %s", err.Error())
-		w.WriteHeader(getStatusCode(resp))
-		if _, err = w.Write(resBody); err != nil {
-			errRspHeader(&w, "PUT", err.Error(), http.StatusInternalServerError)
-			return
+		if resp != nil {
+			w.WriteHeader(getStatusCode(resp))
+			if _, err = w.Write(resBody); err != nil {
+				errRspHeader(&w, "PUT", err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			w.WriteHeader(http.StatusBadRequest)
 		}
 		return
 	}

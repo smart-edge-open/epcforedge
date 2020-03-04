@@ -51,7 +51,11 @@ func GetPfdTransaction(w http.ResponseWriter, r *http.Request) {
 
 	pfdResp, resp, err = getPfdTransaction(cliCtx, afCtx, pfdTransactionID)
 	if err != nil {
-		errRspHeader(&w, "GET", err.Error(), getStatusCode(resp))
+		if resp != nil {
+			errRspHeader(&w, "GET", err.Error(), getStatusCode(resp))
+		} else {
+			errRspHeader(&w, "GET", err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 

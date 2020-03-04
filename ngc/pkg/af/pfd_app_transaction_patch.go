@@ -65,13 +65,18 @@ func PatchPfdAppTransaction(w http.ResponseWriter, r *http.Request) {
 		pfdTransID, appID)
 	if err != nil {
 		log.Errf("Pfd Management Application patch : %s", err.Error())
-		w.WriteHeader(getStatusCode(resp))
-		if _, err = w.Write(respBody); err != nil {
-			errRspHeader(&w, "APP-PATCH", err.Error(),
-				http.StatusInternalServerError)
-			return
+		if resp != nil {
+			w.WriteHeader(getStatusCode(resp))
+			if _, err = w.Write(respBody); err != nil {
+				errRspHeader(&w, "APP PATCH", err.Error(),
+					http.StatusInternalServerError)
+				return
+			}
+		} else {
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
+
 	}
 
 	// Updating the Self Application Link
