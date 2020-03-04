@@ -19,7 +19,8 @@ import (
 
 const (
 	// Enable/Disable HTTP2 Flag
-	Http2Enabled = true
+	/* Temp Disabling http2 in AF NB */
+	Http2Enabled = false
 )
 
 // TransactionIDs type
