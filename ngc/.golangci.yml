@@ -1,5 +1,5 @@
-#SPDX-License-Identifier: Apache-2.0
-#Copyright (c) 2019 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
 
 run:
   tests: true
@@ -38,13 +38,14 @@ linters-settings:
   misspell:
     locale: US
   lll:
-    line-length: 80
+    line-length: 120
     tab-width: 4
 
 issues:
-  exclude-use-default: false
   exclude-rules:
-  - path: _test\.go
-    linters:
-      - errcheck
-      - gosec
+    - text: "string `*`"
+      linters:
+        - goconst
+
+# Disable the default exclude patterns
+exclude-use-default: false
