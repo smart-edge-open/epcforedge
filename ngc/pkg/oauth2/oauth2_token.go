@@ -166,14 +166,16 @@ func GetAccessToken() (token string, err error) {
 func ValidateAccessToken(reqToken string) (status TokenVerificationResult,
 	err error) {
 
-	var oAuth2Cfg = Config{}
+	var oAuth2Cfg = Config{SigningKey: "OPENNESS", Expiration: 100000}
 
+	/* TBD initializing in code
 	//Read Json config
 	err = loadJSONConfig(cfgPath, &oAuth2Cfg)
 	if err != nil {
 		log.Errln("Failed to load OAuth2 configuration")
 		return StatusConfigErr, err
 	}
+	*/
 	var mySigningKey = []byte(oAuth2Cfg.SigningKey)
 	claims := &AccessTokenClaims{}
 
