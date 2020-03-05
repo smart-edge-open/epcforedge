@@ -13,10 +13,7 @@
     "pfd2": {
       "pfdId": "pfd2",
       "flowDescriptions": [],
-      "urls": [""],
-      "domainNames": [
-        "www.newexample.com"
-      ]
+      "domainNames": []
     }
   }
 }
