@@ -42,10 +42,10 @@ linters-settings:
     tab-width: 4
 
 issues:
+  exclude-use-default: false
   exclude-rules:
-    - text: "string `*`"
-      linters:
-        - goconst
+  - path: _test\.go
+    linters:
+      - errcheck
+      - gosec
 
-# Disable the default exclude patterns
-exclude-use-default: false
