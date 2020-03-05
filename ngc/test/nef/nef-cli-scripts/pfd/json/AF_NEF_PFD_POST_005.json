@@ -8,10 +8,8 @@
       "pfds": {
         "pfd1": {
           "pfdId": "pfd1",
-          "flowDescriptions": [
-            "permit in ip from 10.11.12.123 80 to any"
-          ],
-          "urls": [""],
+          "flowDescriptions": [],
+          "urls": [],
           "domainNames": []
         },
         "pfd2": {
@@ -30,11 +28,9 @@
       "pfds": {
         "pfd1": {
           "pfdId": "pfd3",
-          "flowDescriptions": [
-            "permit in ip from 10.11.12.124 80 to any"
-          ],
+          "flowDescriptions": [],
           "urls": [],
-          "domainNames": [""]
+          "domainNames": []
         },
         "pfd4": {
           "pfdId": "pfd4",
