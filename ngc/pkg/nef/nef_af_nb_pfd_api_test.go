@@ -171,6 +171,8 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 			"AF_NEF_PFD_PUT_003.json")
 		putbodyPfdMissing, _ := ioutil.ReadFile(testJSONPFDPath +
 			"AF_NEF_PFD_PUT_004.json")
+		putbodyNewApp, _ := ioutil.ReadFile(testJSONPFDPath +
+			"AF_NEF_PFD_PUT_005.json")
 		putappbody, _ := ioutil.ReadFile(testJSONPFDPath +
 			"AF_NEF_PFD_APP_PUT_001.json")
 		putappbodyPfdMissing, _ := ioutil.ReadFile(testJSONPFDPath +
@@ -452,6 +454,16 @@ var _ = Describe("Test NEF Server PFD NB API's ", func() {
 			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
 			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
 			ngcnef.TestClient = false
+		})
+
+		It("Will Send a invalid PUT for PFD TRANS 10000(400 New App)", func() {
+
+			rr, req :=
+				CreatePFDReqForNEF(ctx, "PUT", "10000", "", putbodyNewApp)
+			req.Header.Set("Content-Type", "application/json")
+			ngcnef.NefAppG.NefRouter.ServeHTTP(rr, req.WithContext(ctx))
+			Expect(rr.Code).Should(Equal(http.StatusBadRequest))
+
 		})
 
 		It("Will Send a invalid PUT for PFD TRANS 10000(500 from UDR)", func() {

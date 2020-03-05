@@ -771,6 +771,15 @@ func (af *afData) afUpdatePutPfdTransaction(nefCtx *nefContext, transID string,
 		return rsp, updPfd, errors.New(pfdNotFound)
 	}
 
+	// PUT should not have any new application
+	for key, _ := range trans.PfdDatas {
+		_, ok = pfdTrans.pfdManagement.PfdDatas[key]
+		if !ok {
+			//Return error
+			return rsp, trans, errors.New("Application not present")
+		}
+	}
+
 	rsp, err = pfdTrans.NEFSBPfdPut(pfdTrans, nefCtx, trans)
 
 	if err != nil {
