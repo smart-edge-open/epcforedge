@@ -17,7 +17,8 @@ import (
 
 const (
 	// Enable/Disable HTTP2 Flag
-	Http2Enabled = true
+	// TBD disabled http2 in oam also
+	Http2Enabled = false
 )
 
 type oamCfg struct {
