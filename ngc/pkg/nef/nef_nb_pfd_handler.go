@@ -1079,44 +1079,6 @@ func validateAFPfdData(pfd Pfd) (rsp nefPFDSBRspData,
 		log.Info(rsp.result.pd.Title)
 		return rsp, false
 	}
-	rspPfd, result := validatePfd(pfd)
-	return rspPfd, result
-}
-
-// validateAFPfd Function to validate mandatory parameters of
-// PFD
-func validatePfd(pfd Pfd) (rsp nefPFDSBRspData,
-	status bool) {
-	if len(pfd.DomainNames) != 0 {
-		if len(pfd.FlowDescriptions) != 0 || len(pfd.Urls) != 0 {
-			rsp.result.errorCode = 400
-			rsp.result.pd.Title = "domainNames present" +
-				"FlowDescriptions and Urls should not be present for PFD"
-			log.Info(rsp.result.pd.Title)
-			return rsp, false
-		}
-	}
-	if len(pfd.Urls) != 0 {
-		if len(pfd.FlowDescriptions) != 0 || len(pfd.DomainNames) != 0 {
-			rsp.result.errorCode = 400
-			rsp.result.pd.Title = "Urls present ," +
-				"FlowDescriptions and DomainNames should not be present for PFD"
-			log.Info(rsp.result.pd.Title)
-			return rsp, false
-		}
-	}
-	// Not required as covered in previous
-	/*
-		if len(pfd.FlowDescriptions) != 0 {
-			if len(pfd.Urls) != 0 || len(pfd.DomainNames) != 0 {
-				rsp.result.errorCode = 400
-				rsp.result.pd.Title = "FlowDescriptions present," +
-					"DomainNames and Urls should not be present for PFD"
-				log.Info(rsp.result.pd.Title)
-				return rsp, false
-			}
-		} */
-
 	return rsp, true
 }
 
