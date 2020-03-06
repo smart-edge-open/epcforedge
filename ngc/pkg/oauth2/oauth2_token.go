@@ -6,21 +6,18 @@ package oauth2
 import (
 	"encoding/json"
 	"errors"
+	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"path/filepath"
 	"time"
-
-	"github.com/dgrijalva/jwt-go"
 
 	logger "github.com/otcshare/common/log"
 )
 
 var log = logger.DefaultLogger.WithField("oauth2", nil)
 
-// Path for NEF Configuration file
+// Path for OAuth2 Configuration file
 const cfgPath string = "configs/oauth2.json"
-
-//var mySigningKey = []byte("OPENNESS")
 
 //TokenVerificationResult Result of the token verification
 type TokenVerificationResult string
@@ -86,15 +83,14 @@ func loadJSONConfig(configPath string, config interface{}) error {
 func GetNEFAccessTokenFromNRF(accessTokenReq AccessTokenReq) (
 	NefAccessToken string, err error) {
 
-	var oAuth2Cfg = Config{SigningKey: "OPENNESS", Expiration: 100000}
-	/* TBD workaround for config error
+	var oAuth2Cfg = Config{}
+
 	//Read Json config
 	err = loadJSONConfig(cfgPath, &oAuth2Cfg)
 	if err != nil {
 		log.Errln("Failed to load OAuth2 configuration")
 		return NefAccessToken, err
 	}
-	*/
 
 	expiration := time.Now().Add(
 		time.Second * time.Duration(oAuth2Cfg.Expiration)).Unix()
@@ -106,13 +102,11 @@ func GetNEFAccessTokenFromNRF(accessTokenReq AccessTokenReq) (
 	//log.Infoln("Expiration Set to ", expiration)
 	// Create AccessToken
 	var accessTokenClaims = AccessTokenClaims{
-		"1",                               // Ramdom val
-		accessTokenReq.NfInstanceID,       // nfInstanceId of service consumer
-		accessTokenReq.TargetNfInstanceID, // nfInstanceId of service producer
-		accessTokenReq.Scope,              // TODO: the name of the NF services
-		// for which the access_token is
-		// authorized for use
-		oAuth2Cfg.Expiration,
+		"OpenNESS",             //Issuer:
+		"NEF Validation token", //Subject:
+		"AF-NEF",               //Audience:
+		accessTokenReq.Scope,   //Scope:
+		oAuth2Cfg.Expiration,   //Expiration:
 		jwt.StandardClaims{ExpiresAt: expiration},
 	}
 
@@ -166,16 +160,14 @@ func GetAccessToken() (token string, err error) {
 func ValidateAccessToken(reqToken string) (status TokenVerificationResult,
 	err error) {
 
-	var oAuth2Cfg = Config{SigningKey: "OPENNESS", Expiration: 100000}
+	var oAuth2Cfg = Config{}
 
-	/* TBD initializing in code
 	//Read Json config
 	err = loadJSONConfig(cfgPath, &oAuth2Cfg)
 	if err != nil {
 		log.Errln("Failed to load OAuth2 configuration")
 		return StatusConfigErr, err
 	}
-	*/
 	var mySigningKey = []byte(oAuth2Cfg.SigningKey)
 	claims := &AccessTokenClaims{}
 
@@ -204,6 +196,6 @@ func ValidateAccessToken(reqToken string) (status TokenVerificationResult,
 		log.Info("Token is invalid")
 		return StatusInvalidToken, errors.New("Token is Invalid")
 	}
-
+	log.Info("OAuth2 Token Validation successfull")
 	return StatusSuccess, nil
 }
