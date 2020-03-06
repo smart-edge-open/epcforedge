@@ -1325,46 +1325,46 @@ func generatePfdReport(appID string,
 func sendPFDErrorResponseToAF(w http.ResponseWriter,
 	rsp nefSBRspData, method string, pfdReports map[string]PfdReport) {
 
-	mdata, eCode := createErrorJSON(rsp)
-	w.Header().Set("Content-Type", "application/problem+json; charset=UTF-8")
-	w.WriteHeader(eCode)
+	//mdata, eCode := createErrorJSON(rsp)
 
-	_, err := w.Write(mdata)
+	var e error
+	var body []byte
+	var pfdReport PfdReport
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	//w.Header().Add("Content-Type", "application/problem+json; charset=UTF-8")
+	w.WriteHeader(rsp.errorCode)
+
+	// If single APP UPdate then only one pfd report else array of reports
+	if method == "SINGLE_APP" {
+		for _, value := range pfdReports {
+			pfdReport = value
+		}
+		body, e = json.Marshal(pfdReport)
+	} else {
+		//Making the array of PfdReport from map
+		pfdList := make([]PfdReport, len(pfdReports))
+		idx := 0
+		for _, value := range pfdReports {
+			pfdList[idx] = value
+			idx++
+		}
+		body, e = json.Marshal(pfdList)
+	}
+	if e != nil {
+		log.Err("NEF ERROR : Failed to send response to AF !!!")
+	}
+	_, err := w.Write(body)
 	if err != nil {
 		log.Err("NEF ERROR : Failed to send response to AF !!!")
 	}
-
-	if eCode == 500 {
-		var e error
-		var body []byte
-		var pfdReport PfdReport
-
-		// If single APP UPdate then only one pfd report else array of reports
-		if method == "SINGLE_APP" {
-			for _, value := range pfdReports {
-				pfdReport = value
-			}
-			body, e = json.Marshal(pfdReport)
-		} else {
-			//Making the array of PfdReport from map
-			pfdList := make([]PfdReport, len(pfdReports))
-			idx := 0
-			for _, value := range pfdReports {
-				pfdList[idx] = value
-				idx++
-			}
-			body, e = json.Marshal(pfdList)
-		}
-		if e != nil {
-			log.Err("NEF ERROR : Failed to send response to AF !!!")
-		}
-		_, err := w.Write(body)
+	/*
+		_, err = w.Write(mdata)
 		if err != nil {
 			log.Err("NEF ERROR : Failed to send response to AF !!!")
 		}
-	}
-
-	log.Infof("HTTP Response sent: %d", eCode)
+	*/
+	log.Infof("HTTP Response sent: %d", rsp.errorCode)
 
 }
 
