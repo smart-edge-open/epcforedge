@@ -4,13 +4,14 @@
 package main
 
 import (
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/gorilla/handlers"
 	logger "github.com/otcshare/common/log"
 	config "github.com/otcshare/epcforedge/ngc/pkg/config"
 	oam "github.com/otcshare/epcforedge/ngc/pkg/oam"
-	"net/http"
-	"os"
-	"time"
 )
 
 type oamCfg struct {
@@ -56,9 +57,11 @@ func main() {
 
 	router := oam.NewRouter()
 
-	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With",
+		"Content-Type", "Authorization"})
 	originsOK := handlers.AllowedOrigins([]string{cfg.UIEndpoint})
-	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PATCH", "OPTIONS", "DELETE"})
+	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD", "POST",
+		"PATCH", "OPTIONS", "DELETE"})
 
 	serverOAM := &http.Server{
 		Addr:         cfg.OpenEndpoint,
@@ -68,5 +71,8 @@ func main() {
 	}
 
 	log.Infof("OAM HTTP Server Listening on:  %s\n", cfg.OpenEndpoint)
-	serverOAM.ListenAndServe()
+	if err = serverOAM.ListenAndServe(); err != http.ErrServerClosed {
+		log.Errf("HTTP: OAM CNCA server error: " + err.Error())
+		os.Exit(1)
+	}
 }
