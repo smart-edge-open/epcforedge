@@ -209,10 +209,16 @@ func updatePfdURL(cfg Config, r *http.Request, resURL string) string {
 
 	res := strings.Split(resURL, "transactions")
 
-	afURL := "http" + "://" + cfg.SrvCfg.Hostname +
-		cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
-		"transactions" + res[1]
-
+	var afURL string
+	if Http2Enabled == true {
+		afURL = "https" + "://" + cfg.SrvCfg.Hostname +
+			cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
+			"transactions" + res[1]
+	} else {
+		afURL = "http" + "://" + cfg.SrvCfg.Hostname +
+			cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
+			"transactions" + res[1]
+	}
 	return afURL
 
 }
@@ -229,10 +235,19 @@ func updateSelfLink(cfg Config, r *http.Request,
 	res := strings.Split(string(nefSelf), "transactions")
 	pID := strings.Split(res[1], "/")
 
-	afSelf := "http" + "://" + cfg.SrvCfg.Hostname +
-		cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
-		"transactions/" + pID[1]
+	var afSelf string
 
+	if Http2Enabled == true {
+
+		afSelf = "https" + "://" + cfg.SrvCfg.Hostname +
+			cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
+			"transactions/" + pID[1]
+	} else {
+
+		afSelf = "http" + "://" + cfg.SrvCfg.Hostname +
+			cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
+			"transactions/" + pID[1]
+	}
 	return afSelf, nil
 }
 
@@ -261,10 +276,16 @@ func updateAppLink(cfg Config, r *http.Request,
 	pID := strings.Split(res[1], "/")
 	app := strings.Split(string(self), "applications")
 
-	appSelf := "http" + "://" + cfg.SrvCfg.Hostname +
-		cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
-		"transactions/" + pID[1] + "/applications" + app[1]
-
+	var appSelf string
+	if Http2Enabled == true {
+		appSelf = "https" + "://" + cfg.SrvCfg.Hostname +
+			cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
+			"transactions/" + pID[1] + "/applications" + app[1]
+	} else {
+		appSelf = "http" + "://" + cfg.SrvCfg.Hostname +
+			cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
+			"transactions/" + pID[1] + "/applications" + app[1]
+	}
 	return appSelf, nil
 
 }
