@@ -210,7 +210,7 @@ func updatePfdURL(cfg Config, r *http.Request, resURL string) string {
 	res := strings.Split(resURL, "transactions")
 
 	var afURL string
-	if Http2Enabled == true {
+	if HTTP2Enabled == true {
 		afURL = "https" + "://" + cfg.SrvCfg.Hostname +
 			cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
 			"transactions" + res[1]
@@ -237,7 +237,7 @@ func updateSelfLink(cfg Config, r *http.Request,
 
 	var afSelf string
 
-	if Http2Enabled == true {
+	if HTTP2Enabled == true {
 
 		afSelf = "https" + "://" + cfg.SrvCfg.Hostname +
 			cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
@@ -277,7 +277,7 @@ func updateAppLink(cfg Config, r *http.Request,
 	app := strings.Split(string(self), "applications")
 
 	var appSelf string
-	if Http2Enabled == true {
+	if HTTP2Enabled == true {
 		appSelf = "https" + "://" + cfg.SrvCfg.Hostname +
 			cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPfd +
 			"transactions/" + pID[1] + "/applications" + app[1]
