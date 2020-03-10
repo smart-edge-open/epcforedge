@@ -65,7 +65,8 @@ func PutPfdTransaction(w http.ResponseWriter, r *http.Request) {
 		if resp != nil {
 			w.WriteHeader(getStatusCode(resp))
 			if _, err = w.Write(resBody); err != nil {
-				errRspHeader(&w, "PUT", err.Error(), http.StatusInternalServerError)
+				errRspHeader(&w, "PUT", err.Error(),
+					http.StatusInternalServerError)
 				return
 			}
 		} else {
