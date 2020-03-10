@@ -32,7 +32,7 @@ http {
     #gzip  on;
 
     server {
-        listen       8082;
+        listen       8083;
         server_name  localhost;
         #charset     utf-8;
         add_header "Access-Control-Allow-Origin" "*" always;
@@ -80,7 +80,7 @@ http {
     # HTTPS server
     #
     server {
-        listen       8083 ssl http2;
+        listen       8082 ssl http2;
         server_name  localhost;
 
         ssl_certificate      /etc/openness/certs/ngc/server-cert.pem;
