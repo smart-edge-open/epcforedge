@@ -52,6 +52,8 @@ do
             helpPrint
          fi
          ;;
+      ? ) helpPrint # Print help
+         ;;
       * )
          if [ $Hostname_flag == 1 ]
          then
@@ -62,7 +64,6 @@ do
             helpPrint
          fi
          ;;
-      ? ) helpPrint # Print help
   esac
   shift
 done

@@ -38,13 +38,15 @@ OAM Config Example File - `oam.json` locates at `ngc/configs`
 
 The configurable parameters list:
 
-| Param        | Description                                         |
-| ------------ | --------------------------------------------------- |
-| TlsEndpoint  | HTTPS(TLS) EndPoint. (Not support for this release) |
-| OpenEndpoint | HTTP EndPoint. Used by CNCA to access OAM via HTTP  |
-| NgcEndpoint  | NGC EndPoint. Used by OAM to access NGC             |
-| NgcType      | NGC Type. Now only support APISTUB test mode.       |
-| NgcTestData  | NGC TestData Path. Used by APISTUB testdata         |
+| Param          | Description                                          |
+| -------------- | ---------------------------------------------------  |
+| TlsEndpoint    | HTTPS(TLS) EndPoint. (Not support for this release)  |
+| OpenEndpoint   | HTTP2 EndPoint. Used by CNCA to access OAM via HTTP2 |
+| NgcEndpoint    | NGC EndPoint. Used by OAM to access NGC              |
+| NgcType        | NGC Type. Now only support APISTUB test mode.        |
+| NgcTestData    | NGC TestData Path. Used by APISTUB testdata          |
+| ServerCertPath | HTTP2 Server SSL Server Certificate Path             |
+| ServerKeyPath  | HTTP2 Server SSL Server Key Path                     |
 
 To run oam, just execute as below:
 ```sh
@@ -100,12 +102,14 @@ AF configurable parameters list:
 | Param               | Description                                               |
 | ------------------- | --------------------------------------------------------- |
 | AfID                | AF ID provided by OAM during AF registration              |
-| CNCAEndpoint        | HTTP EndPoint. Used by CNCA to access AF via HTTP         |
+| CNCAEndpoint        | HTTP2 EndPoint. Used by CNCA to access AF via HTTP2       |
 | Hostname            | Provided by AF to NEF. Part of URL used by  notifications |
 | NotifPort           | NGC EndPoint. Used by NEF to send notifications to AF     |
 | UIEndpoint          | CNCA UI EndPoint Used by AF                               |
-| NotifServerCertPath | Path to certs used by AF server awaiting notification     |
-| NotifServerKeyPath  | Path to keys used for HTTPS connection between AF and NEF |
+| ServerCertPath      | Path to certs used by AF server for CNCA HTTP2 Requests   |
+|                     | and HTTP2 notification                                    |
+| ServerKeyPath       | Path to keys used for HTTP2 connection between AF-CNCA    |
+|                     | and AF-NEF                                                |
 | Protocol            | Protocol used between AF and NEF                          |
 | NEFHostname         | NEF Hostname used by AF                                   |
 | NEFPort             | NEF Port used by AF for sending requests to NEF           |
