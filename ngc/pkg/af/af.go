@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	// Enable/Disable HTTP2 Flag
-	Http2Enabled = true
+	// HTTP2Enabled flag is for enabling/disabling HTTP2
+	HTTP2Enabled = true
 )
 
 // TransactionIDs type
@@ -88,7 +88,7 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	if Http2Enabled == true {
+	if HTTP2Enabled == true {
 		if err = http2.ConfigureServer(
 			serverCNCA, &http2.Server{}); err != nil {
 			log.Errf("AF failed at configuring HTTP2 server (CNCA Server)")
@@ -144,7 +144,7 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 		stopServerCh <- true
 	}(stopServerCh)
 
-	if Http2Enabled == true {
+	if HTTP2Enabled == true {
 		log.Infof("Serving AF (CNCA HTTP2 Requests) on: %s",
 			AfCtx.cfg.SrvCfg.CNCAEndpoint)
 		err = serverCNCA.ListenAndServeTLS(AfCtx.cfg.SrvCfg.ServerCertPath,
