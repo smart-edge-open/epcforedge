@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright © 2019 Intel Corporation
+// Copyright © 2019-2020 Intel Corporation
 
 package af
 
@@ -130,5 +130,70 @@ var afRoutes = Routes{
 		strings.ToUpper("Put"),
 		"/af/v1/subscriptions/{subscriptionId}",
 		ModifySubscriptionPut,
+	},
+
+	// PFD Management routes
+
+	Route{
+		"GetAllPfdTransactions",
+		strings.ToUpper("Get"),
+		"/af/v1/pfd/transactions",
+		GetAllPfdTransactions,
+	},
+
+	Route{
+		"CreatePfdTransaction",
+		strings.ToUpper("Post"),
+		"/af/v1/pfd/transactions",
+		CreatePfdTransaction,
+	},
+
+	Route{
+		"GetPfdTransaction",
+		strings.ToUpper("Get"),
+		"/af/v1/pfd/transactions/{transactionId}",
+		GetPfdTransaction,
+	},
+
+	Route{
+		"DeletePfdTransaction",
+		strings.ToUpper("Delete"),
+		"/af/v1/pfd/transactions/{transactionId}",
+		DeletePfdTransaction,
+	},
+
+	Route{
+		"PutPfdTransaction",
+		strings.ToUpper("Put"),
+		"/af/v1/pfd/transactions/{transactionId}",
+		PutPfdTransaction,
+	},
+
+	Route{
+		"GetPfdAppTransaction",
+		strings.ToUpper("Get"),
+		"/af/v1/pfd/transactions/{transactionId}/applications/{appId}",
+		GetPfdAppTransaction,
+	},
+
+	Route{
+		"DeletePfdAppTransaction",
+		strings.ToUpper("Delete"),
+		"/af/v1/pfd/transactions/{transactionId}/applications/{appId}",
+		DeletePfdAppTransaction,
+	},
+
+	Route{
+		"PutPfdAppTransaction",
+		strings.ToUpper("Put"),
+		"/af/v1/pfd/transactions/{transactionId}/applications/{appId}",
+		PutPfdAppTransaction,
+	},
+
+	Route{
+		"PatchPfdAppTransaction",
+		strings.ToUpper("Patch"),
+		"/af/v1/pfd/transactions/{transactionId}/applications/{appId}",
+		PatchPfdAppTransaction,
 	},
 }

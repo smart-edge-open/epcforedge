@@ -6,28 +6,71 @@
 helpPrint()
 {
    echo ""
-   echo "Usage: $0 -t sanType -n subj1 -m subj2"
+   echo "Usage: $0 -t sanType -h {subj | *}"
    echo -e "\t-t SAN type: could be IP or DNS"
-   echo -e "\t-n subject alternative name 1: could be IP address or domain name for NEF."
-   echo -e "\t-m subject alternative name 2: could be IP address or domain name for AF."
+   echo -e "\t-h subject alternative names list: could be one or more IP addressess or domain names separated by space"
    exit 1 # Exit with help
 }
 
+Hostname_count=0
+Hostname_flag=0
+subjstr=""
 
-while getopts "t:n:m:" opt
+while [ "$1" != "" ]; 
 do
-   case "$opt" in
-      t ) sanType="$OPTARG" ;;
-      n ) subj1="$OPTARG" ;;
-      m ) subj2="$OPTARG" ;;
-      ? ) helpPrint ;; # Print help
-   esac
+   case $1 in
+      -t )
+         if [ $Hostname_flag == 1 ]
+         then
+            echo "Incorrect Command Sequence"
+            helpPrint
+         fi
+         shift 
+         if [ "$1" != "" ]
+         then
+            sanType="$1"
+         else
+            echo "Missing argument for -t option"
+            helpPrint
+         fi
+         ;;
+      -h )
+         if [ "$sanType" == "" ]
+         then
+            echo "Incorrect Command Sequence. Got -h option before -t option"
+            helpPrint
+         fi
+         shift
+         if [ "$1" != "" ]
+         then
+            subj1="$1"
+            Hostname_flag=$((Hostname_flag+1))
+            Hostname_count=$((Hostname_count+1))
+            subjstr=$sanType"."$Hostname_count":""$1"
+         else
+            echo "Missing argument for -h option"
+            helpPrint
+         fi
+         ;;
+      ? ) helpPrint # Print help
+         ;;
+      * )
+         if [ $Hostname_flag == 1 ]
+         then
+            Hostname_count=$((Hostname_count+1))
+            subjstr+=","$sanType"."$Hostname_count":""$1"
+         else
+            echo "Incorrect Input"
+            helpPrint
+         fi
+         ;;
+  esac
+  shift
 done
 
-
-if [ -z "$subj1" ] || [ -z "$subj2" ] || [ -z "$sanType" ]
+if [ -z "$subj1" ] || [ -z "$subjstr" ] || [ -z "$sanType" ]
 then
-   echo "Some input parameters empty"
+   echo "One of the input parameters missing"
    helpPrint
 fi
 
@@ -40,11 +83,10 @@ else
    exit 1
 fi
 
-
 echo "Running with input parameters:"
 echo "$sanType"
-echo "$subj1"
-echo "$subj2"
+#echo "$subj1"
+echo "$subjstr"
 
 ROOT_CA_NAME=OpenNESS-5G-Root
 
@@ -78,7 +120,8 @@ then
    exit 1
 fi
 rm -f extfile.cnf
-echo "subjectAltName = $sanType.1:$subj1,$sanType.2:$subj2" >> extfile.cnf
+#echo "subjectAltName = $sanType.1:$subj1,$sanType.2:$subj2,$sanType.3:$subj3,$sanType.4:$subj4" >> extfile.cnf
+echo "subjectAltName = $subjstr" >> extfile.cnf
 openssl x509 -req -extfile extfile.cnf -in "server-request.csr" -CA "root-ca-cert.pem" -CAkey "root-ca-key.pem" -days 90 -out "server-cert.pem" -CAcreateserial
 if (($?))
 then 

@@ -39,7 +39,7 @@ void UserplaneAdd::execute(Json::Value &request, Json::Value &response,
         string pgwPostData,sgwPostData;
         stringstream pgwPostResponse,sgwPostResponse;
         string pgwId, sgwId;
-		
+
         // Prepare PGW and SGW URL
         pgwPostUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
 				 "/api/v1/pgwprofile?entity-type=pgw-dpf";
@@ -267,6 +267,7 @@ void UserplanesListGet::execute(map<string, string> params, Json::Value &respons
         // Preparing URL for get 
         int pgwCount, sgwCount, itemIndex;
         stringstream pgwGetData, sgwGetData;        
+
         string pgwGetUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
                      "/api/v1/pgwprofile?action=list&entity-type=pgw-dpf";		
         string sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
@@ -357,6 +358,7 @@ void UserplaneGetByID::execute(map<string, string> params, Json::Value &response
         string pgwId, sgwId;
         string pgwTac, sgwTac;
         stringstream pgwGetData,sgwGetData;        
+
         string pgwGetUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
                     "/api/v1/pgwprofile?action=list&entity-type=pgw-dpf&id=" + params["UUID"];
         string sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
@@ -472,6 +474,7 @@ void UserplaneDelByID::execute(map<string, string> params,
     try {
 
         OAMAGENT_LOG(INFO, "UserplaneDelByID(%s) Executing.\n",params["UUID"].c_str());
+
         string pgwDelUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
                      "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" + params["UUID"];
         string sgwDelUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \

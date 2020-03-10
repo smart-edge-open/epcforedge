@@ -195,6 +195,7 @@ int cpfCurlPost(string &url, string &postData, stringstream &responseData)
 
     // Logging
     OAMAGENT_LOG(INFO, "Starting HTTP POST for url: %s\n", url.c_str());
+
 #ifdef INT_TEST
     static int postTestCaseNum = 0;
     const char *postTestCaseRspData[2] = { 
@@ -255,7 +256,7 @@ int cpfCurlPost(string &url, string &postData, stringstream &responseData)
     // Set reponse data hande
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cpfCurlDataHandle);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
-
+    
     // Perform POST
     ret = curl_easy_perform(curl);
     if(ret != CURLE_OK) {
@@ -526,6 +527,7 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
 
     // Logging
     OAMAGENT_LOG(INFO, "Starting HTTP PUT for url: %s\n", url.c_str());
+
     // Generate json file for uploading
     hd_src = fopen("put_data.json", "wb");
     if (NULL == hd_src) {

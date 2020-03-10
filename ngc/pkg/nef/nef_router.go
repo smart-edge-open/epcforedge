@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0
-* Copyright (c) 2019 Intel Corporation
+* Copyright (c) 2019-2020 Intel Corporation
  */
 
 package ngcnef
@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	oauth2 "github.com/otcshare/epcforedge/ngc/pkg/oauth2"
 )
 
 // Route : Structure which describes HTTP Request Handler type and other
@@ -25,6 +26,7 @@ type Route struct {
 // NEFRoutes : NEF Routes lists which contains Routes with different HTTP
 //             Request handlers for NEF
 var NEFRoutes = []Route{
+	// Traffic Influence Routes
 	{
 		"ReadAllTrafficInfluenceSubscription",
 		strings.ToUpper("Get"),
@@ -60,6 +62,73 @@ var NEFRoutes = []Route{
 		strings.ToUpper("Delete"),
 		"/3gpp-traffic-influence/v1/{afId}/subscriptions/{subscriptionId}",
 		DeleteTrafficInfluenceSubscription,
+	},
+	// PFD Management Routes
+	{
+		"ReadAllPFDManagementTransaction",
+		strings.ToUpper("Get"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions",
+		ReadAllPFDManagementTransaction,
+	},
+
+	{
+		"CreatePFDManagementTransaction",
+		strings.ToUpper("Post"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions",
+		CreatePFDManagementTransaction,
+	},
+
+	{
+		"ReadPFDManagementTransaction",
+		strings.ToUpper("Get"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+		ReadPFDManagementTransaction,
+	},
+
+	{
+		"UpdatePutPFDManagementTransaction",
+		strings.ToUpper("Put"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+		UpdatePutPFDManagementTransaction,
+	},
+
+	{
+		"DeletePFDManagementTransaction",
+		strings.ToUpper("Delete"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}",
+		DeletePFDManagementTransaction,
+	},
+
+	{
+		"ReadPFDManagementApplication",
+		strings.ToUpper("Get"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
+		ReadPFDManagementApplication,
+	},
+
+	{
+		"DeletePFDManagementApplication",
+		strings.ToUpper("Delete"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
+		DeletePFDManagementApplication,
+	},
+
+	{
+		"UpdatePutPFDManagementApplication",
+		strings.ToUpper("Put"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
+		UpdatePutPFDManagementApplication,
+	},
+
+	{
+		"PatchPFDManagementApplication",
+		strings.ToUpper("Patch"),
+		"/3gpp-pfd-management/v1/{scsAsId}/transactions/{transactionId}/" +
+			"applications/{appId}",
+		PatchPFDManagementApplication,
 	},
 }
 
@@ -102,12 +171,53 @@ func NewNEFRouter(nefCtx *nefContext) *mux.Router {
 				r.Context(),
 				nefCtxKey("nefCtx"),
 				nefCtx)
-			next.ServeHTTP(w, r.WithContext(ctx))
 
+			if nefCtx.cfg.OAuth2Support {
+				if nefValidateAccessToken(w, r) {
+					next.ServeHTTP(w, r.WithContext(ctx))
+				}
+			} else {
+				//OAuth2 disabled
+				next.ServeHTTP(w, r.WithContext(ctx))
+			}
 		})
 	})
-
 	return router
+}
+
+func nefValidateAccessToken(w http.ResponseWriter, r *http.Request) bool {
+
+	reqToken := r.Header.Get("Authorization")
+
+	if len(reqToken) == 0 {
+		log.Info("Authorization header missing")
+		//Authorization header is not present
+		w.Header().Set("WWW-Authenticate", "Bearer realm="+r.RequestURI)
+
+		w.WriteHeader(http.StatusUnauthorized)
+		return false
+	}
+
+	//Get the token
+	splitToken := strings.Split(reqToken, "Bearer ")
+	reqToken = splitToken[1]
+
+	status, err := oauth2.ValidateAccessToken(reqToken)
+
+	if err != nil {
+		log.Infoln("Token Validation failed")
+		if status == oauth2.StatusInvalidToken {
+			w.Header().Set("WWW-Authenticate", "Bearer realm="+r.RequestURI)
+			w.WriteHeader(http.StatusUnauthorized)
+			return false
+		} else if status == oauth2.StatusBadRequest {
+			w.WriteHeader(http.StatusBadRequest)
+			return false
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		return false
+	}
+	return true
 }
 
 // nefRouteLogger : This function logs data received in HTTP request.

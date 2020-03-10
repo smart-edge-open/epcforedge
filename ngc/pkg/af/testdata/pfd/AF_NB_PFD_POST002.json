@@ -1,0 +1,42 @@
+{
+  "self": "",
+  "suppFeat": "",
+  "pfdDatas": {
+    "app3": {
+      "externalAppId": "app3",
+      "self": "",
+      "pfds": {
+        "pfd5": {
+          "pfdId": "pfd5",
+          "flowDescriptions": [
+            "permit in ip from 10.11.12.130 80 to any"
+          ],
+          "urls": [],
+          "domainNames": []
+        },
+        "pfd6": {
+          "pfdId": "pfd6",
+          "flowDescriptions": [],
+          "urls": [],
+          "domainNames": [
+            "www.newexample.com"
+          ]
+        }
+      }
+    },
+    "app4": {
+      "externalAppId": "app4",
+      "self": "",
+      "pfds": {
+        "pfd7": {
+          "pfdId": "pfd7",
+          "flowDescriptions": [
+            "^http://test.example2.net(/\\S*)?$"
+          ],
+          "urls": [],
+          "domainNames": []
+        }
+      }
+    }
+  }
+}

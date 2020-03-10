@@ -39,6 +39,11 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) handleDeleteResponse(
 			return newErr
 		}
 		newErr.model = v
+		if r.StatusCode == 401 {
+			if fetchNEFAuthorizationToken() != nil {
+				log.Infoln("Token refresh failed")
+			}
+		}
 		return newErr
 
 	default:
@@ -76,23 +81,9 @@ func (a *TrafficInfluenceSubscriptionDeleteAPIService) SubscriptionDelete(
 		"{"+"subscriptionId"+"}", fmt.Sprintf("%v", subscriptionID), -1)
 	headerParams := make(map[string]string)
 
-	// to determine the Content-Type header
-	contentTypes := []string{"application/json"}
+	headerParams["Content-Type"] = contentType
+	headerParams["Accept"] = contentType
 
-	// set Content-Type header
-	contentType := selectHeaderContentType(contentTypes)
-	if contentType != "" {
-		headerParams["Content-Type"] = contentType
-	}
-
-	// to determine the Accept header
-	headerAccepts := []string{"application/json"}
-
-	// set Accept header
-	headerAccept := selectHeaderAccept(headerAccepts)
-	if headerAccept != "" {
-		headerParams["Accept"] = headerAccept
-	}
 	r, err := a.client.prepareRequest(ctx, path, method,
 		deleteBody, headerParams)
 	if err != nil {

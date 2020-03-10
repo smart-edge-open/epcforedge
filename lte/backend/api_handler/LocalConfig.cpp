@@ -26,7 +26,6 @@ string localcfg_nginx_hostip   = "127.0.0.1";
 string localcfg_nginx_port     = "8080"; 
 string localcfg_nginx_fcgipass = "127.0.0.1:9999";
 
-
 int oamReadCfgJsonFile(void)
 {
 
