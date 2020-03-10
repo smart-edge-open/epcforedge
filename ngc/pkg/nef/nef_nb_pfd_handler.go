@@ -197,6 +197,17 @@ func CreatePFDManagementTransaction(w http.ResponseWriter,
 		log.Errf("Write Failed: %v", err)
 		return
 	}
+	// Deleting the PFD reports from the stored transactions once sent
+	af_id := vars["scsAsId"]
+	transID := strconv.Itoa((nef.afs[af_id].transIDnum) - 1)
+	log.Infof("Tranaction ID is %s", transID)
+	pfdList :=
+		nef.afs[af_id].pfdtrans[transID].pfdManagement.PfdReports
+
+	for k := range pfdList {
+		delete(nef.afs[af_id].pfdtrans[transID].pfdManagement.PfdReports, k)
+	}
+
 	logNef(nef)
 
 }
