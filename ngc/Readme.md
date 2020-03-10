@@ -38,13 +38,13 @@ OAM Config Example File - `oam.json` locates at `ngc/configs`
 
 The configurable parameters list:
 
-| Param              | Description                                              |
-|--------------------|----------------------------------------------------------|
-| TlsEndpoint        | HTTPS(TLS) EndPoint. (Not support for this release)      |
-| OpenEndpoint       | HTTP EndPoint. Used by CNCA to access OAM via HTTP       |
-| NgcEndpoint        | NGC EndPoint. Used by OAM to access NGC                  |
-| NgcType            | NGC Type. Now only support APISTUB test mode.            |
-| NgcTestData        | NGC TestData Path. Used by APISTUB testdata              |
+| Param        | Description                                         |
+| ------------ | --------------------------------------------------- |
+| TlsEndpoint  | HTTPS(TLS) EndPoint. (Not support for this release) |
+| OpenEndpoint | HTTP EndPoint. Used by CNCA to access OAM via HTTP  |
+| NgcEndpoint  | NGC EndPoint. Used by OAM to access NGC             |
+| NgcType      | NGC Type. Now only support APISTUB test mode.       |
+| NgcTestData  | NGC TestData Path. Used by APISTUB testdata         |
 
 To run oam, just execute as below:
 ```sh
@@ -97,17 +97,23 @@ AF sample code, generated bin will be put under ngc/dist
 
 AF configurable parameters list:
 
-| Param              | Description                                               |
-|--------------------|-----------------------------------------------------------|
-| AfID               | AF ID provided by OAM during AF registration              |
-| CNCAEndpoint       | HTTP EndPoint. Used by CNCA to access AF via HTTP         |
-| Hostname           | Provided by AF to NEF. Part of URL used by  notifications |
-| NotifPort          | NGC EndPoint. Used by NEF to send notifications to AF     |
-| NotifServerCertPath| Path to certs used by AF server awaiting notification     |
-| NotifServerKeyPath | Path to keys used for HTTPS connection between AF and NEF |
-| NEFBasePath        | URL used by AF to access NEF                              |
-| UserAgent          | Used by AF client connecting to NEF                       |
-| NEFClientCertPath  | Path to certs used by AF client                           | 
+| Param               | Description                                               |
+| ------------------- | --------------------------------------------------------- |
+| AfID                | AF ID provided by OAM during AF registration              |
+| CNCAEndpoint        | HTTP EndPoint. Used by CNCA to access AF via HTTP         |
+| Hostname            | Provided by AF to NEF. Part of URL used by  notifications |
+| NotifPort           | NGC EndPoint. Used by NEF to send notifications to AF     |
+| UIEndpoint          | CNCA UI EndPoint Used by AF                               |
+| NotifServerCertPath | Path to certs used by AF server awaiting notification     |
+| NotifServerKeyPath  | Path to keys used for HTTPS connection between AF and NEF |
+| Protocol            | Protocol used between AF and NEF                          |
+| NEFHostname         | NEF Hostname used by AF                                   |
+| NEFPort             | NEF Port used by AF for sending requests to NEF           |
+| NEFBasePath         | URL used by AF to access NEF Traffic Influence            |
+| UserAgent           | Used by AF client connecting to NEF                       |
+| NEFClientCertPath   | Path to certs used by AF client                           |
+| LocationPrefixPfd   | The API prefix for PFD management                         |
+| NEFPFDBasePath      | URL used by AF to access NEF PFD management               |
 
 To run af, just execute as below:
 ```sh
@@ -121,6 +127,19 @@ To run AF Ginkgo test suite run
 ```sh
 make test-unit-af
 ```
+
+To run af PFD functional tests, execute the test scripts in ngc/test/af/pfd_tests/:
+
+```sh
+./af_pfd_trans_tests.sh  - These are the PFD Transaction level tests GET/POST/GET_ALL/PUT/DELETE
+./af_pfd_max_trans.sh - These are tests for maximum number of transactions supported
+./af_pfd_app_tests.sh - These are the PFD application level tests GET/PUT/DELETE/PATCH
+./af_pfd_all_tests.sh - This is a script which calls all the above tests
+```
+
+> NOTE: The config file contains the url, hostname and port information for AF/NEF. 
+> The AF bin and NEF bin must be started prior to test execution with the same config as in config file
+
 
 ## NEF
 
@@ -139,26 +158,29 @@ NEF Config Example File - `nef.json` located at `ngc/configs`
 
 #### The configurable parameters list:
 
-| Param         | Description                                              |
-|---------------|----------------------------------------------------------|
-| NefAPIRoot    | The API root of the NEF i.e. ip address or domain name   |
-| LocationPrefix| The API prefix for the traffic influence subscription. The NefAPIRoot + Endpoint + LocationPrefix + subscription id generated by NEF form the subscription resource uri       |
-| MaxSubSupport | The maximum number of subscriptions to be supported by NEF.                 |
-| MaxAFSupport  | The maximum number of AF's to be supported by NEF           |
-| SubStartId    | The start value of  the subscription ids              |
-| UpfNotificationResUriPath | The API path on which the the NEF would listen for UPF notifications from SMF. The NefAPI + EndPoint + UpfNotificationResUriPath together form the notification URI |
-| UserAgent     | The user agent information to put in the HTTP requests|
-| HTTPConfig    | The fields under this describe the configuration for the HTTP Endpoint |
-| Endpoint      | The end point where the NEF server needs to listen for HTTP 1.1 requests.Format ipaddress:port |
-| HTTP2Config   | The fields under this describe the configuration for the HTTP2 Endpoint |
-| Endpoint      | The end point where the NEF server needs to listen for HTTP 2.1 requests. Format ipaddress:port |
-| NefServerCert | The file path containing the NEF Server public key    |
-| NefServerKey  | The file path containing the NEF Server private key   |
-| AfClientCert  | The file path containing the AF Server public key     |
-| AfServiceID   | List of mappings for AfServiceID to dnn and snssai, used by NEF when communicating with UDR and PCF |
-| id            | The AF Service ID  |
-| dnn           | Data network name |
-| snssai        | Single Network Slice Selection Assistance Information |
+| Param                     | Description                                                                                                                                                             |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NefAPIRoot                | The API root of the NEF i.e. ip address or domain name                                                                                                                  |
+| LocationPrefix            | The API prefix for the traffic influence subscription. The NefAPIRoot + Endpoint + LocationPrefix + subscription id generated by NEF form the subscription resource uri |
+| MaxSubSupport             | The maximum number of subscriptions to be supported by NEF.                                                                                                             |
+| MaxAFSupport              | The maximum number of AF's to be supported by NEF                                                                                                                       |
+| SubStartId                | The start value of  the subscription ids                                                                                                                                |
+| UpfNotificationResUriPath | The API path on which the the NEF would listen for UPF notifications from SMF. The NefAPI + EndPoint + UpfNotificationResUriPath together form the notification URI     |
+| UserAgent                 | The user agent information to put in the HTTP requests                                                                                                                  |
+| HTTPConfig                | The fields under this describe the configuration for the HTTP Endpoint                                                                                                  |
+| Endpoint                  | The end point where the NEF server needs to listen for HTTP 1.1 requests.Format ipaddress:port                                                                          |
+| HTTP2Config               | The fields under this describe the configuration for the HTTP2 Endpoint                                                                                                 |
+| Endpoint                  | The end point where the NEF server needs to listen for HTTP 2.1 requests. Format ipaddress:port                                                                         |
+| NefServerCert             | The file path containing the NEF Server public key                                                                                                                      |
+| NefServerKey              | The file path containing the NEF Server private key                                                                                                                     |
+| AfClientCert              | The file path containing the AF Server public key                                                                                                                       |
+| AfServiceID               | List of mappings for AfServiceID to dnn and snssai, used by NEF when communicating with UDR and PCF                                                                     |
+| id                        | The AF Service ID                                                                                                                                                       |
+| dnn                       | Data network name                                                                                                                                                       |
+| snssai                    | Single Network Slice Selection Assistance Information                                                                                                                   |
+| LocationPrefixPfd         | The API prefix for PFD management. The NefAPIRoot + Endpoint + LocationPrefixPfd + transaction id generated by NEF forms the PFD resource uri                           |
+| MaxPfdTransSupport        | The maximum number of PFD transactions to be supported by NEF.                                                                                                          |
+| PfdTransStartID           | The start value of  the PFD transaction ids                                                                                                                             |
 
 #### Run NEF
 To run nef, just execute as below:
@@ -184,8 +206,6 @@ make test-unit-nef
 $ go get github.com/onsi/ginkgo/ginkgo
 $ go get github.com/onsi/gomega/...
 ```
-
-
 To run API Testing:
 
 Step 1 : Change to the nef folder
