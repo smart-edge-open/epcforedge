@@ -50,17 +50,11 @@ void UserplaneAdd::execute(Json::Value &request, Json::Value &response,
         string pgwPostData,sgwPostData;
         stringstream pgwPostResponse,sgwPostResponse;
         string pgwId, sgwId;
-        string protocol;
-		
-        if (0 == localcfg_http2_enabled.compare("true") ||
-            0 == localcfg_https_enabled.compare("true"))
-            protocol = "https://";
-        else
-            protocol = "http://";
+
         // Prepare PGW and SGW URL
-        pgwPostUrl = protocol + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
+        pgwPostUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
 				 "/api/v1/pgwprofile?entity-type=pgw-dpf";
-        sgwPostUrl = protocol + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
+        sgwPostUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
 				 "/api/v1/sgwprofile?entity-type=sgw-dpf";
 			
         // Check function exist
@@ -107,7 +101,7 @@ void UserplaneAdd::execute(Json::Value &request, Json::Value &response,
                  OAMAGENT_LOG(ERR, "filling message falied.\n");
 
 				 // delete PGW
-				 string pgwUrl_toDelete = protocol + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" + pgwId.c_str();
+				 string pgwUrl_toDelete = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" + pgwId.c_str();
                  OAMAGENT_LOG(INFO, "starting delete old pgw cfg with id %s.\n",pgwId.c_str());
                  bool delSucFlag = false;
 				 cpfCurlDelete(pgwUrl_toDelete, delSucFlag);
@@ -178,17 +172,11 @@ void UserplanePatchByID::execute(Json::Value &request, Json::Value &response,
         string pgwPatchUrl, sgwPatchUrl;
         string pgwPatchData,sgwPatchData;
         stringstream pgwPostResponse,sgwPostResponse;
-        string protocol;
  
-        if (0 == localcfg_http2_enabled.compare("true") ||
-            0 == localcfg_https_enabled.compare("true"))
-            protocol = "https://";
-        else
-            protocol = "http://";
         // Prepare PGW and SGW URL
-        pgwPatchUrl = protocol + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
+        pgwPatchUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
 			 "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" + request["UUID"].asString();
-        sgwPatchUrl = protocol + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
+        sgwPatchUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
 			 "/api/v1/sgwprofile?entity-type=sgw-dpf&id=" + request["UUID"].asString();
 		 				
         // Check function exist
@@ -234,7 +222,7 @@ void UserplanePatchByID::execute(Json::Value &request, Json::Value &response,
               OAMAGENT_LOG(ERR, "filling message falied.\n");
 
               // delete PGW
-             string pgwUrl_toDelete = protocol + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" +  request["UUID"].asString().c_str();
+             string pgwUrl_toDelete = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" +  request["UUID"].asString().c_str();
              OAMAGENT_LOG(INFO, "starting delete old pgw cfg with id %s.\n", request["UUID"].asString().c_str());
              bool delSucFlag = false;
 			 cpfCurlDelete(pgwUrl_toDelete, delSucFlag);
@@ -290,16 +278,10 @@ void UserplanesListGet::execute(map<string, string> params, Json::Value &respons
         // Preparing URL for get 
         int pgwCount, sgwCount, itemIndex;
         stringstream pgwGetData, sgwGetData;        
-        string protocol;
 
-        if (0 == localcfg_http2_enabled.compare("true") ||
-            0 == localcfg_https_enabled.compare("true"))
-            protocol = "https://";
-        else
-            protocol = "http://";
-        string pgwGetUrl = protocol + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
+        string pgwGetUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
                      "/api/v1/pgwprofile?action=list&entity-type=pgw-dpf";		
-        string sgwGetUrl = protocol + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
+        string sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
                      "/api/v1/sgwprofile?action=list&entity-type=sgw-dpf";       
 
         #ifdef INT_TEST
@@ -387,17 +369,10 @@ void UserplaneGetByID::execute(map<string, string> params, Json::Value &response
         string pgwId, sgwId;
         string pgwTac, sgwTac;
         stringstream pgwGetData,sgwGetData;        
-        string protocol;
 
-        if (0 == localcfg_http2_enabled.compare("true") ||
-            0 == localcfg_https_enabled.compare("true"))
-            protocol = "https://";
-        else
-            protocol = "http://";
-
-        string pgwGetUrl = protocol + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
+        string pgwGetUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
                     "/api/v1/pgwprofile?action=list&entity-type=pgw-dpf&id=" + params["UUID"];
-        string sgwGetUrl = protocol + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
+        string sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
                     "/api/v1/sgwprofile?action=list&entity-type=sgw-dpf&id=" + params["UUID"]; 
 
         #ifdef INT_TEST
@@ -510,17 +485,10 @@ void UserplaneDelByID::execute(map<string, string> params,
     try {
 
         OAMAGENT_LOG(INFO, "UserplaneDelByID(%s) Executing.\n",params["UUID"].c_str());
-        string protocol;
 
-        if (0 == localcfg_http2_enabled.compare("true") ||
-            0 == localcfg_https_enabled.compare("true"))
-            protocol = "https://";
-        else
-            protocol = "http://";
-
-        string pgwDelUrl = protocol + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
+        string pgwDelUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
                      "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" + params["UUID"];
-        string sgwDelUrl = protocol + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
+        string sgwDelUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
                      "/api/v1/sgwprofile?entity-type=sgw-dpf&id=" + params["UUID"];
 
         // Delete PGW information from CP

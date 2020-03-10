@@ -32,7 +32,6 @@
 #include <curl/curl.h>
 #include <json/json.h>
 #include "CpfInterface.h"
-#include "LocalConfig.h"
 #include "Log.h"
 
 #define CPF_CURL_DEBUG 1
@@ -188,16 +187,6 @@ size_t cpfCurlDataHandle(void *ptr, size_t size, size_t nmemb, void *stream)
     return size * nmemb;
 }
 
-size_t header_callback(char *buffer, size_t size,
-                              size_t nitems, void *userdata)
-{
-  /* received header is nitems * size long in 'buffer' NOT ZERO TERMINATED */
-  /* 'userdata' is set with CURLOPT_HEADERDATA */
-    size_t numbytes = size * nitems;
-    OAMAGENT_LOG(INFO, "RESPONSE HEADER: %.*s\n", (int)numbytes, buffer);
-    return numbytes;
-}
-
 /**
 * @brief			The inteface function will send POST to EPC and receive the response 
 *					
@@ -217,13 +206,8 @@ int cpfCurlPost(string &url, string &postData, stringstream &responseData)
     char strTemp[256] = "Content-Type: application/json";
 
     // Logging
-    if (0 == localcfg_http2_enabled.compare("true")) {
-        OAMAGENT_LOG(INFO, "Starting HTTP2 POST for url: %s\n", url.c_str());
-    } else if (0 == localcfg_https_enabled.compare("true")){
-        OAMAGENT_LOG(INFO, "Starting HTTPS POST for url: %s\n", url.c_str());
-    } else {
-        OAMAGENT_LOG(INFO, "Starting HTTP POST for url: %s\n", url.c_str());
-    }
+    OAMAGENT_LOG(INFO, "Starting HTTP POST for url: %s\n", url.c_str());
+
 #ifdef INT_TEST
     static int postTestCaseNum = 0;
     const char *postTestCaseRspData[2] = { 
@@ -285,20 +269,6 @@ int cpfCurlPost(string &url, string &postData, stringstream &responseData)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cpfCurlDataHandle);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
     
-    // Set options for using HTTP2 or HTTPS
-#if CURL_HTTP2
-    if (0 == localcfg_http2_enabled.compare("true")) {
-        curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    } else
-#endif
-    if (0 == localcfg_https_enabled.compare("true")) {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    }
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-
     // Perform POST
     ret = curl_easy_perform(curl);
     if(ret != CURLE_OK) {
@@ -350,13 +320,7 @@ int cpfCurlGet(string &url, stringstream &responseData)
     char strTemp[256] = "Content-Type: application/json";
 
     // Logging
-    if (0 == localcfg_http2_enabled.compare("true")) {
-        OAMAGENT_LOG(INFO, "Starting HTTP2 GET for url: %s\n", url.c_str());
-    } else if (0 == localcfg_https_enabled.compare("true")){
-        OAMAGENT_LOG(INFO, "Starting HTTPS GET for url: %s\n", url.c_str());
-    } else {
-        OAMAGENT_LOG(INFO, "Starting HTTP GET for url: %s\n", url.c_str());
-    }
+    OAMAGENT_LOG(INFO, "Starting HTTP GET for url: %s\n", url.c_str());
 
 #ifdef INT_TEST
     static int getTestCaseNum = 0;
@@ -432,21 +396,6 @@ int cpfCurlGet(string &url, stringstream &responseData)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cpfCurlDataHandle);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
 
-    // Set options for using HTTP2 or HTTPS
-#if CURL_HTTP2
-    if (0 == localcfg_http2_enabled.compare("true")) {
-        curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    } else 
-#endif
-    if (0 == localcfg_https_enabled.compare("true")) {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    }
-
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-    
     // Perform GET
     ret = curl_easy_perform(curl);
     if(ret != CURLE_OK) {
@@ -498,13 +447,7 @@ int cpfCurlDelete(string &url, bool &successFlg)
     char strTemp[256] = "Content-Type: application/json";
     stringstream responseData;
     // Logging
-    if (0 == localcfg_http2_enabled.compare("true")) {
-        OAMAGENT_LOG(INFO, "Starting HTTP2 DELETE for url: %s\n", url.c_str());
-    } else if (0 == localcfg_https_enabled.compare("true")){
-        OAMAGENT_LOG(INFO, "Starting HTTPS DELETE for url: %s\n", url.c_str());
-    } else {
-        OAMAGENT_LOG(INFO, "Starting HTTP DELETE for url: %s\n", url.c_str());
-    }
+    OAMAGENT_LOG(INFO, "Starting HTTP DELETE for url: %s\n", url.c_str());
 
     #ifdef INT_TEST
     static int delTestCaseNum = 0;
@@ -560,20 +503,6 @@ int cpfCurlDelete(string &url, bool &successFlg)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cpfCurlDataHandle);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
 
-    // Set options for using HTTP2 or HTTPS
-#if CURL_HTTP2
-    if (0 == localcfg_http2_enabled.compare("true")) {
-        curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    } else
-#endif
-    if (0 == localcfg_https_enabled.compare("true")) {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    }
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-
     // Perform DELETE
     ret = curl_easy_perform(curl);
     if(ret != CURLE_OK) {
@@ -609,13 +538,7 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
     char strTemp[256] = "Content-Type: application/json";
 
     // Logging
-    if (0 == localcfg_http2_enabled.compare("true")) {
-        OAMAGENT_LOG(INFO, "Starting HTTP2 PUT for url: %s\n", url.c_str());
-    } else if (0 == localcfg_https_enabled.compare("true")){
-        OAMAGENT_LOG(INFO, "Starting HTTPS PUT for url: %s\n", url.c_str());
-    } else {
-        OAMAGENT_LOG(INFO, "Starting HTTP PUT for url: %s\n", url.c_str());
-    }
+    OAMAGENT_LOG(INFO, "Starting HTTP PUT for url: %s\n", url.c_str());
 
     // Generate json file for uploading
     hd_src = fopen("put_data.json", "wb");
@@ -698,20 +621,6 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
     // Set reponse data hande
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cpfCurlDataHandle);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
-
-    // Set options for using HTTP2 or HTTPS
-#if CURL_HTTP2
-    if (0 == localcfg_http2_enabled.compare("true")) {
-        curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    } else 
-#endif
-    if (0 == localcfg_https_enabled.compare("true")) {
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-        curl_easy_setopt(curl, CURLOPT_CAINFO, localcfg_ssl_cainfo.c_str());
-    }
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
 
     // Perform PUT
     ret = curl_easy_perform(curl);

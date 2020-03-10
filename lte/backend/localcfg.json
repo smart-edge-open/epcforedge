@@ -1,18 +1,15 @@
 {
-     "pgw": {
-        "ipaddress" : "192.168.120.219" ,
-        "port" : "10000"
-     },
-     "sgw": {
-        "ipaddress" : "192.168.120.220" ,
-        "port" : "10000"
-     },
-     "nginx" : {
-        "hostIp" : "127.0.0.1",
-        "hostPort" : "8083",
-        "fcgiPass" : "127.0.0.1:9999"
+    "pgw": {
+        "ipaddress": "192.168.120.219",
+        "port": "10000"
     },
-    "http2_enabled": "false",
-    "https_enabled": "true",
-    "ssl_cainfo": "/etc/certs/root-ca-cert.pem"
+    "sgw": {
+        "ipaddress": "192.168.120.220",
+        "port": "10000"
+    },
+    "nginx": {
+        "hostIp": "127.0.0.1",
+        "hostPort": "8082",
+        "fcgiPass": "127.0.0.1:9999"
+    }
 }
