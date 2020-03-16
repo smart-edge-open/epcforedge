@@ -27,6 +27,7 @@ func (a *PfdManagementTransactionPutAPIService) handlePfdPutResponse(
 		err := json.Unmarshal(body, pfdTs)
 		if err != nil {
 			log.Errf("Error decoding response body %s, ", err.Error())
+			r.StatusCode = 500
 		}
 		return err
 	}

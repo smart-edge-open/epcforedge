@@ -56,10 +56,27 @@ type service struct {
 	client *Client
 }
 
+// Parameters for AF testing, when all tests are
+// updated, these variables may be removed
+var TestAf bool = false
+var HTTPClient *http.Client
+
+// Function to setup a httpClient for testing if required
+func SetHTTPClient(httpClient *http.Client) {
+
+	HTTPClient = httpClient
+
+}
+
 // NewClient creates a new API client.
 func NewClient(cfg *CliConfig) *Client {
 
-	if cfg.HTTPClient == nil {
+	if TestAf == true {
+
+		cfg.HTTPClient = HTTPClient
+
+	}
+	if cfg.HTTPClient == nil || TestAf == false {
 
 		CACert, err := ioutil.ReadFile(cfg.NEFCliCertPath)
 		if err != nil {

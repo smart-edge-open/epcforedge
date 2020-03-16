@@ -24,6 +24,22 @@ func TestAf(t *testing.T) {
 
 type KeyType string
 
+// RoundTripFunc .
+type RoundTripFunc func(req *http.Request) *http.Response
+
+// RoundTrip .
+func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req), nil
+}
+
+func testingAFClient(fn RoundTripFunc) *http.Client {
+
+	return &http.Client{
+		Transport: RoundTripFunc(fn),
+	}
+
+}
+
 var _ = Describe("AF", func() {
 
 	var (
@@ -320,10 +336,50 @@ var _ = Describe("AF", func() {
 				resp := httptest.NewRecorder()
 				ctx := context.WithValue(req.Context(),
 					KeyType("af-ctx"), af.AfCtx)
+
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
 			})
+		})
+
+		Context("PFD  GET ALL - 400", func() {
+			Specify("Read all PFD transactions", func() {
+
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_GETALL.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				reqBodyBytes := bytes.NewReader(reqBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 400,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			})
+
 		})
 
 		Context("PFD Transaction POST", func() {
@@ -430,6 +486,188 @@ var _ = Describe("AF", func() {
 
 		})
 
+		Context("PFD POST Transaction  No Location Header", func() {
+			Specify("", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+		})
+
+		Context("PFD Transaction  POST SELF APP LINK MISSING", func() {
+			Specify("", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST_SELF.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				header := make(http.Header)
+				header.Set("Location",
+					"http://localhost:8080/af/v1/pfd/transactions/10000")
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: header,
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+		})
+
+		Context("PFD Transaction  POST SELF LINK MISSING", func() {
+			Specify("", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				header := make(http.Header)
+				header.Set("Location",
+					"http://localhost:8080/af/v1/pfd/transactions/10000")
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: header,
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("DECODE error in PFD POST TRANS", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_invalid.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+		})
 		Context("PFD  GET ALL", func() {
 			Specify("Read all PFD transactions", func() {
 
@@ -462,6 +700,111 @@ var _ = Describe("AF", func() {
 
 			})
 
+			Specify("DECODE error in GET ALL", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				reqBodyBytes := bytes.NewReader(reqBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("SELF LINK MISSING IN GET ALL", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_GETALL.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				reqBodyBytes := bytes.NewReader(reqBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("SELF APP LINK MISSING IN GET ALL", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_GETALL_SELF.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				reqBodyBytes := bytes.NewReader(reqBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
 		})
 
 		Context("PFD transaction ID GET", func() {
@@ -477,6 +820,110 @@ var _ = Describe("AF", func() {
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
+
+			})
+
+			Specify("SELF LINK MISIING in GET", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions/10000",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				reqBodyBytes := bytes.NewReader(reqBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("SELF LINK MISIING in APP", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions/10000",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST_SELF.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				reqBodyBytes := bytes.NewReader(reqBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("DECODE error in PFD GET", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions/10000",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_invalid.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				reqBodyBytes := bytes.NewReader(reqBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
 
 			})
 
@@ -518,6 +965,88 @@ var _ = Describe("AF", func() {
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
+
+			})
+
+			Specify("PUT - SELF LINK MISSING", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/pfd/transactions/10000",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("PUT - SELF LAPP INK MISSING", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/pfd/transactions/10000",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_POST_SELF.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
 
 			})
 
@@ -567,6 +1096,49 @@ var _ = Describe("AF", func() {
 
 			})
 
+			Specify("DECODE error in PFD PUT TRANS", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_PUT001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/pfd/transactions/10000",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_invalid.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
 		})
 
 		Context("PFD Transcation DELETE", func() {
@@ -595,6 +1167,68 @@ var _ = Describe("AF", func() {
 					KeyType("af-ctx"), af.AfCtx)
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 				Expect(resp.Code).To(Equal(http.StatusNotFound))
+			})
+
+			Specify("INVALID DELETE PFD Transaction 400", func() {
+
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/pfd/transactions/11000",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 400,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+
+			})
+
+			Specify("INVALID DELETE PFD Transaction 451", func() {
+
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/pfd/transactions/11000",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 451,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusUnavailableForLegalReasons))
+
 			})
 
 		})
@@ -627,6 +1261,75 @@ var _ = Describe("AF", func() {
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusNotFound))
+
+			})
+
+			Specify("PFD TRANS GET SELF APP LINK MISSING", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_APP_PUT_01.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("DECODE error in PFD APP GET", func() {
+
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_invalid.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				reqBodyBytes := bytes.NewReader(reqBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
 
 			})
 
@@ -705,6 +1408,90 @@ var _ = Describe("AF", func() {
 
 			})
 
+			Specify("PFD APP PUT SELF APP LINK MISSING", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_APP_PUT_01.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_APP_PUT_01.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("DECODE error in PFD APP PUT", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_APP_PUT_01.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_invalid.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
 		})
 
 		Context("PFD transaction Application PATCH", func() {
@@ -780,6 +1567,90 @@ var _ = Describe("AF", func() {
 
 			})
 
+			Specify("PFD APP PATCH SELF APP LINK MISSING", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_APP_PATCH_01.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPatch,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_APP_PUT_01.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("DECODE error in PFD APP PATCH", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_APP_PATCH_01.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPatch,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				resBody, err := ioutil.ReadFile(
+					"./testdata/pfd/AF_NB_PFD_invalid.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
 		})
 
 		Context("PFD transaction Application DELETE", func() {
@@ -810,6 +1681,37 @@ var _ = Describe("AF", func() {
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusNotFound))
+
+			})
+
+			Specify("INVALID DELETE PFD APP 451", func() {
+
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/pfd/transactions/10000/"+
+						"applications/app1", nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 451,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusUnavailableForLegalReasons))
 
 			})
 
