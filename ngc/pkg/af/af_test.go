@@ -95,7 +95,6 @@ var _ = Describe("AF", func() {
 				ctx := context.WithValue(req.Context(),
 					KeyType("af-ctx"), af.AfCtx)
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
-
 				Expect(resp.Code).To(Equal(http.StatusCreated))
 
 			})
@@ -167,6 +166,138 @@ var _ = Describe("AF", func() {
 
 			})
 
+			Specify("Sending POST 005 request", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST005.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request with subID")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/subscriptions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+
+			})
+
+			Specify("Sending POST 006 request - no location URL", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST006.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request with subID")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/subscriptions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				resBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST006.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("Sending POST 007 request - no SUB-ID in URL", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST006.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/subscriptions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				resBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST006.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				resBodyBytes := bytes.NewReader(resBody)
+				header := make(http.Header)
+				header.Set("Location",
+					"http://localhost:8080/af/v1/")
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: header,
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("Sending POST 008 request - invalid json", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/invalid.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request with subID")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8080/af/v1/subscriptions",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
 		})
 
 		Context("Subscription GET ALL", func() {
@@ -200,10 +331,46 @@ var _ = Describe("AF", func() {
 				Expect(resp.Code).To(Equal(http.StatusNotFound))
 
 			})
+
+			Specify("Read all Subscriptions - 400", func() {
+
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/subscriptions",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/100_AF_NB_SUB_POST004.json")
+				Expect(err).ShouldNot(HaveOccurred())
+				reqBodyBytes := bytes.NewReader(reqBody)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 400,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				af.TestAf = false
+
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			})
 		})
 
 		Context("Subscription ID GET", func() {
-			Specify("", func() {
+			Specify("VALID SUB-ID", func() {
 				req, err := http.NewRequest(http.MethodGet,
 					"http://localhost:8080/af/v1/subscriptions/11112",
 					nil)
@@ -215,6 +382,52 @@ var _ = Describe("AF", func() {
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
+
+			})
+
+			Specify("INVALID SUB ID", func() {
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/subscriptions/11120",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusNotFound))
+
+			})
+
+			Specify("INVALID GET SUBSCRIPTION 501", func() {
+
+				req, err := http.NewRequest(http.MethodGet,
+					"http://localhost:8080/af/v1/subscriptions/11111",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 501,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusNotImplemented))
 
 			})
 
@@ -244,6 +457,89 @@ var _ = Describe("AF", func() {
 
 			})
 
+			Specify("SUBSCRIPTION PUT INVALID SUB ID", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/300_AF_NB_SUB_SUBID_PUT001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/subscriptions/11120",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+
+			})
+
+			Specify("SUBSCRIPTION PUT Invalid json", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/invalid.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/subscriptions/11111",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+			})
+
+			Specify("PUT Subscription 501", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/300_AF_NB_SUB_SUBID_PUT001.json")
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPut,
+					"http://localhost:8080/af/v1/subscriptions/11111",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 501,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusNotImplemented))
+
+			})
+
 		})
 
 		Context("Subscription ID PATCH", func() {
@@ -267,6 +563,52 @@ var _ = Describe("AF", func() {
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 
 				Expect(resp.Code).To(Equal(http.StatusOK))
+
+			})
+
+			Specify("INVALID SUB ID", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/400_AF_NB_SUB_SUBID_PATCH001.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPatch,
+					"http://localhost:8080/af/v1/subscriptions/11120",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(
+					req.Context(), KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+
+			})
+
+			Specify("INVALID json", func() {
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/invalid.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPatch,
+					"http://localhost:8080/af/v1/subscriptions/11111",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(
+					req.Context(), KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusInternalServerError))
 
 			})
 
@@ -323,6 +665,199 @@ var _ = Describe("AF", func() {
 				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
 				Expect(resp.Code).To(Equal(http.StatusNotFound))
 			})
+
+			Specify("INVALID DELETE SUBSCRIPTION 501", func() {
+
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/subscriptions/11114",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 501,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
+
+				af.TestAf = true
+				af.SetHTTPClient(httpclient)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				af.TestAf = false
+				Expect(resp.Code).To(Equal(http.StatusNotImplemented))
+
+			})
+
+		})
+
+		Describe("Cnca Notify Subscription to AF : ", func() {
+
+			Context("Subscription POST", func() {
+				Specify("Sending POST 001 request", func() {
+					By("Reading json file")
+					reqBody, err := ioutil.ReadFile(
+						"./testdata/100_AF_NB_SUB_POST001.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Preparing request")
+					reqBodyBytes := bytes.NewReader(reqBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8080/af/v1/subscriptions",
+						reqBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx := context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+					Expect(resp.Code).To(Equal(http.StatusCreated))
+
+				})
+			})
+
+			Context("Subscription NOTIFY", func() {
+
+				Specify("Sending NOTIFY 001 request", func() {
+
+					By("Preparing Notify request with invalid json")
+					ntfBody, err := ioutil.ReadFile(
+						"./testdata/AF_SB_NOTIFY_POST005.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					ntfBodyBytes := bytes.NewReader(ntfBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8081/af/v1/notifications",
+						ntfBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx = context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+					Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+				})
+
+				Specify("Sending NOTIFY 002 request", func() {
+
+					By("Preparing Notify request with non existent Trans ID")
+					ntfBody, err := ioutil.ReadFile(
+						"./testdata/AF_SB_NOTIFY_POST001.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					ntfBodyBytes := bytes.NewReader(ntfBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8081/af/v1/notifications",
+						ntfBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx = context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+					Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+				})
+
+				Specify("Sending NOTIFY 003 request", func() {
+
+					By("Preparing Notify request with empty trans ID")
+					ntfBody, err := ioutil.ReadFile(
+						"./testdata/AF_SB_NOTIFY_POST002.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					ntfBodyBytes := bytes.NewReader(ntfBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8081/af/v1/notifications",
+						ntfBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx = context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+					Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+				})
+
+				Specify("Sending NOTIFY 004 request", func() {
+
+					By("Preparing Notify request with valid Trans ID")
+					ntfBody, err := ioutil.ReadFile(
+						"./testdata/AF_SB_NOTIFY_POST003.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					ntfBodyBytes := bytes.NewReader(ntfBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8081/af/v1/notifications",
+						ntfBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx = context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+					Expect(resp.Code).To(Equal(http.StatusOK))
+
+				})
+
+				Specify("Sending NOTIFY 005 request", func() {
+
+					By("Preparing Notify request with invalid Trans ID")
+					ntfBody, err := ioutil.ReadFile(
+						"./testdata/AF_SB_NOTIFY_POST004.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					ntfBodyBytes := bytes.NewReader(ntfBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8081/af/v1/notifications",
+						ntfBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx = context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+					Expect(resp.Code).To(Equal(http.StatusInternalServerError))
+
+				})
+
+			})
+
+			Specify("DELETE Subcription 01", func() {
+				req, err := http.NewRequest(http.MethodDelete,
+					"http://localhost:8080/af/v1/subscriptions/11111",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
+			})
+
 		})
 
 		Context("PFD  GET ALL - NO PFDS ", func() {

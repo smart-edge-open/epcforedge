@@ -1,0 +1,12 @@
+{
+    "afTransId": "",
+    "dnaiChgType": "EARLY",
+    "sourceTrafficRoute":{},
+    "subscribedEvent":"UP_PATH_CH",
+    "targetTrafficRoute":{},
+    "gpsi":"msisdn-1234567890",
+    "sourceUeIpv4Addr": "192.10.20.30",
+    "targetUeIpv4Addr": "192.10.20.31",
+    "ueMac": "00:0a:95:9d:68:16"
+}
+

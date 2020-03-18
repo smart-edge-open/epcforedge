@@ -282,12 +282,3 @@ func (e GenericError) Error() string {
 	return e.error
 }
 
-// Body returns the raw bytes of the response
-func (e GenericError) Body() []byte {
-	return e.body
-}
-
-// Model returns the unpacked model of the error
-func (e GenericError) Model() interface{} {
-	return e.model
-}
