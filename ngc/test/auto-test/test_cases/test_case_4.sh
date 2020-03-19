@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#SPDX-License-Identifier: Apache-2.0
+#Copyright © 2019 Intel Corporation
+
 
 # A sample test case to show json unmarshalling using jq tool. body variable 
 # after making post request contains json data. jq tool is used to unmarshall

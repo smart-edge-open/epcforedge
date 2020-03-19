@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#SPDX-License-Identifier: Apache-2.0
+#Copyright © 2019 Intel Corporation
+
 # A basic test case which uses different function exported from the test_nef.sh
 # For generic test case use see test_case_2.sh
 

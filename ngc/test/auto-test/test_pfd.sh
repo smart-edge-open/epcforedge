@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#SPDX-License-Identifier: Apache-2.0
+#Copyright © 2019 Intel Corporation
+
 		
 # Script to build & send http/https request to server for PFD applications and 
 # validate the resp nse.

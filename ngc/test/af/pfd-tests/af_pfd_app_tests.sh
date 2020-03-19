@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#SPDX-License-Identifier: Apache-2.0
+#Copyright © 2019 Intel Corporation
+
 # Test Case Scenario 
 # 1) POST 001 with app1,app2
 # 2) GET 001,app1

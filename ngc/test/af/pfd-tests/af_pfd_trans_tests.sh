@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#SPDX-License-Identifier: Apache-2.0
+#Copyright © 2019 Intel Corporation
+
 # Test Case Scenarios in this script 
 # 1) PFD GET ALL (no PFD) 
 # 2) PFD POST with two apps - app1, app2
