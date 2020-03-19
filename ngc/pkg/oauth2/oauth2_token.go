@@ -6,10 +6,11 @@ package oauth2
 import (
 	"encoding/json"
 	"errors"
-	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"path/filepath"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 
 	logger "github.com/otcshare/common/log"
 )
@@ -196,6 +197,6 @@ func ValidateAccessToken(reqToken string) (status TokenVerificationResult,
 		log.Info("Token is invalid")
 		return StatusInvalidToken, errors.New("Token is Invalid")
 	}
-	log.Info("OAuth2 Token Validation successfull")
+	log.Info("OAuth2 Token Validation successful")
 	return StatusSuccess, nil
 }
