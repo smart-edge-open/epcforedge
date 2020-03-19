@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SPDX-License-Identifier: Apache-2.0
-#Copyright © 2019 Intel Corporation
+#Copyright © 2020 Intel Corporation
 
 
 # A sample test case to show json unmarshalling using jq tool. body variable 

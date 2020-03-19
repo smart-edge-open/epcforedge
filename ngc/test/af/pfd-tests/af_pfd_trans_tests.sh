@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SPDX-License-Identifier: Apache-2.0
-#Copyright © 2019 Intel Corporation
+#Copyright © 2020 Intel Corporation
 
 # Test Case Scenarios in this script 
 # 1) PFD GET ALL (no PFD) 

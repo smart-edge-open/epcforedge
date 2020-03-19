@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SPDX-License-Identifier: Apache-2.0
-#Copyright © 2019 Intel Corporation
+#Copyright © 2020 Intel Corporation
 
 # Before running the scripts, the pre-requisite is to run the AF and NEF 
 # on baremetal with same config as in the config file

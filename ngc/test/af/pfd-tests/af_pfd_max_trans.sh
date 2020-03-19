@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SPDX-License-Identifier: Apache-2.0
-#Copyright © 2019 Intel Corporation
+#Copyright © 2020 Intel Corporation
 
 # Test Case Scenario 
 # 1) PFD POST 11 transactions
