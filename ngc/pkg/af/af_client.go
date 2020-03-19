@@ -31,8 +31,8 @@ var (
 // Client manages communication with the NEF Northbound API API v1.0.1
 type Client struct {
 	cfg *CliConfig
-	// Reuse a single struct instead of allocating one for each service on
-	// the heap.
+	// Reuse a single struct instead of allocating one for each service
+	// on the heap.
 	common service
 	// API Services
 	TrafficInfluSubGetAllAPI  *TrafficInfluenceSubscriptionGetAllAPIService
@@ -56,12 +56,13 @@ type service struct {
 	client *Client
 }
 
-// Parameters for AF testing, when all tests are
-// updated, these variables may be removed
+// TestAf boolean to be set to true in AF UT
 var TestAf bool = false
+
+// HTTPClient to be setup in AF UT
 var HTTPClient *http.Client
 
-// Function to setup a httpClient for testing if required
+// SetHTTPClient Function to setup a httpClient for testing if required
 func SetHTTPClient(httpClient *http.Client) {
 
 	HTTPClient = httpClient
@@ -281,4 +282,3 @@ type GenericError struct {
 func (e GenericError) Error() string {
 	return e.error
 }
-

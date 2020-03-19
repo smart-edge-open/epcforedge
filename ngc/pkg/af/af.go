@@ -63,7 +63,7 @@ var (
 	AfCtx *Context
 	//AfRouter public var
 	AfRouter *mux.Router
-	//NotifyRouter
+	//NotifRouter public var
 	NotifRouter *mux.Router
 )
 

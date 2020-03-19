@@ -35,7 +35,7 @@ func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 func testingAFClient(fn RoundTripFunc) *http.Client {
 
 	return &http.Client{
-		Transport: RoundTripFunc(fn),
+		Transport: fn,
 	}
 
 }
@@ -508,6 +508,7 @@ var _ = Describe("AF", func() {
 				By("Reading json file")
 				reqBody, err := ioutil.ReadFile(
 					"./testdata/300_AF_NB_SUB_SUBID_PUT001.json")
+				Expect(err).ShouldNot(HaveOccurred())
 
 				By("Preparing request")
 				reqBodyBytes := bytes.NewReader(reqBody)
