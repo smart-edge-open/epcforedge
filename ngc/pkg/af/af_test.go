@@ -48,8 +48,6 @@ var _ = Describe("AF", func() {
 		afIsRunning bool
 	)
 
-	ctx, srvCancel = context.WithCancel(context.Background())
-
 	Describe("Cnca client request methods to AF : ", func() {
 
 		Context("Subscription GET ALL", func() {
@@ -744,7 +742,7 @@ var _ = Describe("AF", func() {
 
 					By("Sending request")
 					resp := httptest.NewRecorder()
-					ctx = context.WithValue(req.Context(),
+					ctx := context.WithValue(req.Context(),
 						KeyType("af-ctx"), af.AfCtx)
 					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
 
@@ -767,7 +765,7 @@ var _ = Describe("AF", func() {
 
 					By("Sending request")
 					resp := httptest.NewRecorder()
-					ctx = context.WithValue(req.Context(),
+					ctx := context.WithValue(req.Context(),
 						KeyType("af-ctx"), af.AfCtx)
 					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
 
@@ -790,7 +788,7 @@ var _ = Describe("AF", func() {
 
 					By("Sending request")
 					resp := httptest.NewRecorder()
-					ctx = context.WithValue(req.Context(),
+					ctx := context.WithValue(req.Context(),
 						KeyType("af-ctx"), af.AfCtx)
 					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
 
@@ -813,7 +811,7 @@ var _ = Describe("AF", func() {
 
 					By("Sending request")
 					resp := httptest.NewRecorder()
-					ctx = context.WithValue(req.Context(),
+					ctx := context.WithValue(req.Context(),
 						KeyType("af-ctx"), af.AfCtx)
 					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
 
@@ -836,7 +834,7 @@ var _ = Describe("AF", func() {
 
 					By("Sending request")
 					resp := httptest.NewRecorder()
-					ctx = context.WithValue(req.Context(),
+					ctx := context.WithValue(req.Context(),
 						KeyType("af-ctx"), af.AfCtx)
 					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
 
