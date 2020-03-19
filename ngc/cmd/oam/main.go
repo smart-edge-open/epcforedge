@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	// Enable/Disable HTTP2 Flag
-	Http2Enabled = true
+	// HTTP2Enabled is a flag for Enablling/DIsabling HTTP2
+	HTTP2Enabled = true
 )
 
 type oamCfg struct {
@@ -79,7 +79,7 @@ func main() {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-	if Http2Enabled == true {
+	if HTTP2Enabled == true {
 		if err = http2.ConfigureServer(serverOAM, &http2.Server{}); err != nil {
 			log.Errf("OAM failed at configuring HTTP2 server ")
 			os.Exit(1)

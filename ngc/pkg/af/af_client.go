@@ -31,8 +31,8 @@ var (
 // Client manages communication with the NEF Northbound API API v1.0.1
 type Client struct {
 	cfg *CliConfig
-	// Reuse a single struct instead of allocating one for each service on
-	// the heap.
+	// Reuse a single struct instead of allocating one for each service
+	// on the heap.
 	common service
 	// API Services
 	TrafficInfluSubGetAllAPI  *TrafficInfluenceSubscriptionGetAllAPIService
@@ -56,10 +56,28 @@ type service struct {
 	client *Client
 }
 
+// TestAf boolean to be set to true in AF UT
+var TestAf bool = false
+
+// HTTPClient to be setup in AF UT
+var HTTPClient *http.Client
+
+// SetHTTPClient Function to setup a httpClient for testing if required
+func SetHTTPClient(httpClient *http.Client) {
+
+	HTTPClient = httpClient
+
+}
+
 // NewClient creates a new API client.
 func NewClient(cfg *CliConfig) *Client {
 
-	if cfg.HTTPClient == nil {
+	if TestAf == true {
+
+		cfg.HTTPClient = HTTPClient
+
+	}
+	if cfg.HTTPClient == nil || TestAf == false {
 
 		CACert, err := ioutil.ReadFile(cfg.NEFCliCertPath)
 		if err != nil {
@@ -263,14 +281,4 @@ type GenericError struct {
 // Error returns non-empty string if there was an error.
 func (e GenericError) Error() string {
 	return e.error
-}
-
-// Body returns the raw bytes of the response
-func (e GenericError) Body() []byte {
-	return e.body
-}
-
-// Model returns the unpacked model of the error
-func (e GenericError) Model() interface{} {
-	return e.model
 }

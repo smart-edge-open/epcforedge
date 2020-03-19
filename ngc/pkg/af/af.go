@@ -63,6 +63,8 @@ var (
 	AfCtx *Context
 	//AfRouter public var
 	AfRouter *mux.Router
+	//NotifRouter public var
+	NotifRouter *mux.Router
 )
 
 func runServer(ctx context.Context, AfCtx *Context) error {
@@ -79,7 +81,7 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 	AfCtx.transactions = make(TransactionIDs)
 	AfCtx.subscriptions = make(NotifSubscryptions)
 	AfRouter = NewAFRouter(AfCtx)
-	NotifRouter := NewNotifRouter(AfCtx)
+	NotifRouter = NewNotifRouter(AfCtx)
 
 	serverCNCA := &http.Server{
 		Addr:         AfCtx.cfg.SrvCfg.CNCAEndpoint,
