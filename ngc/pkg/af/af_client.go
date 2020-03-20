@@ -72,12 +72,12 @@ func SetHTTPClient(httpClient *http.Client) {
 // NewClient creates a new API client.
 func NewClient(cfg *CliConfig) *Client {
 
-	if TestAf == true {
+	if TestAf {
 
 		cfg.HTTPClient = HTTPClient
 
 	}
-	if cfg.HTTPClient == nil || TestAf == false {
+	if cfg.HTTPClient == nil || !TestAf {
 
 		CACert, err := ioutil.ReadFile(cfg.NEFCliCertPath)
 		if err != nil {
