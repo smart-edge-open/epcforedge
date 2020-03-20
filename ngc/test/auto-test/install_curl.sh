@@ -1,7 +1,7 @@
-#!/bin/bash
-
 #SPDX-License-Identifier: Apache-2.0
 #Copyright © 2020 Intel Corporation
+
+#!/bin/bash
 
 # Script to install curl 7.68.0. Sudo permissions are required to install it.
 # Additional packages might be required, if script fails at some point install

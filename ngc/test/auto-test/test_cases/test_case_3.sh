@@ -1,7 +1,7 @@
-#!/bin/bash
-
 #SPDX-License-Identifier: Apache-2.0
 #Copyright © 2020 Intel Corporation
+
+#!/bin/bash
 
 # A sample test case to test the maximum subscription a server can handle. 
 
