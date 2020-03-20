@@ -231,7 +231,11 @@ func (c *Client) prepareRequest(
 			return nil, err
 		}
 		// Add the Authorization header to the request.
-		localVarRequest.Header.Add("Authorization", "Bearer "+auth)
+		if len(auth) > 0 {
+			localVarRequest.Header.Add("Authorization", "Bearer "+auth)
+		} else {
+			localVarRequest.Header.Add("Authorization", "Bearer ")
+		}
 	}
 
 	return localVarRequest, nil

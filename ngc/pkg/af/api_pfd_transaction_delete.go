@@ -33,6 +33,12 @@ func (a *PfdManagementTransactionDeleteAPIService) handlePfdDeleteResponse(
 	case 400, 401, 403, 404, 429, 500, 503:
 
 		var v ProblemDetails
+		if r.StatusCode == 401 {
+			if fetchNEFAuthorizationToken() != nil {
+				log.Infoln("Token refresh failed")
+			}
+		}
+
 		err := json.Unmarshal(body, &v)
 		if err != nil {
 			newErr.error = err.Error()
