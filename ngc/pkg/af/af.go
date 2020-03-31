@@ -10,11 +10,11 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	oauth2 "github.com/otcshare/epcforedge/ngc/pkg/oauth2"
+	oauth2 "github.com/open-ness/epcforedge/ngc/pkg/oauth2"
 	"golang.org/x/net/http2"
 
-	logger "github.com/otcshare/common/log"
-	config "github.com/otcshare/epcforedge/ngc/pkg/config"
+	logger "github.com/open-ness/common/log"
+	config "github.com/open-ness/epcforedge/ngc/pkg/config"
 )
 
 const (
