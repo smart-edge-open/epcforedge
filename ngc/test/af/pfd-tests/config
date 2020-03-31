@@ -11,7 +11,7 @@ export http_port=8050
 export https_port=8050
 
 # Directory where curl with http2 is installed
-export curl_path=/home/soniabha/go/src/github.com/otcshare/epcforedge/ngc/test/auto-test/curl-7.68.0/src/curl
+export curl_path=/home/soniabha/go/src/github.com/open-ness/epcforedge/ngc/test/auto-test/curl-7.68.0/src/curl
 
 # NEF node id or hostname
 export nef_host=localhost
