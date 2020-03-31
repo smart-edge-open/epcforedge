@@ -1,18 +1,6 @@
-/*******************************************************************************
-* Copyright 2019 Intel Corporation. All rights reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*******************************************************************************/
+/* SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2019 Intel Corporation
+ */
 
 /**
  * @file    cpfInterface.cpp
@@ -207,6 +195,7 @@ int cpfCurlPost(string &url, string &postData, stringstream &responseData)
 
     // Logging
     OAMAGENT_LOG(INFO, "Starting HTTP POST for url: %s\n", url.c_str());
+
 #ifdef INT_TEST
     static int postTestCaseNum = 0;
     const char *postTestCaseRspData[2] = { 
@@ -267,7 +256,7 @@ int cpfCurlPost(string &url, string &postData, stringstream &responseData)
     // Set reponse data hande
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cpfCurlDataHandle);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
-
+    
     // Perform POST
     ret = curl_easy_perform(curl);
     if(ret != CURLE_OK) {
@@ -538,6 +527,7 @@ int cpfCurlPut(string &url, string &putData, stringstream &responseData)
 
     // Logging
     OAMAGENT_LOG(INFO, "Starting HTTP PUT for url: %s\n", url.c_str());
+
     // Generate json file for uploading
     hd_src = fopen("put_data.json", "wb");
     if (NULL == hd_src) {

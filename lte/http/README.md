@@ -32,7 +32,7 @@ http {
     #gzip  on;
 
     server {
-        listen       8080;
+        listen       8083;
         server_name  localhost;
         #charset     utf-8;
         add_header "Access-Control-Allow-Origin" "*" always;
@@ -77,6 +77,59 @@ http {
             root   html;
         }
     }
+    # HTTPS server
+    #
+    server {
+        listen       8082 ssl http2;
+        server_name  localhost;
+
+        ssl_certificate      /etc/openness/certs/ngc/server-cert.pem;
+        ssl_certificate_key  /etc/openness/certs/ngc/server-key.pem;
+
+    #    ssl_session_cache    shared:SSL:1m;
+    #    ssl_session_timeout  5m;
+
+    #    ssl_ciphers  HIGH:!aNULL:!MD5;
+    #    ssl_prefer_server_ciphers  on;
+
+        add_header "Access-Control-Allow-Origin" "*" always;
+        add_header "Access-Control-Allow-Headers" "Content-Type" always;
+
+        location /userplanes {
+                if ($request_method = "OPTIONS") {
+                   add_header "Access-Control-Allow-Origin" "*" always;
+                   add_header "Access-Control-Allow-Headers" "Content-Type" always;
+                   add_header "Access-Control-Allow-Methods" "GET,POST,PATCH,DELETE" always;
+                   return 200;
+                }
+
+                if ($request_method = "GET") {
+                  add_header "Access-Control-Allow-Origin" "*" always;
+                  add_header "Content-Type" "application/json" always;
+                }
+
+                if ($request_method = "DELETE") {
+                  add_header "Access-Control-Allow-Origin" "*" always;
+                  add_header "Content-Type" "application/json" always;
+                }
+
+                if ($request_method = "PATCH") {
+                  add_header "Access-Control-Allow-Origin" "*" always;
+                  add_header "Content-Type" "application/json" always;
+                }
+
+                if ($request_method = "POST") {
+                  add_header "Access-Control-Allow-Origin" "*" always;
+                  add_header "Content-Type" "application/json" always;
+                }
+
+                fastcgi_pass  127.0.0.1:9999;
+                include       fastcgi_params;
+                fastcgi_param HTTPS on;
+        }
+
+    }
+
 }
 
 ```

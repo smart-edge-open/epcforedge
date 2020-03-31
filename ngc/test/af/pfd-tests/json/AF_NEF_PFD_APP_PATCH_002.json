@@ -1,0 +1,11 @@
+{
+  "externalAppId": "app1",
+  "self": "",
+  "pfds": {
+    "pfd2": {
+      "pfdId": "pfd2",
+      "flowDescriptions": [],
+      "domainNames": []
+    }
+  }
+}

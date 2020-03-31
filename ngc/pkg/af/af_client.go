@@ -15,13 +15,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"reflect"
 	"regexp"
-	"strings"
 	"time"
 
 	"golang.org/x/net/http2"
 )
+
+const contentType string = "application/json"
 
 var (
 	jsonCheck = regexp.MustCompile("(?i:[application|text]/json)")
@@ -31,26 +31,53 @@ var (
 // Client manages communication with the NEF Northbound API API v1.0.1
 type Client struct {
 	cfg *CliConfig
-	// Reuse a single struct instead of allocating one for each service on
-	// the heap.
+	// Reuse a single struct instead of allocating one for each service
+	// on the heap.
 	common service
 	// API Services
-	TrafficInfluSubGetAllAPI *TrafficInfluenceSubscriptionGetAllAPIService
-	TrafficInfluSubDeleteAPI *TrafficInfluenceSubscriptionDeleteAPIService
-	TrafficInfluSubGetAPI    *TrafficInfluenceSubscriptionGetAPIService
-	TrafficInfluSubPatchAPI  *TrafficInfluenceSubscriptionPatchAPIService
-	TrafficInfluSubPostAPI   *TrafficInfluenceSubscriptionPostAPIService
-	TrafficInfluSubPutAPI    *TrafficInfluenceSubscriptionPutAPIService
+	TrafficInfluSubGetAllAPI  *TrafficInfluenceSubscriptionGetAllAPIService
+	TrafficInfluSubDeleteAPI  *TrafficInfluenceSubscriptionDeleteAPIService
+	TrafficInfluSubGetAPI     *TrafficInfluenceSubscriptionGetAPIService
+	TrafficInfluSubPatchAPI   *TrafficInfluenceSubscriptionPatchAPIService
+	TrafficInfluSubPostAPI    *TrafficInfluenceSubscriptionPostAPIService
+	TrafficInfluSubPutAPI     *TrafficInfluenceSubscriptionPutAPIService
+	PfdManagementGetAllAPI    *PfdManagementTransactionGetAllAPIService
+	PfdManagementPostAPI      *PfdManagementTransactionPostAPIService
+	PfdManagementGetAPI       *PfdManagementTransactionGetAPIService
+	PfdManagementDeleteAPI    *PfdManagementTransactionDeleteAPIService
+	PfdManagementPutAPI       *PfdManagementTransactionPutAPIService
+	PfdManagementAppGetAPI    *PfdManagementTransactionAppGetAPIService
+	PfdManagementAppDeleteAPI *PfdManagementTransactionAppDeleteAPIService
+	PfdManagementAppPutAPI    *PfdManagementTransactionAppPutAPIService
+	PfdManagementAppPatchAPI  *PfdManagementTransactionAppPatchAPIService
 }
 
 type service struct {
 	client *Client
 }
 
+// TestAf boolean to be set to true in AF UT
+var TestAf bool = false
+
+// HTTPClient to be setup in AF UT
+var HTTPClient *http.Client
+
+// SetHTTPClient Function to setup a httpClient for testing if required
+func SetHTTPClient(httpClient *http.Client) {
+
+	HTTPClient = httpClient
+
+}
+
 // NewClient creates a new API client.
 func NewClient(cfg *CliConfig) *Client {
 
-	if cfg.HTTPClient == nil {
+	if TestAf {
+
+		cfg.HTTPClient = HTTPClient
+
+	}
+	if cfg.HTTPClient == nil || !TestAf {
 
 		CACert, err := ioutil.ReadFile(cfg.NEFCliCertPath)
 		if err != nil {
@@ -87,43 +114,26 @@ func NewClient(cfg *CliConfig) *Client {
 		(*TrafficInfluenceSubscriptionPostAPIService)(&c.common)
 	c.TrafficInfluSubPutAPI =
 		(*TrafficInfluenceSubscriptionPutAPIService)(&c.common)
+	c.PfdManagementGetAllAPI =
+		(*PfdManagementTransactionGetAllAPIService)(&c.common)
+	c.PfdManagementPostAPI =
+		(*PfdManagementTransactionPostAPIService)(&c.common)
+	c.PfdManagementGetAPI =
+		(*PfdManagementTransactionGetAPIService)(&c.common)
+	c.PfdManagementDeleteAPI =
+		(*PfdManagementTransactionDeleteAPIService)(&c.common)
+	c.PfdManagementPutAPI =
+		(*PfdManagementTransactionPutAPIService)(&c.common)
+	c.PfdManagementAppGetAPI =
+		(*PfdManagementTransactionAppGetAPIService)(&c.common)
+	c.PfdManagementAppDeleteAPI =
+		(*PfdManagementTransactionAppDeleteAPIService)(&c.common)
+	c.PfdManagementAppPutAPI =
+		(*PfdManagementTransactionAppPutAPIService)(&c.common)
+	c.PfdManagementAppPatchAPI =
+		(*PfdManagementTransactionAppPatchAPIService)(&c.common)
 
 	return c
-}
-
-// selectHeaderContentType select a content type from the available list.
-func selectHeaderContentType(contentTypes []string) string {
-	if len(contentTypes) == 0 {
-		return ""
-	}
-	if contains(contentTypes, "application/json") {
-		return "application/json"
-	}
-	// use the first content type specified in 'consumes'
-	return contentTypes[0]
-}
-
-// selectHeaderAccept join all accept types and return
-func selectHeaderAccept(accepts []string) string {
-	if len(accepts) == 0 {
-		return ""
-	}
-
-	if contains(accepts, "application/json") {
-		return "application/json"
-	}
-
-	return strings.Join(accepts, ",")
-}
-
-// contains is a case insenstive match, finding needle in a haystack
-func contains(words []string, word string) bool {
-	for _, a := range words {
-		if strings.EqualFold(strings.ToLower(a), strings.ToLower(word)) {
-			return true
-		}
-	}
-	return false
 }
 
 // callAPI do the request.
@@ -157,13 +167,8 @@ func genBody(postBody interface{},
 	)
 
 	if postBody != nil {
-		contentType := headerParams["Content-Type"]
-		if contentType == "" {
-			contentType = detectContentType(postBody)
-			headerParams["Content-Type"] = contentType
-		}
-
-		body, err = setBody(postBody, contentType)
+		contenttype := headerParams["Content-Type"]
+		body, err = setBody(postBody, contenttype)
 		if err != nil {
 			return nil, err
 		}
@@ -220,6 +225,19 @@ func (c *Client) prepareRequest(
 
 	}
 
+	if c.cfg.OAuth2Support {
+		auth, err := getNEFAuthorizationToken()
+		if err != nil {
+			return nil, err
+		}
+		// Add the Authorization header to the request.
+		if len(auth) > 0 {
+			localVarRequest.Header.Add("Authorization", "Bearer "+auth)
+		} else {
+			localVarRequest.Header.Add("Authorization", "Bearer ")
+		}
+	}
+
 	return localVarRequest, nil
 }
 
@@ -256,28 +274,6 @@ func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer,
 	return bodyBuf, nil
 }
 
-// detectContentType method is used to get `Request.Body` content
-// type for request header
-func detectContentType(body interface{}) string {
-	contentType := "text/plain; charset=utf-8"
-	kind := reflect.TypeOf(body).Kind()
-
-	switch kind {
-	case reflect.Struct, reflect.Map, reflect.Ptr:
-		contentType = "application/json; charset=utf-8"
-	case reflect.String:
-		contentType = "text/plain; charset=utf-8"
-	default:
-		if b, ok := body.([]byte); ok {
-			contentType = http.DetectContentType(b)
-		} else if kind == reflect.Slice {
-			contentType = "application/json; charset=utf-8"
-		}
-	}
-
-	return contentType
-}
-
 // GenericError Provides access to the body,
 // error and model on returned errors.
 type GenericError struct {
@@ -289,14 +285,4 @@ type GenericError struct {
 // Error returns non-empty string if there was an error.
 func (e GenericError) Error() string {
 	return e.error
-}
-
-// Body returns the raw bytes of the response
-func (e GenericError) Body() []byte {
-	return e.body
-}
-
-// Model returns the unpacked model of the error
-func (e GenericError) Model() interface{} {
-	return e.model
 }

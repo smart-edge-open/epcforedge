@@ -1,20 +1,18 @@
 /* SPDX-License-Identifier: Apache-2.0
-* Copyright (c) 2019 Intel Corporation
+* Copyright (c) 2019-2020 Intel Corporation
  */
 
 package ngcnef
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
+	"net/http"
+	"time"
+
 	"github.com/gorilla/mux"
 	logtool "github.com/open-ness/common/log"
 	"golang.org/x/net/http2"
-	"io/ioutil"
-	"net/http"
-	"path/filepath"
-	"time"
 )
 
 // NefApp structure to store the variables/contexts for access in UT
@@ -49,14 +47,18 @@ type Config struct {
 	// API Root for the NEF
 	NefAPIRoot                string `json:"nefAPIRoot"`
 	LocationPrefix            string `json:"locationPrefix"`
+	LocationPrefixPfd         string `json:"locationPrefixPfd"`
 	MaxSubSupport             int    `json:"maxSubSupport"`
+	MaxPfdTransSupport        int    `json:"maxPfdTransSupport"`
 	MaxAFSupport              int    `json:"maxAFSupport"`
 	SubStartID                int    `json:"subStartID"`
+	PfdTransStartID           int    `json:"pfdTransStartID"`
 	UpfNotificationResURIPath string `json:"UpfNotificationResUriPath"`
 	UserAgent                 string `json:"UserAgent"`
 	HTTPConfig                HTTPConfig
 	HTTP2Config               HTTP2Config
 	AfServiceIDs              []interface{} `json:"afServiceIDs"`
+	OAuth2Support             bool          `json:"OAuth2Support"`
 }
 
 // NEF Module Context Data Structure
@@ -199,16 +201,6 @@ func runServer(ctx context.Context, nefCtx *nefContext) error {
 
 }
 
-// LoadJSONConfig reads a file located at configPath and unmarshals it to
-// config structure
-func loadJSONConfig(configPath string, config interface{}) error {
-	cfgData, err := ioutil.ReadFile(filepath.Clean(configPath))
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(cfgData, config)
-}
-
 // Run : This function reads the NEF Module configuration file and stores in
 //       NEF Module Context. This also calls the Initialization/Creation of
 //       NEF Data. Also it  calls runServer function for starting HTTP Server.
@@ -249,8 +241,11 @@ func printConfig(cfg Config) {
 	log.Infoln("********************* NGC NEF CONFIGURATION ******************")
 	log.Infoln("APIRoot: ", cfg.NefAPIRoot)
 	log.Infoln("LocationPrefix: ", cfg.LocationPrefix)
+	log.Infoln("LocationPrefixPfd: ", cfg.LocationPrefixPfd)
 	log.Infoln("UpfNotificationResUriPath:", cfg.UpfNotificationResURIPath)
+	log.Infoln("Trans Start ID", cfg.PfdTransStartID)
 	log.Infoln("UserAgent:", cfg.UserAgent)
+	log.Infoln("OAuth2Support:", cfg.OAuth2Support)
 	log.Infoln("-------------------------- NEF SERVER ----------------------")
 	log.Infoln("EndPoint(HTTP): ", cfg.HTTPConfig.Endpoint)
 	log.Infoln("EndPoint(HTTP2): ", cfg.HTTP2Config.Endpoint)

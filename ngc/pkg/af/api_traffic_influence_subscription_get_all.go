@@ -62,21 +62,10 @@ func (a *TrafficInfluenceSubscriptionGetAllAPIService) SubscriptionsGetAll(
 		fmt.Sprintf("%v", afID), -1)
 
 	headerParams := make(map[string]string)
-	// to determine the Content-Type header
-	contentTypes := []string{"application/json"}
-	// set Content-Type header
-	contentType := selectHeaderContentType(contentTypes)
-	if contentType != "" {
-		headerParams["Content-Type"] = contentType
-	}
 
-	// to determine the Accept header
-	headerAccepts := []string{"application/json"}
-	// set Accept header
-	headerAccept := selectHeaderAccept(headerAccepts)
-	if headerAccept != "" {
-		headerParams["Accept"] = headerAccept
-	}
+	headerParams["Content-Type"] = contentType
+	headerParams["Accept"] = contentType
+
 	r, err := a.client.prepareRequest(ctx, path, method,
 		getBody, headerParams)
 

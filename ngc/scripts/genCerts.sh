@@ -6,45 +6,129 @@
 helpPrint()
 {
    echo ""
-   echo "Usage: $0 -t sanType -n subj1 -m subj2"
+   echo "Usage: $0 [-t sanType -h {sanValue | *}] | *"
    echo -e "\t-t SAN type: could be IP or DNS"
-   echo -e "\t-n subject alternative name 1: could be IP address or domain name for NEF."
-   echo -e "\t-m subject alternative name 2: could be IP address or domain name for AF."
+   echo -e "\t-h subject alternative names list: could be one or more IP addressess or domain names separated by space"
+   echo -e "\t"
+   echo -e "Ex: $0 -t DNS -h afservice nefservice localhost"
+   echo -e "    $0 -t IP -h 172.168.10.12 172.168.10.56"
+   echo -e "    $0 -t DNS -h controller -t IP -h 172.168.10.12 172.168.10.56"
+   echo -e "    $0 -t IP -h 172.168.10.12 -t DNS -h afservice nefservice localhost"
+   echo -e ""
    exit 1 # Exit with help
 }
 
+Hostname_count=0
+Hostname_flag=0
+IP_count=0
+IP_flag=0
+subjstr=""
+subj1=""
+tupleStarted=0
 
-while getopts "t:n:m:" opt
+while [ "$1" != "" ]; 
 do
-   case "$opt" in
-      t ) sanType="$OPTARG" ;;
-      n ) subj1="$OPTARG" ;;
-      m ) subj2="$OPTARG" ;;
-      ? ) helpPrint ;; # Print help
-   esac
+   case $1 in
+      -t )
+         if [ $tupleStarted == 1 ]
+         then
+            echo "Missing -h option"
+            helpPrint
+         else
+            tupleStarted=1
+         fi
+         if [ $Hostname_flag == 1 ]
+         then
+            Hostname_flag=0
+         fi
+         if [ $IP_flag == 1 ]
+         then
+            IP_flag=0
+         fi
+         shift 
+         if [ "$1" == IP ] || [ "$1" == DNS ] 
+         then
+            sanType="$1"
+         else
+            echo "Missing/Wrong sanType"
+            helpPrint
+         fi
+         ;;
+      -h )
+         if [ "$sanType" == "" ] || [ $Hostname_flag != 0 ] || [ $IP_flag != 0 ]
+         then
+            echo "Missing -t option"
+            helpPrint
+         fi
+         shift
+         if [ "$1" != "" ] && [ "$1" != "-t" ] && [ "$1" != "-h" ]
+         then
+            tupleStarted=0
+            if [ "$subj1" == "" ]
+            then
+               subj1="$1"
+            fi
+            if [ "$sanType" == DNS ]
+            then
+               Hostname_flag=$((Hostname_flag+1))
+               Hostname_count=$((Hostname_count+1))
+               if [ "$subjstr" == "" ]
+               then
+                  subjstr=$sanType"."$Hostname_count":""$1"
+               else
+                  subjstr+=","$sanType"."$Hostname_count":""$1"
+               fi
+            fi
+            if [ "$sanType" == IP ]
+            then
+               IP_flag=$((IP_flag+1))
+               IP_count=$((IP_count+1))
+               if [ "$subjstr" == "" ]
+               then 
+                  subjstr=$sanType"."$IP_count":""$1"
+               else
+                  subjstr+=","$sanType"."$IP_count":""$1"
+               fi
+            fi
+         else
+            echo "Missing argument for -h option"
+            helpPrint
+         fi
+         ;;
+      ? ) helpPrint # Print help
+         ;;
+      * )
+         if [ $Hostname_flag == 1 ]
+         then
+            Hostname_count=$((Hostname_count+1))
+            subjstr+=","$sanType"."$Hostname_count":""$1"
+         elif [ $IP_flag == 1 ]
+         then
+            IP_count=$((IP_count+1))
+            subjstr+=","$sanType"."$IP_count":""$1"
+         else
+            echo "Incorrect Input"
+            helpPrint
+         fi
+         ;;
+  esac
+  shift
 done
 
-
-if [ -z "$subj1" ] || [ -z "$subj2" ] || [ -z "$sanType" ]
+if [ $tupleStarted != 0 ]
 then
-   echo "Some input parameters empty"
+   echo "Missing -h option "
    helpPrint
 fi
 
-if [ "$sanType" == IP ] || [ "$sanType" == DNS ]
-then 
-   echo "Input OK"
-else
-   echo "Wrong sanType"
+if [ -z "$subj1" ] || [ -z "$subjstr" ] || [ -z "$sanType" ]
+then
+   echo "One of the input parameters missing"
    helpPrint
-   exit 1
 fi
-
 
 echo "Running with input parameters:"
-echo "$sanType"
-echo "$subj1"
-echo "$subj2"
+echo "$subjstr"
 
 ROOT_CA_NAME=OpenNESS-5G-Root
 
@@ -78,7 +162,7 @@ then
    exit 1
 fi
 rm -f extfile.cnf
-echo "subjectAltName = $sanType.1:$subj1,$sanType.2:$subj2" >> extfile.cnf
+echo "subjectAltName = $subjstr" >> extfile.cnf
 openssl x509 -req -extfile extfile.cnf -in "server-request.csr" -CA "root-ca-cert.pem" -CAkey "root-ca-key.pem" -days 90 -out "server-cert.pem" -CAcreateserial
 if (($?))
 then 

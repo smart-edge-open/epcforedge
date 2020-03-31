@@ -1,19 +1,8 @@
 #! /bin/sh
-############################################################################
-# Copyright 2019 Intel Corporation. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-###########################################################################
+
 setup_dir=${PWD}
 
 set -e
@@ -47,7 +36,7 @@ log "Extract $pkg_name"
 tar -xvmf $pkg_name.tar.gz > /dev/null
 cd $setup_dir/$pkg_name
 log "Build $pkg_name"
-./configure --with-http_ssl_module && make install
+./configure --with-http_ssl_module --with-http_v2_module && make install
 if [ $? -ne 0 ]; then
         log "Compiled [ $pkg_name ] failed."
         exit 1

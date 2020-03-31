@@ -1,0 +1,53 @@
+[{
+  "self": "",
+  "suppFeat": "",
+  "pfdDatas": {
+    "app1": {
+      "externalAppID": "app1",
+      "self": "https://localhost:8050/af/v1/pfd/transactions/10000/applications/app1",
+      "pfds": {
+        "pfd1": {
+          "pfdID": "pfd1",
+          "flowDescriptions": ["permit in ip from 10.11.12.123 80 to any"]
+        },
+        "pfd2": {
+          "pfdID": "pfd2",
+          "domainNames": ["www.google.com"]
+        }
+      }
+    },
+    "app2": {
+      "externalAppID": "app2",
+      "self": "https://localhost:8050/af/v1/pfd/transactions/10000/applications/app2",
+      "pfds": {
+        "pfd1": {
+          "pfdID": "pfd3",
+          "flowDescriptions": ["permit in ip from 10.11.12.124 80 to any"]
+        },
+        "pfd4": {
+          "pfdID": "pfd4",
+          "domainNames": ["www.google.com"]
+        }
+      }
+    }
+  }
+}, {
+  "self": "",
+  "suppFeat": "",
+  "pfdDatas": {
+    "app3": {
+      "externalAppID": "app3",
+      "self": "https://localhost:8050/af/v1/pfd/transactions/10001/applications/app3",
+      "pfds": {
+        "pfd1": {
+          "pfdID": "pfd1",
+          "flowDescriptions": ["permit in ip from 10.11.12.123 80 to any"]
+        },
+        "pfd2": {
+          "pfdID": "pfd2",
+          "domainNames": ["www.google.com"]
+        }
+      }
+    }
+  }
+}]

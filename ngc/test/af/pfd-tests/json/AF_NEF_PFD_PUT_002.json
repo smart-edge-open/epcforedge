@@ -1,0 +1,39 @@
+{
+  "self": "",
+  "suppFeat": "",
+  "pfdDatas": {
+    "app1": {
+      "externalAppId": "app1",
+      "self": "",
+      "pfds": {
+        "pfd1": {
+          "pfdId": "pfd1",
+          "flowDescriptions": [
+            ""
+          ],
+          "urls": ["url"],
+          "domainNames": [""]
+        },
+        "pfd2": {
+          "pfdId": "pfd2",
+          "flowDescriptions": [],
+          "urls": [],
+          "domainNames": [
+            "www.example.com"
+          ]
+        }
+      }
+    },
+    "app2": {
+      "externalAppId": "app2",
+      "self": "",
+      "pfds": {
+        "pfd3": {
+          "pfdId": "pfd3",
+          "flowDescriptions": [],
+          "urls": []
+        }
+      }
+    }
+  }
+}

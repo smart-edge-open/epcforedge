@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright © 2019 Intel Corporation
+// Copyright © 2019-2020 Intel Corporation
 
 package af
 
@@ -10,10 +10,16 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	oauth2 "github.com/open-ness/epcforedge/ngc/pkg/oauth2"
 	"golang.org/x/net/http2"
 
 	logger "github.com/open-ness/common/log"
 	config "github.com/open-ness/epcforedge/ngc/pkg/config"
+)
+
+const (
+	// HTTP2Enabled flag is for enabling/disabling HTTP2
+	HTTP2Enabled = true
 )
 
 // TransactionIDs type
@@ -22,21 +28,26 @@ type TransactionIDs map[int]TrafficInfluSub
 // NotifSubscryptions type
 type NotifSubscryptions map[string]map[string]TrafficInfluSub
 
+// Store the  Access token
+var nefAccessToken string
+
 // ServerConfig struct
 type ServerConfig struct {
-	CNCAEndpoint        string `json:"CNCAEndpoint"`
-	Hostname            string `json:"Hostname"`
-	NotifPort           string `json:"NotifPort"`
-	UIEndpoint          string `json:"UIEndpoint"`
-	NotifServerCertPath string `json:"NotifServerCertPath"`
-	NotifServerKeyPath  string `json:"NotifServerKeyPath"`
+	CNCAEndpoint   string `json:"CNCAEndpoint"`
+	Hostname       string `json:"Hostname"`
+	NotifPort      string `json:"NotifPort"`
+	UIEndpoint     string `json:"UIEndpoint"`
+	ServerCertPath string `json:"ServerCertPath"`
+	ServerKeyPath  string `json:"ServerKeyPath"`
 }
 
 //Config struct
 type Config struct {
-	AfID   string       `json:"AfId"`
-	SrvCfg ServerConfig `json:"ServerConfig"`
-	CliCfg CliConfig    `json:"CliConfig"`
+	AfID              string       `json:"AfId"`
+	AfAPIRoot         string       `json:"AfAPIRoot"`
+	LocationPrefixPfd string       `json:"LocationPrefixPfd"`
+	SrvCfg            ServerConfig `json:"ServerConfig"`
+	CliCfg            CliConfig    `json:"CliConfig"`
 }
 
 //Context struct
@@ -52,6 +63,8 @@ var (
 	AfCtx *Context
 	//AfRouter public var
 	AfRouter *mux.Router
+	//NotifRouter public var
+	NotifRouter *mux.Router
 )
 
 func runServer(ctx context.Context, AfCtx *Context) error {
@@ -68,25 +81,42 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 	AfCtx.transactions = make(TransactionIDs)
 	AfCtx.subscriptions = make(NotifSubscryptions)
 	AfRouter = NewAFRouter(AfCtx)
-	NotifRouter := NewNotifRouter(AfCtx)
+	NotifRouter = NewNotifRouter(AfCtx)
 
 	serverCNCA := &http.Server{
 		Addr:         AfCtx.cfg.SrvCfg.CNCAEndpoint,
 		Handler:      handlers.CORS(headersOK, originsOK, methodsOK)(AfRouter),
-		ReadTimeout:  5 * time.Second,
+		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
+	if HTTP2Enabled == true {
+		if err = http2.ConfigureServer(
+			serverCNCA, &http2.Server{}); err != nil {
+			log.Errf("AF failed at configuring HTTP2 server (CNCA Server)")
+			return err
+		}
+	}
 	serverNotif := &http.Server{
 		Addr:         AfCtx.cfg.SrvCfg.NotifPort,
 		Handler:      NotifRouter,
-		ReadTimeout:  5 * time.Second,
+		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
 	if err = http2.ConfigureServer(serverNotif, &http2.Server{}); err != nil {
-		log.Errf("AF failed at configuring HTTP2 server")
+		log.Errf("AF failed at configuring HTTP2 server (NEF Server)")
 		return err
+	}
+
+	if AfCtx.cfg.CliCfg.OAuth2Support {
+		log.Infoln("Fetching NEF access token")
+		if fetchNEFAuthorizationToken() != nil {
+			log.Infoln("Failed to get access token")
+			return err
+		}
+	} else {
+		log.Infoln("OAuth2 DISABLED")
 	}
 
 	stopServerCh := make(chan bool, 2)
@@ -108,16 +138,25 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 		log.Infof("Serving AF Notifications on: %s",
 			AfCtx.cfg.SrvCfg.NotifPort)
 		if err = serverNotif.ListenAndServeTLS(
-			AfCtx.cfg.SrvCfg.NotifServerCertPath,
-			AfCtx.cfg.SrvCfg.NotifServerKeyPath); err != http.ErrServerClosed {
+			AfCtx.cfg.SrvCfg.ServerCertPath,
+			AfCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
 
 			log.Errf("AF Notifications server error: " + err.Error())
 		}
 		stopServerCh <- true
 	}(stopServerCh)
 
-	log.Infof("Serving AF on: %s", AfCtx.cfg.SrvCfg.CNCAEndpoint)
-	if err = serverCNCA.ListenAndServe(); err != http.ErrServerClosed {
+	if HTTP2Enabled == true {
+		log.Infof("Serving AF (CNCA HTTP2 Requests) on: %s",
+			AfCtx.cfg.SrvCfg.CNCAEndpoint)
+		err = serverCNCA.ListenAndServeTLS(AfCtx.cfg.SrvCfg.ServerCertPath,
+			AfCtx.cfg.SrvCfg.ServerKeyPath)
+	} else {
+		log.Infof("Serving AF (CNCA HTTP Requests) on: %s",
+			AfCtx.cfg.SrvCfg.CNCAEndpoint)
+		err = serverCNCA.ListenAndServe()
+	}
+	if err != http.ErrServerClosed {
 		log.Errf("AF CNCA server error: " + err.Error())
 		return err
 	}
@@ -131,20 +170,23 @@ func printConfig(cfg Config) {
 
 	log.Infoln("********************* NGC AF CONFIGURATION ******************")
 	log.Infoln("AfID: ", cfg.AfID)
+	log.Infoln("LocationPrefixPfd ", cfg.LocationPrefixPfd)
 	log.Infoln("-------------------------- CNCA SERVER ----------------------")
 	log.Infoln("CNCAEndpoint: ", cfg.SrvCfg.CNCAEndpoint)
 	log.Infoln("-------------------- NEF NOTIFICATIONS SERVER ---------------")
 	log.Infoln("Hostname: ", cfg.SrvCfg.Hostname)
 	log.Infoln("NotifPort: ", cfg.SrvCfg.NotifPort)
-	log.Infoln("NotifServerCertPath: ", cfg.SrvCfg.NotifServerCertPath)
-	log.Infoln("NotifServerKeyPath: ", cfg.SrvCfg.NotifServerKeyPath)
+	log.Infoln("ServerCertPath: ", cfg.SrvCfg.ServerCertPath)
+	log.Infoln("ServerKeyPath: ", cfg.SrvCfg.ServerKeyPath)
 	log.Infoln("UIEndpoint: ", cfg.SrvCfg.UIEndpoint)
 	log.Infoln("------------------------- CLIENT TO NEF ---------------------")
 	log.Infoln("Protocol: ", cfg.CliCfg.Protocol)
 	log.Infoln("NEFPort: ", cfg.CliCfg.NEFPort)
 	log.Infoln("NEFBasePath: ", cfg.CliCfg.NEFBasePath)
+	log.Infoln("NEFPFDBasePath: ", cfg.CliCfg.NEFPFDBasePath)
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
 	log.Infoln("NEFCliCertPath: ", cfg.CliCfg.NEFCliCertPath)
+	log.Infoln("OAuth2Support: ", cfg.CliCfg.OAuth2Support)
 	log.Infoln("*************************************************************")
 
 }
@@ -164,4 +206,22 @@ func Run(parentCtx context.Context, cfgPath string) error {
 	printConfig(AfCtx.cfg)
 
 	return runServer(parentCtx, &AfCtx)
+}
+
+func fetchNEFAuthorizationToken() error {
+
+	var err error
+
+	nefAccessToken, err = oauth2.GetAccessToken()
+	if err != nil {
+		log.Errf("Failed to Fetch Access Token ")
+		return err
+	}
+	log.Errf("Got Access Token ", nefAccessToken)
+	return nil
+}
+
+func getNEFAuthorizationToken() (token string, err error) {
+
+	return nefAccessToken, nil
 }

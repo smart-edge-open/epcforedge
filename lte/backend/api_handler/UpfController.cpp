@@ -1,18 +1,7 @@
-/*******************************************************************************
-* Copyright 2019 Intel Corporation. All rights reserved.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*******************************************************************************/
+/* SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 2019 Intel Corporation
+ */
+
 /**
  * @file  UpfController.cpp
  * @brief OAMAGENT handler UpfControl Message from MEC controller
@@ -50,7 +39,7 @@ void UserplaneAdd::execute(Json::Value &request, Json::Value &response,
         string pgwPostData,sgwPostData;
         stringstream pgwPostResponse,sgwPostResponse;
         string pgwId, sgwId;
-		
+
         // Prepare PGW and SGW URL
         pgwPostUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
 				 "/api/v1/pgwprofile?entity-type=pgw-dpf";
@@ -278,6 +267,7 @@ void UserplanesListGet::execute(map<string, string> params, Json::Value &respons
         // Preparing URL for get 
         int pgwCount, sgwCount, itemIndex;
         stringstream pgwGetData, sgwGetData;        
+
         string pgwGetUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
                      "/api/v1/pgwprofile?action=list&entity-type=pgw-dpf";		
         string sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
@@ -368,6 +358,7 @@ void UserplaneGetByID::execute(map<string, string> params, Json::Value &response
         string pgwId, sgwId;
         string pgwTac, sgwTac;
         stringstream pgwGetData,sgwGetData;        
+
         string pgwGetUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
                     "/api/v1/pgwprofile?action=list&entity-type=pgw-dpf&id=" + params["UUID"];
         string sgwGetUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \
@@ -483,6 +474,7 @@ void UserplaneDelByID::execute(map<string, string> params,
     try {
 
         OAMAGENT_LOG(INFO, "UserplaneDelByID(%s) Executing.\n",params["UUID"].c_str());
+
         string pgwDelUrl = "http://" + localcfg_pgw_ipaddress + ":" + localcfg_pgw_port + \
                      "/api/v1/pgwprofile?entity-type=pgw-dpf&id=" + params["UUID"];
         string sgwDelUrl = "http://" + localcfg_sgw_ipaddress + ":" + localcfg_sgw_port + \

@@ -1,0 +1,45 @@
+{
+  "self": "",
+  "suppFeat": "",
+  "pfdDatas": {
+    "app20": {
+      "externalAppId": "app20",
+      "self": "",
+      "pfds": {
+        "pfd1": {
+          "pfdId": "pfd1",
+          "flowDescriptions": [],
+          "urls": [],
+          "domainNames": []
+        },
+        "pfd2": {
+          "pfdId": "pfd2",
+          "flowDescriptions": [],
+          "urls": [],
+          "domainNames": [
+            "www.google.com"
+          ]
+        }
+      }
+    },
+    "app21": {
+      "externalAppId": "app21",
+      "self": "",
+      "pfds": {
+        "pfd1": {
+          "pfdId": "pfd3",
+          "flowDescriptions": [],
+          "urls": [],
+          "domainNames": []
+        },
+        "pfd4": {
+          "pfdId": "pfd4",
+          "flowDescriptions": [],
+          "domainNames": [
+            "www.google.com"
+          ]
+        }
+      }
+    }
+  }
+}

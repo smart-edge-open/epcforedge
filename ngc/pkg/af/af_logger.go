@@ -13,7 +13,8 @@ func afLogger(inner http.Handler, name string) http.Handler {
 		start := time.Now()
 
 		log.Infoln("")
-		log.Infof("%s %s %s %s\n",
+		log.Infof("%s %s %s %s %s\n",
+			r.Proto,
 			r.Method,
 			r.RequestURI,
 			name,
