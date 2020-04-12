@@ -215,6 +215,44 @@ type AfRoutingRequirementRm struct {
  * Application Session Context.
  */
 type AppSessionContextReqData struct {
+	AfAppId   string               `json:"afAppId,omitempty"`
+	AfRoutReq AfRoutingRequirement `json:"afRoutReq,omitempty"`
+	// Contains an identity of an application service provider.
+	AspId string `json:"aspId,omitempty"`
+	/*
+	 * string identifying a BDT Reference ID as defined in subclause
+	 * 5.3.3 of 3GPP TS 29.154.
+	 */
+	BdtRefId      string                      `json:"bdtRefId,omitempty"`
+	Dnn           string                      `json:"dnn"`
+	EvSubsc       EventsSubscReqDataRm        `json:"evSubsc,omitempty"`
+	MedComponents map[string]MediaComponentRm `json:"medComponents,omitempty"`
+	// indication of MPS service request
+	MpsId      string           `json:"mpsId,omitempty"`
+	NotifUri   string           `json:"notifUri,omitempty"`
+	SliceInfo  Snssai           `json:"sliceInfo"`
+	SponId     string           `json:"sponId,omitempty"`
+	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
+	Supi       string           `json:"supi"`
+	Gpsi       string           `json:"gpsi"`
+	/*
+	 * A string used to indicate the features supported by an API that is
+	 * used as defined in subclause 6.6 in 3GPP TS 29.500 [1]. The string
+	 * shall contain a bitmask indicating supported features in hexadecimal
+	 * representation. Each character in the string shall take a value of
+	 * \"0\" to \"9\" or \"A\" to \"F\" and shall represent the support of 4
+	 * features as described in table 5.2.2-3. The most significant
+	 * character representing the highest-numbered features shall appear
+	 * first in the string, and the character representing features 1 to 4
+	 * shall appear last in the string. The list of features and their
+	 * numbering (starting with 1) are defined separately for each API.
+	 * Possible features for traffic influencing are
+	 * Notification_websocket(1), Notification_test_event(2)
+	 */
+	SuppFeat string   `json:"suppFeat,omitempty"`
+	UeIpv4   IPv4Addr `json:"ueIpv4"`
+	UeIpv6   IPv6Addr `json:"ueIpv6"`
+	UeMac    MacAddr  `json:"ueMac"`
 }
 
 /*
@@ -334,6 +372,10 @@ type Flows struct {
 
 // GlobalRanNodeId struct for GlobalRanNodeId
 type GlobalRanNodeId struct {
+	PlmnId  PlmnId `json:"plmnId"`
+	N3IwfId string `json:"n3IwfId"`
+	GNbId   GNbId  `json:"gNbId"`
+	NgeNbId string `json:"ngeNbId"`
 }
 
 type GNbId struct {
@@ -486,10 +528,6 @@ type QosNotificationControlInfo struct {
 type ResourcesAllocationInfo struct {
 	McResourcStatus MediaComponentResourcesStatus `json:"mcResourcStatus"`
 	Flows           []Flows                       `json:"flows,omitempty"`
-}
-
-// RouteToLocation struct for RouteToLocation
-type RouteToLocation struct {
 }
 
 type Snssai struct {
