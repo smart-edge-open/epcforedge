@@ -224,17 +224,18 @@ type AppSessionContextReqData struct {
 	 * 5.3.3 of 3GPP TS 29.154.
 	 */
 	BdtRefId      string                      `json:"bdtRefId,omitempty"`
-	Dnn           string                      `json:"dnn"`
-	EvSubsc       EventsSubscReqDataRm        `json:"evSubsc,omitempty"`
+	Dnn           string                      `json:"dnn,omitempty"`
+	EvSubsc       *EventsSubscReqData         `json:"evSubsc,omitempty"`
 	MedComponents map[string]MediaComponentRm `json:"medComponents,omitempty"`
+	IpDomain      string                      `json:"ipDomain,omitempty"`
 	// indication of MPS service request
 	MpsId      string           `json:"mpsId,omitempty"`
-	NotifUri   string           `json:"notifUri,omitempty"`
-	SliceInfo  Snssai           `json:"sliceInfo"`
+	NotifUri   string           `json:"notifUri"`
+	SliceInfo  Snssai           `json:"sliceInfo,omitempty"`
 	SponId     string           `json:"sponId,omitempty"`
 	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
-	Supi       string           `json:"supi"`
-	Gpsi       string           `json:"gpsi"`
+	Supi       string           `json:"supi,omitempty"`
+	Gpsi       string           `json:"gpsi,omitempty"`
 	/*
 	 * A string used to indicate the features supported by an API that is
 	 * used as defined in subclause 6.6 in 3GPP TS 29.500 [1]. The string
@@ -249,10 +250,10 @@ type AppSessionContextReqData struct {
 	 * Possible features for traffic influencing are
 	 * Notification_websocket(1), Notification_test_event(2)
 	 */
-	SuppFeat string   `json:"suppFeat,omitempty"`
-	UeIpv4   IPv4Addr `json:"ueIpv4"`
-	UeIpv6   IPv6Addr `json:"ueIpv6"`
-	UeMac    MacAddr  `json:"ueMac"`
+	SuppFeat string   `json:"suppFeat"`
+	UeIpv4   IPv4Addr `json:"ueIpv4,omitempty"`
+	UeIpv6   IPv6Addr `json:"ueIpv6,omitempty"`
+	UeMac    MacAddr  `json:"ueMac,omitempty"`
 }
 
 /*
@@ -318,17 +319,6 @@ type Ecgi struct {
 	EutraCellId string `json:"eutraCellId"`
 }
 
-// EthFlowDescription Identifies an Ethernet flow
-type EthFlowDescription struct {
-	DestMacAddr string `json:"destMacAddr,omitempty"`
-	EthType     string `json:"ethType"`
-	// Defines a packet filter of an IP flow.
-	FDesc         string        `json:"fDesc,omitempty"`
-	FDir          FlowDirection `json:"fDir,omitempty"`
-	SourceMacAddr string        `json:"sourceMacAddr,omitempty"`
-	VlanTags      []string      `json:"vlanTags,omitempty"`
-}
-
 // EventsNotification describes the notification of a matched event
 type EventsNotification struct {
 	AccessType AccessType  `json:"accessType,omitempty"`
@@ -372,10 +362,10 @@ type Flows struct {
 
 // GlobalRanNodeId struct for GlobalRanNodeId
 type GlobalRanNodeId struct {
-	PlmnId  PlmnId `json:"plmnId"`
-	N3IwfId string `json:"n3IwfId"`
-	GNbId   GNbId  `json:"gNbId"`
-	NgeNbId string `json:"ngeNbId"`
+	PlmnId  *PlmnId `json:"plmnId"`
+	N3IwfId string  `json:"n3IwfId,omitempty"`
+	GNbId   *GNbId  `json:"gNbId,omitempty"`
+	NgeNbId string  `json:"ngeNbId,omitempty"`
 }
 
 type GNbId struct {
@@ -482,36 +472,6 @@ type PresenceInfo struct {
 	GlobalRanNodeIdList []GlobalRanNodeId `json:"globalRanNodeIdList,omitempty"`
 }
 
-type ProblemDetails struct {
-	// string providing an URI formatted according to IETF RFC 3986.
-	Type string `json:"type,omitempty"`
-	/*
-	 * A short, human-readable summary of the problem type. It should not
-	 * change from occurrence to occurrence of the problem.
-	 */
-	Title string `json:"title,omitempty"`
-	// The HTTP status code for this occurrence of the problem.
-	Status int32 `json:"status,omitempty"`
-	/*
-	 * A human-readable explanation specific to this occurrence of the
-	 * problem.
-	 */
-	Detail string `json:"detail,omitempty"`
-	// string providing an URI formatted according to IETF RFC 3986.
-	Instance string `json:"instance,omitempty"`
-	/*
-	 * A machine-readable application error cause specific to this
-	 * occurrence of the problem. This IE should be present and provide
-	 * application-related error information, if available.
-	 */
-	Cause string `json:"cause,omitempty"`
-	/*
-	 * Description of invalid parameters, for a request rejected due to
-	 * invalid parameters.
-	 */
-	InvalidParams []InvalidParam `json:"invalidParams,omitempty"`
-}
-
 /*
  * QosNotificationControlInfo Indicates whether the QoS targets for a GRB flow
  * are not  guaranteed or guaranteed again
@@ -528,11 +488,6 @@ type QosNotificationControlInfo struct {
 type ResourcesAllocationInfo struct {
 	McResourcStatus MediaComponentResourcesStatus `json:"mcResourcStatus"`
 	Flows           []Flows                       `json:"flows,omitempty"`
-}
-
-type Snssai struct {
-	Sst int32  `json:"sst"`
-	Sd  string `json:"sd,omitempty"`
 }
 
 // SpatialValidity describes explicitly the route to an Application location
