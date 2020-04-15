@@ -6,8 +6,11 @@ package ngccntest
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -18,12 +21,12 @@ import (
 // CnTestApp structure to store the variables/contexts for access in UT
 type CnTestApp struct {
 	cnTestRouter *mux.Router
-	cnTestCtx    *cnTestContext
+	//cnTestCtx    *cnTestContext
 }
 
-// NefAppG is the NEF App variable which can be used for accessing the
+// CnTestAppG is the NEF App variable which can be used for accessing the
 // global contexts
-var CnTestApp CnTestApp
+var CnTestAppG CnTestApp
 
 // Log handler initialized. This is to be used throughout the CN-TEST module for
 // logging
@@ -36,20 +39,20 @@ type HTTPConfig struct {
 
 //HTTP2Config Contains the configuration for the HTTP2
 type HTTP2Config struct {
-	Endpoint      string `json:"endpoint"`
-	CNTESTServerCert string `json:"CnTestServerCert"`
-	CNTESTServerKey  string `json:"CnTestServerKey"`
-	AfClientCert  string `json:"AfClientCert"`
+	Endpoint         string `json:"endpoint"`
+	CnTestServerCert string `json:"CnTestServerCert"`
+	CnTestServerKey  string `json:"CnTestServerKey"`
+	AfClientCert     string `json:"AfClientCert"`
 }
 
 // Config contains NEF Module Configuration Data Structure
 type Config struct {
 	//MaxAFSupport              int    `json:"maxAFSupport"`
 	//UpfNotificationResURIPath string `json:"UpfNotificationResUriPath"`
-	HTTPConfig                HTTPConfig
-	HTTP2Config               HTTP2Config
+	HTTPConfig  HTTPConfig
+	HTTP2Config HTTP2Config
 	//AfServiceIDs              []interface{} `json:"afServiceIDs"`
-	OAuth2Support             bool          `json:"OAuth2Support"`
+	OAuth2Support bool `json:"OAuth2Support"`
 }
 
 // CN-TEST Module Context Data Structure
@@ -71,13 +74,13 @@ func startHTTPServer(server *http.Server,
 }
 
 /* Go Routine is spawned here for starting HTTP-2 Server */
-func startHTTP2Server(serverHTTP2 *http.Server, cntestCtx *cnTestContext,
+func startHTTP2Server(serverHTTP2 *http.Server, cnTestCtx *cnTestContext,
 	stopServerCh chan bool) {
 	if serverHTTP2 != nil {
 		log.Infof("HTTP 2.0 listening on %s", serverHTTP2.Addr)
 		if err := serverHTTP2.ListenAndServeTLS(
-			cnTestCtx.cfg.HTTP2Config.NefServerCert,
-			cnTestCtx.cfg.HTTP2Config.NefServerKey); err != nil {
+			cnTestCtx.cfg.HTTP2Config.CnTestServerCert,
+			cnTestCtx.cfg.HTTP2Config.CnTestServerKey); err != nil {
 			log.Errf("HTTP2server error: " + err.Error())
 		}
 	}
@@ -103,7 +106,7 @@ func runServer(ctx context.Context, cnTestCtx *cnTestContext) error {
 	 * the HTTP Service Handlers. These handlers will be called when HTTP
 	 * server receives any HTTP Request */
 	cnTestRouter := NewCnTestRouter(cnTestCtx)
-	CnTestAppG.CnTestRouter = cnTestRouter
+	CnTestAppG.cnTestRouter = cnTestRouter
 
 	// 1 for http2, 1 for http and 1 for the os signal
 	numchannels := 3
@@ -111,7 +114,7 @@ func runServer(ctx context.Context, cnTestCtx *cnTestContext) error {
 	// Check if http and http 2 are both configured to determine number
 	// of channels
 
-	if nefCtx.cfg.HTTPConfig.Endpoint == "" {
+	if cnTestCtx.cfg.HTTPConfig.Endpoint == "" {
 		log.Info("HTTP Server not configured")
 		numchannels--
 	} else {
@@ -125,7 +128,7 @@ func runServer(ctx context.Context, cnTestCtx *cnTestContext) error {
 		}
 	}
 
-	if nefCtx.cfg.HTTP2Config.Endpoint == "" {
+	if cnTestCtx.cfg.HTTP2Config.Endpoint == "" {
 		log.Info("HTTP 2 Server not configured")
 		numchannels--
 	} else {
@@ -176,7 +179,7 @@ func runServer(ctx context.Context, cnTestCtx *cnTestContext) error {
 	/* Go Routine is spawned here for starting HTTP Server */
 	go startHTTPServer(server, stopServerCh)
 	/* Go Routine is spawned here for starting HTTP-2 Server */
-	go startHTTP2Server(serverHTTP2, nefCtx, stopServerCh)
+	go startHTTP2Server(serverHTTP2, cnTestCtx, stopServerCh)
 	/* This self go routine is waiting for the receive events from the spawned
 	 * go routines */
 	<-stopServerCh
@@ -191,14 +194,15 @@ func runServer(ctx context.Context, cnTestCtx *cnTestContext) error {
 
 // Run : This function creates CN-TEST Server
 func Run(ctx context.Context, cfgPath string) error {
+	var cnTestCtx cnTestContext
 
-//	err := loadJSONConfig(cfgPath, &cnTestCtx.cfg)
+	err := loadJSONConfig(cfgPath, &cnTestCtx.cfg)
 	if err != nil {
 		log.Errf("Failed to load NEF configuration: %v", err)
 		return err
 
 	}
-//	printConfig(cnTestCtx.cfg)
+	printConfig(cnTestCtx.cfg)
 
 	return runServer(ctx, &cnTestCtx)
 }
@@ -211,9 +215,19 @@ func printConfig(cfg Config) {
 	log.Infoln("-------------------------- CN-TEST SERVER ----------------------")
 	log.Infoln("EndPoint(HTTP): ", cfg.HTTPConfig.Endpoint)
 	log.Infoln("EndPoint(HTTP2): ", cfg.HTTP2Config.Endpoint)
-	log.Infoln("ServerCert(HTTP2): ", cfg.HTTP2Config.NefServerCert)
-	log.Infoln("ServerKey(HTTP2): ", cfg.HTTP2Config.NefServerKey)
+	log.Infoln("ServerCert(HTTP2): ", cfg.HTTP2Config.CnTestServerCert)
+	log.Infoln("ServerKey(HTTP2): ", cfg.HTTP2Config.CnTestServerKey)
 	log.Infoln("AFClientCert(HTTP2): ", cfg.HTTP2Config.AfClientCert)
 	log.Infoln("*************************************************************")
 
+}
+
+// LoadJSONConfig reads a file located at configPath and unmarshals it to
+// config structure
+func loadJSONConfig(configPath string, config interface{}) error {
+	cfgData, err := ioutil.ReadFile(filepath.Clean(configPath))
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(cfgData, config)
 }

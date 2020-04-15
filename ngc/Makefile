@@ -29,7 +29,7 @@ oam:
 
 cn-test:
 	mkdir -p "${BUILD_DIR}"
-	GOOS=linux go build -o "${BUILD_DIR}/af" ./cmd/cn-test
+	GOOS=linux go build -o "${BUILD_DIR}/cn-test" ./cmd/cn-test
 
 
 lint:

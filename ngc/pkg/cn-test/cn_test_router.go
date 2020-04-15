@@ -2,9 +2,9 @@
 * Copyright (c) 2019-2020 Intel Corporation
  */
 
- package ngccntest
+package ngccntest
 
- import (
+import (
 	"context"
 	"net/http"
 	"strings"
@@ -25,7 +25,7 @@ type Route struct {
 	Handler http.HandlerFunc /*    */
 }
 
-// NEFRoutes : NEF Routes lists which contains Routes with different HTTP
+// CNTESTRoutes : NEF Routes lists which contains Routes with different HTTP
 //             Request handlers for NEF
 var CNTESTRoutes = []Route{
 	// Traffic Influence Routes
@@ -73,7 +73,7 @@ func NewCnTestRouter(cnTestCtx *cnTestContext) *mux.Router {
 				cnTestCtxKey("cnTestCtx"),
 				cnTestCtx)
 
-			if nefCtx.cfg.OAuth2Support {
+			if cnTestCtx.cfg.OAuth2Support {
 				if cnTestValidateAccessToken(w, r) {
 					next.ServeHTTP(w, r.WithContext(ctx))
 				}
@@ -150,13 +150,14 @@ func cnTestRouteLogger(httpHandler http.Handler, name string) http.Handler {
 	})
 }
 
-
+//PolicyAuthorizationAppSessionGet Get
 func PolicyAuthorizationAppSessionGet(w http.ResponseWriter,
 	r *http.Request) {
-		log.Infoln("PolicyAuthorizationAppSessionGet -- Entered")
+	log.Infoln("PolicyAuthorizationAppSessionGet -- Entered")
 }
 
+//PolicyAuthorizationAppSessionCreate Post
 func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 	r *http.Request) {
-		log.Infoln("PolicyAuthorizationAppSessionCreate -- Entered")
+	log.Infoln("PolicyAuthorizationAppSessionCreate -- Entered")
 }

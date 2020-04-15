@@ -1,11 +1,11 @@
 {
     "HTTPConfig": {
-        "Endpoint": ":8061"
+        "Endpoint": ":8096"
     },
     "HTTP2Config": {
-        "Endpoint": ":8060",
-        "NefServerCert": "/etc/certs/server-cert.pem",
-        "NefServerKey": "/etc/certs/server-key.pem",
+        "Endpoint": ":8095",
+        "CnTestServerCert": "/etc/certs/server-cert.pem",
+        "CnTestServerKey": "/etc/certs/server-key.pem",
         "AfClientCert": "/etc/certs/root-ca-cert.pem"
     },
     "OAuth2Support": true
