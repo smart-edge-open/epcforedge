@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright © 2019 Intel Corporation
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    service: cntestservice
+  name: cn-test
+  namespace: ngc
+spec:
+  volumes:
+  - name: shared-configs
+    hostPath:
+      path: /etc/openness/configs/ngc
+  - name: shared-certs
+    hostPath:
+      path: /etc/openness/certs/ngc
+  containers:
+  - securityContext:
+      privileged: false
+    name: cn-test-container
+    image: cn-test-image:1.0
+    imagePullPolicy: Never
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "./entrypoint.sh" ]
+    resources:
+      requests:
+        memory: 1Gi
+      limits:
+        memory: 1Gi
+    ports:
+    - containerPort: 8060
+    volumeMounts:
+    - name: shared-configs
+      mountPath: /root/configs
+    - name: shared-certs
+      mountPath: /etc/certs
+  tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: "Exists"
+    effect: "NoSchedule"
+  nodeSelector:
+    5g-openness: "true"
+  restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cntestservice
+  labels:
+    service: cntestservice
+  namespace: ngc
+spec:
+  type: NodePort
+  ports:
+  - port: 8095
+    targetPort: 8095
+    protocol: TCP
+    name: af
+  selector:
+    service: cntestservice
+
+
+
