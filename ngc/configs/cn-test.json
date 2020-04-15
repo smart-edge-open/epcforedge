@@ -8,5 +8,5 @@
         "CnTestServerKey": "/etc/certs/server-key.pem",
         "AfClientCert": "/etc/certs/root-ca-cert.pem"
     },
-    "OAuth2Support": true
+    "OAuth2Support": false
 }

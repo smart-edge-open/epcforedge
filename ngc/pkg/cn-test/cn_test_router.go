@@ -25,34 +25,60 @@ type Route struct {
 	Handler http.HandlerFunc /*    */
 }
 
-// CNTESTRoutes : NEF Routes lists which contains Routes with different HTTP
-//             Request handlers for NEF
+// CNTESTRoutes : CN-TEST Routes lists which contains Routes with different HTTP
+//             Request handlers for CN-TEST
 var CNTESTRoutes = []Route{
-	// Traffic Influence Routes
+	// Policy Authorization Routes
 	{
-		"ReadAllTrafficInfluenceSubscription",
+		"PolicyAuthorizationAppSessionCreate",
+		strings.ToUpper("Post"),
+		"/npcf-policyauthorization/v1/app-sessions",
+		PolicyAuthorizationAppSessionCreate,
+	},
+	{
+		"PolicyAuthorizationAppSessionGet",
 		strings.ToUpper("Get"),
-		"npcf-policyauthorization/v1/app-sessions/{appSessionId}",
+		"/npcf-policyauthorization/v1/app-sessions/{appSessionId}",
 		PolicyAuthorizationAppSessionGet,
 	},
 	{
-		"CreateTrafficInfluenceSubscription",
-		strings.ToUpper("Post"),
-		"npcf-policyauthorization/v1/app-sessions",
-		PolicyAuthorizationAppSessionCreate,
+		"PolicyAuthorizationAppSessionPatch",
+		strings.ToUpper("Patch"),
+		"/npcf-policyauthorization/v1/app-sessions/{appSessionId}",
+		PolicyAuthorizationAppSessionPatch,
+	},
+	{
+		"PolicyAuthorizationAppSessionDelete",
+		strings.ToUpper("Delete"),
+		"/npcf-policyauthorization/v1/app-sessions/{appSessionId}/delete",
+		PolicyAuthorizationAppSessionDelete,
+	},
+	{
+		"PolicyAuthorizationAppSessionSubscribe",
+		strings.ToUpper("Put"),
+		"/npcf-policyauthorization/v1/app-sessions/{appSessionId}/events-subscription",
+		PolicyAuthorizationAppSessionSubscribe,
+	},
+	{
+		"PolicyAuthorizationAppSessionUnsubscribe",
+		strings.ToUpper("Delete"),
+		"/npcf-policyauthorization/v1/app-sessions/{appSessionId}/events-subscription",
+		PolicyAuthorizationAppSessionUnsubscribe,
 	},
 }
 
 // NewCnTestRouter : This function creates and initializes a CN-TEST Router with all
-//                the available routes for NEF Module. This router object is
+//                the available routes for CN-TEST Module. This router object is
 //                defined in "github.com/gorilla/mux" package.
 //  Input Args:
-//     - cnTestCtx: This is NEF Module Context. This contains the NEF Module Data.
+//     - cnTestCtx: This is CN-TEST Module Context. This contains the CN-TEST Module Data.
 //  Output Args:
 //     - error: retruns pointer to created mux.Router object
 func NewCnTestRouter(cnTestCtx *cnTestContext) *mux.Router {
 
 	router := mux.NewRouter().StrictSlash(true)
+
+	//Subscription for notification to be added
 
 	for _, route := range CNTESTRoutes {
 
@@ -154,10 +180,41 @@ func cnTestRouteLogger(httpHandler http.Handler, name string) http.Handler {
 func PolicyAuthorizationAppSessionGet(w http.ResponseWriter,
 	r *http.Request) {
 	log.Infoln("PolicyAuthorizationAppSessionGet -- Entered")
+	vars := mux.Vars(r)
+	log.Infof(" APP Session ID  : %s", vars["appSessionId"])
+
 }
 
 //PolicyAuthorizationAppSessionCreate Post
 func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 	r *http.Request) {
 	log.Infoln("PolicyAuthorizationAppSessionCreate -- Entered")
+}
+
+//PolicyAuthorizationAppSessionPatch Patch
+func PolicyAuthorizationAppSessionPatch(w http.ResponseWriter,
+	r *http.Request) {
+	log.Infoln("PolicyAuthorizationAppSession -- Entered")
+
+}
+
+//PolicyAuthorizationAppSessionDelete Delete
+func PolicyAuthorizationAppSessionDelete(w http.ResponseWriter,
+	r *http.Request) {
+	log.Infoln("PolicyAuthorizationAppSessionDelete -- Entered")
+
+}
+
+//PolicyAuthorizationAppSessionSubscribe Subscribe
+func PolicyAuthorizationAppSessionSubscribe(w http.ResponseWriter,
+	r *http.Request) {
+	log.Infoln("PolicyAuthorizationAppSessionSubscribe -- Entered")
+
+}
+
+//PolicyAuthorizationAppSessionUnsubscribe Unsubscribe
+func PolicyAuthorizationAppSessionUnsubscribe(w http.ResponseWriter,
+	r *http.Request) {
+	log.Infoln("PolicyAuthorizationAppSessionUnsubscribe -- Entered")
+
 }
