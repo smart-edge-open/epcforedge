@@ -700,19 +700,17 @@ func (af *afData) afGetSubscription(nefCtx *nefContext,
 		return rsp, ti, errors.New(subNotFound)
 	}
 
-	//ti, rsp, err = sub.NEFSBGet(sub, nefCtx)
+	ti, rsp, err = sub.NEFSBGet(sub, nefCtx)
 
-	/*
-		if err != nil {
-			log.Infoln("Failed to Get Subscription")
-			return rsp, ti, err
-		}
-
+	if err != nil {
+		log.Infoln("Failed to Get Subscription")
 		return rsp, ti, err
-	*/
+	}
+
+	return rsp, ti, err
 
 	//Return locally
-	return rsp, sub.ti, err
+	//return rsp, sub.ti, err
 }
 
 func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (rsp nefSBRspData,
