@@ -14,10 +14,40 @@ type AppSessionContext struct {
 	AscReqData AppSessionContextReqData `json:"ascReqData,omitempty"`
 	// The following fields will not be supported as its not required for
 	// Traffic Influence
-	// AscRespData AppSessionContextRespData `json:"ascRespData,omitempty"`
-	// EvsNotif EventsNotification `json:"evsNotif,omitempty"`
-
+	AscRespData AppSessionContextRespData `json:"ascRespData,omitempty"`
+	EvsNotif    EventsNotification        `json:"evsNotif,omitempty"`
 }
+
+//AppSessionContextRespData added
+type AppSessionContextRespData struct {
+	ServAuthInfo ServAuthInfo `json:"servAuthInfo,omitempty" bson:"servAuthInfo"`
+	SuppFeat     string       `json:"suppFeat,omitempty" bson:"suppFeat"`
+}
+
+//ServAuthInfo added
+type ServAuthInfo string
+
+//EventsNotification describes the notification of a matched event
+type EventsNotification struct {
+	AccessType AccessType `json:"accessType,omitempty" bson:"accessType"`
+	//AnGwAddr                  *AnGwAddress                 `json:"anGwAddr,omitempty" bson:"anGwAddr"`
+	EvSubsURI string                `json:"evSubsUri" bson:"evSubsUri"`
+	EvNotifs  []AfEventNotification `json:"evNotifs" bson:"evNotifs"`
+	//FailedResourcAllocReports []ResourcesAllocationInfo    `json:"failedResourcAllocReports,omitempty" bson:"failedResourcAllocReports"`
+	//PlmnId                    *PlmnId                      `json:"plmnId,omitempty" bson:"plmnId"`
+	//QncReports                []QosNotificationControlInfo `json:"qncReports,omitempty" bson:"qncReports"`
+	//RatType                   RatType                      `json:"ratType,omitempty" bson:"ratType"`
+	//UsgRep                    *AccumulatedUsage            `json:"usgRep,omitempty" bson:"usgRep"`
+}
+
+//AfEventNotification describes the event information delivered in the notification
+type AfEventNotification struct {
+	Event AfEvent `json:"event" bson:"event"`
+	//Flows []Flows `json:"flows,omitempty" bson:"flows"`
+}
+
+//AfEvent string
+type AfEvent string
 
 // AppSessionContextReqData Identifies the service requirements of an
 // Individual Application Session Context.
@@ -44,8 +74,8 @@ type AppSessionContextReqData struct {
 	// ue Ipv6
 	UeIpv6 Ipv6Addr `json:"ueIpv6,omitempty"`
 	// ue mac
-	UeMac MacAddr48 `json:"ueMac,omitempty"`
-
+	UeMac    MacAddr48 `json:"ueMac,omitempty"`
+	NotifURI string    `json:"notifUri" bson:"notifUri"`
 	// The following fields have been omitted as they are not required for
 	// Traffic Influ feature
 	// evSubsc and notifUri - Not Required
@@ -88,7 +118,7 @@ type AfRoutingRequirement struct {
 	// Min Items: 1
 	RouteToLocs []RouteToLocation `json:"routeToLocs"`
 	// sp val
-	SpVal SpatialValidity `json:"spVal,omitempty"`
+	SpVal *SpatialValidity `json:"spVal,omitempty"`
 	// temp vals
 	// Min Items: 1
 	TempVals []TemporalValidity `json:"tempVals"`
