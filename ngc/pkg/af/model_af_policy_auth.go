@@ -184,8 +184,8 @@ type AfEventNotification struct {
 
 // AfEventSubscription describes the event info delivered in the subscription
 type AfEventSubscription struct {
-	Event       AfEvent        `json:"event"`
-	NotifMethod *AfNotifMethod `json:"notifMethod,omitempty"`
+	Event       AfEvent       `json:"event"`
+	NotifMethod AfNotifMethod `json:"notifMethod,omitempty"`
 }
 
 // AfRoutingRequirement describes the event info delivered in the subscription
@@ -216,13 +216,13 @@ type AppSessionContextReqData struct {
 	MedComponents map[string]MediaComponent `json:"medComponents,omitempty"`
 	IpDomain      string                    `json:"ipDomain,omitempty"`
 	// indication of MPS service request
-	MpsId      string            `json:"mpsId,omitempty"`
-	NotifUri   string            `json:"notifUri"`
-	SliceInfo  *Snssai           `json:"sliceInfo,omitempty"`
-	SponId     string            `json:"sponId,omitempty"`
-	SponStatus *SponsoringStatus `json:"sponStatus,omitempty"`
-	Supi       string            `json:"supi,omitempty"`
-	Gpsi       string            `json:"gpsi,omitempty"`
+	MpsId      string           `json:"mpsId,omitempty"`
+	NotifUri   string           `json:"notifUri"`
+	SliceInfo  *Snssai          `json:"sliceInfo,omitempty"`
+	SponId     string           `json:"sponId,omitempty"`
+	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
+	Supi       string           `json:"supi,omitempty"`
+	Gpsi       string           `json:"gpsi,omitempty"`
 	/*
 	 * A string used to indicate the features supported by an API that is
 	 * used as defined in subclause 6.6 in 3GPP TS 29.500 [1]. The string
@@ -237,10 +237,10 @@ type AppSessionContextReqData struct {
 	 * Possible features for traffic influencing are
 	 * Notification_websocket(1), Notification_test_event(2)
 	 */
-	SuppFeat string    `json:"suppFeat"`
-	UeIpv4   *IPv4Addr `json:"ueIpv4,omitempty"`
-	UeIpv6   *IPv6Addr `json:"ueIpv6,omitempty"`
-	UeMac    *MacAddr  `json:"ueMac,omitempty"`
+	SuppFeat string   `json:"suppFeat"`
+	UeIpv4   IPv4Addr `json:"ueIpv4,omitempty"`
+	UeIpv6   IPv6Addr `json:"ueIpv6,omitempty"`
+	UeMac    MacAddr  `json:"ueMac,omitempty"`
 }
 
 /*
@@ -248,7 +248,7 @@ type AppSessionContextReqData struct {
  * Application Session Context created by the PCF.
  */
 type AppSessionContextRespData struct {
-	ServAuthInfo *ServAuthInfo `json:"servAuthInfo,omitempty"`
+	ServAuthInfo ServAuthInfo `json:"servAuthInfo,omitempty"`
 	/*
 	 * A string used to indicate the features supported by an API that is
 	 * used as defined in subclause 6.6 in 3GPP TS 29.500 [1]. The string
@@ -287,8 +287,8 @@ type AppSessionContextUpdateData struct {
 	// indication of MPS service request
 	MpsId string `json:"mpsId,omitempty"`
 	// Contains an identity of a sponsor.
-	SponId     string            `json:"sponId,omitempty"`
-	SponStatus *SponsoringStatus `json:"sponStatus,omitempty"`
+	SponId     string           `json:"sponId,omitempty"`
+	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
 }
 
 /*
@@ -308,16 +308,16 @@ type Ecgi struct {
 
 // EventsNotification describes the notification of a matched event
 type EventsNotification struct {
-	AccessType *AccessType  `json:"accessType,omitempty"`
-	AnGwAddr   *AnGwAddress `json:"anGwAddr,omitempty"`
+	AccessType AccessType  `json:"accessType,omitempty"`
+	AnGwAddr   AnGwAddress `json:"anGwAddr,omitempty"`
 	// string providing an URI formatted according to IETF RFC 3986.
 	EvSubsUri                 string                       `json:"evSubsUri"`
 	EvNotifs                  []AfEventNotification        `json:"evNotifs"`
 	FailedResourcAllocReports []ResourcesAllocationInfo    `json:"failedResourcAllocReports,omitempty"`
 	PlmnId                    *PlmnId                      `json:"plmnId,omitempty"`
 	QncReports                []QosNotificationControlInfo `json:"qncReports,omitempty"`
-	RatType                   *RatType                     `json:"ratType,omitempty"`
-	UsgRep                    *AccumulatedUsage            `json:"usgRep,omitempty"`
+	RatType                   RatType                      `json:"ratType,omitempty"`
+	UsgRep                    AccumulatedUsage             `json:"usgRep,omitempty"`
 }
 
 // EventsSubscReqData Identifies the events the application subscribes to.
@@ -356,15 +356,15 @@ type MediaComponent struct {
 	// Represents the content version of some content.
 	ContVer     int32                        `json:"contVer,omitempty"`
 	Codecs      []string                     `json:"codecs,omitempty"`
-	FStatus     *FlowStatus                  `json:"fStatus,omitempty"`
+	FStatus     FlowStatus                   `json:"fStatus,omitempty"`
 	MarBwDl     string                       `json:"marBwDl,omitempty"`
 	MarBwUl     string                       `json:"marBwUl,omitempty"`
 	MedCompN    int32                        `json:"medCompN"`
 	MedSubComps map[string]MediaSubComponent `json:"medSubComps,omitempty"`
-	MedType     *MediaType                   `json:"medType,omitempty"`
+	MedType     MediaType                    `json:"medType,omitempty"`
 	MirBwDl     string                       `json:"mirBwDl,omitempty"`
 	MirBwUl     string                       `json:"mirBwUl,omitempty"`
-	ResPrio     *ReservPriority              `json:"resPrio,omitempty"`
+	ResPrio     ReservPriority               `json:"resPrio,omitempty"`
 }
 
 // MediaSubComponent Identifies a media subcomponent
@@ -372,7 +372,7 @@ type MediaSubComponent struct {
 	EthfDescs []EthFlowDescription `json:"ethfDescs,omitempty"`
 	FNum      int32                `json:"fNum"`
 	FDescs    []string             `json:"fDescs,omitempty"`
-	FStatus   *FlowStatus          `json:"fStatus,omitempty"`
+	FStatus   FlowStatus           `json:"fStatus,omitempty"`
 	MarBwDl   string               `json:"marBwDl,omitempty"`
 	MarBwUl   string               `json:"marBwUl,omitempty"`
 	/*
@@ -381,8 +381,8 @@ type MediaSubComponent struct {
 	 * the IPv6 Traffic-Class field and the second octet contains the
 	 * ToS/Traffic Class mask field.
 	 */
-	TosTrCl   string     `json:"tosTrCl,omitempty"`
-	FlowUsage *FlowUsage `json:"flowUsage,omitempty"`
+	TosTrCl   string    `json:"tosTrCl,omitempty"`
+	FlowUsage FlowUsage `json:"flowUsage,omitempty"`
 }
 
 type Ncgi struct {
@@ -397,7 +397,7 @@ type PlmnId struct {
 
 type PresenceInfo struct {
 	PraId               string            `json:"praId,omitempty"`
-	PresenceState       *PresenceState    `json:"presenceState,omitempty"`
+	PresenceState       PresenceState     `json:"presenceState,omitempty"`
 	TrackingAreaList    []Tai             `json:"trackingAreaList,omitempty"`
 	EcgiList            []Ecgi            `json:"ecgiList,omitempty"`
 	NcgiList            []Ncgi            `json:"ncgiList,omitempty"`
