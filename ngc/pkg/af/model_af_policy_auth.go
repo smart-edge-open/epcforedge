@@ -184,30 +184,17 @@ type AfEventNotification struct {
 
 // AfEventSubscription describes the event info delivered in the subscription
 type AfEventSubscription struct {
-	Event       AfEvent       `json:"event"`
-	NotifMethod AfNotifMethod `json:"notifMethod,omitempty"`
+	Event       AfEvent        `json:"event"`
+	NotifMethod *AfNotifMethod `json:"notifMethod,omitempty"`
 }
 
 // AfRoutingRequirement describes the event info delivered in the subscription
 type AfRoutingRequirement struct {
 	AppReloc     bool               `json:"appReloc,omitempty"`
 	RouteToLocs  []RouteToLocation  `json:"routeToLocs,omitempty"`
-	SpVal        SpatialValidity    `json:"spVal,omitempty"`
+	SpVal        *SpatialValidity   `json:"spVal,omitempty"`
 	TempVals     []TemporalValidity `json:"tempVals,omitempty"`
 	UpPathChgSub *UpPathChgEvent    `json:"upPathChgSub,omitempty"`
-}
-
-/*
- * AfRoutingRequirementRm this data type is defined in the same way as the
- * AfRoutingRequirement data type, but with the OpenAPI nullable property set to
- * true and the spVal and tempVals attributes defined as removable.
- */
-type AfRoutingRequirementRm struct {
-	AppReloc     bool                `json:"appReloc,omitempty"`
-	RouteToLocs  *[]RouteToLocation  `json:"routeToLocs,omitempty"`
-	SpVal        *SpatialValidityRm  `json:"spVal,omitempty"`
-	TempVals     *[]TemporalValidity `json:"tempVals,omitempty"`
-	UpPathChgSub *UpPathChgEvent     `json:"upPathChgSub,omitempty"`
 }
 
 /*
@@ -215,27 +202,27 @@ type AfRoutingRequirementRm struct {
  * Application Session Context.
  */
 type AppSessionContextReqData struct {
-	AfAppId   string               `json:"afAppId,omitempty"`
-	AfRoutReq AfRoutingRequirement `json:"afRoutReq,omitempty"`
+	AfAppId   string                `json:"afAppId,omitempty"`
+	AfRoutReq *AfRoutingRequirement `json:"afRoutReq,omitempty"`
 	// Contains an identity of an application service provider.
 	AspId string `json:"aspId,omitempty"`
 	/*
 	 * string identifying a BDT Reference ID as defined in subclause
 	 * 5.3.3 of 3GPP TS 29.154.
 	 */
-	BdtRefId      string                      `json:"bdtRefId,omitempty"`
-	Dnn           string                      `json:"dnn,omitempty"`
-	EvSubsc       *EventsSubscReqData         `json:"evSubsc,omitempty"`
-	MedComponents map[string]MediaComponentRm `json:"medComponents,omitempty"`
-	IpDomain      string                      `json:"ipDomain,omitempty"`
+	BdtRefId      string                    `json:"bdtRefId,omitempty"`
+	Dnn           string                    `json:"dnn,omitempty"`
+	EvSubsc       *EventsSubscReqData       `json:"evSubsc,omitempty"`
+	MedComponents map[string]MediaComponent `json:"medComponents,omitempty"`
+	IpDomain      string                    `json:"ipDomain,omitempty"`
 	// indication of MPS service request
-	MpsId      string           `json:"mpsId,omitempty"`
-	NotifUri   string           `json:"notifUri"`
-	SliceInfo  Snssai           `json:"sliceInfo,omitempty"`
-	SponId     string           `json:"sponId,omitempty"`
-	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
-	Supi       string           `json:"supi,omitempty"`
-	Gpsi       string           `json:"gpsi,omitempty"`
+	MpsId      string            `json:"mpsId,omitempty"`
+	NotifUri   string            `json:"notifUri"`
+	SliceInfo  *Snssai           `json:"sliceInfo,omitempty"`
+	SponId     string            `json:"sponId,omitempty"`
+	SponStatus *SponsoringStatus `json:"sponStatus,omitempty"`
+	Supi       string            `json:"supi,omitempty"`
+	Gpsi       string            `json:"gpsi,omitempty"`
 	/*
 	 * A string used to indicate the features supported by an API that is
 	 * used as defined in subclause 6.6 in 3GPP TS 29.500 [1]. The string
@@ -250,10 +237,10 @@ type AppSessionContextReqData struct {
 	 * Possible features for traffic influencing are
 	 * Notification_websocket(1), Notification_test_event(2)
 	 */
-	SuppFeat string   `json:"suppFeat"`
-	UeIpv4   IPv4Addr `json:"ueIpv4,omitempty"`
-	UeIpv6   IPv6Addr `json:"ueIpv6,omitempty"`
-	UeMac    MacAddr  `json:"ueMac,omitempty"`
+	SuppFeat string    `json:"suppFeat"`
+	UeIpv4   *IPv4Addr `json:"ueIpv4,omitempty"`
+	UeIpv6   *IPv6Addr `json:"ueIpv6,omitempty"`
+	UeMac    *MacAddr  `json:"ueMac,omitempty"`
 }
 
 /*
@@ -261,7 +248,7 @@ type AppSessionContextReqData struct {
  * Application Session Context created by the PCF.
  */
 type AppSessionContextRespData struct {
-	ServAuthInfo ServAuthInfo `json:"servAuthInfo,omitempty"`
+	ServAuthInfo *ServAuthInfo `json:"servAuthInfo,omitempty"`
 	/*
 	 * A string used to indicate the features supported by an API that is
 	 * used as defined in subclause 6.6 in 3GPP TS 29.500 [1]. The string
@@ -286,22 +273,22 @@ type AppSessionContextRespData struct {
  */
 type AppSessionContextUpdateData struct {
 	// Contains an AF application identifier.
-	AfAppId   string                  `json:"afAppId,omitempty"`
-	AfRoutReq *AfRoutingRequirementRm `json:"afRoutReq,omitempty"`
+	AfAppId   string                `json:"afAppId,omitempty"`
+	AfRoutReq *AfRoutingRequirement `json:"afRoutReq,omitempty"`
 	// Contains an identity of an application service provider.
 	AspId string `json:"aspId,omitempty"`
 	/*
 	 * string identifying a BDT Reference ID as defined in subclause
 	 * 5.3.3 of 3GPP TS 29.154.
 	 */
-	BdtRefId      string                      `json:"bdtRefId,omitempty"`
-	EvSubsc       *EventsSubscReqDataRm       `json:"evSubsc,omitempty"`
-	MedComponents map[string]MediaComponentRm `json:"medComponents,omitempty"`
+	BdtRefId      string                    `json:"bdtRefId,omitempty"`
+	EvSubsc       *EventsSubscReqData       `json:"evSubsc,omitempty"`
+	MedComponents map[string]MediaComponent `json:"medComponents,omitempty"`
 	// indication of MPS service request
 	MpsId string `json:"mpsId,omitempty"`
 	// Contains an identity of a sponsor.
-	SponId     string           `json:"sponId,omitempty"`
-	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
+	SponId     string            `json:"sponId,omitempty"`
+	SponStatus *SponsoringStatus `json:"sponStatus,omitempty"`
 }
 
 /*
@@ -309,9 +296,9 @@ type AppSessionContextUpdateData struct {
  * resource.
  */
 type AppSessionContext struct {
-	AscReqData  AppSessionContextReqData  `json:"ascReqData,omitempty"`
-	AscRespData AppSessionContextRespData `json:"ascRespData,omitempty"`
-	EvsNotif    EventsNotification        `json:"evsNotif,omitempty"`
+	AscReqData  *AppSessionContextReqData  `json:"ascReqData,omitempty"`
+	AscRespData *AppSessionContextRespData `json:"ascRespData,omitempty"`
+	EvsNotif    *EventsNotification        `json:"evsNotif,omitempty"`
 }
 
 type Ecgi struct {
@@ -321,36 +308,24 @@ type Ecgi struct {
 
 // EventsNotification describes the notification of a matched event
 type EventsNotification struct {
-	AccessType AccessType  `json:"accessType,omitempty"`
-	AnGwAddr   AnGwAddress `json:"anGwAddr,omitempty"`
+	AccessType *AccessType  `json:"accessType,omitempty"`
+	AnGwAddr   *AnGwAddress `json:"anGwAddr,omitempty"`
 	// string providing an URI formatted according to IETF RFC 3986.
 	EvSubsUri                 string                       `json:"evSubsUri"`
 	EvNotifs                  []AfEventNotification        `json:"evNotifs"`
 	FailedResourcAllocReports []ResourcesAllocationInfo    `json:"failedResourcAllocReports,omitempty"`
-	PlmnId                    PlmnId                       `json:"plmnId,omitempty"`
+	PlmnId                    *PlmnId                      `json:"plmnId,omitempty"`
 	QncReports                []QosNotificationControlInfo `json:"qncReports,omitempty"`
-	RatType                   RatType                      `json:"ratType,omitempty"`
-	UsgRep                    AccumulatedUsage             `json:"usgRep,omitempty"`
+	RatType                   *RatType                     `json:"ratType,omitempty"`
+	UsgRep                    *AccumulatedUsage            `json:"usgRep,omitempty"`
 }
 
 // EventsSubscReqData Identifies the events the application subscribes to.
 type EventsSubscReqData struct {
 	Events []AfEventSubscription `json:"events"`
 	// string providing an URI formatted according to IETF RFC 3986.
-	NotifUri string         `json:"notifUri,omitempty"`
-	UsgThres UsageThreshold `json:"usgThres,omitempty"`
-}
-
-/*
- * EventsSubscReqDataRm this data type is defined in the same way as the
- * EventsSubscReqData data type, but with the OpenAPI nullable property set to
- * true.
- */
-type EventsSubscReqDataRm struct {
-	Events []AfEventSubscription `json:"events"`
-	// string providing an URI formatted according to IETF RFC 3986.
-	NotifUri string            `json:"notifUri,omitempty"`
-	UsgThres *UsageThresholdRm `json:"usgThres,omitempty"`
+	NotifUri string          `json:"notifUri,omitempty"`
+	UsgThres *UsageThreshold `json:"usgThres,omitempty"`
 }
 
 // Flows Identifies the flows
@@ -376,42 +351,20 @@ type GNbId struct {
 // MediaComponent Identifies a media component.
 type MediaComponent struct {
 	// Contains an AF application identifier.
-	AfAppId   string               `json:"afAppId,omitempty"`
-	AfRoutReq AfRoutingRequirement `json:"afRoutReq,omitempty"`
+	AfAppId   string                `json:"afAppId,omitempty"`
+	AfRoutReq *AfRoutingRequirement `json:"afRoutReq,omitempty"`
 	// Represents the content version of some content.
 	ContVer     int32                        `json:"contVer,omitempty"`
 	Codecs      []string                     `json:"codecs,omitempty"`
-	FStatus     FlowStatus                   `json:"fStatus,omitempty"`
+	FStatus     *FlowStatus                  `json:"fStatus,omitempty"`
 	MarBwDl     string                       `json:"marBwDl,omitempty"`
 	MarBwUl     string                       `json:"marBwUl,omitempty"`
 	MedCompN    int32                        `json:"medCompN"`
 	MedSubComps map[string]MediaSubComponent `json:"medSubComps,omitempty"`
-	MedType     MediaType                    `json:"medType,omitempty"`
+	MedType     *MediaType                   `json:"medType,omitempty"`
 	MirBwDl     string                       `json:"mirBwDl,omitempty"`
 	MirBwUl     string                       `json:"mirBwUl,omitempty"`
-	ResPrio     ReservPriority               `json:"resPrio,omitempty"`
-}
-
-/*
- * MediaComponentRm This data type is defined in the same way as the
- * MediaComponent data type, but with the OpenAPI nullable property set to true
- */
-type MediaComponentRm struct {
-	// Contains an AF application identifier.
-	AfAppId   string                  `json:"afAppId,omitempty"`
-	AfRoutReq *AfRoutingRequirementRm `json:"afRoutReq,omitempty"`
-	// Represents the content version of some content.
-	ContVer     int32                          `json:"contVer,omitempty"`
-	Codecs      []string                       `json:"codecs,omitempty"`
-	FStatus     FlowStatus                     `json:"fStatus,omitempty"`
-	MarBwDl     *string                        `json:"marBwDl,omitempty"`
-	MarBwUl     *string                        `json:"marBwUl,omitempty"`
-	MedCompN    int32                          `json:"medCompN"`
-	MedSubComps map[string]MediaSubComponentRm `json:"medSubComps,omitempty"`
-	MedType     MediaType                      `json:"medType,omitempty"`
-	MirBwDl     *string                        `json:"mirBwDl,omitempty"`
-	MirBwUl     *string                        `json:"mirBwUl,omitempty"`
-	ResPrio     ReservPriority                 `json:"resPrio,omitempty"`
+	ResPrio     *ReservPriority              `json:"resPrio,omitempty"`
 }
 
 // MediaSubComponent Identifies a media subcomponent
@@ -419,7 +372,7 @@ type MediaSubComponent struct {
 	EthfDescs []EthFlowDescription `json:"ethfDescs,omitempty"`
 	FNum      int32                `json:"fNum"`
 	FDescs    []string             `json:"fDescs,omitempty"`
-	FStatus   FlowStatus           `json:"fStatus,omitempty"`
+	FStatus   *FlowStatus          `json:"fStatus,omitempty"`
 	MarBwDl   string               `json:"marBwDl,omitempty"`
 	MarBwUl   string               `json:"marBwUl,omitempty"`
 	/*
@@ -428,29 +381,8 @@ type MediaSubComponent struct {
 	 * the IPv6 Traffic-Class field and the second octet contains the
 	 * ToS/Traffic Class mask field.
 	 */
-	TosTrCl   string    `json:"tosTrCl,omitempty"`
-	FlowUsage FlowUsage `json:"flowUsage,omitempty"`
-}
-
-/*
- * MediaSubComponentRm This data type is defined in the same way as the
- * MediaSubComponent data type, but with the OpenAPI nullable property set to
- * true. Removable attributes marBwDland marBwUl are defined with the
- * corresponding removable data type.
- */
-type MediaSubComponentRm struct {
-	EthfDescs *[]EthFlowDescription `json:"ethfDescs,omitempty"`
-	FNum      int32                 `json:"fNum"`
-	FDescs    *[]string             `json:"fDescs,omitempty"`
-	FStatus   FlowStatus            `json:"fStatus,omitempty"`
-	MarBwDl   *string               `json:"marBwDl,omitempty"`
-	MarBwUl   *string               `json:"marBwUl,omitempty"`
-	/*
-	 * this data type is defined in the same way as the TosTrafficClass data
-	 * type, but with the OpenAPI nullable property set to true
-	 */
-	TosTrCl   *string   `json:"tosTrCl,omitempty"`
-	FlowUsage FlowUsage `json:"flowUsage,omitempty"`
+	TosTrCl   string     `json:"tosTrCl,omitempty"`
+	FlowUsage *FlowUsage `json:"flowUsage,omitempty"`
 }
 
 type Ncgi struct {
@@ -465,7 +397,7 @@ type PlmnId struct {
 
 type PresenceInfo struct {
 	PraId               string            `json:"praId,omitempty"`
-	PresenceState       PresenceState     `json:"presenceState,omitempty"`
+	PresenceState       *PresenceState    `json:"presenceState,omitempty"`
 	TrackingAreaList    []Tai             `json:"trackingAreaList,omitempty"`
 	EcgiList            []Ecgi            `json:"ecgiList,omitempty"`
 	NcgiList            []Ncgi            `json:"ncgiList,omitempty"`
@@ -492,14 +424,6 @@ type ResourcesAllocationInfo struct {
 
 // SpatialValidity describes explicitly the route to an Application location
 type SpatialValidity struct {
-	PresenceInfoList map[string]PresenceInfo `json:"presenceInfoList"`
-}
-
-/*
- * SpatialValidityRm this data type is defined in the same way as the
- * SpatialValidity data type, but with the OpenAPI nullable property set to true
- */
-type SpatialValidityRm struct {
 	PresenceInfoList map[string]PresenceInfo `json:"presenceInfoList"`
 }
 
@@ -538,27 +462,4 @@ type UsageThreshold struct {
 	DownlinkVolume int64 `json:"downlinkVolume,omitempty"`
 	// Unsigned integer identifying a volume in units of bytes.
 	UplinkVolume int64 `json:"uplinkVolume,omitempty"`
-}
-
-type UsageThresholdRm struct {
-	/*
-	 * Unsigned integer identifying a period of time in units of seconds
-	 * with \"nullable=true\" property.
-	 */
-	Duration *int32 `json:"duration,omitempty"`
-	/*
-	 * Unsigned integer identifying a volume in units of bytes with
-	 * \"nullable=true\" property.
-	 */
-	TotalVolume *int64 `json:"totalVolume,omitempty"`
-	/*
-	 * Unsigned integer identifying a volume in units of bytes with
-	 * \"nullable=true\" property.
-	 */
-	DownlinkVolume *int64 `json:"downlinkVolume,omitempty"`
-	/*
-	 * Unsigned integer identifying a volume in units of bytes with
-	 * \"nullable=true\" property.
-	 */
-	UplinkVolume *int64 `json:"uplinkVolume,omitempty"`
 }

@@ -89,12 +89,12 @@ type ProblemDetails struct {
 type RouteInformation struct {
 	// string identifying a Ipv4 address formatted in the \"dotted decimal\"
 	// notation as defined in IETF RFC 1166.
-	IPv4Addr IPv4Addr `json:"ipv4Addr,omitempty"`
+	IPv4Addr *IPv4Addr `json:"ipv4Addr,omitempty"`
 	// string identifying a Ipv6 address formatted according to clause 4 in
 	// IETF RFC 5952.
 	// The mixed Ipv4 Ipv6 notation according to clause 5 of IETF RFC 5952
 	// shall not be used.
-	IPv6Addr IPv6Addr `json:"ipv6Addr,omitempty"`
+	IPv6Addr *IPv6Addr `json:"ipv6Addr,omitempty"`
 	// Port number
 	PortNumber int32 `json:"portNumber"`
 }
@@ -106,7 +106,7 @@ type RouteToLocation struct {
 	// Dnai route profile identifier
 	RouteProfID string `json:"routeProfId,omitempty"`
 	// Additional route information about the route to Dnai
-	RouteInfo RouteInformation `json:"routeInfo,omitempty"`
+	RouteInfo *RouteInformation `json:"routeInfo,omitempty"`
 }
 --Remove-this-comment*/
 
