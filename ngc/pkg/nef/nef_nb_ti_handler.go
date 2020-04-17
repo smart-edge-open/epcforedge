@@ -709,8 +709,6 @@ func (af *afData) afGetSubscription(nefCtx *nefContext,
 
 	return rsp, ti, err
 
-	//Return locally
-	//return rsp, sub.ti, err
 }
 
 func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (rsp nefSBRspData,
@@ -1363,62 +1361,7 @@ func getSpatialValidityData(cliCtx context.Context, nefCtx *nefContext,
 	_ = cliCtx
 	_ = nefCtx
 
-	/* spVal.PresenceInfoList.PraID = "PRA_01"
-	spVal.PresenceInfoList.PresenceState = "IN_AREA"
-	spVal.PresenceInfoList.EcgiList = make([]Ecgi, 1)
-	spVal.PresenceInfoList.EcgiList[0].EutraCellID = "EUTRACELL_01"
-	spVal.PresenceInfoList.EcgiList[0].PlmnID.Mcc = "634"
-	spVal.PresenceInfoList.EcgiList[0].PlmnID.Mnc = "635"
-	spVal.PresenceInfoList.NcgiList = make([]Ncgi, 1)
-	spVal.PresenceInfoList.NcgiList[0].NrCellID = "NRCELL_01"
-	spVal.PresenceInfoList.NcgiList[0].PlmnID.Mcc = "834"
-	spVal.PresenceInfoList.NcgiList[0].PlmnID.Mnc = "835"
-	spVal.PresenceInfoList.GlobalRanNodeIDList = make([]GlobalRanNodeID, 1)
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].PlmnID.Mcc = "934"
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].PlmnID.Mnc = "935"
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].N3IwfID = "IWF_01"
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].GNbID.BitLength = 48
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].GNbID.GNBValue = "GNB_01"
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].NgeNbID = "NB_01" */
-	PresenceInfoList := map[string]PresenceInfo{
-		"additionalProp1": {
-			PraID:         "PRA_01",
-			PresenceState: "IN_AREA",
-			EcgiList: []Ecgi{
-				0: {
-					EutraCellID: "EUTRACELL_01",
-					PlmnID: PlmnID{
-						Mcc: "634",
-						Mnc: "635",
-					},
-				},
-			},
-			NcgiList: []Ncgi{
-				0: {
-					NrCellID: "NRCELL_01",
-					PlmnID: PlmnID{
-						Mcc: "834",
-						Mnc: "835",
-					},
-				},
-			},
-			GlobalRanNodeIDList: []GlobalRanNodeID{
-				0: {
-					PlmnID: PlmnID{
-						Mcc: "934",
-						Mnc: "935",
-					},
-					N3IwfID: "IWF_01",
-					GNbID: GNbID{
-						BitLength: 48,
-						GNBValue:  "GNB_01",
-					},
-					NgeNbID: "NB_01",
-				},
-			},
-		},
-	}
-
+	PresenceInfoList := map[string]PresenceInfo{}
 	spVal.PresenceInfoList = PresenceInfoList
 	return nil
 }

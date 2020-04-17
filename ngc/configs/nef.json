@@ -25,12 +25,5 @@
             "snssai": "snssai1_value"
         }
     ],
-    "OAuth2Support": false,
-    "PcfPolicyAuthorizationConfig":
-    {
-        "Scheme":"https",
-        "ClientCert":"/etc/certs/pcf.pem",
-        "ApiRoot":"localhost:29507",
-        "Uri":"/npcf-policyauthorization/v1/app-sessions/"
-    }
+    "OAuth2Support": true
 }

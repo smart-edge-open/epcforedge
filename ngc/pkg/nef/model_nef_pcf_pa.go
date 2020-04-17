@@ -11,17 +11,15 @@ type AppSessionContext struct {
 	// Context.
 	// It shall be present in HTTP POST request messages and may be included
 	// in the HTTP response messages
-	AscReqData AppSessionContextReqData `json:"ascReqData,omitempty"`
-	// The following fields will not be supported as its not required for
-	// Traffic Influence
+	AscReqData  AppSessionContextReqData  `json:"ascReqData,omitempty"`
 	AscRespData AppSessionContextRespData `json:"ascRespData,omitempty"`
 	EvsNotif    EventsNotification        `json:"evsNotif,omitempty"`
 }
 
 //AppSessionContextRespData added
 type AppSessionContextRespData struct {
-	ServAuthInfo ServAuthInfo `json:"servAuthInfo,omitempty" bson:"servAuthInfo"`
-	SuppFeat     string       `json:"suppFeat,omitempty" bson:"suppFeat"`
+	ServAuthInfo ServAuthInfo `json:"servAuthInfo,omitempty"`
+	SuppFeat     string       `json:"suppFeat,omitempty"`
 }
 
 //ServAuthInfo added
@@ -29,21 +27,21 @@ type ServAuthInfo string
 
 //EventsNotification describes the notification of a matched event
 type EventsNotification struct {
-	AccessType AccessType `json:"accessType,omitempty" bson:"accessType"`
-	//AnGwAddr                  *AnGwAddress                 `json:"anGwAddr,omitempty" bson:"anGwAddr"`
-	EvSubsURI string                `json:"evSubsUri" bson:"evSubsUri"`
-	EvNotifs  []AfEventNotification `json:"evNotifs" bson:"evNotifs"`
-	//FailedResourcAllocReports []ResourcesAllocationInfo    `json:"failedResourcAllocReports,omitempty" bson:"failedResourcAllocReports"`
-	//PlmnId                    *PlmnId                      `json:"plmnId,omitempty" bson:"plmnId"`
-	//QncReports                []QosNotificationControlInfo `json:"qncReports,omitempty" bson:"qncReports"`
-	//RatType                   RatType                      `json:"ratType,omitempty" bson:"ratType"`
-	//UsgRep                    *AccumulatedUsage            `json:"usgRep,omitempty" bson:"usgRep"`
+	AccessType AccessType `json:"accessType,omitempty"`
+	//AnGwAddr                  *AnGwAddress                 `json:"anGwAddr,omitempty"`
+	EvSubsURI string                `json:"evSubsUri"`
+	EvNotifs  []AfEventNotification `json:"evNotifs"`
+	//FailedResourcAllocReports []ResourcesAllocationInfo    `json:"failedResourcAllocReports,omitempty"`
+	//PlmnId                    *PlmnId                      `json:"plmnId,omitempty"`
+	//QncReports                []QosNotificationControlInfo `json:"qncReports,omitempty"`
+	//RatType                   RatType                      `json:"ratType,omitempty"`
+	//UsgRep                    *AccumulatedUsage            `json:"usgRep,omitempty"`
 }
 
 //AfEventNotification describes the event information delivered in the notification
 type AfEventNotification struct {
-	Event AfEvent `json:"event" bson:"event"`
-	//Flows []Flows `json:"flows,omitempty" bson:"flows"`
+	Event AfEvent `json:"event"`
+	//Flows []Flows `json:"flows,omitempty"`
 }
 
 //AfEvent string
@@ -75,10 +73,10 @@ type AppSessionContextReqData struct {
 	UeIpv6 Ipv6Addr `json:"ueIpv6,omitempty"`
 	// ue mac
 	UeMac    MacAddr48 `json:"ueMac,omitempty"`
-	NotifURI string    `json:"notifUri" bson:"notifUri"`
+	NotifURI string    `json:"notifUri"`
 	// The following fields have been omitted as they are not required for
 	// Traffic Influ feature
-	// evSubsc and notifUri - Not Required
+	// evSubsc - Not Required
 	// AspId - Required when Sponspored Connnectivity is supported
 	// bdtRefId - Required when BDT is supported
 	// ipDomain - Required when Qos is supported
@@ -99,7 +97,7 @@ type AppSessionContextUpdateData struct {
 
 	// The following fields have been omitted as they are not required for
 	// Traffic Influ feature
-	// evSubsc and notifUri - Not Required
+	// evSubsc - Not Required
 	// AspId - Required when Sponspored Connnectivity is supported
 	// bdtRefId - Required when BDT is supported
 	// medComponents - Required when Qos is supported
