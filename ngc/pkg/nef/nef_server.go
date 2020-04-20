@@ -53,20 +53,21 @@ type PcfPolicyAuthorizationConfig struct {
 // Config contains NEF Module Configuration Data Structure
 type Config struct {
 	// API Root for the NEF
-	NefAPIRoot                string `json:"nefAPIRoot"`
-	LocationPrefix            string `json:"locationPrefix"`
-	LocationPrefixPfd         string `json:"locationPrefixPfd"`
-	MaxSubSupport             int    `json:"maxSubSupport"`
-	MaxPfdTransSupport        int    `json:"maxPfdTransSupport"`
-	MaxAFSupport              int    `json:"maxAFSupport"`
-	SubStartID                int    `json:"subStartID"`
-	PfdTransStartID           int    `json:"pfdTransStartID"`
-	UpfNotificationResURIPath string `json:"UpfNotificationResUriPath"`
-	UserAgent                 string `json:"UserAgent"`
-	HTTPConfig                HTTPConfig
-	HTTP2Config               HTTP2Config
-	AfServiceIDs              []interface{} `json:"afServiceIDs"`
-	OAuth2Support             bool          `json:"OAuth2Support"`
+	NefAPIRoot                   string `json:"nefAPIRoot"`
+	LocationPrefix               string `json:"locationPrefix"`
+	LocationPrefixPfd            string `json:"locationPrefixPfd"`
+	MaxSubSupport                int    `json:"maxSubSupport"`
+	MaxPfdTransSupport           int    `json:"maxPfdTransSupport"`
+	MaxAFSupport                 int    `json:"maxAFSupport"`
+	SubStartID                   int    `json:"subStartID"`
+	PfdTransStartID              int    `json:"pfdTransStartID"`
+	UpfNotificationResURIPath    string `json:"UpfNotificationResUriPath"`
+	UserAgent                    string `json:"UserAgent"`
+	HTTPConfig                   HTTPConfig
+	HTTP2Config                  HTTP2Config
+	AfServiceIDs                 []interface{}                 `json:"afServiceIDs"`
+	OAuth2Support                bool                          `json:"OAuth2Support"`
+	PcfPolicyAuthorizationConfig *PcfPolicyAuthorizationConfig `json:"PcfPolicyAuthorizationConfig,omitempty"`
 }
 
 // NEF Module Context Data Structure
