@@ -49,7 +49,7 @@ var CNTESTRoutes = []Route{
 	},
 	{
 		"PolicyAuthorizationAppSessionDelete",
-		strings.ToUpper("Delete"),
+		strings.ToUpper("Post"),
 		"/npcf-policyauthorization/v1/app-sessions/{appSessionId}/delete",
 		PolicyAuthorizationAppSessionDelete,
 	},
@@ -174,47 +174,4 @@ func cnTestRouteLogger(httpHandler http.Handler, name string) http.Handler {
 		log.Infof("HTTP Request Handling -- ENDS. Time Taken: %s",
 			time.Since(start))
 	})
-}
-
-//PolicyAuthorizationAppSessionGet Get
-func PolicyAuthorizationAppSessionGet(w http.ResponseWriter,
-	r *http.Request) {
-	log.Infoln("PolicyAuthorizationAppSessionGet -- Entered")
-	vars := mux.Vars(r)
-	log.Infof(" APP Session ID  : %s", vars["appSessionId"])
-
-}
-
-//PolicyAuthorizationAppSessionCreate Post
-func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
-	r *http.Request) {
-	log.Infoln("PolicyAuthorizationAppSessionCreate -- Entered")
-}
-
-//PolicyAuthorizationAppSessionPatch Patch
-func PolicyAuthorizationAppSessionPatch(w http.ResponseWriter,
-	r *http.Request) {
-	log.Infoln("PolicyAuthorizationAppSession -- Entered")
-
-}
-
-//PolicyAuthorizationAppSessionDelete Delete
-func PolicyAuthorizationAppSessionDelete(w http.ResponseWriter,
-	r *http.Request) {
-	log.Infoln("PolicyAuthorizationAppSessionDelete -- Entered")
-
-}
-
-//PolicyAuthorizationAppSessionSubscribe Subscribe
-func PolicyAuthorizationAppSessionSubscribe(w http.ResponseWriter,
-	r *http.Request) {
-	log.Infoln("PolicyAuthorizationAppSessionSubscribe -- Entered")
-
-}
-
-//PolicyAuthorizationAppSessionUnsubscribe Unsubscribe
-func PolicyAuthorizationAppSessionUnsubscribe(w http.ResponseWriter,
-	r *http.Request) {
-	log.Infoln("PolicyAuthorizationAppSessionUnsubscribe -- Entered")
-
 }
