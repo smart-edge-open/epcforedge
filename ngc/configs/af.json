@@ -20,9 +20,9 @@
         "OAuth2Support": true
     },
     "CliPcfConfig": {
-        "Protocol": "http",
+        "Protocol": "https",
         "PcfHostname": "localhost",
-        "PcfPort": ":8060",
+        "PcfPort": ":8090",
         "PolicyAuthBasePath": "/npcf-policyauthorization/v1",
         "UserAgent": "NGC-AF",
         "CliCertPath": "/etc/certs/root-ca-cert.pem",

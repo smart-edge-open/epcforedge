@@ -18,7 +18,7 @@ func getAppSessionID(r *http.Request) string {
 }
 
 func logPolicyRespErr(w *http.ResponseWriter, err string, statusCode int) {
-	log.Errf("%s")
+	log.Errf("%s", err)
 	(*w).WriteHeader(statusCode)
 	return
 }
@@ -54,7 +54,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiClient := AfCtx.cfg.policyAuthAPIClient
+	apiClient := afCtx.cfg.policyAuthAPIClient
 	if apiClient == nil {
 		logPolicyRespErr(&w, "nil policyAuthAPIClient in "+
 			"CreatePolicyAuthAppSessions",
@@ -143,7 +143,7 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	apiClient := AfCtx.cfg.policyAuthAPIClient
+	apiClient := afCtx.cfg.policyAuthAPIClient
 	if apiClient == nil {
 		logPolicyRespErr(&w, "nil policyAuthAPIClient in "+
 			"DeletePolicyAuthAppSessions",
@@ -220,7 +220,7 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	apiClient := AfCtx.cfg.policyAuthAPIClient
+	apiClient := afCtx.cfg.policyAuthAPIClient
 	if apiClient == nil {
 		logPolicyRespErr(&w, "nil policyAuthAPIClient in "+
 			"GetPolicyAuthAppSessions",
@@ -310,7 +310,7 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiClient := AfCtx.cfg.policyAuthAPIClient
+	apiClient := afCtx.cfg.policyAuthAPIClient
 	if apiClient == nil {
 		logPolicyRespErr(&w, "nil policyAuthAPIClient in "+
 			"ModifyPolicyAuthAppSessions",
