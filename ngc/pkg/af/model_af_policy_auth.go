@@ -154,7 +154,7 @@ const (
 type SponsoringStatus string
 
 const (
-	SponsorEnabled  SponsoringStatus = "SPONSOR_EnABLED"
+	SponsorEnabled  SponsoringStatus = "SPONSOR_ENABLED"
 	SponsorDisabled SponsoringStatus = "SPONSOR_DISABLED"
 )
 

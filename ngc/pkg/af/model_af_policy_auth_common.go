@@ -89,7 +89,7 @@ type ProblemDetails struct {
 type RouteInformation struct {
 	// string identifying a Ipv4 address formatted in the \"dotted decimal\"
 	// notation as defined in IETF RFC 1166.
-	IPv4Addr *IPv4Addr `json:"ipv4Addr,omitempty"`
+	IPv4Addr IPv4Addr `json:"ipv4Addr,omitempty"`
 	// string identifying a Ipv6 address formatted according to clause 4 in
 	// IETF RFC 5952.
 	// The mixed Ipv4 Ipv6 notation according to clause 5 of IETF RFC 5952
