@@ -99,5 +99,5 @@ func loadJSONConfig(configPath string, config interface{}) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(cfgData, config)
+	return json.Unmarshal(cfgData, &config)
 }
