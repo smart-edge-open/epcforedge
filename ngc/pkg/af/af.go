@@ -5,6 +5,7 @@ package af
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -43,11 +44,13 @@ type ServerConfig struct {
 
 //Config struct
 type Config struct {
-	AfID              string       `json:"AfId"`
-	AfAPIRoot         string       `json:"AfAPIRoot"`
-	LocationPrefixPfd string       `json:"LocationPrefixPfd"`
-	SrvCfg            ServerConfig `json:"ServerConfig"`
-	CliCfg            CliConfig    `json:"CliConfig"`
+	AfID                string        `json:"AfId"`
+	AfAPIRoot           string        `json:"AfAPIRoot"`
+	LocationPrefixPfd   string        `json:"LocationPrefixPfd"`
+	SrvCfg              ServerConfig  `json:"ServerConfig"`
+	CliCfg              CliConfig     `json:"CliConfig"`
+	CliPcfCfg           *CliPcfConfig `json:"CliPcfConfig"`
+	policyAuthApiClient *PolicyAuthApiClient
 }
 
 //Context struct
@@ -80,6 +83,13 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 
 	AfCtx.transactions = make(TransactionIDs)
 	AfCtx.subscriptions = make(NotifSubscryptions)
+	if AfCtx.cfg.CliPcfCfg == nil {
+		err = errors.New("nil CliPcfCfg in AfCtx")
+		log.Errf("%s", err.Error())
+		return err
+	}
+	AfCtx.cfg.policyAuthApiClient =
+		NewPolicyAuthApiClient(AfCtx.cfg.CliPcfCfg)
 	AfRouter = NewAFRouter(AfCtx)
 	NotifRouter = NewNotifRouter(AfCtx)
 
