@@ -700,19 +700,15 @@ func (af *afData) afGetSubscription(nefCtx *nefContext,
 		return rsp, ti, errors.New(subNotFound)
 	}
 
-	//ti, rsp, err = sub.NEFSBGet(sub, nefCtx)
+	ti, rsp, err = sub.NEFSBGet(sub, nefCtx)
 
-	/*
-		if err != nil {
-			log.Infoln("Failed to Get Subscription")
-			return rsp, ti, err
-		}
-
+	if err != nil {
+		log.Infoln("Failed to Get Subscription")
 		return rsp, ti, err
-	*/
+	}
 
-	//Return locally
-	return rsp, sub.ti, err
+	return rsp, ti, err
+
 }
 
 func (af *afData) afGetSubscriptionList(nefCtx *nefContext) (rsp nefSBRspData,
@@ -863,14 +859,17 @@ func nefSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
 	_ = copy(appSessCtx.AscReqData.AfRoutReq.TempVals, ti.TempValidities)
 
 	//Populating Spatial Validity in App Session Context
+	appSessCtx.AscReqData.AfRoutReq.SpVal = &SpatialValidity{}
 	_ = getSpatialValidityData(cliCtx, nefCtx,
-		&appSessCtx.AscReqData.AfRoutReq.SpVal)
+		appSessCtx.AscReqData.AfRoutReq.SpVal)
 
 	//Populating IP and Mac Addresses in App Session Context
 	appSessCtx.AscReqData.UeIpv4 = ti.Ipv4Addr
 	appSessCtx.AscReqData.UeIpv6 = ti.Ipv6Addr
 	appSessCtx.AscReqData.UeMac = ti.MacAddr
-
+	appSessCtx.AscReqData.NotifURI = string(ti.NotificationDestination)
+	appSessCtx.AscReqData.SuppFeat = ti.SuppFeat
+	appSessCtx.EvsNotif.EvSubsURI = ""
 	//Populating DNN and NW Slice Info and SUPI in App Session Context
 	for _, afServIdcounter := range nefCtx.cfg.AfServiceIDs {
 		afServiceID := afServIdcounter.(map[string]interface{})
@@ -1014,8 +1013,9 @@ func nefSBPCFPatch(pcfSub *afSubscription, nefCtx *nefContext,
 	_ = copy(appSessCtxUpdtData.AfRoutReq.TempVals, tisp.TempValidities)
 
 	//Populating Spatial Validity in App Session Context
+	appSessCtxUpdtData.AfRoutReq.SpVal = &SpatialValidity{}
 	_ = getSpatialValidityData(cliCtx, nefCtx,
-		&appSessCtxUpdtData.AfRoutReq.SpVal)
+		appSessCtxUpdtData.AfRoutReq.SpVal)
 
 	pcfPolicyResp, err := nef.pcfClient.PolicyAuthorizationUpdate(cliCtx,
 		appSessCtxUpdtData, pcfSub.appSessionID)
@@ -1361,24 +1361,8 @@ func getSpatialValidityData(cliCtx context.Context, nefCtx *nefContext,
 	_ = cliCtx
 	_ = nefCtx
 
-	spVal.PresenceInfoList.PraID = "PRA_01"
-	spVal.PresenceInfoList.PresenceState = "IN_AREA"
-	spVal.PresenceInfoList.EcgiList = make([]Ecgi, 1)
-	spVal.PresenceInfoList.EcgiList[0].EutraCellID = "EUTRACELL_01"
-	spVal.PresenceInfoList.EcgiList[0].PlmnID.Mcc = "634"
-	spVal.PresenceInfoList.EcgiList[0].PlmnID.Mnc = "635"
-	spVal.PresenceInfoList.NcgiList = make([]Ncgi, 1)
-	spVal.PresenceInfoList.NcgiList[0].NrCellID = "NRCELL_01"
-	spVal.PresenceInfoList.NcgiList[0].PlmnID.Mcc = "834"
-	spVal.PresenceInfoList.NcgiList[0].PlmnID.Mnc = "835"
-	spVal.PresenceInfoList.GlobalRanNodeIDList = make([]GlobalRanNodeID, 1)
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].PlmnID.Mcc = "934"
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].PlmnID.Mnc = "935"
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].N3IwfID = "IWF_01"
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].GNbID.BitLength = 48
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].GNbID.GNBValue = "GNB_01"
-	spVal.PresenceInfoList.GlobalRanNodeIDList[0].NgeNbID = "NB_01"
-
+	PresenceInfoList := map[string]PresenceInfo{}
+	spVal.PresenceInfoList = PresenceInfoList
 	return nil
 }
 
