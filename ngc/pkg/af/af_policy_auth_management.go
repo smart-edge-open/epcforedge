@@ -8,18 +8,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func getAppSessionId(r *http.Request) string {
-	vars := mux.Vars(r)
-	retVal := vars["appSessionId"]
-	return retVal
-}
-
 func logErr(w *http.ResponseWriter, err string, statusCode int) {
 	log.Errf("%s")
 	(*w).WriteHeader(statusCode)
 	return
 }
-
 func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 
 	var (
@@ -27,7 +20,6 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		appSess     AppSessionContext
 		appSessResp AppSessionContext
 		httpResp    *http.Response
-		probDetails *ProblemDetails
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -57,10 +49,21 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	appSessResp, probDetails, httpResp, err =
+	/*
+		cliCfg := AfCtx.cfg.CliPcfCfg
+		if cliCfg == nil {
+
+			log.Errf("CreatePolicyAuthAppSessions nil client config")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	*/
+
+	appSessResp, httpResp, err =
 		apiClient.PolicyAuthAppSessionApi.PostAppSessions(cliCtx,
 			appSess)
 	if err != nil {
+		// Handle error
 		if httpResp != nil {
 			logErr(&w, "Create Policy App Session"+err.Error(),
 				httpResp.StatusCode)
@@ -71,34 +74,11 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if probDetails != nil {
-		probDetailsJson, err := json.Marshal(probDetails)
-		if err != nil {
-			logErr(&w, "Json marshal error (probDetials) in "+
-				"CreatePolicyAuthAppSessions"+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
-		_, err = w.Write(probDetailsJson)
-		if err != nil {
-			log.Errf("Response write error in " +
-				"CreatePolicyAuthAppSessions" + err.Error())
-			return
-		}
-		return
-	}
-
 	appSessJson, err := json.Marshal(appSessResp)
-	if err != nil {
-		logErr(&w, "Json marshal error in CreatePolicyAuthAppSessions"+
-			err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	w.WriteHeader(httpResp.StatusCode)
 	_, err = w.Write(appSessJson)
 	if err != nil {
-		log.Errf("Response write error in CreatePolicyAuthAppSessions")
+		// Handle Error
 		return
 	}
 }
@@ -110,13 +90,12 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		eventSubscReq EventsSubscReqData
 		appSessResp   AppSessionContext
 		httpResp      *http.Response
-		probDetails   *ProblemDetails
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
-		logErr(&w, "nil afCtx in DeletePolicyAuthAppSessions",
-			http.StatusInternalServerError)
+		log.Errf("CreatePolicyAuthAppSessions nil afCtx")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -126,70 +105,54 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Check if body is not null then decode
-	if r.Body != nil && r.ContentLength > 0 {
-		err = json.NewDecoder(r.Body).Decode(&eventSubscReq)
-		if err != nil {
-			logErr(&w, "Json decode error in "+
-				"DeletePolicyAuthAppSession: "+err.Error(),
-				http.StatusBadRequest)
-			return
-		}
+	err = json.NewDecoder(r.Body).Decode(&eventSubscReq)
+	if err != nil {
+		log.Errf("Policy auth app sess create error in json decode %s",
+			err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
 	apiClient := AfCtx.cfg.policyAuthApiClient
 	if apiClient == nil {
-		logErr(&w, "nil policyAuthApiClient in "+
-			"DeletePolicyAuthAppSessions",
-			http.StatusInternalServerError)
+		log.Errf("CreatePolicyAuthAppSessions nil policyAuthApiClient")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	appSessionId := getAppSessionId(r)
+	// Do we need this?
+	cliCfg := AfCtx.cfg.CliPcfCfg
+	if cliCfg == nil {
+		log.Errf("CreatePolicyAuthAppSessions nil client config")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	appSessResp, probDetails, httpResp, err =
-		apiClient.PolicyAuthIndividualAppSessApi.
-			DeleteAppSession(cliCtx, appSessionId, &eventSubscReq)
+	appSessionId := getAppSessionId(r) // use inline or call func?
+
+	appSessResp, httpResp, err =
+		apiClient.PolicyAuthIndividualAppSessApi.DeleteAppSession(cliCtx,
+			appSessionId, &eventSubscReq)
 	if err != nil {
-		if httpResp != nil {
-			logErr(&w, "Delete Policy App Session"+err.Error(),
-				httpResp.StatusCode)
-		} else {
-			logErr(&w, "Delete Policy App Session"+err.Error(),
-				http.StatusInternalServerError)
-		}
-		return
-	}
-
-	if probDetails != nil {
-		probDetailsJson, err := json.Marshal(probDetails)
-		if err != nil {
-			logErr(&w, "Json marshal error (probDetials) in "+
-				"DeletePolicyAuthAppSessions"+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
-		_, err = w.Write(probDetailsJson)
-		if err != nil {
-			log.Errf("Response write error in " +
-				"DeletePolicyAuthAppSessions")
-			return
-		}
+		// Handle error
 		return
 	}
 
 	appSessJson, err := json.Marshal(appSessResp)
-	if err != nil {
-		logErr(&w, "Json marshal error in DeletePolicyAuthAppSessions"+
-			err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	w.WriteHeader(httpResp.StatusCode)
 	_, err = w.Write(appSessJson)
 	if err != nil {
-		log.Errf("Response write error in DeletePolicyAuthAppSessions")
+		// Handle Error
 		return
 	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+}
+
+func getAppSessionId(r *http.Request) string {
+	vars := mux.Vars(r)
+	retVal := vars["appSessionId"]
+	return retVal
 }
 
 func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
@@ -198,13 +161,12 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		err         error
 		appSessResp AppSessionContext
 		httpResp    *http.Response
-		probDetails *ProblemDetails
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
-		logErr(&w, "nil afCtx in GetPolicyAuthAppSessions",
-			http.StatusInternalServerError)
+		log.Errf("CreatePolicyAuthAppSessions nil afCtx")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -213,58 +175,33 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
 	apiClient := AfCtx.cfg.policyAuthApiClient
 	if apiClient == nil {
-		logErr(&w, "nil policyAuthApiClient in "+
-			"GetPolicyAuthAppSessions",
-			http.StatusInternalServerError)
+		log.Errf("CreatePolicyAuthAppSessions nil policyAuthApiClient")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	appSessionId := getAppSessionId(r)
+	appSessionId := getAppSessionId(r) // use inline or call func?
 
-	appSessResp, probDetails, httpResp, err =
+	appSessResp, httpResp, err =
 		apiClient.PolicyAuthIndividualAppSessApi.GetAppSession(cliCtx,
 			appSessionId)
 
 	if err != nil {
-		if httpResp != nil {
-			logErr(&w, "Get Policy App Session"+err.Error(),
-				httpResp.StatusCode)
-		} else {
-			logErr(&w, "Get Policy App Session"+err.Error(),
-				http.StatusInternalServerError)
-		}
-		return
-	}
-
-	if probDetails != nil {
-		probDetailsJson, err := json.Marshal(probDetails)
-		if err != nil {
-			logErr(&w, "Json marshal error (probDetials) in "+
-				"GetPolicyAuthAppSessions"+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
-		_, err = w.Write(probDetailsJson)
-		if err != nil {
-			log.Errf("Response write error in " +
-				"GetPolicyAuthAppSessions")
-			return
-		}
+		// Handle Error
 		return
 	}
 
 	appSessRespJson, err := json.Marshal(appSessResp)
 	if err != nil {
-		logErr(&w, "Json marshal error in GetPolicyAuthAppSessions"+
-			err.Error(), http.StatusInternalServerError)
+		// Handle Error
 		return
 	}
 
 	w.WriteHeader(httpResp.StatusCode)
 	_, err = w.Write(appSessRespJson)
 	if err != nil {
-		log.Errf("Response write error in GetPolicyAuthAppSessions")
+		// Handle Error
 		return
 	}
 }
@@ -276,13 +213,12 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		appSessUpdateData AppSessionContextUpdateData
 		appSessResp       AppSessionContext
 		httpResp          *http.Response
-		probDetails       *ProblemDetails
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
-		logErr(&w, "nil afCtx in ModifyPolicyAuthAppSessions",
-			http.StatusInternalServerError)
+		log.Errf("CreatePolicyAuthAppSessions nil afCtx")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -301,56 +237,34 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
 	apiClient := AfCtx.cfg.policyAuthApiClient
 	if apiClient == nil {
-		logErr(&w, "nil policyAuthApiClient in "+
-			"ModifyPolicyAuthAppSessions",
-			http.StatusInternalServerError)
+		log.Errf("CreatePolicyAuthAppSessions nil policyAuthApiClient")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	appSessionId := getAppSessionId(r)
+	// Do we need this?
+	cliCfg := AfCtx.cfg.CliPcfCfg
+	if cliCfg == nil {
+		log.Errf("CreatePolicyAuthAppSessions nil client config")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-	appSessResp, probDetails, httpResp, err =
+	appSessionId := getAppSessionId(r) // use inline or call func?
+
+	appSessResp, httpResp, err =
 		apiClient.PolicyAuthIndividualAppSessApi.ModAppSession(cliCtx,
 			appSessionId, appSessUpdateData)
 	if err != nil {
-		if httpResp != nil {
-			logErr(&w, "Modify Policy App Session"+err.Error(),
-				httpResp.StatusCode)
-		} else {
-			logErr(&w, "Modify Policy App Session"+err.Error(),
-				http.StatusInternalServerError)
-		}
-		return
-	}
-
-	if probDetails != nil {
-		probDetailsJson, err := json.Marshal(probDetails)
-		if err != nil {
-			logErr(&w, "Json marshal error (probDetials) in "+
-				"ModifyPolicyAuthAppSessions"+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
-		_, err = w.Write(probDetailsJson)
-		if err != nil {
-			log.Errf("Response write error in " +
-				"ModifyPolicyAuthAppSessions")
-			return
-		}
+		// Handle error
 		return
 	}
 
 	appSessJson, err := json.Marshal(appSessResp)
-	if err != nil {
-		logErr(&w, "Json marshal error in ModifyPolicyAuthAppSessions"+
-			err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	w.WriteHeader(httpResp.StatusCode)
 	_, err = w.Write(appSessJson)
 	if err != nil {
-		log.Errf("Response write error in ModifyPolicyAuthAppSessions")
+		// Handle Error
 		return
 	}
 }
