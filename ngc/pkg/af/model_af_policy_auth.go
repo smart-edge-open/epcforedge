@@ -171,9 +171,9 @@ type ServAuthInfo string
 
 // List of ServAuthInfos
 const (
-	ServAuthNotKnown   ServAuthInfo = "TP_NOT_KNOWN"
-	ServAuthExpired    ServAuthInfo = "TP_EXPIRED"
-	ServAuthNotOcurred ServAuthInfo = "TP_NOT_YET_OCURRED"
+	ServAuthNotKnown    ServAuthInfo = "TP_NOT_KNOWN"
+	ServAuthExpired     ServAuthInfo = "TP_EXPIRED"
+	ServAuthNotOccurred ServAuthInfo = "TP_NOT_YET_OCCURRED"
 )
 
 // SponsoringStatus type
@@ -382,16 +382,16 @@ type GnbID struct {
 
 // MediaComponent Identifies a media component.
 type MediaComponent struct {
+	ContVer  int32 `json:"contVer,omitempty"`
+	MedCompN int32 `json:"medCompN"`
 	// Contains an AF application identifier.
 	AfAppID   string              `json:"afAppId,omitempty"`
 	AfRoutReq *RoutingRequirement `json:"afRoutReq,omitempty"`
 	// Represents the content version of some content.
-	ContVer     int32                        `json:"contVer,omitempty"`
 	Codecs      []string                     `json:"codecs,omitempty"`
 	FStatus     FlowStatus                   `json:"fStatus,omitempty"`
 	MarBwDl     string                       `json:"marBwDl,omitempty"`
 	MarBwUl     string                       `json:"marBwUl,omitempty"`
-	MedCompN    int32                        `json:"medCompN"`
 	MedSubComps map[string]MediaSubComponent `json:"medSubComps,omitempty"`
 	MedType     MediaType                    `json:"medType,omitempty"`
 	MirBwDl     string                       `json:"mirBwDl,omitempty"`
