@@ -108,14 +108,12 @@ type RouteToLocation struct {
 	// Additional route information about the route to Dnai
 	RouteInfo *RouteInformation `json:"routeInfo,omitempty"`
 }
---Remove-this-comment*/
 
-type Snssai struct {
+type SNSSAI struct {
 	Sst int32  `json:"sst"`
 	Sd  string `json:"sd,omitempty"`
 }
 
-/* -- Additional
 // TemporalValidity Indicates the time interval(s) during which the AF request
 // is to be applied
 type TemporalValidity struct {

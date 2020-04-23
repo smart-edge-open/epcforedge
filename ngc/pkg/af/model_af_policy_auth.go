@@ -8,34 +8,40 @@ type AccessType string
 
 // List of AccessType
 const (
-	_3_GPP_ACCESS    AccessType = "3GPP_ACCESS"
-	NON_3_GPP_ACCESS AccessType = "NON_3GPP_ACCESS"
+	AccessType3Gpp    AccessType = "3GPP_ACCESS"
+	AccessTypeNon3Gpp AccessType = "NON_3GPP_ACCESS"
 )
 
-type AfEvent string
+// Event type
+type Event string
 
+// list of Event
 const (
-	AccessTypeChange          AfEvent = "ACCESS_TYPE_CHANGE"
-	FailedResourcesAllocation AfEvent = "FAILED_RESOURCES_ALLOCATION"
-	PlmnChg                   AfEvent = "PLMN_CHG"
-	QosNotif                  AfEvent = "QOS_NOTIF"
-	ResourceAllocated         AfEvent = "SUCCESSFUL_RESOURCES_ALLOCATION"
-	UsageReport               AfEvent = "USAGE_REPORT"
+	AccessTypeChange          Event = "ACCESS_TYPE_CHANGE"
+	FailedResourcesAllocation Event = "FAILED_RESOURCES_ALLOCATION"
+	PlmnChg                   Event = "PLMN_CHG"
+	QosNotif                  Event = "QOS_NOTIF"
+	ResourceAllocated         Event = "SUCCESSFUL_RESOURCES_ALLOCATION"
+	UsageReport               Event = "USAGE_REPORT"
 )
 
-type AfNotifMethod string
+// NotifMethod type
+type NotifMethod string
 
+// List of NotifMethod
 const (
-	EventDetection AfNotifMethod = "EVENT_DETECTION"
-	OneTime        AfNotifMethod = "ONE_TIME"
+	EventDetection NotifMethod = "EVENT_DETECTION"
+	OneTime        NotifMethod = "ONE_TIME"
 )
 
+// AnGwAddress type
 /*
  *AnGwAddress describes the address of the access network gateway control node
  * It can be an Ipv4 or Ipv6 Address
  */
 type AnGwAddress string
 
+// FlowDirection type
 /*
  * FlowDirection Possible values are -
  * -DOWNLINK: The corresponding filter applies for traffic to the UE.
@@ -53,6 +59,7 @@ type AnGwAddress string
  */
 type FlowDirection string
 
+// List of FlowDirection
 const (
 	DLFlow           FlowDirection = "DOWNLINK"
 	ULFlow           FlowDirection = "UPLINK"
@@ -60,8 +67,10 @@ const (
 	FlowNotSpecified FlowDirection = "UNSPECIFIED"
 )
 
+// FlowStatus type
 type FlowStatus string
 
+// list of FlowStatus
 const (
 	ULFlowEnabled FlowStatus = "ENABLED-UPLINK"
 	DLFlowEnabled FlowStatus = "ENABLED-UPLINK"
@@ -70,22 +79,28 @@ const (
 	FlowRemoved   FlowStatus = "REMOVED"
 )
 
+// FlowUsage type
 type FlowUsage string
 
+// List of FlowUsage
 const (
 	FlowUsageNotSpecified FlowUsage = "NO_INFO"
 	RTCPFlow              FlowUsage = "RTCP"
 )
 
+// MediaComponentResourcesStatus type
 type MediaComponentResourcesStatus string
 
+// list of MediaComponentResourceStatus
 const (
 	MediaComponentResourceActive   MediaComponentResourcesStatus = "ACTIVE"
 	MediaComponentResourceInActive MediaComponentResourcesStatus = "INACTIVE"
 )
 
+// MediaType type
 type MediaType string
 
+// list of MediaType
 const (
 	MediaTypeAudio       MediaType = "AUDIO"
 	MediaTypeVideo       MediaType = "VIDEO"
@@ -97,8 +112,10 @@ const (
 	MediaTypeMisc        MediaType = "OTHER"
 )
 
+// PresenceState type
 type PresenceState string
 
+// List of PresenceState
 const (
 	PresenceStateInArea    PresenceState = "IN_AREA"
 	PresenceStateOutOfArea PresenceState = "OUT_OF_AREA"
@@ -106,15 +123,19 @@ const (
 	PresenceStateInactive  PresenceState = "INACTIVE"
 )
 
+// QosNotifType model
 type QosNotifType string
 
+// List of QosNotifType
 const (
 	QosNotifGuaranteed    QosNotifType = "GUARANTEED"
 	QosNotifNotGuaranteed QosNotifType = "NOT_GUARANTEED"
 )
 
+// RatType type
 type RatType string
 
+// List of RatType
 const (
 	RatTypeNR      RatType = "NR"
 	RatTypeEUTRA   RatType = "EUTRA"
@@ -122,8 +143,10 @@ const (
 	RatTypeVIRTUAL RatType = "VIRTUAL"
 )
 
+// ReservPriority type
 type ReservPriority string
 
+// list of ReservPriority
 const (
 	ReservPriority1  ReservPriority = "PRIO_1"
 	ReservPriority2  ReservPriority = "PRIO_2"
@@ -143,28 +166,35 @@ const (
 	ReservPriority16 ReservPriority = "PRIO_16"
 )
 
+// ServAuthInfo type
 type ServAuthInfo string
 
+// List of ServAuthInfos
 const (
 	ServAuthNotKnown   ServAuthInfo = "TP_NOT_KNOWN"
 	ServAuthExpired    ServAuthInfo = "TP_EXPIRED"
 	ServAuthNotOcurred ServAuthInfo = "TP_NOT_YET_OCURRED"
 )
 
+// SponsoringStatus type
 type SponsoringStatus string
 
+// List of SponsoringStatus
 const (
 	SponsorEnabled  SponsoringStatus = "SPONSOR_ENABLED"
 	SponsorDisabled SponsoringStatus = "SPONSOR_DISABLED"
 )
 
+// TerminationCause type
 type TerminationCause string
 
+// List of TerminationCause
 const (
 	AllSDFDeactivated    TerminationCause = "ALL_SDF_DEACTIVATION"
 	PDUSessionTerminated TerminationCause = "PDU_SESSION_TERMINATION"
 )
 
+// AccumulatedUsage struct
 type AccumulatedUsage struct {
 	// Unsigned integer identifying a period of time in units of seconds.
 	Duration int32 `json:"duration,omitempty"`
@@ -176,20 +206,20 @@ type AccumulatedUsage struct {
 	UplinkVolume int64 `json:"uplinkVolume,omitempty"`
 }
 
-// AfEventNotification describes the event info delivered in the notification
-type AfEventNotification struct {
-	Event AfEvent `json:"event"`
+// PolicyEventNotification describes the event info delivered in the notification
+type PolicyEventNotification struct {
+	Event Event   `json:"event"`
 	Flows []Flows `json:"flows,omitempty"`
 }
 
-// AfEventSubscription describes the event info delivered in the subscription
-type AfEventSubscription struct {
-	Event       AfEvent       `json:"event"`
-	NotifMethod AfNotifMethod `json:"notifMethod,omitempty"`
+// EventSubscription describes the event info delivered in the subscription
+type EventSubscription struct {
+	Event       Event       `json:"event"`
+	NotifMethod NotifMethod `json:"notifMethod,omitempty"`
 }
 
-// AfRoutingRequirement describes the event info delivered in the subscription
-type AfRoutingRequirement struct {
+// RoutingRequirement describes the event info delivered in the subscription
+type RoutingRequirement struct {
 	AppReloc     bool               `json:"appReloc,omitempty"`
 	RouteToLocs  []RouteToLocation  `json:"routeToLocs,omitempty"`
 	SpVal        *SpatialValidity   `json:"spVal,omitempty"`
@@ -197,29 +227,30 @@ type AfRoutingRequirement struct {
 	UpPathChgSub *UpPathChgEvent    `json:"upPathChgSub,omitempty"`
 }
 
+// AppSessionContextReqData type
 /*
  * AppSessionContextReqData Identifies the service requirements of an Individual
  * Application Session Context.
  */
 type AppSessionContextReqData struct {
-	AfAppId   string                `json:"afAppId,omitempty"`
-	AfRoutReq *AfRoutingRequirement `json:"afRoutReq,omitempty"`
+	AfAppID   string              `json:"afAppId,omitempty"`
+	AfRoutReq *RoutingRequirement `json:"afRoutReq,omitempty"`
 	// Contains an identity of an application service provider.
-	AspId string `json:"aspId,omitempty"`
+	AspID string `json:"aspId,omitempty"`
 	/*
 	 * string identifying a BDT Reference ID as defined in subclause
 	 * 5.3.3 of 3GPP TS 29.154.
 	 */
-	BdtRefId      string                    `json:"bdtRefId,omitempty"`
+	BdtRefID      string                    `json:"bdtRefId,omitempty"`
 	Dnn           string                    `json:"dnn,omitempty"`
 	EvSubsc       *EventsSubscReqData       `json:"evSubsc,omitempty"`
 	MedComponents map[string]MediaComponent `json:"medComponents,omitempty"`
-	IpDomain      string                    `json:"ipDomain,omitempty"`
+	IPDomain      string                    `json:"ipDomain,omitempty"`
 	// indication of MPS service request
-	MpsId      string           `json:"mpsId,omitempty"`
-	NotifUri   string           `json:"notifUri"`
-	SliceInfo  *Snssai          `json:"sliceInfo,omitempty"`
-	SponId     string           `json:"sponId,omitempty"`
+	MpsID      string           `json:"mpsId,omitempty"`
+	NotifURI   string           `json:"notifUri"`
+	SliceInfo  *SNSSAI          `json:"sliceInfo,omitempty"`
+	SponID     string           `json:"sponId,omitempty"`
 	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
 	Supi       string           `json:"supi,omitempty"`
 	Gpsi       string           `json:"gpsi,omitempty"`
@@ -243,6 +274,7 @@ type AppSessionContextReqData struct {
 	UeMac    MacAddr  `json:"ueMac,omitempty"`
 }
 
+// AppSessionContextRespData struct
 /*
  * AppSessionContextRespData Describes the authorization data of an Individual
  * Application Session Context created by the PCF.
@@ -266,6 +298,7 @@ type AppSessionContextRespData struct {
 	SuppFeat string `json:"suppFeat,omitempty"`
 }
 
+// AppSessionContextUpdateData struct
 /*
  * AppSessionContextUpdateData Identifies the modifications to an Individual
  * Application Session Context and may include the modifications to the
@@ -273,37 +306,35 @@ type AppSessionContextRespData struct {
  */
 type AppSessionContextUpdateData struct {
 	// Contains an AF application identifier.
-	AfAppId   string                `json:"afAppId,omitempty"`
-	AfRoutReq *AfRoutingRequirement `json:"afRoutReq,omitempty"`
+	AfAppID   string              `json:"afAppId,omitempty"`
+	AfRoutReq *RoutingRequirement `json:"afRoutReq,omitempty"`
 	// Contains an identity of an application service provider.
-	AspId string `json:"aspId,omitempty"`
+	AspID string `json:"aspId,omitempty"`
 	/*
 	 * string identifying a BDT Reference ID as defined in subclause
 	 * 5.3.3 of 3GPP TS 29.154.
 	 */
-	BdtRefId      string                    `json:"bdtRefId,omitempty"`
+	BdtRefID      string                    `json:"bdtRefId,omitempty"`
 	EvSubsc       *EventsSubscReqData       `json:"evSubsc,omitempty"`
 	MedComponents map[string]MediaComponent `json:"medComponents,omitempty"`
 	// indication of MPS service request
-	MpsId string `json:"mpsId,omitempty"`
+	MpsID string `json:"mpsId,omitempty"`
 	// Contains an identity of a sponsor.
-	SponId     string           `json:"sponId,omitempty"`
+	SponID     string           `json:"sponId,omitempty"`
 	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
 }
 
-/*
- * AppSessionContext Represents an Individual Application Session Context
- * resource.
- */
+// AppSessionContext Represents an Individual Application Session Context resource.
 type AppSessionContext struct {
 	AscReqData  *AppSessionContextReqData  `json:"ascReqData,omitempty"`
 	AscRespData *AppSessionContextRespData `json:"ascRespData,omitempty"`
 	EvsNotif    *EventsNotification        `json:"evsNotif,omitempty"`
 }
 
+// Ecgi Struct
 type Ecgi struct {
-	PlmnId      PlmnId `json:"plmnId"`
-	EutraCellId string `json:"eutraCellId"`
+	PlmnID      PlmnID `json:"plmnId"`
+	EutraCellID string `json:"eutraCellId"`
 }
 
 // EventsNotification describes the notification of a matched event
@@ -311,10 +342,10 @@ type EventsNotification struct {
 	AccessType AccessType  `json:"accessType,omitempty"`
 	AnGwAddr   AnGwAddress `json:"anGwAddr,omitempty"`
 	// string providing an URI formatted according to IETF RFC 3986.
-	EvSubsUri                 string                       `json:"evSubsUri"`
-	EvNotifs                  []AfEventNotification        `json:"evNotifs"`
+	EvSubsURI                 string                       `json:"evSubsUri"`
+	EvNotifs                  []PolicyEventNotification    `json:"evNotifs"`
 	FailedResourcAllocReports []ResourcesAllocationInfo    `json:"failedResourcAllocReports,omitempty"`
-	PlmnId                    *PlmnId                      `json:"plmnId,omitempty"`
+	PlmnID                    *PlmnID                      `json:"plmnId,omitempty"`
 	QncReports                []QosNotificationControlInfo `json:"qncReports,omitempty"`
 	RatType                   RatType                      `json:"ratType,omitempty"`
 	UsgRep                    AccumulatedUsage             `json:"usgRep,omitempty"`
@@ -322,9 +353,9 @@ type EventsNotification struct {
 
 // EventsSubscReqData Identifies the events the application subscribes to.
 type EventsSubscReqData struct {
-	Events []AfEventSubscription `json:"events"`
+	Events []EventSubscription `json:"events"`
 	// string providing an URI formatted according to IETF RFC 3986.
-	NotifUri string          `json:"notifUri,omitempty"`
+	NotifURI string          `json:"notifUri,omitempty"`
 	UsgThres *UsageThreshold `json:"usgThres,omitempty"`
 }
 
@@ -335,15 +366,16 @@ type Flows struct {
 	MedCompN int32   `json:"medCompN"`
 }
 
-// GlobalRanNodeId struct for GlobalRanNodeId
-type GlobalRanNodeId struct {
-	PlmnId  *PlmnId `json:"plmnId"`
-	N3IwfId string  `json:"n3IwfId,omitempty"`
-	GNbId   *GNbId  `json:"gNbId,omitempty"`
-	NgeNbId string  `json:"ngeNbId,omitempty"`
+// GlobalRanNodeID struct for GlobalRanNodeId
+type GlobalRanNodeID struct {
+	PlmnID  *PlmnID `json:"plmnId"`
+	N3IwfID string  `json:"n3IwfId,omitempty"`
+	GnbID   *GnbID  `json:"gNbId,omitempty"`
+	NgeNbID string  `json:"ngeNbId,omitempty"`
 }
 
-type GNbId struct {
+// GnbID struct
+type GnbID struct {
 	BitLength int32  `json:"bitLength"`
 	GNBValue  string `json:"gNBValue"`
 }
@@ -351,8 +383,8 @@ type GNbId struct {
 // MediaComponent Identifies a media component.
 type MediaComponent struct {
 	// Contains an AF application identifier.
-	AfAppId   string                `json:"afAppId,omitempty"`
-	AfRoutReq *AfRoutingRequirement `json:"afRoutReq,omitempty"`
+	AfAppID   string              `json:"afAppId,omitempty"`
+	AfRoutReq *RoutingRequirement `json:"afRoutReq,omitempty"`
 	// Represents the content version of some content.
 	ContVer     int32                        `json:"contVer,omitempty"`
 	Codecs      []string                     `json:"codecs,omitempty"`
@@ -385,25 +417,29 @@ type MediaSubComponent struct {
 	FlowUsage FlowUsage `json:"flowUsage,omitempty"`
 }
 
+// Ncgi struct
 type Ncgi struct {
-	PlmnId   PlmnId `json:"plmnId"`
-	NrCellId string `json:"nrCellId"`
+	PlmnID   PlmnID `json:"plmnId"`
+	NrCellID string `json:"nrCellId"`
 }
 
-type PlmnId struct {
+// PlmnID struct
+type PlmnID struct {
 	Mcc string `json:"mcc"`
 	Mnc string `json:"mnc"`
 }
 
+// PresenceInfo  struct
 type PresenceInfo struct {
-	PraId               string            `json:"praId,omitempty"`
+	PraID               string            `json:"praId,omitempty"`
 	PresenceState       PresenceState     `json:"presenceState,omitempty"`
 	TrackingAreaList    []Tai             `json:"trackingAreaList,omitempty"`
 	EcgiList            []Ecgi            `json:"ecgiList,omitempty"`
 	NcgiList            []Ncgi            `json:"ncgiList,omitempty"`
-	GlobalRanNodeIdList []GlobalRanNodeId `json:"globalRanNodeIdList,omitempty"`
+	GlobalRanNodeIDList []GlobalRanNodeID `json:"globalRanNodeIdList,omitempty"`
 }
 
+// QosNotificationControlInfo struct
 /*
  * QosNotificationControlInfo Indicates whether the QoS targets for a GRB flow
  * are not  guaranteed or guaranteed again
@@ -413,6 +449,7 @@ type QosNotificationControlInfo struct {
 	Flows     []Flows      `json:"flows,omitempty"`
 }
 
+// ResourcesAllocationInfo struct
 /*
  * ResourcesAllocationInfo describes the status of the PCC rule(s) related to
  * certain media components.
@@ -427,11 +464,13 @@ type SpatialValidity struct {
 	PresenceInfoList map[string]PresenceInfo `json:"presenceInfoList"`
 }
 
+// Tai Struct
 type Tai struct {
-	PlmnId PlmnId `json:"plmnId"`
+	PlmnID PlmnID `json:"plmnId"`
 	Tac    string `json:"tac"`
 }
 
+// TerminationInfo struct
 /*
  * TerminationInfo indicates the cause for requesting the deletion of the
  * Individual Application Session Context resource
@@ -439,20 +478,22 @@ type Tai struct {
 type TerminationInfo struct {
 	TermCause TerminationCause `json:"termCause"`
 	// string providing an URI formatted according to IETF RFC 3986.
-	ResUri string `json:"resUri"`
+	ResURI string `json:"resUri"`
 }
 
+// UpPathChgEvent struct
 type UpPathChgEvent struct {
 	// string providing an URI formatted according to IETF RFC 3986.
-	NotificationUri string `json:"notificationUri"`
+	NotificationURI string `json:"notificationUri"`
 	/*
 	 * It is used to set the value of Notification Correlation ID in the
 	 * notification sent by the SMF.
 	 */
-	NotifCorreId string         `json:"notifCorreId"`
+	NotifCorreID string         `json:"notifCorreId"`
 	DnaiChgType  DNAIChangeType `json:"dnaiChgType"`
 }
 
+// UsageThreshold struct
 type UsageThreshold struct {
 	// Unsigned integer identifying a period of time in units of seconds.
 	Duration int32 `json:"duration,omitempty"`
