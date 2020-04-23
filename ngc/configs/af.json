@@ -18,15 +18,5 @@
         "UserAgent": "NGC-AF",
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem",
         "OAuth2Support": true
-    },
-    "CliPcfConfig": {
-        "Protocol": "http",
-        "PcfHostname": "localhost",
-        "PcfPort": ":8060",
-        "PolicyAuthBasePath": "/npcf-policyauthorization/v1",
-        "UserAgent": "NGC-AF",
-        "CliCertPath": "/etc/certs/root-ca-cert.pem",
-        "OAuth2Support": false
     }
-
 }
