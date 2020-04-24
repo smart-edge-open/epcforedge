@@ -14,6 +14,14 @@ import (
 	oauth2 "github.com/otcshare/epcforedge/ngc/pkg/oauth2"
 )
 
+// NgcData :
+var NgcData NGCTestData
+
+// NGCTestData : NGC test context data
+type NGCTestData struct {
+	paData PolicyAuthData
+}
+
 type cnTestCtxKey string
 
 // Route : Structure which describes HTTP Request Handler type and other
@@ -64,6 +72,18 @@ var CNTESTRoutes = []Route{
 		strings.ToUpper("Delete"),
 		"/npcf-policyauthorization/v1/app-sessions/{appSessionId}/events-subscription",
 		PolicyAuthorizationAppSessionUnsubscribe,
+	},
+	{
+		"PolicyAuthorizationAppSessionTestNotify",
+		strings.ToUpper("Post"),
+		"/npcf-policyauthorization/v1/app-sessions/{appSessionId}/test-notify",
+		PolicyAuthorizationAppSessionTestNotify,
+	},
+	{
+		"PolicyAuthorizationAppSessionTestNotifyTerminate",
+		strings.ToUpper("Post"),
+		"/npcf-policyauthorization/v1/app-sessions/{appSessionId}/test-notify-terminate",
+		PolicyAuthorizationAppSessionTestNotifyTerminate,
 	},
 }
 
@@ -174,4 +194,11 @@ func cnTestRouteLogger(httpHandler http.Handler, name string) http.Handler {
 		log.Infof("HTTP Request Handling -- ENDS. Time Taken: %s",
 			time.Since(start))
 	})
+}
+
+// InitNgcTestData : Init NGC-Test module data
+func initNgcTestData() {
+
+	NgcData.paData.ascId = 5000
+	NgcData.paData.asc = make(map[string]*AppSessionContext)
 }

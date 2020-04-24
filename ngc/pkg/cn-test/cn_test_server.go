@@ -47,12 +47,12 @@ type HTTP2Config struct {
 
 // Config contains NEF Module Configuration Data Structure
 type Config struct {
-	//MaxAFSupport              int    `json:"maxAFSupport"`
-	//UpfNotificationResURIPath string `json:"UpfNotificationResUriPath"`
-	HTTPConfig  HTTPConfig
-	HTTP2Config HTTP2Config
-	//AfServiceIDs              []interface{} `json:"afServiceIDs"`
-	OAuth2Support bool `json:"OAuth2Support"`
+	HTTPConfig     HTTPConfig
+	HTTP2Config    HTTP2Config
+	LocationPrefix string `json:"locationPrefix"`
+	CnTestAPIRoot  string `json:"CnTestAPIRoot"`
+	MaxASCSupport  int    `json:"MaxASCSupport"`
+	OAuth2Support  bool   `json:"OAuth2Support"`
 }
 
 // CN-TEST Module Context Data Structure
@@ -203,15 +203,18 @@ func Run(ctx context.Context, cfgPath string) error {
 
 	}
 	printConfig(cnTestCtx.cfg)
-
+	IntPolicyAuthorization(cnTestCtx.cfg)
 	return runServer(ctx, &cnTestCtx)
 }
 
 func printConfig(cfg Config) {
 
 	log.Infoln("********************* NGC CN-TEST CONFIGURATION ******************")
-	//log.Infoln("APIRoot: ", cfg.CnTestAPIRoot)
+	log.Infoln("APIRoot: ", cfg.CnTestAPIRoot)
+	log.Infoln("MaxASCSupport: ", cfg.MaxASCSupport)
 	log.Infoln("OAuth2Support:", cfg.OAuth2Support)
+	log.Infoln("LocationPrefix:", cfg.LocationPrefix)
+
 	log.Infoln("-------------------------- CN-TEST SERVER ----------------------")
 	log.Infoln("EndPoint(HTTP): ", cfg.HTTPConfig.Endpoint)
 	log.Infoln("EndPoint(HTTP2): ", cfg.HTTP2Config.Endpoint)
@@ -230,4 +233,20 @@ func loadJSONConfig(configPath string, config interface{}) error {
 		return err
 	}
 	return json.Unmarshal(cfgData, config)
+}
+
+func getLocationURLPrefix(cfg *Config) string {
+
+	var uri string
+	// If http2 port is configured use it else http port
+	if cfg.HTTP2Config.Endpoint != "" {
+		uri = "https://" + cfg.CnTestAPIRoot +
+			cfg.HTTP2Config.Endpoint
+	} else {
+		uri = "http://" + cfg.CnTestAPIRoot +
+			cfg.HTTPConfig.Endpoint
+	}
+	uri += cfg.LocationPrefix
+	return uri
+
 }
