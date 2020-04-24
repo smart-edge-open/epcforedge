@@ -203,6 +203,14 @@ func printConfig(cfg Config) {
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
 	log.Infoln("NEFCliCertPath: ", cfg.CliCfg.NEFCliCertPath)
 	log.Infoln("OAuth2Support: ", cfg.CliCfg.OAuth2Support)
+	log.Infoln("------------------------- CLIENT TO PCF ---------------------")
+	log.Infoln("Protocol: ", cfg.CliPcfCfg.Protocol)
+	log.Infoln("PcfHostname: ", cfg.CliPcfCfg.PcfHostname)
+	log.Infoln("PcfPort: ", cfg.CliPcfCfg.PcfPort)
+	log.Infoln("PolicyAuthBasePath: ", cfg.CliPcfCfg.PolicyAuthBasePath)
+	log.Infoln("UserAgent: ", cfg.CliPcfCfg.UserAgent)
+	log.Infoln("CliCertPath: ", cfg.CliPcfCfg.CliCertPath)
+	log.Infoln("OAuth2Support: ", cfg.CliPcfCfg.OAuth2Support)
 	log.Infoln("*************************************************************")
 
 }
