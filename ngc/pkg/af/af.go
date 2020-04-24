@@ -70,36 +70,37 @@ var (
 	NotifRouter *mux.Router
 )
 
-func runServer(ctx context.Context, AfCtx *Context) error {
+func runServer(ctx context.Context, afCtx *Context) error {
 
 	var err error
 
 	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With",
 		"Content-Type", "Authorization"})
 	originsOK := handlers.AllowedOrigins(
-		[]string{AfCtx.cfg.SrvCfg.UIEndpoint})
+		[]string{afCtx.cfg.SrvCfg.UIEndpoint})
 	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD",
 		"POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
 
-	AfCtx.transactions = make(TransactionIDs)
-	AfCtx.subscriptions = make(NotifSubscryptions)
-	if AfCtx.cfg.CliPcfCfg == nil {
-		err = errors.New("nil CliPcfCfg in AfCtx")
+	afCtx.transactions = make(TransactionIDs)
+	afCtx.subscriptions = make(NotifSubscryptions)
+	log.Infoln(afCtx.cfg.CliPcfCfg) // Jenkins debug 1
+	if afCtx.cfg.CliPcfCfg == nil {
+		err = errors.New("nil CliPcfCfg in afCtx")
 		log.Errf("%s", err.Error())
 		return err
 	}
 	policyAuthAPIClient, err :=
-		NewPolicyAuthAPIClient(AfCtx.cfg.CliPcfCfg)
+		NewPolicyAuthAPIClient(afCtx.cfg.CliPcfCfg)
 	if err != nil {
 		log.Errf("Unable to create new policy auth api client")
 		return err
 	}
-	AfCtx.cfg.policyAuthAPIClient = policyAuthAPIClient
-	AfRouter = NewAFRouter(AfCtx)
-	NotifRouter = NewNotifRouter(AfCtx)
+	afCtx.cfg.policyAuthAPIClient = policyAuthAPIClient
+	AfRouter = NewAFRouter(afCtx)
+	NotifRouter = NewNotifRouter(afCtx)
 
 	serverCNCA := &http.Server{
-		Addr:         AfCtx.cfg.SrvCfg.CNCAEndpoint,
+		Addr:         afCtx.cfg.SrvCfg.CNCAEndpoint,
 		Handler:      handlers.CORS(headersOK, originsOK, methodsOK)(AfRouter),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -113,7 +114,7 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 		}
 	}
 	serverNotif := &http.Server{
-		Addr:         AfCtx.cfg.SrvCfg.NotifPort,
+		Addr:         afCtx.cfg.SrvCfg.NotifPort,
 		Handler:      NotifRouter,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -124,7 +125,7 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 		return err
 	}
 
-	if AfCtx.cfg.CliCfg.OAuth2Support {
+	if afCtx.cfg.CliCfg.OAuth2Support {
 		log.Infoln("Fetching NEF access token")
 		if fetchNEFAuthorizationToken() != nil {
 			log.Infoln("Failed to get access token")
@@ -151,10 +152,10 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 
 	go func(stopServerCh chan bool) {
 		log.Infof("Serving AF Notifications on: %s",
-			AfCtx.cfg.SrvCfg.NotifPort)
+			afCtx.cfg.SrvCfg.NotifPort)
 		if err = serverNotif.ListenAndServeTLS(
-			AfCtx.cfg.SrvCfg.ServerCertPath,
-			AfCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
+			afCtx.cfg.SrvCfg.ServerCertPath,
+			afCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
 
 			log.Errf("AF Notifications server error: " + err.Error())
 		}
@@ -163,12 +164,12 @@ func runServer(ctx context.Context, AfCtx *Context) error {
 
 	if HTTP2Enabled == true {
 		log.Infof("Serving AF (CNCA HTTP2 Requests) on: %s",
-			AfCtx.cfg.SrvCfg.CNCAEndpoint)
-		err = serverCNCA.ListenAndServeTLS(AfCtx.cfg.SrvCfg.ServerCertPath,
-			AfCtx.cfg.SrvCfg.ServerKeyPath)
+			afCtx.cfg.SrvCfg.CNCAEndpoint)
+		err = serverCNCA.ListenAndServeTLS(afCtx.cfg.SrvCfg.ServerCertPath,
+			afCtx.cfg.SrvCfg.ServerKeyPath)
 	} else {
 		log.Infof("Serving AF (CNCA HTTP Requests) on: %s",
-			AfCtx.cfg.SrvCfg.CNCAEndpoint)
+			afCtx.cfg.SrvCfg.CNCAEndpoint)
 		err = serverCNCA.ListenAndServe()
 	}
 	if err != http.ErrServerClosed {
@@ -209,18 +210,18 @@ func printConfig(cfg Config) {
 // Run function
 func Run(parentCtx context.Context, cfgPath string) error {
 
-	var AfCtx Context
+	var afCtx Context
 
 	// load AF configuration from file
-	err := config.LoadJSONConfig(cfgPath, &AfCtx.cfg)
+	err := config.LoadJSONConfig(cfgPath, &afCtx.cfg)
 
 	if err != nil {
 		log.Errf("Failed to load AF configuration: %v", err)
 		return err
 	}
-	printConfig(AfCtx.cfg)
+	printConfig(afCtx.cfg)
 
-	return runServer(parentCtx, &AfCtx)
+	return runServer(parentCtx, &afCtx)
 }
 
 func fetchNEFAuthorizationToken() error {
