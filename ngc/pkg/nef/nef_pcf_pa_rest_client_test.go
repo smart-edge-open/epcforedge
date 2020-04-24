@@ -18,21 +18,6 @@ import (
 	"golang.org/x/net/http2"
 )
 
-// RoundTripFunc .
-type RoundTripFunc func(req *http.Request) *http.Response
-
-// RoundTrip .
-func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
-	return f(req), nil
-}
-
-func testingPCFClient(fn RoundTripFunc) *http.Client {
-
-	return &http.Client{
-		Transport: fn,
-	}
-
-}
 func TestPcfClient_PolicyAuthorizationCreate(t *testing.T) {
 	type fields struct {
 		Pcf        string

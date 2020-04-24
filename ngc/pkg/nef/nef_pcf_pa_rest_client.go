@@ -16,17 +16,17 @@ import (
 )
 
 // TestPcf boolean to be set to true in PCF UT
-//var TestPcf bool = false
+var TestPcf bool = false
 
 // HTTPClient to be setup in AF UT
-//var HTTPClient *http.Client
+var HTTPClient *http.Client
 
 // SetHTTPClient Function to setup a httpClient for testing if required
-/* func SetHTTPClient(httpClient *http.Client) {
+func SetHTTPClient(httpClient *http.Client) {
 
 	HTTPClient = httpClient
 
-} */
+}
 
 // PcfClient is an implementation of the Pcf Authorization
 type PcfClient struct {
