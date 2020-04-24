@@ -14,18 +14,17 @@ import (
 	"strconv"
 )
 
-var gASCStartId int = 5000
+var gASCStartID = 5000
 
 // PolicyAuthData : Policy Authorization data
 type PolicyAuthData struct {
 	asc       map[string]*AppSessionContext
-	ascId     int
+	ascID     int
 	locPrefix string
 	ascMax    int
-	ascCount  int
 }
 
-//IntPolicyAuthorization
+//IntPolicyAuthorization Init Policy Authorization variables
 func IntPolicyAuthorization(cfg Config) {
 
 	NgcData.paData.locPrefix = getLocationURLPrefix(&cfg)
@@ -69,14 +68,14 @@ func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 
 	AscRespData := getAppSessionContextRespData()
 	EvsNotif := getEventsNotification()
-	EvsNotif.EvSubsUri = asc.AscReqData.EvSubsc.NotifUri
+	EvsNotif.EvSubsURI = asc.AscReqData.EvSubsc.NotifURI
 
 	asc.AscRespData = &AscRespData
 	asc.EvsNotif = &EvsNotif
 
 	fmt.Println(asc)
 
-	loc, ascId := genLocUri()
+	loc, ascID := genLocURI()
 	fmt.Println("Location Header", loc)
 
 	mdata, err2 := json.Marshal(asc)
@@ -87,7 +86,7 @@ func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 	}
 
 	/*Update the data in map*/
-	NgcData.paData.asc[ascId] = &asc
+	NgcData.paData.asc[ascID] = &asc
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Location", loc)
@@ -109,14 +108,14 @@ func PolicyAuthorizationAppSessionGet(w http.ResponseWriter,
 	r *http.Request) {
 	log.Infoln("PolicyAuthorizationAppSessionGet -- Entered")
 	vars := mux.Vars(r)
-	ascId := vars["appSessionId"]
-	log.Infof(" APP Session ID  : %s", ascId)
+	ascID := vars["appSessionId"]
+	log.Infof(" APP Session ID  : %s", ascID)
 
 	var err error
 	if len(NgcData.paData.asc) > 0 {
 
-		if NgcData.paData.asc[ascId] != nil {
-			mdata, err2 := json.Marshal(NgcData.paData.asc[ascId])
+		if NgcData.paData.asc[ascID] != nil {
+			mdata, err2 := json.Marshal(NgcData.paData.asc[ascID])
 			if err2 != nil {
 				log.Errf("Write Failed: %v", err2)
 				w.WriteHeader(http.StatusInternalServerError)
@@ -141,13 +140,96 @@ func PolicyAuthorizationAppSessionGet(w http.ResponseWriter,
 	}
 }
 
+func patchAsc(ascp *AppSessionContextUpdateData, AscReqData *AppSessionContextReqData) {
+
+	if len(ascp.AfAppID) > 0 {
+		AscReqData.AfAppID = ascp.AfAppID
+	}
+	if ascp.AfRoutReq != nil {
+		AscReqData.AfRoutReq = ascp.AfRoutReq
+	}
+	if len(ascp.AspID) > 0 {
+		AscReqData.AspID = ascp.AspID
+	}
+	if len(ascp.BdtRefID) > 0 {
+		AscReqData.BdtRefID = ascp.BdtRefID
+	}
+	if ascp.EvSubsc != nil {
+		AscReqData.EvSubsc = ascp.EvSubsc
+	}
+	if ascp.MedComponents != nil {
+		AscReqData.MedComponents = ascp.MedComponents
+	}
+	if len(ascp.MpsID) > 0 {
+		AscReqData.MpsID = ascp.MpsID
+	}
+	if len(ascp.SponID) > 0 {
+		AscReqData.SponID = ascp.SponID
+	}
+	if len(ascp.SponStatus) > 0 {
+		AscReqData.SponStatus = ascp.SponStatus
+	}
+
+}
+
 //PolicyAuthorizationAppSessionPatch Patch
 func PolicyAuthorizationAppSessionPatch(w http.ResponseWriter,
 	r *http.Request) {
 	log.Infoln("PolicyAuthorizationAppSession -- Entered")
 	vars := mux.Vars(r)
-	log.Infof(" APP Session ID  : %s", vars["appSessionId"])
-	w.WriteHeader(http.StatusNoContent)
+
+	ascID := vars["appSessionId"]
+	log.Infof(" APP Session ID  : %s", ascID)
+
+	b, err := ioutil.ReadAll(r.Body)
+
+	if err != nil {
+		log.Err(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	defer closeReqBody(r)
+
+	ascp := AppSessionContextUpdateData{}
+
+	err1 := json.Unmarshal(b, &ascp)
+	if err1 != nil {
+		log.Err(err1)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if len(NgcData.paData.asc) > 0 {
+
+		if NgcData.paData.asc[ascID] != nil {
+
+			asc := NgcData.paData.asc[ascID]
+
+			patchAsc(&ascp, asc.AscReqData)
+
+			mdata, err2 := json.Marshal(asc)
+			if err2 != nil {
+				log.Errf("Write Failed: %v", err2)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
+			w.WriteHeader(http.StatusOK)
+
+			//Send Success response to AF
+			_, err = w.Write(mdata)
+			if err != nil {
+				log.Errf("Write Failed: %v", err)
+				return
+			}
+			log.Infof("HTTP Response sent: %d", http.StatusCreated)
+			return
+		}
+	}
+
+	w.WriteHeader(http.StatusNotFound)
 
 }
 
@@ -255,7 +337,7 @@ func PolicyAuthorizationAppSessionUnsubscribe(w http.ResponseWriter,
 
 }
 
-//PolicyAuthorizationAppSessionTestNotify
+//PolicyAuthorizationAppSessionTestNotify Trigger Notify towards AF
 func PolicyAuthorizationAppSessionTestNotify(w http.ResponseWriter,
 	r *http.Request) {
 	log.Infoln("func PolicyAuthorizationAppSessionTestNotify -- Entered")
@@ -264,7 +346,7 @@ func PolicyAuthorizationAppSessionTestNotify(w http.ResponseWriter,
 	w.WriteHeader(http.StatusOK)
 }
 
-//PolicyAuthorizationAppSessionTestNotifyTerminate
+//PolicyAuthorizationAppSessionTestNotifyTerminate Triggers Terminate towards AF
 func PolicyAuthorizationAppSessionTestNotifyTerminate(w http.ResponseWriter,
 	r *http.Request) {
 
@@ -290,10 +372,10 @@ func getAppSessionContextRespData() (AscRespData AppSessionContextRespData) {
 	return AscRespData
 
 }
-func genLocUri() (string, string) {
+func genLocURI() (string, string) {
 
-	ascIDStr := strconv.Itoa(gASCStartId + NgcData.paData.ascId)
-	NgcData.paData.ascId++
+	ascIDStr := strconv.Itoa(gASCStartID + NgcData.paData.ascID)
+	NgcData.paData.ascID++
 	loc := NgcData.paData.locPrefix + ascIDStr
 
 	return loc, ascIDStr
@@ -302,18 +384,18 @@ func getEventsNotification() (EvsNotif EventsNotification) {
 
 	//EvsNotif := EventsNotification{}
 
-	EvsNotif.AccessType = _3_GPP_ACCESS
+	EvsNotif.AccessType = AccessType3Gpp
 	EvsNotif.AnGwAddr = AnGwAddress("192.168.10.11")
 	//EvsNotif.EvSubsUri = AscReqData.EvSubsc.NotifUri
-	EvsNotif.EvNotifs = make([]AfEventNotification, 2)
+	EvsNotif.EvNotifs = make([]PolicyEventNotification, 2)
 
-	afEvnt := AfEventNotification{Event: AfEvent("SUCCESSFUL_RESOURCES_ALLOCATION")}
+	afEvnt := PolicyEventNotification{Event: ResourceAllocated}
 	afEvnt.Flows = make([]Flows, 2)
 	Flows1 := Flows{ContVers: []int32{1, 2}, FNums: []int32{3, 4}, MedCompN: 32}
 	afEvnt.Flows[0] = Flows1
 	afEvnt.Flows[1] = Flows1
 	afEvnt2 := afEvnt
-	afEvnt2.Event = AfEvent("FAILED_RESOURCES_ALLOCATION")
+	afEvnt2.Event = FailedResourcesAllocation
 
 	EvsNotif.EvNotifs[0] = afEvnt
 	EvsNotif.EvNotifs[1] = afEvnt2
@@ -329,8 +411,8 @@ func getEventsNotification() (EvsNotif EventsNotification) {
 	EvsNotif.FailedResourcAllocReports[0] = ra
 	EvsNotif.FailedResourcAllocReports[1] = ra2
 
-	plmn := PlmnId{"100", "010"}
-	EvsNotif.PlmnId = &plmn
+	plmn := PlmnID{"100", "010"}
+	EvsNotif.PlmnID = &plmn
 
 	EvsNotif.QncReports = make([]QosNotificationControlInfo, 2)
 	qos := QosNotificationControlInfo{NotifType: QosNotifGuaranteed}

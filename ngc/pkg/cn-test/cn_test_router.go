@@ -195,10 +195,3 @@ func cnTestRouteLogger(httpHandler http.Handler, name string) http.Handler {
 			time.Since(start))
 	})
 }
-
-// InitNgcTestData : Init NGC-Test module data
-func initNgcTestData() {
-
-	NgcData.paData.ascId = 5000
-	NgcData.paData.asc = make(map[string]*AppSessionContext)
-}
