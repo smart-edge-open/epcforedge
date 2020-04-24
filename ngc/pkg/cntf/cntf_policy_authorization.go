@@ -2,19 +2,18 @@
 * Copyright (c) 2019-2020 Intel Corporation
  */
 
-package ngccntest
+package cntf
 
 import (
 	//"context"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 )
 
-var gASCStartID = 5000
+var gASCStartID = 5001
 
 // PolicyAuthData : Policy Authorization data
 type PolicyAuthData struct {
@@ -39,11 +38,10 @@ func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 
 	asc := AppSessionContext{}
 
-	fmt.Println(" len(NgcData.paData.asc) ", len(NgcData.paData.asc))
-	fmt.Println("NgcData.paData.ascMax", NgcData.paData.ascMax)
 	/*Check if max subscription reached */
 	if len(NgcData.paData.asc) > NgcData.paData.ascMax {
 		log.Info("Maximum Context creation reached")
+		log.Info("ASC MAX Permitted", NgcData.paData.ascMax)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -64,8 +62,6 @@ func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 		return
 	}
 
-	fmt.Println(asc)
-
 	AscRespData := getAppSessionContextRespData()
 	EvsNotif := getEventsNotification()
 	EvsNotif.EvSubsURI = asc.AscReqData.EvSubsc.NotifURI
@@ -73,10 +69,8 @@ func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 	asc.AscRespData = &AscRespData
 	asc.EvsNotif = &EvsNotif
 
-	fmt.Println(asc)
-
 	loc, ascID := genLocURI()
-	fmt.Println("Location Header", loc)
+	log.Info("Location Header", loc)
 
 	mdata, err2 := json.Marshal(asc)
 	if err2 != nil {
@@ -87,6 +81,9 @@ func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 
 	/*Update the data in map*/
 	NgcData.paData.asc[ascID] = &asc
+
+	log.Info(string(mdata))
+	log.Info("ASC Count ", len(NgcData.paData.asc))
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Header().Set("Location", loc)
@@ -135,9 +132,9 @@ func PolicyAuthorizationAppSessionGet(w http.ResponseWriter,
 			log.Infof("HTTP Response sent: %d", http.StatusOK)
 			return
 		}
-		w.WriteHeader(http.StatusNotFound)
-		return
 	}
+	w.WriteHeader(http.StatusNotFound)
+	log.Infof("HTTP Response sent: %d", http.StatusNotFound)
 }
 
 func patchAsc(ascp *AppSessionContextUpdateData, AscReqData *AppSessionContextReqData) {
@@ -224,13 +221,12 @@ func PolicyAuthorizationAppSessionPatch(w http.ResponseWriter,
 				log.Errf("Write Failed: %v", err)
 				return
 			}
-			log.Infof("HTTP Response sent: %d", http.StatusCreated)
+			log.Infof("HTTP Response sent: %d", http.StatusOK)
 			return
 		}
 	}
-
 	w.WriteHeader(http.StatusNotFound)
-
+	log.Infof("HTTP Response sent: %d", http.StatusNotFound)
 }
 
 //PolicyAuthorizationAppSessionDelete Delete
@@ -239,7 +235,7 @@ func PolicyAuthorizationAppSessionDelete(w http.ResponseWriter,
 	log.Infoln("PolicyAuthorizationAppSessionDelete -- Entered")
 	vars := mux.Vars(r)
 	ascID := vars["appSessionId"]
-	log.Infof(" APP Session ID  : %s", ascID)
+	//log.Infof(" APP Session ID  : %s", ascID)
 
 	if len(NgcData.paData.asc) > 0 {
 
@@ -247,11 +243,13 @@ func PolicyAuthorizationAppSessionDelete(w http.ResponseWriter,
 
 			delete(NgcData.paData.asc, ascID)
 			w.WriteHeader(http.StatusNoContent)
+			log.Infof(" APP Session ID  : %s%s", ascID, " - Deleted Successfully")
+			log.Infof("HTTP Response sent: %d", http.StatusNoContent)
 			return
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
-
+	log.Infof("HTTP Response sent: %d", http.StatusNotFound)
 }
 
 //PolicyAuthorizationAppSessionSubscribe Subscribe
@@ -280,7 +278,7 @@ func PolicyAuthorizationAppSessionSubscribe(w http.ResponseWriter,
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	fmt.Println(evSub)
+	log.Info(evSub)
 
 	if len(NgcData.paData.asc) > 0 {
 
@@ -313,7 +311,7 @@ func PolicyAuthorizationAppSessionSubscribe(w http.ResponseWriter,
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
-
+	log.Infof("HTTP Response sent: %d", http.StatusNotFound)
 }
 
 //PolicyAuthorizationAppSessionUnsubscribe Unsubscribe
@@ -329,12 +327,14 @@ func PolicyAuthorizationAppSessionUnsubscribe(w http.ResponseWriter,
 			asc := NgcData.paData.asc[ascID]
 			asc.AscReqData.EvSubsc = nil
 			w.WriteHeader(http.StatusNoContent)
+			log.Infof("HTTP Response sent: %d", http.StatusNoContent)
+
 			return
 		}
 	}
 
 	w.WriteHeader(http.StatusNotFound)
-
+	log.Infof("HTTP Response sent: %d", http.StatusNotFound)
 }
 
 //PolicyAuthorizationAppSessionTestNotify Trigger Notify towards AF

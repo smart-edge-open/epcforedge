@@ -6,14 +6,14 @@
 
 export GO111MODULE = on
 
-.PHONY: build af oam nef lint test-unit-af test-unit-nef test-unit-oam test-cn-test
+.PHONY: build af oam nef lint test-unit-af test-unit-nef test-unit-oam test-cntf
 TMP_DIR:=$(shell mktemp -d)
 BUILD_DIR ?=dist
 CERTS_DIR ?=/etc/certs
 
 VER:=1.0
 
-build: af nef oam cn-test
+build: af nef oam cntf
 
 af:
 	mkdir -p "${BUILD_DIR}"
@@ -27,13 +27,13 @@ oam:
 	mkdir -p "${BUILD_DIR}"
 	GOOS=linux go build -o "${BUILD_DIR}/oam" ./cmd/oam
 
-cn-test:
+cntf:
 	mkdir -p "${BUILD_DIR}"
-	GOOS=linux go build -o "${BUILD_DIR}/cn-test" ./cmd/cn-test
+	GOOS=linux go build -o "${BUILD_DIR}/cntf" ./cmd/cntf
 
 
 lint:
-	golangci-lint run ./pkg/oam ./pkg/nef ./pkg/af ./pkg/cn-test
+	golangci-lint run ./pkg/oam ./pkg/nef ./pkg/af ./pkg/cntf
 
 # ./scripts/genCerts.sh -t DNS -h localhost
 # Replace the "localhost" in test-unit-af with hostname
@@ -55,8 +55,8 @@ test-unit-nef:
 test-unit-oam:
 	ginkgo -v -cover ./pkg/config ./pkg/oam
 
-test-unit-cn-test:
-	ginkgo -v -cover ./pkg/cn-test
+test-unit-cntf:
+	ginkgo -v -cover ./pkg/cntf
 
 clean:
 	rm -rf "${BUILD_DIR}"
@@ -70,11 +70,11 @@ help:
 	@echo "  af                     to build the AF"
 	@echo "  nef                    to build the NEF"
 	@echo "  oam                    to build the OAM"
-	@echo "  cn-test                to build the CN-TEST"
+	@echo "  cntf                	to build the cntf"
 	@echo ""
 	@echo "Executing Test:"
 	@echo "  lint                   to run static code analysis with golangci-lint"
 	@echo "  test-unit-af           to run AF unit tests with ginkgo"
 	@echo "  test-unit-nef          to run NEF unit tests with ginkgo"
 	@echo "  test-unit-oam          to run OAM unit tests with ginkgo"
-	@echo "  test-unit-cn-test      to run CN-TEST unit tests with ginkgo"
+	@echo "  test-unit-cntf      	to run cntf unit tests with ginkgo"

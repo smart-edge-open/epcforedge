@@ -1,5 +1,5 @@
 {
-    "CnTestAPIRoot": "localhost",
+    "CNTFAPIRoot": "localhost",
     "LocationPrefix": "/npcf-policyauthorization/v1/",
     "MaxASCSupport": 10,
     "HTTPConfig": {
@@ -7,8 +7,8 @@
     },
     "HTTP2Config": {
         "Endpoint": ":8095",
-        "CnTestServerCert": "/etc/certs/server-cert.pem",
-        "CnTestServerKey": "/etc/certs/server-key.pem",
+        "CNTFServerCert": "/etc/certs/server-cert.pem",
+        "CNTFServerKey": "/etc/certs/server-key.pem",
         "AfClientCert": "/etc/certs/root-ca-cert.pem"
     },
     "OAuth2Support": false

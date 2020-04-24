@@ -10,16 +10,16 @@ import (
 	"syscall"
 
 	logtool "github.com/otcshare/common/log"
-	ngccntest "github.com/otcshare/epcforedge/ngc/pkg/cn-test"
+	ngccntest "github.com/otcshare/epcforedge/ngc/pkg/cntf"
 )
 
-// Log handler initialized. This is to be used for CN-TEST Main
-var log = logtool.DefaultLogger.WithField("CN-TEST-MAIN", nil)
+// Log handler initialized. This is to be used for CNTF Main
+var log = logtool.DefaultLogger.WithField("CNTF-MAIN", nil)
 
-// Path for CN-TEST Configuration file
-const cfgPath string = "configs/cn-test.json"
+// Path for CNTF Configuration file
+const cfgPath string = "configs/cntf.json"
 
-// main: Entry point for CN-TEST Module Execution
+// main: Entry point for CNTF Module Execution
 // Input Args: None
 // Output Args: None
 func main() {
@@ -35,7 +35,7 @@ func main() {
 	log.Infof("Logger Level: %d", lvl)
 
 	/* Creating a context. This context will be used for following:
-	 * 1. To store the NEF Module Context data and other module related data.
+	 * 1. To store the CNTF Module Context data and other module related data.
 	 * 2. To notify in case context is canceled. */
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -51,7 +51,7 @@ func main() {
 		cancel()
 	}()
 
-	log.Infof("Starting CN-TEST server ...")
+	log.Infof("Starting CNTF server ...")
 	_ = ngccntest.Run(ctx, cfgPath)
 
 }

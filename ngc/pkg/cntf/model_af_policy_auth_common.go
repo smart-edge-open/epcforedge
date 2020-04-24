@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright © 2020 Intel Corporation
 
-package ngccntest
+package cntf
 
 /*
  * This file include structs which are common to traffic_influence and policy
@@ -9,8 +9,10 @@ package ngccntest
  * If using AF Policy authorization as Saperate entity, then remove commented
  * struct.
  */
-// Dnai : string identifying the Data Network Area Identifier
+
+// DNAI : string identifying the Data Network Area Identifier
 type DNAI string
+
 // DNAIChangeType type
 type DNAIChangeType string
 
@@ -21,8 +23,10 @@ const (
 	Late      DNAIChangeType = "LATE"
 )
 
+//IPv4Addr Address string
 type IPv4Addr string
 
+//IPv6Addr Address string
 type IPv6Addr string
 
 // EthFlowDescription Identifies an Ethernet flow
@@ -56,6 +60,7 @@ type InvalidParam struct {
 	Reason string `json:"reason,omitempty"`
 }
 
+//ProblemDetails Issues detais struct
 type ProblemDetails struct {
 	// string providing an URI formatted according to IETF RFC 3986.
 	Type string `json:"type,omitempty"`
@@ -110,6 +115,7 @@ type RouteToLocation struct {
 	RouteInfo *RouteInformation `json:"routeInfo,omitempty"`
 }
 
+// SNSSAI SNSSAI data
 type SNSSAI struct {
 	Sst int32  `json:"sst"`
 	Sd  string `json:"sd,omitempty"`

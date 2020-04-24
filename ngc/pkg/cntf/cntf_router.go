@@ -2,7 +2,7 @@
 * Copyright (c) 2019-2020 Intel Corporation
  */
 
-package ngccntest
+package cntf
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type NGCTestData struct {
 	paData PolicyAuthData
 }
 
-type cnTestCtxKey string
+type cntfCtxKey string
 
 // Route : Structure which describes HTTP Request Handler type and other
 //         details like name, method, path, etc
@@ -33,9 +33,9 @@ type Route struct {
 	Handler http.HandlerFunc /*    */
 }
 
-// CNTESTRoutes : CN-TEST Routes lists which contains Routes with different HTTP
-//             Request handlers for CN-TEST
-var CNTESTRoutes = []Route{
+// CNTFRoutes : CNTF Routes lists which contains Routes with different HTTP
+//             Request handlers for CNTF
+var CNTFRoutes = []Route{
 	// Policy Authorization Routes
 	{
 		"PolicyAuthorizationAppSessionCreate",
@@ -87,23 +87,23 @@ var CNTESTRoutes = []Route{
 	},
 }
 
-// NewCnTestRouter : This function creates and initializes a CN-TEST Router with all
-//                the available routes for CN-TEST Module. This router object is
+// NewCNTFRouter : This function creates and initializes a CNTF Router with all
+//                the available routes for CNTF Module. This router object is
 //                defined in "github.com/gorilla/mux" package.
 //  Input Args:
-//     - cnTestCtx: This is CN-TEST Module Context. This contains the CN-TEST Module Data.
+//     - cntfCtx: This is CNTFodule Context. This contains the CNTF Module Data.
 //  Output Args:
 //     - error: retruns pointer to created mux.Router object
-func NewCnTestRouter(cnTestCtx *cnTestContext) *mux.Router {
+func NewCNTFRouter(cntfCtx *cntfContext) *mux.Router {
 
 	router := mux.NewRouter().StrictSlash(true)
 
 	//Subscription for notification to be added
 
-	for _, route := range CNTESTRoutes {
+	for _, route := range CNTFRoutes {
 
 		var handler http.Handler = route.Handler
-		handler = cnTestRouteLogger(handler, route.Name)
+		handler = cntfRouteLogger(handler, route.Name)
 
 		router.
 			Methods(route.Method).
@@ -116,11 +116,11 @@ func NewCnTestRouter(cnTestCtx *cnTestContext) *mux.Router {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := context.WithValue(
 				r.Context(),
-				cnTestCtxKey("cnTestCtx"),
-				cnTestCtx)
+				cntfCtxKey("cntfCtx"),
+				cntfCtx)
 
-			if cnTestCtx.cfg.OAuth2Support {
-				if cnTestValidateAccessToken(w, r) {
+			if cntfCtx.cfg.OAuth2Support {
+				if cntfValidateAccessToken(w, r) {
 					next.ServeHTTP(w, r.WithContext(ctx))
 				}
 			} else {
@@ -132,7 +132,7 @@ func NewCnTestRouter(cnTestCtx *cnTestContext) *mux.Router {
 	return router
 }
 
-func cnTestValidateAccessToken(w http.ResponseWriter, r *http.Request) bool {
+func cntfValidateAccessToken(w http.ResponseWriter, r *http.Request) bool {
 
 	reqToken := r.Header.Get("Authorization")
 
@@ -167,7 +167,7 @@ func cnTestValidateAccessToken(w http.ResponseWriter, r *http.Request) bool {
 	return true
 }
 
-// cnTestRouteLogger : This function logs data received in HTTP request.
+// cntfRouteLogger : This function logs data received in HTTP request.
 // Input Args:
 //    - httpHandler: This is HTTP handler function pointer for HTTP Request
 //                   Received
@@ -177,7 +177,7 @@ func cnTestValidateAccessToken(w http.ResponseWriter, r *http.Request) bool {
 //                   Received. This HTTP Handler is actually the updated HTTP
 //                   Handler. The updated HTTP Handler now can logging of HTTP
 //                   Request Info also
-func cnTestRouteLogger(httpHandler http.Handler, name string) http.Handler {
+func cntfRouteLogger(httpHandler http.Handler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
