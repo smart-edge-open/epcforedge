@@ -83,7 +83,6 @@ func runServer(ctx context.Context, afCtx *Context) error {
 
 	afCtx.transactions = make(TransactionIDs)
 	afCtx.subscriptions = make(NotifSubscryptions)
-	log.Infoln(afCtx.cfg.CliPcfCfg) // Jenkins debug 1
 	if afCtx.cfg.CliPcfCfg == nil {
 		err = errors.New("nil CliPcfCfg in afCtx")
 		log.Errf("%s", err.Error())

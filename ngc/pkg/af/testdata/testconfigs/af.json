@@ -19,4 +19,13 @@
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem",
 	"OAuth2Support": true
     }
+    "CliPcfConfig": {
+        "Protocol": "https",
+        "PcfHostname": "localhost",
+        "PcfPort": ":8090",
+        "PolicyAuthBasePath": "/npcf-policyauthorization/v1",
+        "UserAgent": "NGC-AF",
+        "CliCertPath": "/etc/certs/root-ca-cert.pem",
+        "OAuth2Support": true
+    }
 }
