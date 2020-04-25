@@ -70,6 +70,23 @@ var (
 	NotifRouter *mux.Router
 )
 
+func getPolicyAuthAPIClient(pcfCfg *CliPcfConfig) (
+	apiClient *PolicyAuthAPIClient, err error) {
+
+	if pcfCfg == nil {
+		err = errors.New("nil CliPcfCfg in afCtx")
+		log.Errf("%s", err.Error())
+		return nil, err
+	}
+
+	apiClient, err = NewPolicyAuthAPIClient(pcfCfg)
+	if err != nil {
+		log.Errf("Unable to create new policy auth api client")
+		return nil, err
+	}
+	return apiClient, nil
+}
+
 func runServer(ctx context.Context, afCtx *Context) error {
 
 	var err error
@@ -83,18 +100,12 @@ func runServer(ctx context.Context, afCtx *Context) error {
 
 	afCtx.transactions = make(TransactionIDs)
 	afCtx.subscriptions = make(NotifSubscryptions)
-	if afCtx.cfg.CliPcfCfg == nil {
-		err = errors.New("nil CliPcfCfg in afCtx")
-		log.Errf("%s", err.Error())
-		return err
-	}
-	policyAuthAPIClient, err :=
-		NewPolicyAuthAPIClient(afCtx.cfg.CliPcfCfg)
+
+	afCtx.cfg.policyAuthAPIClient, err =
+		getPolicyAuthAPIClient(afCtx.cfg.CliPcfCfg)
 	if err != nil {
-		log.Errf("Unable to create new policy auth api client")
 		return err
 	}
-	afCtx.cfg.policyAuthAPIClient = policyAuthAPIClient
 	AfRouter = NewAFRouter(afCtx)
 	NotifRouter = NewNotifRouter(afCtx)
 

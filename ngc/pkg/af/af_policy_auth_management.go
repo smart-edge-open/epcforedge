@@ -20,18 +20,19 @@ func getAppSessionID(r *http.Request) string {
 func logPolicyRespErr(w *http.ResponseWriter, err string, statusCode int) {
 	log.Errf("%s", err)
 	(*w).WriteHeader(statusCode)
-	return
 }
 
 // CreatePolicyAuthAppSessions func create one or more App Session Ctx
 func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err         error
-		appSess     AppSessionContext
-		appSessResp AppSessionContext
-		httpResp    *http.Response
-		probDetails *ProblemDetails
+		err             error
+		appSess         AppSessionContext
+		appSessResp     AppSessionContext
+		httpResp        *http.Response
+		probDetails     *ProblemDetails
+		probDetailsJSON []byte
+		appSessJSON     []byte
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -77,7 +78,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if probDetails != nil {
-		probDetailsJSON, err := json.Marshal(probDetails)
+		probDetailsJSON, err = json.Marshal(probDetails)
 		if err != nil {
 			logPolicyRespErr(&w, "Json marshal error (probDetials)"+
 				" in CreatePolicyAuthAppSessions: "+err.Error(),
@@ -93,7 +94,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	appSessJSON, err := json.Marshal(appSessResp)
+	appSessJSON, err = json.Marshal(appSessResp)
 	if err != nil {
 		logPolicyRespErr(&w, "Json marshal error in "+
 			"CreatePolicyAuthAppSessions: "+err.Error(),
@@ -109,15 +110,31 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func decodeEventSubscReq(r *http.Request, w http.ResponseWriter,
+	eventSubscReq *EventsSubscReqData) (err error) {
+
+	if r.Body != nil && r.ContentLength > 0 {
+		err = json.NewDecoder(r.Body).Decode(eventSubscReq)
+		if err != nil {
+			logPolicyRespErr(&w, "Json decode error in "+
+				"DeletePolicyAuthAppSession: "+err.Error(),
+				http.StatusBadRequest)
+			return err
+		}
+	}
+	return nil
+}
+
 // DeletePolicyAuthAppSession func deletes an App Session Ctx
 func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err           error
-		eventSubscReq EventsSubscReqData
-		appSessResp   AppSessionContext
-		httpResp      *http.Response
-		probDetails   *ProblemDetails
+		err             error
+		eventSubscReq   EventsSubscReqData
+		appSessResp     AppSessionContext
+		httpResp        *http.Response
+		probDetails     *ProblemDetails
+		probDetailsJSON []byte
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -133,14 +150,9 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Check if body is not null then decode
-	if r.Body != nil && r.ContentLength > 0 {
-		err = json.NewDecoder(r.Body).Decode(&eventSubscReq)
-		if err != nil {
-			logPolicyRespErr(&w, "Json decode error in "+
-				"DeletePolicyAuthAppSession: "+err.Error(),
-				http.StatusBadRequest)
-			return
-		}
+	err = decodeEventSubscReq(r, w, &eventSubscReq)
+	if err != nil {
+		return
 	}
 
 	apiClient := afCtx.cfg.policyAuthAPIClient
@@ -168,7 +180,7 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if probDetails != nil {
-		probDetailsJSON, err := json.Marshal(probDetails)
+		probDetailsJSON, err = json.Marshal(probDetails)
 		if err != nil {
 			logPolicyRespErr(&w, "Json marshal error (probDetials)"+
 				" in DeletePolicyAuthAppSessions: "+err.Error(),
@@ -204,10 +216,11 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err         error
-		appSessResp AppSessionContext
-		httpResp    *http.Response
-		probDetails *ProblemDetails
+		err             error
+		appSessResp     AppSessionContext
+		httpResp        *http.Response
+		probDetails     *ProblemDetails
+		probDetailsJSON []byte
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -247,7 +260,7 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if probDetails != nil {
-		probDetailsJSON, err := json.Marshal(probDetails)
+		probDetailsJSON, err = json.Marshal(probDetails)
 		if err != nil {
 			logPolicyRespErr(&w, "Json marshal error (probDetials)"+
 				" in GetPolicyAuthAppSessions "+err.Error(),
@@ -288,6 +301,8 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		appSessResp       AppSessionContext
 		httpResp          *http.Response
 		probDetails       *ProblemDetails
+		probDetailsJSON   []byte
+		appSessJSON       []byte
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -335,7 +350,7 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if probDetails != nil {
-		probDetailsJSON, err := json.Marshal(probDetails)
+		probDetailsJSON, err = json.Marshal(probDetails)
 		if err != nil {
 			logPolicyRespErr(&w, "Json marshal error (probDetials)"+
 				" in ModifyPolicyAuthAppSessions: "+err.Error(),
@@ -351,7 +366,7 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	appSessJSON, err := json.Marshal(appSessResp)
+	appSessJSON, err = json.Marshal(appSessResp)
 	if err != nil {
 		logPolicyRespErr(&w, "Json marshal error in "+
 			"ModifyPolicyAuthAppSessions: "+err.Error(),

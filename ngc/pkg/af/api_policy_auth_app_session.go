@@ -44,8 +44,8 @@ func (a *PolicyAuthAppSessionAPIService) PostAppSessions(ctx _context.Context,
 		"/app-sessions"
 
 	headerParams := make(map[string]string)
-	headerParams["Content-Type"] = "application/json"
-	headerParams["Accept"] = "appication/json"
+	headerParams["Content-Type"] = contentTypeJSON
+	headerParams["Accept"] = contentTypeJSON
 
 	postBody = &appSessionContext
 
@@ -61,7 +61,13 @@ func (a *PolicyAuthAppSessionAPIService) PostAppSessions(ctx _context.Context,
 	}
 
 	respBody, err := _ioutil.ReadAll(httpResponse.Body)
-	httpResponse.Body.Close()
+	defer func() {
+		err = httpResponse.Body.Close()
+		if err != nil {
+			log.Errf("Resp Body wasn't closed properly" +
+				err.Error())
+		}
+	}()
 	if err != nil {
 		return retVal, nil, httpResponse, err
 	}

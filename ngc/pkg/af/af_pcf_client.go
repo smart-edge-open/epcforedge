@@ -11,7 +11,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"reflect"
 	"time"
@@ -19,6 +18,8 @@ import (
 	oauth2 "github.com/otcshare/epcforedge/ngc/pkg/oauth2"
 	"golang.org/x/net/http2"
 )
+
+var contentTypeJSON string = "application/json"
 
 // PolicyAuthAPIClient type
 // In most cases there should be only one, shared, PolicyAuthAPIClient.
@@ -106,27 +107,9 @@ func NewPolicyAuthAPIClient(cfg *CliPcfConfig) (*PolicyAuthAPIClient, error) {
 func (c *PolicyAuthAPIClient) callAPI(request *http.Request) (
 	*http.Response, error) {
 
-	if c.cfg.Debug {
-		dump, err := httputil.DumpRequestOut(request, true)
-		if err != nil {
-			return nil, err
-		}
-		//log.Printf("\n%s\n", string(dump))
-		_ = dump
-	}
-
 	resp, err := c.cfg.HTTPClient.Do(request)
 	if err != nil {
 		return resp, err
-	}
-
-	if c.cfg.Debug {
-		dump, err := httputil.DumpResponse(resp, true)
-		if err != nil {
-			return resp, err
-		}
-		//log.Printf("\n%s\n", string(dump))
-		_ = dump
 	}
 
 	return resp, err
@@ -144,13 +127,13 @@ func (c *PolicyAuthAPIClient) prepareRequest(
 
 	// Detect reqBody type and post.
 	if reqBody != nil {
-		contentType := headerParams["Content-Type"]
-		if contentType == "" {
-			contentType = detectContentType(reqBody)
-			headerParams["Content-Type"] = contentType
+		reqContentType := headerParams["Content-Type"]
+		if reqContentType == "" {
+			reqContentType = detectContentType(reqBody)
+			headerParams["Content-Type"] = reqContentType
 		}
 
-		body, err = setBody(reqBody, contentType)
+		body, err = setBody(reqBody, reqContentType)
 		if err != nil {
 			return nil, err
 		}
@@ -209,21 +192,21 @@ func (c *PolicyAuthAPIClient) prepareRequest(
  * for request header.
  */
 func detectContentType(body interface{}) string {
-	contentType := "text/plain; charset=utf-8"
+	reqContentType := "text/plain; charset=utf-8"
 	kind := reflect.TypeOf(body).Kind()
 
 	switch kind {
 	case reflect.Struct, reflect.Map, reflect.Ptr:
-		contentType = "application/json; charset=utf-8"
+		reqContentType = "application/json; charset=utf-8"
 	case reflect.String:
-		contentType = "text/plain; charset=utf-8"
+		reqContentType = "text/plain; charset=utf-8"
 	default:
 		if b, ok := body.([]byte); ok {
-			contentType = http.DetectContentType(b)
+			reqContentType = http.DetectContentType(b)
 		} else if kind == reflect.Slice {
-			contentType = "application/json; charset=utf-8"
+			reqContentType = "application/json; charset=utf-8"
 		}
 	}
 
-	return contentType
+	return reqContentType
 }
