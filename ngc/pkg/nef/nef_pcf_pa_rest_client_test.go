@@ -45,7 +45,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 
 					defer cancel()
 					go func() {
-						ngcnef.TestPcf = true
+
 						err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid_pcf.json")
 						Expect(err).To(BeNil())
 
@@ -84,7 +84,6 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}
 				})
 
-			ngcnef.SetHTTPClient(httpclient)
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
 			appid, pcr, err1 := pcfc.PolicyAuthorizationCreate(ctx, ascreq)
 			Expect(err1).ShouldNot(HaveOccurred())
@@ -121,7 +120,6 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}
 				})
 
-			ngcnef.SetHTTPClient(httpclient)
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
 			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ascreq, ngcnef.AppSessionID("test1234"))
 			Expect(err1).ShouldNot(HaveOccurred())
@@ -148,7 +146,6 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}
 				})
 
-			ngcnef.SetHTTPClient(httpclient)
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
 			pcr, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).ShouldNot(HaveOccurred())
@@ -170,7 +167,6 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}
 				})
 
-			ngcnef.SetHTTPClient(httpclient)
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
 			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).ShouldNot(HaveOccurred())
@@ -207,7 +203,6 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}
 				})
 
-			ngcnef.SetHTTPClient(httpclient)
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
 			appid, pcr, err1 := pcfc.PolicyAuthorizationCreate(ctx, ascreq)
 			Expect(err1).Should(HaveOccurred())
@@ -244,7 +239,6 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}
 				})
 
-			ngcnef.SetHTTPClient(httpclient)
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
 			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ascreq, ngcnef.AppSessionID("test1234"))
 			Expect(err1).Should(HaveOccurred())
@@ -271,7 +265,6 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}
 				})
 
-			ngcnef.SetHTTPClient(httpclient)
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
 			pcr, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).Should(HaveOccurred())
@@ -293,7 +286,6 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}
 				})
 
-			ngcnef.SetHTTPClient(httpclient)
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
 			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).Should(HaveOccurred())

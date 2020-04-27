@@ -45,25 +45,17 @@ post()
 		echo "Invalid Json filepath"
 		return 1
 	fi
-	#afid
-    #echo $2
-	if [ -z "$2" ]
-	then 
-	echo "invalid af"
-	return 1
-	fi
+	
 	if [[ $https == "true" ]]; then
 		out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 -X \
 			POST -H "Content-Type: application/json" --data @$1 \
 			https://$nef_host:$https_port/$sub_url 2>/dev/null`
 	else
-		# out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X POST -H \
-		# "Content-Type: application/json" --data @$1 \
-		# http://$nef_host:$http_port/$sub_url 2>/dev/null`
+		 out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X POST -H \
+		 "Content-Type: application/json" --data @$1 \
+		 http://$nef_host:$http_port/$sub_url 2>/dev/null`
 
-		out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X POST -H \
-		"Content-Type: application/json" --data @$1 \
-		http://$nef_host:$http_port/$sub_url1/$2/$sub_url2 2>/dev/null`
+		
 	fi
 	echo "post req body sent" 
 	jq . $1
@@ -92,10 +84,9 @@ get()
 			--http2 -X GET https://$nef_host:$https_port/$sub_url/$sub_id \
 			2>/dev/null`
 		else
-			# out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X \
-			# GET http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
-			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X \
-			GET http://$nef_host:$http_port/$sub_url1/$2/$sub_url2/$sub_id 2>/dev/null`
+			 out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X \
+			 GET http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
+			
 		fi
 			
 		status_code=`echo $out | grep "Response Status"  | awk \
@@ -114,19 +105,15 @@ get()
 # On successfull execution it returns 0.
 get_all()
 {
-	if [ -z "$1" ]
-	then 
-	echo "invalid af"
-	return 1
-	fi
+	
+	
 	if [[ $https == "true" ]]; then
 		out=`$curl_path  -w '\nResponse Status=%{http_code}\n' --cacert $cert_path \
 		--http2 -X GET https://$nef_host:$https_port/$sub_url 2>/dev/null`
 	else
-		# out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X GET \
-		# http://$nef_host:$http_port/$sub_url 2>/dev/null`
-		out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X GET \
-		http://$nef_host:$http_port/$sub_url1/$1/$sub_url2 2>/dev/null`
+		 out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X GET \
+		 http://$nef_host:$http_port/$sub_url 2>/dev/null`
+		
 	fi
 	status_code=`echo $out | grep "Response Status"  | awk 'BEGIN \
 	{ FS="=" } // {print $2}'`
@@ -187,13 +174,10 @@ patch()
 			-X PATCH -H "Content-Type: application/json" --data @$1 \
 			https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
 		else
-			# out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X PATCH -H \
-			# "Content-Type: application/json" --data @$1 \
-			# http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
+			 out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X PATCH -H \
+			 "Content-Type: application/json" --data @$1 \
+			 http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
 
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X PATCH -H \
-		"Content-Type: application/json" --data @$1 \
-		http://$nef_host:$http_port/$sub_url1/$3/$sub_url2/$sub_id 2>/dev/null`
 		fi
 		echo "patch req body sent" 
 	    jq . $1
@@ -222,7 +206,8 @@ delete()
 			-X DELETE https://$nef_host:$https_port/$sub_url/$sub_id 2>/dev/null`
 		else
 			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X DELETE \
-			http://$nef_host:$http_port/$sub_url1/$2/$sub_url2/$sub_id 2>/dev/null`
+			http://$nef_host:$http_port/$sub_url/$sub_id 2>/dev/null`
+	
 		fi
 		status_code=`echo $out | grep "Response Status"  | awk 'BEGIN \
 		{ FS="=" } // {print $2}'`
@@ -251,26 +236,25 @@ send_req()
 	sub_id=$2
 	data=$3
 	expected_response=$4
-	afid=$5
 	ret_val=false
 	case "$method" in
 		"delete")
-			delete $sub_id $afid
+			delete $sub_id
 			;;
 		"get")
-			get $sub_id $afid
+			get $sub_id
 			;;
 		"patch")
-			patch $data $sub_id $afid
+			patch $data $sub_id
 			;;
 		"post")
-			post $data $afid
+			post $data
 			;;
 		"put")
-			put $data $sub_id
+			put $data
 			;;
 		"get_all")
-			get_all $afid
+			get_all
 			;;
 		*)
 			echo "Invalid Method"

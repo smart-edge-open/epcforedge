@@ -9,5 +9,5 @@ func initializePcfClient(cfg Config) PcfPolicyAuthorization {
 	if cfg.PcfPolicyAuthorizationConfig == nil {
 		return NewPCFClient(&cfg)
 	}
-	return NewPCFClientF(&cfg)
+	return NewPCFRestClient(&cfg)
 }
