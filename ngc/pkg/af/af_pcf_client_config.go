@@ -18,6 +18,7 @@ type CliPcfConfig struct {
 	HTTPClient         *http.Client // Change HTTPClient to HttpClient
 	OAuth2Support      bool         `json:"OAuth2Support"`
 	Debug              bool         `json:"Debug"`
+	PolicyAuthNotifURI string       `json:"PolicyAuthNotifURI"`
 }
 
 // NewCliPcfConfiguration create new client pcf config struct
@@ -32,6 +33,7 @@ func NewCliPcfConfiguration(afCtx *Context) *CliPcfConfig {
 		CliCertPath:        afCtx.cfg.CliPcfCfg.CliCertPath,
 		OAuth2Support:      afCtx.cfg.CliPcfCfg.OAuth2Support,
 		Debug:              afCtx.cfg.CliPcfCfg.Debug,
+		PolicyAuthNotifURI: afCtx.cfg.CliPcfCfg.PolicyAuthNotifURI,
 	}
 
 	return cfg
