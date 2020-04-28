@@ -60,10 +60,6 @@ spec:
     targetPort: 8095
     protocol: TCP
     name: af
-  - port: 8096
-    targetPort: 8096
-    protocol: TCP
-    name: af
   selector:
     service: cntfservice
 
