@@ -241,15 +241,15 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 		pcfPr.ResponseCode = uint16(res.StatusCode)
 
 	} else if res.StatusCode == 200 {
-		var eventnoti EventsNotification
+		//var eventnoti EventsNotification
 		log.Infof("Body in the response =>")
 		body, _ := ioutil.ReadAll(res.Body)
 		defer res.Body.Close()
 		log.Infof(string(body))
-		err = json.Unmarshal(body, &eventnoti)
+		/* err = json.Unmarshal(body, &eventnoti)
 		if err != nil {
 			fmt.Printf("Failed go error :%s", err)
-		}
+		} */
 		pcfPr.ResponseCode = uint16(res.StatusCode)
 
 	} else {
