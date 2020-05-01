@@ -19,7 +19,7 @@ import (
 
 const (
 	// HTTP2Enabled flag is for enabling/disabling HTTP2
-	HTTP2Enabled = false
+	HTTP2Enabled = true
 )
 
 // TransactionIDs type
