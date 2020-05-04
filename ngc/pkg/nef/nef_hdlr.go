@@ -136,7 +136,9 @@ func (nef *nefData) nefCreate(ctx context.Context, cfg Config) error {
 
 	nef.ctx = ctx
 	nef.afCount = 0
-	nef.pcfClient = NewPCFClient(&cfg)
+	nef.pcfClient = initializePcfClient(cfg)
+
+	//nef.pcfClient = NewPCFClient(&cfg)
 	if nef.pcfClient == nil {
 		return errors.New("PCF Client creation failed")
 	}
