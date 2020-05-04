@@ -30,6 +30,7 @@
          "Scheme":"https",
          "ClientCert":"/etc/certs/pcf.pem",
          "ApiRoot":"localhost:29507",
-         "Uri":"/npcf-policyauthorization/v1/app-sessions/"
+         "Uri":"/npcf-policyauthorization/v1/app-sessions/",
+         "InsecureSkipVerify":true
      }
 }

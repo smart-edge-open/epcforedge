@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -17,11 +18,11 @@ import (
 )
 
 // RoundTripFunc .
-type RoundTripFunc func(req *http.Request) *http.Response
+type RoundTripFunc func(req *http.Request) (*http.Response, error)
 
 // RoundTrip .
 func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
-	return f(req), nil
+	return f(req)
 }
 
 func testingPCFClient(fn RoundTripFunc) *http.Client {
@@ -71,7 +72,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			resBodyBytes := bytes.NewReader(resBody)
 			httpclient :=
-				testingPCFClient(func(req *http.Request) *http.Response {
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
 					// Test request parameters
 					respHeader := make(http.Header)
 					respHeader.Set("Location", "1234test")
@@ -81,7 +82,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 						Body: ioutil.NopCloser(resBodyBytes),
 						// Must be set to non-nil value or it panics
 						Header: respHeader,
-					}
+					}, nil
 				})
 
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
@@ -108,7 +109,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			resBodyBytes := bytes.NewReader(resBody)
 			httpclient :=
-				testingPCFClient(func(req *http.Request) *http.Response {
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
 					// Test request parameters
 
 					return &http.Response{
@@ -117,7 +118,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 						Body: ioutil.NopCloser(resBodyBytes),
 						// Must be set to non-nil value or it panics
 						Header: make(http.Header),
-					}
+					}, nil
 				})
 
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
@@ -135,7 +136,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			resBodyBytes := bytes.NewReader(resBody)
 			httpclient :=
-				testingPCFClient(func(req *http.Request) *http.Response {
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
 					// Test request parameters
 					return &http.Response{
 						StatusCode: 200,
@@ -143,7 +144,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 						Body: ioutil.NopCloser(resBodyBytes),
 						// Must be set to non-nil value or it panics
 						Header: make(http.Header),
-					}
+					}, nil
 				})
 
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
@@ -156,7 +157,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 		Specify("Sending valid DELETE request ", func() {
 
 			httpclient :=
-				testingPCFClient(func(req *http.Request) *http.Response {
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
 					// Test request parameters
 					return &http.Response{
 						StatusCode: 204,
@@ -164,7 +165,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 						Body: ioutil.NopCloser(nil),
 						// Must be set to non-nil value or it panics
 						Header: make(http.Header),
-					}
+					}, nil
 				})
 
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
@@ -190,17 +191,18 @@ var _ = Describe("NefPcfPaRestClient", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			resBodyBytes := bytes.NewReader(resBody)
 			httpclient :=
-				testingPCFClient(func(req *http.Request) *http.Response {
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
 					// Test request parameters
 					respHeader := make(http.Header)
 					respHeader.Set("Location", "1234test")
+					respHeader.Set("Content-Type", "application/problem+json")
 					return &http.Response{
 						StatusCode: 403,
 						// Send response to be tested
 						Body: ioutil.NopCloser(resBodyBytes),
 						// Must be set to non-nil value or it panics
 						Header: respHeader,
-					}
+					}, nil
 				})
 
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
@@ -227,16 +229,17 @@ var _ = Describe("NefPcfPaRestClient", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			resBodyBytes := bytes.NewReader(resBody)
 			httpclient :=
-				testingPCFClient(func(req *http.Request) *http.Response {
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
 					// Test request parameters
-
+					respHeader := make(http.Header)
+					respHeader.Set("Content-Type", "application/problem+json")
 					return &http.Response{
 						StatusCode: 404,
 						// Send response to be tested
 						Body: ioutil.NopCloser(resBodyBytes),
 						// Must be set to non-nil value or it panics
-						Header: make(http.Header),
-					}
+						Header: respHeader,
+					}, nil
 				})
 
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
@@ -254,15 +257,17 @@ var _ = Describe("NefPcfPaRestClient", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			resBodyBytes := bytes.NewReader(resBody)
 			httpclient :=
-				testingPCFClient(func(req *http.Request) *http.Response {
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
 					// Test request parameters
+					respHeader := make(http.Header)
+					respHeader.Set("Content-Type", "application/problem+json")
 					return &http.Response{
 						StatusCode: 404,
 						// Send response to be tested
 						Body: ioutil.NopCloser(resBodyBytes),
 						// Must be set to non-nil value or it panics
-						Header: make(http.Header),
-					}
+						Header: respHeader,
+					}, nil
 				})
 
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
@@ -270,12 +275,11 @@ var _ = Describe("NefPcfPaRestClient", func() {
 			Expect(err1).Should(HaveOccurred())
 			Expect(pcr.Pd).ToNot(Equal(nil))
 			Expect(int(pcr.ResponseCode)).To(Equal(http.StatusNotFound))
-
 		})
 		Specify("Sending invalid DELETE request ", func() {
 
 			httpclient :=
-				testingPCFClient(func(req *http.Request) *http.Response {
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
 					// Test request parameters
 					return &http.Response{
 						StatusCode: 404,
@@ -283,7 +287,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 						Body: ioutil.NopCloser(nil),
 						// Must be set to non-nil value or it panics
 						Header: make(http.Header),
-					}
+					}, nil
 				})
 
 			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
@@ -291,6 +295,58 @@ var _ = Describe("NefPcfPaRestClient", func() {
 			Expect(err1).Should(HaveOccurred())
 
 			Expect(int(pcr.ResponseCode)).To(Equal(http.StatusNotFound))
+
+		})
+		Specify("Checking server timeout for GET request ", func() {
+			httpclient :=
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
+					// Test request parameters
+					err := errors.New("no response from server")
+					return nil, err
+				})
+
+			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
+			_, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
+			Expect(err1).Should(HaveOccurred())
+
+		})
+		Specify("Checking server timeout for POST request ", func() {
+			httpclient :=
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
+					// Test request parameters
+					err := errors.New("no response from server")
+					return nil, err
+				})
+
+			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
+			_, _, err1 := pcfc.PolicyAuthorizationCreate(ctx, ngcnef.AppSessionContext{})
+			Expect(err1).Should(HaveOccurred())
+
+		})
+		Specify("Checking server timeout for PATCH request ", func() {
+			httpclient :=
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
+					// Test request parameters
+					err := errors.New("no response from server")
+					return nil, err
+				})
+
+			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
+			_, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ngcnef.AppSessionContextUpdateData{}, ngcnef.AppSessionID(""))
+			Expect(err1).Should(HaveOccurred())
+
+		})
+		Specify("Checking server timeout for DELETE request ", func() {
+			httpclient :=
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
+					// Test request parameters
+					err := errors.New("no response from server")
+					return nil, err
+				})
+
+			pcfc := ngcnef.PcfClient{Pcf: "test", HTTPClient: httpclient, PcfRootURI: "testuri", PcfURI: "test"}
+			_, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
+			Expect(err1).Should(HaveOccurred())
 
 		})
 	})

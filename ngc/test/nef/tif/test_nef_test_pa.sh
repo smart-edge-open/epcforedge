@@ -1,4 +1,5 @@
 #!/bin/bash
+
 source test_nef.sh
 #post request with sub_id=0,json file as post body,expected response code(for success case) and AF id  
 if send_req post 0 json/AF_NEF_POST_01.json 201; then
