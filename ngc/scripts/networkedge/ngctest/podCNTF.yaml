@@ -30,7 +30,7 @@ spec:
       limits:
         memory: 1Gi
     ports:
-    - containerPort: 8060
+    - containerPort: 8095
     volumeMounts:
     - name: shared-configs
       mountPath: /root/configs
