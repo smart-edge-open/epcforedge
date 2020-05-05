@@ -227,6 +227,121 @@ type RoutingRequirement struct {
 	UpPathChgSub *UpPathChgEvent    `json:"upPathChgSub,omitempty"`
 }
 
+// AfappSessionContextRespData struct
+/*
+ * AfappSessionContextRespData Describes the authorization data of an Individual
+ * Application Session Context created by the PCF.
+ */
+type AfappSessionContextRespData struct {
+	ServAuthInfo ServAuthInfo `json:"servAuthInfo,omitempty"`
+	/*
+	 * A string used to indicate the features supported by an API that is
+	 * used as defined in subclause 6.6 in 3GPP TS 29.500 [1]. The string
+	 * shall contain a bitmask indicating supported features in hexadecimal
+	 * representation. Each character in the string shall take a value of
+	 * \"0\" to \"9\" or \"A\" to \"F\" and shall represent the support of 4
+	 * features as described in table 5.2.2-3. The most significant
+	 * character representing the highest-numbered features shall appear
+	 * first in the string, and the character representing features 1 to 4
+	 * shall appear last in the string. The list of features and their
+	 * numbering (starting with 1) are defined separately for each API.
+	 * Possible features for traffic influencing are
+	 * Notification_websocket(1), Notification_test_event(2)
+	 */
+	SuppFeat string `json:"suppFeat,omitempty"`
+}
+
+// AfappSessionContextReqData type
+/*
+ * AfappSessionContextReqData Identifies the service requirements of an Individual
+ * Application Session Context. It may include the notification parameters for websocket
+ * delivery of AF notifications
+ */
+type AfappSessionContextReqData struct {
+	AfAppID   string              `json:"afAppId,omitempty"`
+	AfRoutReq *RoutingRequirement `json:"afRoutReq,omitempty"`
+	// Contains an identity of an application service provider.
+	AspID string `json:"aspId,omitempty"`
+	/*
+	 * string identifying a BDT Reference ID as defined in subclause
+	 * 5.3.3 of 3GPP TS 29.154.
+	 */
+	BdtRefID      string                    `json:"bdtRefId,omitempty"`
+	Dnn           string                    `json:"dnn,omitempty"`
+	EvSubsc       *EventsSubscReqData       `json:"evSubsc,omitempty"`
+	MedComponents map[string]MediaComponent `json:"medComponents,omitempty"`
+	IPDomain      string                    `json:"ipDomain,omitempty"`
+	// indication of MPS service request
+	MpsID      string           `json:"mpsId,omitempty"`
+	NotifURI   string           `json:"notifUri"`
+	SliceInfo  *SNSSAI          `json:"sliceInfo,omitempty"`
+	SponID     string           `json:"sponId,omitempty"`
+	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
+	Supi       string           `json:"supi,omitempty"`
+	Gpsi       string           `json:"gpsi,omitempty"`
+	/*
+	 * A string used to indicate the features supported by an API that is
+	 * used as defined in subclause 6.6 in 3GPP TS 29.500 [1]. The string
+	 * shall contain a bitmask indicating supported features in hexadecimal
+	 * representation. Each character in the string shall take a value of
+	 * \"0\" to \"9\" or \"A\" to \"F\" and shall represent the support of 4
+	 * features as described in table 5.2.2-3. The most significant
+	 * character representing the highest-numbered features shall appear
+	 * first in the string, and the character representing features 1 to 4
+	 * shall appear last in the string. The list of features and their
+	 * numbering (starting with 1) are defined separately for each API.
+	 * Possible features for traffic influencing are
+	 * Notification_websocket(1), Notification_test_event(2)
+	 */
+	SuppFeat string   `json:"suppFeat"`
+	UeIpv4   IPv4Addr `json:"ueIpv4,omitempty"`
+	UeIpv6   IPv6Addr `json:"ueIpv6,omitempty"`
+	UeMac    MacAddr  `json:"ueMac,omitempty"`
+	// This parameter is present only if websocket delivery of notification
+	// is requested by consumer for events
+	AfwebsockNotifConfig *AfwebsockNotifConfig `json:"afwebsockNotifConfig,omitempty"`
+}
+
+// AfappSessionContextUpdateData struct
+/*
+ * AfappSessionContextUpdateData Identifies the modifications to an Individual
+ * Application Session Context and may include the modifications to the
+ * sub-resource Events Subscription.It may include the notification parameters
+ * for websocket delivery of AF notifications
+ */
+type AfappSessionContextUpdateData struct {
+	// Contains an AF application identifier.
+	AfAppID   string              `json:"afAppId,omitempty"`
+	AfRoutReq *RoutingRequirement `json:"afRoutReq,omitempty"`
+	// Contains an identity of an application service provider.
+	AspID string `json:"aspId,omitempty"`
+	/*
+	 * string identifying a BDT Reference ID as defined in subclause
+	 * 5.3.3 of 3GPP TS 29.154.
+	 */
+	BdtRefID      string                    `json:"bdtRefId,omitempty"`
+	EvSubsc       *EventsSubscReqData       `json:"evSubsc,omitempty"`
+	MedComponents map[string]MediaComponent `json:"medComponents,omitempty"`
+	// indication of MPS service request
+	MpsID string `json:"mpsId,omitempty"`
+	// Contains an identity of a sponsor.
+	SponID     string           `json:"sponId,omitempty"`
+	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
+	// This parameter is present only if websocket delivery of notification
+	// is requested by consumer for events
+	AfwebsockNotifConfig *AfwebsockNotifConfig `json:"afwebsockNotifConfig,omitempty"`
+}
+
+// AfappSessionContext Represents an Individual Application Session
+// Context resource for AF NB APIs
+type AfappSessionContext struct {
+	AscReqData *AfappSessionContextReqData `json:"ascReqData,omitempty"`
+
+	AscRespData *AfappSessionContextRespData `json:"ascRespData,omitempty"`
+
+	EvsNotif *EventsNotification `json:"evsNotif,omitempty"`
+}
+
 // AppSessionContextReqData type
 /*
  * AppSessionContextReqData Identifies the service requirements of an Individual
@@ -324,7 +439,8 @@ type AppSessionContextUpdateData struct {
 	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
 }
 
-// AppSessionContext Represents an Individual Application Session Context resource.
+// AppSessionContext Represents an Individual Application Session
+// Context resource for AF SB towards PCF
 type AppSessionContext struct {
 	AscReqData  *AppSessionContextReqData  `json:"ascReqData,omitempty"`
 	AscRespData *AppSessionContextRespData `json:"ascRespData,omitempty"`
@@ -484,12 +600,12 @@ type TerminationInfo struct {
 // UpPathChgEvent struct
 type UpPathChgEvent struct {
 	// string providing an URI formatted according to IETF RFC 3986.
-	NotificationURI string `json:"notificationUri"`
+	NotificationURI string `json:"notificationUri,omitempty"`
 	/*
 	 * It is used to set the value of Notification Correlation ID in the
 	 * notification sent by the SMF.
 	 */
-	NotifCorreID string         `json:"notifCorreId"`
+	NotifCorreID string         `json:"notifCorreId,omitempty"`
 	DnaiChgType  DNAIChangeType `json:"dnaiChgType"`
 }
 
