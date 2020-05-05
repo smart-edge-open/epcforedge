@@ -11,10 +11,10 @@
         "ServerKeyPath": "/etc/certs/server-key.pem"
     },
     "NotifSrvConfig": {
-	"Protocol": "https",
-	"ProtocolVer": "2.0",
-	"Hostname": "localhost",
-	"Port": "8051",
+        "Protocol": "https",
+        "ProtocolVer": "2.0",
+        "Hostname": "localhost",
+        "Port": "8051",
         "CertPath": "/etc/certs/server-cert.pem",
         "KeyPath": "/etc/certs/server-key.pem"
     },
@@ -30,14 +30,14 @@
     },
     "CliPcfConfig": {
         "Protocol": "https",
-	"ProtocolVer": "2.0",
+        "ProtocolVer": "2.0",
         "Hostname": "localhost",
-        "Port": ":8095",
+        "Port": "8095",
         "BasePath": "/npcf-policyauthorization/v1",
-	"LocationPrefix": "/af/v1/policy-authorization/app-sessions",
+        "LocationPrefix": "/af/v1/policy-authorization/app-sessions",
         "CliCertPath": "/etc/certs/root-ca-cert.pem",
-	"VerifyCerts": "true",
+        "VerifyCerts": "true",
         "OAuth2Support": false,
-	"NotifURI": "/af/v1/policy-authorization"
+        "NotifURI": "/af/v1/policy-authorization"
     }
 }

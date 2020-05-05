@@ -186,6 +186,18 @@ func runServer(ctx context.Context, afCtx *Context) error {
 	return nil
 }
 
+func printGenericClientConfig(cfg *GenericCliConfig) {
+	log.Infoln("Protocol: ", cfg.Protocol)
+	log.Infoln("ProtocolVer: ", cfg.ProtocolVer)
+	log.Infoln("Hostname: ", cfg.Hostname)
+	log.Infoln("Port: ", cfg.Port)
+	log.Infoln("BasePath: ", cfg.BasePath)
+	log.Infoln("LocationPrefixURI: ", cfg.LocationPrefixURI)
+	log.Infoln("CliCertPath: ", cfg.CliCertPath)
+	log.Infoln("OAuth2Support: ", cfg.OAuth2Support)
+	log.Infoln("NotifURI: ", cfg.NotifURI)
+}
+
 func printConfig(cfg Config) {
 
 	log.Infoln("********************* NGC AF CONFIGURATION ******************")
@@ -208,12 +220,7 @@ func printConfig(cfg Config) {
 	log.Infoln("NEFCliCertPath: ", cfg.CliCfg.NEFCliCertPath)
 	log.Infoln("OAuth2Support: ", cfg.CliCfg.OAuth2Support)
 	log.Infoln("--------------- CLIENT TO PCF (Policy Auth)---------------")
-	log.Infoln("Protocol: ", cfg.CliPcfCfg.Protocol)
-	log.Infoln("Hostname: ", cfg.CliPcfCfg.Hostname)
-	log.Infoln("Port: ", cfg.CliPcfCfg.Port)
-	log.Infoln("BasePath: ", cfg.CliPcfCfg.BasePath)
-	log.Infoln("CliCertPath: ", cfg.CliPcfCfg.CliCertPath)
-	log.Infoln("OAuth2Support: ", cfg.CliPcfCfg.OAuth2Support)
+	printGenericClientConfig(cfg.CliPcfCfg)
 	log.Infoln("**********************************************************")
 
 }
