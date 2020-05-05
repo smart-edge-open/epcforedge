@@ -28,7 +28,7 @@
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem",
         "OAuth2Support": true
     },
-    "CliPcfConfig": {
+    "CliPAConfig": {
         "Protocol": "https",
         "ProtocolVer": "2.0",
         "Hostname": "localhost",
@@ -36,7 +36,7 @@
         "BasePath": "/npcf-policyauthorization/v1",
         "LocationPrefix": "/af/v1/policy-authorization/app-sessions",
         "CliCertPath": "/etc/certs/root-ca-cert.pem",
-        "VerifyCerts": "true",
+        "VerifyCerts": true,
         "OAuth2Support": false,
         "NotifURI": "/af/v1/policy-authorization"
     }
