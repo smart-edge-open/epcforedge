@@ -5,7 +5,6 @@ package af
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"time"
 
@@ -42,14 +41,26 @@ type ServerConfig struct {
 	ServerKeyPath  string `json:"ServerKeyPath"`
 }
 
+type notifSrvConfig struct {
+	Protocol string `json:"protocol"`
+	Hostname string `json:"hostname"`
+	Port     string `json:"port"`
+	// lint warning
+	//	protocolVer string `json:"ProtocolVer"`
+	//	certPath    string `json:"CertPath"`
+	//	keyPath     string `json:"KeyPath"`
+}
+
 //Config struct
 type Config struct {
-	AfID                string        `json:"AfId"`
-	AfAPIRoot           string        `json:"AfAPIRoot"`
-	LocationPrefixPfd   string        `json:"LocationPrefixPfd"`
-	SrvCfg              ServerConfig  `json:"ServerConfig"`
-	CliCfg              CliConfig     `json:"CliConfig"`
-	CliPcfCfg           *CliPcfConfig `json:"CliPcfConfig"`
+	AfID                string            `json:"AfId"`
+	AfAPIRoot           string            `json:"AfAPIRoot"`
+	LocationPrefixPfd   string            `json:"LocationPrefixPfd"`
+	UserAgent           string            `json:"UserAgent"`
+	SrvCfg              ServerConfig      `json:"ServerConfig"`
+	NotifSrvCfg         *notifSrvConfig   `json:"NotifSrvConfig"`
+	CliCfg              CliConfig         `json:"CliConfig"`
+	CliPcfCfg           *GenericCliConfig `json:"CliPAConfig"`
 	policyAuthAPIClient *PolicyAuthAPIClient
 }
 
@@ -70,23 +81,6 @@ var (
 	NotifRouter *mux.Router
 )
 
-func getPolicyAuthAPIClient(pcfCfg *CliPcfConfig) (
-	apiClient *PolicyAuthAPIClient, err error) {
-
-	if pcfCfg == nil {
-		err = errors.New("nil CliPcfCfg in afCtx")
-		log.Errf("%s", err.Error())
-		return nil, err
-	}
-
-	apiClient, err = NewPolicyAuthAPIClient(pcfCfg)
-	if err != nil {
-		log.Errf("Unable to create new policy auth api client")
-		return nil, err
-	}
-	return apiClient, nil
-}
-
 func runServer(ctx context.Context, afCtx *Context) error {
 
 	var err error
@@ -95,17 +89,17 @@ func runServer(ctx context.Context, afCtx *Context) error {
 		"Content-Type", "Authorization"})
 	originsOK := handlers.AllowedOrigins(
 		[]string{afCtx.cfg.SrvCfg.UIEndpoint})
-	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD",
-		"POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
+	methodsOK := handlers.AllowedMethods([]string{"GET",
+		"POST", "PUT", "PATCH", "DELETE"})
 
 	afCtx.transactions = make(TransactionIDs)
 	afCtx.subscriptions = make(NotifSubscryptions)
 
-	afCtx.cfg.policyAuthAPIClient, err =
-		getPolicyAuthAPIClient(afCtx.cfg.CliPcfCfg)
+	err = initPACfg(afCtx)
 	if err != nil {
 		return err
 	}
+
 	AfRouter = NewAFRouter(afCtx)
 	NotifRouter = NewNotifRouter(afCtx)
 
@@ -213,15 +207,14 @@ func printConfig(cfg Config) {
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
 	log.Infoln("NEFCliCertPath: ", cfg.CliCfg.NEFCliCertPath)
 	log.Infoln("OAuth2Support: ", cfg.CliCfg.OAuth2Support)
-	log.Infoln("------------------------- CLIENT TO PCF ---------------------")
+	log.Infoln("--------------- CLIENT TO PCF (Policy Auth)---------------")
 	log.Infoln("Protocol: ", cfg.CliPcfCfg.Protocol)
-	log.Infoln("PcfHostname: ", cfg.CliPcfCfg.PcfHostname)
-	log.Infoln("PcfPort: ", cfg.CliPcfCfg.PcfPort)
-	log.Infoln("PolicyAuthBasePath: ", cfg.CliPcfCfg.PolicyAuthBasePath)
-	log.Infoln("UserAgent: ", cfg.CliPcfCfg.UserAgent)
+	log.Infoln("Hostname: ", cfg.CliPcfCfg.Hostname)
+	log.Infoln("Port: ", cfg.CliPcfCfg.Port)
+	log.Infoln("BasePath: ", cfg.CliPcfCfg.BasePath)
 	log.Infoln("CliCertPath: ", cfg.CliPcfCfg.CliCertPath)
 	log.Infoln("OAuth2Support: ", cfg.CliPcfCfg.OAuth2Support)
-	log.Infoln("*************************************************************")
+	log.Infoln("**********************************************************")
 
 }
 

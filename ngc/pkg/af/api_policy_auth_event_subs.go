@@ -19,7 +19,8 @@ var (
 // PolicyAuthEventSubsAPIService EventsSubscriptionDocumentApi service
 type PolicyAuthEventSubsAPIService policyAuthService
 
-func handleUpdateEventResp(respBody []byte, statusCode int) (
+func handleUpdateEventResp(respBody []byte, statusCode int,
+	a *PolicyAuthEventSubsAPIService) (
 	retVal EventSubscResponse, err error) {
 
 	var (
@@ -47,6 +48,9 @@ func handleUpdateEventResp(respBody []byte, statusCode int) (
 		return retVal, nil
 
 	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
+		if statusCode == 401 {
+			validatePAAuthToken(a.client)
+		}
 		var v *ProblemDetails = new(ProblemDetails)
 		err = json.Unmarshal(respBody, v)
 		if err != nil {
@@ -88,9 +92,8 @@ func (a *PolicyAuthEventSubsAPIService) UpdateEventsSubsc(ctx _context.Context,
 	)
 
 	// create path and map variables
-	path := a.client.cfg.Protocol + "://" + a.client.cfg.PcfHostname +
-		a.client.cfg.PcfPort + a.client.cfg.PolicyAuthBasePath +
-		"/app-sessions/" + appSessionID + "/events-subscription"
+	path := a.client.rootURI + "/app-sessions/" + appSessionID +
+		"/events-subscription"
 
 	headerParams := make(map[string]string)
 	headerParams["Content-Type"] = contentTypeJSON
@@ -124,7 +127,7 @@ func (a *PolicyAuthEventSubsAPIService) UpdateEventsSubsc(ctx _context.Context,
 		return retVal, httpResponse, err
 	}
 
-	retVal, err = handleUpdateEventResp(respBody, httpResponse.StatusCode)
+	retVal, err = handleUpdateEventResp(respBody, httpResponse.StatusCode, a)
 	return retVal, httpResponse, err
 
 }
@@ -145,9 +148,8 @@ func (a *PolicyAuthEventSubsAPIService) DeleteEventsSubsc(ctx _context.Context,
 	)
 
 	// create path and map variables
-	path := a.client.cfg.Protocol + "://" + a.client.cfg.PcfHostname +
-		a.client.cfg.PcfPort + a.client.cfg.PolicyAuthBasePath +
-		"/app-sessions/" + appSessionID + "/events-subscription"
+	path := a.client.rootURI + "/app-sessions/" + appSessionID +
+		"/events-subscription"
 
 	headerParams := make(map[string]string)
 	headerParams["Accept"] = contentTypeJSON
@@ -180,6 +182,9 @@ func (a *PolicyAuthEventSubsAPIService) DeleteEventsSubsc(ctx _context.Context,
 		return retVal, httpResponse, nil
 
 	case 400, 401, 403, 404, 429, 500, 503:
+		if httpResponse.StatusCode == 401 {
+			validatePAAuthToken(a.client)
+		}
 		var v *ProblemDetails = new(ProblemDetails)
 		err = json.Unmarshal(respBody, v)
 		if err != nil {

@@ -39,9 +39,7 @@ func (a *PolicyAuthAppSessionAPIService) PostAppSessions(ctx _context.Context,
 	)
 
 	// create path and map variables
-	path := a.client.cfg.Protocol + "://" + a.client.cfg.PcfHostname +
-		a.client.cfg.PcfPort + a.client.cfg.PolicyAuthBasePath +
-		"/app-sessions"
+	path := a.client.rootURI + "/app-sessions"
 
 	headerParams := make(map[string]string)
 	headerParams["Content-Type"] = contentTypeJSON
@@ -84,6 +82,9 @@ func (a *PolicyAuthAppSessionAPIService) PostAppSessions(ctx _context.Context,
 
 	switch httpResponse.StatusCode {
 	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
+		if httpResponse.StatusCode == 401 {
+			validatePAAuthToken(a.client)
+		}
 		var v *ProblemDetails = new(ProblemDetails)
 		err = json.Unmarshal(respBody, v)
 		if err != nil {

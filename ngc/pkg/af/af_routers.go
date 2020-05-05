@@ -86,6 +86,20 @@ var notifRoutes = Routes{
 		DefaultNotifURL,
 		NotificationPost,
 	},
+
+	// Policy auth notification routes
+	Route{
+		"PolicyAuthEventNotify",
+		strings.ToUpper("Post"),
+		"/af/v1/policy-authorization/notify",
+		PolicyAuthEventNotify,
+	},
+	Route{
+		"PolicyAuthEventNotifTerminate",
+		strings.ToUpper("Post"),
+		"/af/v1/policy-authorization/notify",
+		PolicyAuthEventNotifTerminate,
+	},
 }
 
 var afRoutes = Routes{
@@ -227,19 +241,17 @@ var afRoutes = Routes{
 		DeletePolicyAuthAppSession,
 	},
 
-	/*
-		Route{
-			"PolicyAuthAppEventSubs",
-			strings.ToUpper("Put"),
-			"/af/v1/policy-authorization/app-sessions/{appSessionId}/event-subscription",
-			PolicyAuthAppEventSubs,
-		},
+	Route{
+		"PolicyAuthEventSubsc",
+		strings.ToUpper("Put"),
+		"/af/v1/policy-authorization/app-sessions/{appSessionId}/event-subscription",
+		PolicyAuthEventSubsc,
+	},
 
-		Route{
-			"PolicyAuthAppEventUnSubs",
-			strings.ToUpper("Delete"),
-			"/af/v1/policy-authorization/app-sessions/{appSessionId}/event-subscription",
-			PolicyAuthAppEventUnSubs,
-		},
-	*/
+	Route{
+		"PolicyAuthEventDelete",
+		strings.ToUpper("Delete"),
+		"/af/v1/policy-authorization/app-sessions/{appSessionId}/event-subscription",
+		PolicyAuthEventDelete,
+	},
 }

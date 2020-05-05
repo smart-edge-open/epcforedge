@@ -44,9 +44,8 @@ func (a *PolicyAuthIndividualAppSessAPIService) DeleteAppSession(
 	)
 
 	// create path and map variables
-	path := a.client.cfg.Protocol + "://" + a.client.cfg.PcfHostname +
-		a.client.cfg.PcfPort + a.client.cfg.PolicyAuthBasePath +
-		"/app-sessions/" + appSessionID + "/delete"
+	path := a.client.rootURI + "/app-sessions/" + appSessionID +
+		"/delete"
 
 	headerParams := make(map[string]string)
 	headerParams["Content-Type"] = contentTypeJSON
@@ -92,6 +91,9 @@ func (a *PolicyAuthIndividualAppSessAPIService) DeleteAppSession(
 
 	switch httpResponse.StatusCode {
 	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
+		if httpResponse.StatusCode == 401 {
+			validatePAAuthToken(a.client)
+		}
 		var v *ProblemDetails = new(ProblemDetails)
 		err = json.Unmarshal(respBody, v)
 		if err != nil {
@@ -128,9 +130,7 @@ func (a *PolicyAuthIndividualAppSessAPIService) GetAppSession(
 	)
 
 	// create path and map variables
-	path := a.client.cfg.Protocol + "://" + a.client.cfg.PcfHostname +
-		a.client.cfg.PcfPort + a.client.cfg.PolicyAuthBasePath +
-		"/app-sessions/" + appSessionID
+	path := a.client.rootURI + "/app-sessions/" + appSessionID
 
 	headerParams := make(map[string]string)
 	headerParams["Accept"] = contentTypeJSON
@@ -170,6 +170,9 @@ func (a *PolicyAuthIndividualAppSessAPIService) GetAppSession(
 
 	switch httpResponse.StatusCode {
 	case 400, 401, 403, 404, 406, 429, 500, 503:
+		if httpResponse.StatusCode == 401 {
+			validatePAAuthToken(a.client)
+		}
 		var v *ProblemDetails = new(ProblemDetails)
 		err = json.Unmarshal(respBody, v)
 		if err != nil {
@@ -208,9 +211,7 @@ func (a *PolicyAuthIndividualAppSessAPIService) ModAppSession(
 	)
 
 	// create path and map variables
-	path := a.client.cfg.Protocol + "://" + a.client.cfg.PcfHostname +
-		a.client.cfg.PcfPort + a.client.cfg.PolicyAuthBasePath +
-		"/app-sessions/" + appSessionID
+	path := a.client.rootURI + "/app-sessions/" + appSessionID
 
 	headerParams := make(map[string]string)
 	headerParams["Content-Type"] = "application/json"
@@ -252,6 +253,9 @@ func (a *PolicyAuthIndividualAppSessAPIService) ModAppSession(
 	}
 	switch httpResponse.StatusCode {
 	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
+		if httpResponse.StatusCode == 401 {
+			validatePAAuthToken(a.client)
+		}
 		var v *ProblemDetails = new(ProblemDetails)
 		err = json.Unmarshal(respBody, v)
 		if err != nil {

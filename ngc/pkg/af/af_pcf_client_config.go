@@ -3,37 +3,34 @@
 
 package af
 
-import (
-	"net/http"
-)
-
-// CliPcfConfig struct
-type CliPcfConfig struct {
-	Protocol           string       `json:"Protocol"`
-	PcfHostname        string       `json:"PcfHostname"`
-	PcfPort            string       `json:"PcfPort"`
-	PolicyAuthBasePath string       `json:"PolicyAuthBasePath"`
-	UserAgent          string       `json:"UserAgent"`
-	CliCertPath        string       `json:"CliCertPath"`
-	HTTPClient         *http.Client // Change HTTPClient to HttpClient
-	OAuth2Support      bool         `json:"OAuth2Support"`
-	Debug              bool         `json:"Debug"`
-	PolicyAuthNotifURI string       `json:"PolicyAuthNotifURI"`
+// GenericCliConfig struct
+type GenericCliConfig struct {
+	Protocol          string `json:"Protocol"`
+	ProtocolVer       string `json:"ProtocolVer"`
+	Hostname          string `json:"Hostname"`
+	Port              string `json:"Port"`
+	BasePath          string `json:"BasePath"`
+	LocationPrefixURI string `json:"LocationPrefixURI"`
+	CliCertPath       string `json:"CliCertPath"`
+	OAuth2Support     bool   `json:"OAuth2Support"`
+	VerifyCerts       bool   `json:"VerifyCerts"`
+	NotifURI          string `json:"NotifURI"`
 }
 
 // NewCliPcfConfiguration create new client pcf config struct
-func NewCliPcfConfiguration(afCtx *Context) *CliPcfConfig {
+func NewCliPcfConfiguration(afCtx *Context) *GenericCliConfig {
 
-	cfg := &CliPcfConfig{
-		Protocol:           afCtx.cfg.CliPcfCfg.Protocol,
-		PcfPort:            afCtx.cfg.CliPcfCfg.PcfPort,
-		PcfHostname:        afCtx.cfg.CliPcfCfg.PcfHostname,
-		PolicyAuthBasePath: afCtx.cfg.CliPcfCfg.PolicyAuthBasePath,
-		UserAgent:          afCtx.cfg.CliPcfCfg.UserAgent,
-		CliCertPath:        afCtx.cfg.CliPcfCfg.CliCertPath,
-		OAuth2Support:      afCtx.cfg.CliPcfCfg.OAuth2Support,
-		Debug:              afCtx.cfg.CliPcfCfg.Debug,
-		PolicyAuthNotifURI: afCtx.cfg.CliPcfCfg.PolicyAuthNotifURI,
+	cfg := &GenericCliConfig{
+		Protocol:          afCtx.cfg.CliPcfCfg.Protocol,
+		ProtocolVer:       afCtx.cfg.CliPcfCfg.ProtocolVer,
+		Port:              afCtx.cfg.CliPcfCfg.Port,
+		Hostname:          afCtx.cfg.CliPcfCfg.Hostname,
+		BasePath:          afCtx.cfg.CliPcfCfg.BasePath,
+		LocationPrefixURI: afCtx.cfg.CliPcfCfg.LocationPrefixURI,
+		CliCertPath:       afCtx.cfg.CliPcfCfg.CliCertPath,
+		OAuth2Support:     afCtx.cfg.CliPcfCfg.OAuth2Support,
+		NotifURI:          afCtx.cfg.CliPcfCfg.NotifURI,
+		VerifyCerts:       afCtx.cfg.CliPcfCfg.VerifyCerts,
 	}
 
 	return cfg

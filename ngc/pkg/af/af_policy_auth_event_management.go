@@ -7,6 +7,8 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 // EventSubscResponse struct anyof EventSusbscReqData, EventNotification,
@@ -17,50 +19,66 @@ type EventSubscResponse struct {
 	probDetails   *ProblemDetails
 }
 
-func handleEventSubscResp(w http.ResponseWriter,
+func handleEventSubscResp(w *http.ResponseWriter, locationPrefixURI string,
 	eventSubscResp EventSubscResponse, httpResp *http.Response) {
 
 	var (
-		respBody []byte
-		err      error
+		respBody  []byte
+		err       error
+		setLocURL bool
+		url       *url.URL
 	)
 
 	if eventSubscResp.eventSubscReq != nil {
 		respBody, err = json.Marshal(eventSubscResp.eventSubscReq)
 		if err != nil {
-			logPolicyRespErr(&w, "Json marshal error (eventSubsc)"+
+			logPolicyRespErr(w, "Json marshal error (eventSubsc)"+
 				" in PolicyAuthEventSubsc: "+err.Error(),
 				http.StatusInternalServerError)
-			return
 		}
+		setLocURL = true
 	} else if eventSubscResp.evsNotif != nil {
 		respBody, err = json.Marshal(eventSubscResp.evsNotif)
 		if err != nil {
-			logPolicyRespErr(&w, "Json marshal error (evsNotif)"+
+			logPolicyRespErr(w, "Json marshal error (evsNotif)"+
 				" in PolicyAuthEventSubsc: "+err.Error(),
 				http.StatusInternalServerError)
-			return
 		}
+		setLocURL = true
 	} else if eventSubscResp.probDetails != nil {
 		respBody, err = json.Marshal(eventSubscResp.probDetails)
 		if err != nil {
-			logPolicyRespErr(&w, "Json marshal error (probDetails)"+
+			logPolicyRespErr(w, "Json marshal error (probDetails)"+
 				" in PolicyAuthEventSubsc: "+err.Error(),
 				http.StatusInternalServerError)
-			return
 		}
+		setLocURL = false
 	} else {
-		w.WriteHeader(httpResp.StatusCode)
+		(*w).WriteHeader(httpResp.StatusCode)
 		return
 	}
 
-	_, err = w.Write(respBody)
+	if setLocURL {
+		uri := locationPrefixURI
+		if url, err = httpResp.Location(); err != nil {
+			logPolicyRespErr(w, "PolicyAuthEventSubsc: "+
+				err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		res := strings.Split(url.String(), "app-sessions")
+		uri += res[1]
+
+		(*w).Header().Set("Location", uri)
+	}
+
+	_, err = (*w).Write(respBody)
 	if err != nil {
 		log.Errf("Response write error in " +
 			"PolicyAuthEvemtSubsc: " + err.Error())
 	}
 
-	w.WriteHeader(httpResp.StatusCode)
+	(*w).WriteHeader(httpResp.StatusCode)
 }
 
 // PolicyAuthEventSubsc Event susbscription request handler
@@ -93,7 +111,7 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	eventSubscReq.NotifURI = afCtx.cfg.CliPcfCfg.PolicyAuthNotifURI
+	eventSubscReq.NotifURI = afCtx.cfg.CliPcfCfg.NotifURI
 	appSessionID := getAppSessionID(r)
 
 	apiClient := afCtx.cfg.policyAuthAPIClient
@@ -110,28 +128,29 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if httpResp != nil {
-			logPolicyRespErr(&w, "Create Policy App Session: "+
+			logPolicyRespErr(&w, "PolicyAuthAppEventSubs: "+
 				err.Error(), httpResp.StatusCode)
 		} else {
-			logPolicyRespErr(&w, "Create Policy App Session: "+
+			logPolicyRespErr(&w, "PolicyAuthAppEventSubs: "+
 				err.Error(), http.StatusInternalServerError)
 		}
 		return
 	}
 
-	handleEventSubscResp(w, eventSubscResp, httpResp)
+	handleEventSubscResp(&w, apiClient.locationPrefixURI, eventSubscResp,
+		httpResp)
 }
 
 // PolicyAuthEventDelete Event delete request handler
 func PolicyAuthEventDelete(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err             error
-		httpResp        *http.Response
-		probDetails     *ProblemDetails
-		probDetailsJSON []byte
+		err         error
+		httpResp    *http.Response
+		probDetails *ProblemDetails
 	)
 
+	funcName := "PolicyAuthEventDelete: "
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	if afCtx == nil {
 		logPolicyRespErr(&w, "nil afCtx in PolicyAuthAppEventDelete",
@@ -158,32 +177,8 @@ func PolicyAuthEventDelete(w http.ResponseWriter, r *http.Request) {
 		apiClient.PolicyAuthEventSubsAPI.DeleteEventsSubsc(cliCtx,
 			appSessionID)
 
-	if err != nil {
-		if httpResp != nil {
-			logPolicyRespErr(&w, "Policy auth event delete: "+
-				err.Error(), httpResp.StatusCode)
-		} else {
-			logPolicyRespErr(&w, "Policy auth event delete: "+
-				err.Error(), http.StatusInternalServerError)
-		}
-		return
-	}
-
-	if probDetails != nil {
-		probDetailsJSON, err = json.Marshal(probDetails)
-		if err != nil {
-			logPolicyRespErr(&w, "Json marshal error (probDetials)"+
-				" in PolicyAuthEventDelete: "+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
-
-		w.WriteHeader(httpResp.StatusCode)
-		_, err = w.Write(probDetailsJSON)
-		if err != nil {
-			log.Errf("Response write error in " +
-				" in PolicyAuthEventDelete: " + err.Error())
-		}
+	if err != nil || probDetails != nil {
+		handlePAErrorResp(probDetails, err, &w, httpResp, funcName)
 		return
 	}
 
