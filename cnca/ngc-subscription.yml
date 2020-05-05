@@ -1,0 +1,30 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019 Intel Corporation
+
+---
+apiVersion: v1
+kind: ngc
+policy:
+  afServiceId: 'afService001'
+  afAppId: app001
+  afTransId: ''
+  appReloInd: false
+  dnn: edgeLocation001
+  snssai:
+    sst: 0
+    sd: default
+  anyUeInd: false
+  gpsi: ''
+  ipv4Addr: 127.0.0.1
+  ipv6Addr: ''
+  macAddr: ''
+  requestTestNotification: true
+  websockNotifConfig:
+    websocketUri: ''
+    requestWebsocketUri: true
+  trafficRoutes:
+  - dnai: edgeLocation001
+    routeInfo:
+      ipv4Addr: ''
+      ipv6Addr: ''
+    routeProfId: default
