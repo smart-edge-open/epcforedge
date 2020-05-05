@@ -21,22 +21,24 @@ import (
 
 // PcfClient is an implementation of the Pcf Authorization
 type PcfClient struct {
-	Pcf        string
-	HTTPClient *http.Client
-	PcfRootURI string
-	PcfURI     string
+	Pcfcfg            *PcfPolicyAuthorizationConfig
+	HTTPClient        *http.Client
+	OAuth2Token       string
+	RootURI           string
+	LocationPrefixURI string
+	UserAgent         string
 }
 
-//NewPCFPolicyAuthHTTPClient creates a new PCF Client
-func NewPCFPolicyAuthHTTPClient(cfg *Config) *PcfClient {
+const pdContentType string = "application/problem+json"
 
-	c := &PcfClient{}
-	c.Pcf = "PCF PA Client"
+//HTTPclient creates a new HTTP Client
+func genHTTPClient(cfg *Config) *http.Client {
 
-	c.HTTPClient = &http.Client{
+	HTTPClient := &http.Client{
 		Timeout: 15 * time.Second,
 	}
-	if cfg.PcfPolicyAuthorizationConfig.Scheme == "https" {
+
+	if cfg.PcfPolicyAuthorizationConfig.Protocol == "https" {
 		CACert, err1 := ioutil.ReadFile(cfg.PcfPolicyAuthorizationConfig.ClientCert)
 		if err1 != nil {
 			fmt.Printf("NEF Certification loading Error: %v", err1)
@@ -47,7 +49,7 @@ func NewPCFPolicyAuthHTTPClient(cfg *Config) *PcfClient {
 		caCertPool := x509.NewCertPool()
 		caCertPool.AppendCertsFromPEM(CACert)
 		var tlsConfig *tls.Config
-		if cfg.PcfPolicyAuthorizationConfig.InsecureSkipVerify == true {
+		if !cfg.PcfPolicyAuthorizationConfig.VerifyCerts {
 			tlsConfig = &tls.Config{
 				InsecureSkipVerify: true,
 			}
@@ -58,20 +60,37 @@ func NewPCFPolicyAuthHTTPClient(cfg *Config) *PcfClient {
 			}
 
 		}
-
-		c.HTTPClient.Transport = &http2.Transport{
+		HTTPClient.Transport = &http.Transport{
 			TLSClientConfig: tlsConfig,
 		}
+		if cfg.PcfPolicyAuthorizationConfig.ProtocolVer == "2.0" {
+
+			HTTPClient.Transport = &http2.Transport{
+				TLSClientConfig: tlsConfig,
+			}
+		}
+
 	}
+	return HTTPClient
+}
 
-	c.PcfRootURI = cfg.PcfPolicyAuthorizationConfig.Scheme + "://" + cfg.PcfPolicyAuthorizationConfig.APIRoot
-	c.PcfURI = cfg.PcfPolicyAuthorizationConfig.URI
+//NewPCFPolicyAuthHTTPClient creates a new PCF Client
+func NewPCFPolicyAuthHTTPClient(cfg *Config) *PcfClient {
 
+	c := &PcfClient{}
+
+	c.HTTPClient = genHTTPClient(cfg)
+	c.Pcfcfg = cfg.PcfPolicyAuthorizationConfig
+	base := cfg.PcfPolicyAuthorizationConfig.Protocol + "://" + cfg.PcfPolicyAuthorizationConfig.Hostname + ":"
+	c.RootURI = base + cfg.PcfPolicyAuthorizationConfig.Port
+	c.LocationPrefixURI = cfg.PcfPolicyAuthorizationConfig.LocationPrefixURI
+	c.UserAgent = cfg.UserAgent
 	log.Infoln("PCF Client created with the following configuration:")
-	log.Infoln("Scheme: ", cfg.PcfPolicyAuthorizationConfig.Scheme)
-	log.Infoln("ApiRoot: ", cfg.PcfPolicyAuthorizationConfig.APIRoot)
-	log.Infoln("Uri: ", cfg.PcfPolicyAuthorizationConfig.URI)
-	log.Infoln("InsecureSkipVerify: ", cfg.PcfPolicyAuthorizationConfig.InsecureSkipVerify)
+	log.Infoln("Protocol: ", cfg.PcfPolicyAuthorizationConfig.Protocol)
+	log.Infoln("Version: ", cfg.PcfPolicyAuthorizationConfig.ProtocolVer)
+	log.Infoln("OAuth2Support: ", cfg.PcfPolicyAuthorizationConfig.OAuth2Support)
+	log.Infoln("TLSVerify: ", cfg.PcfPolicyAuthorizationConfig.VerifyCerts)
+	log.Infoln("Resource URI: ", c.RootURI+c.LocationPrefixURI)
 	return c
 }
 
@@ -84,7 +103,7 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 	_ = ctx
 
 	pcfPr := PcfPolicyResponse{}
-	apiURL := pcf.PcfRootURI + pcf.PcfURI
+	apiURL := pcf.RootURI + pcf.LocationPrefixURI
 	var appsesid string
 	var req *http.Request
 	var res *http.Response
@@ -93,39 +112,44 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 	var problemDetails ProblemDetails
 	appSessionID := AppSessionID("")
 	var resbody []byte
-	log.Infof("Triggering PCF /* POST */ :" + apiURL)
+	log.Infof("Triggering PCF Policy Authorization POST :" + apiURL)
 
 	postbody, err := json.Marshal(body)
 	if err != nil {
-		fmt.Printf("Failed go error in marshalling POST body error:%s", err)
+		fmt.Printf("Failed marshaling POST body :%s", err)
 		goto END
 
 	}
 	req, err = http.NewRequest("POST", apiURL, bytes.NewBuffer(postbody))
 	// Add user-agent header and content-type header
-	req.Header.Set("User-Agent", "NEF-OPENNESS-2006")
+	req.Header.Set("User-Agent", pcf.UserAgent)
 	req.Header.Set("Content-Type", "application/json")
 	req = req.WithContext(ctx)
 	if err != nil {
-		fmt.Printf("Failed go error in creating POST request:%s", err)
+		fmt.Printf("Failed creating POST request:%s", err)
 		goto END
 	}
 	res, err = pcf.HTTPClient.Do(req)
 	if err != nil {
-		fmt.Printf("Failed go error in receiving POST response:%s", err)
+		fmt.Printf("Failed receiving POST response:%s", err)
 		goto END
 	}
 
 	log.Infof("Body in the response =>")
 	resbody, err = ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Printf("Failed go error in reading POST response body:%s", err)
+		fmt.Printf("Failed reading POST response body:%s", err)
 		goto END
 
 	}
 	log.Infof(string(resbody))
 
-	defer res.Body.Close()
+	defer func() {
+		err = res.Body.Close()
+		if err != nil {
+			log.Errf("response body was not closed properly")
+		}
+	}()
 
 	if res.StatusCode == 201 {
 		appsesid = res.Header.Get("Location")
@@ -134,7 +158,7 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 		appSessionContext = AppSessionContext{}
 		err = json.Unmarshal(resbody, &appSessionContext)
 		if err != nil {
-			fmt.Printf("Failed go error in unmarshalling POST response body:%s", err)
+			fmt.Printf("Failed unmarshaling POST response body:%s", err)
 			goto END
 		}
 		pcfPr.ResponseCode = uint16(res.StatusCode)
@@ -144,10 +168,10 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 	} else {
 		problemDetails = ProblemDetails{}
 		contentType := res.Header.Get("Content-type")
-		if contentType == "application/problem+json" {
+		if contentType == pdContentType {
 			e := json.Unmarshal(resbody, &problemDetails)
 			if e != nil {
-				fmt.Printf("Failed go error in unmarshalling POST response body:%s", e)
+				fmt.Printf("Failed unmarshaling POST response body:%s", e)
 				goto END
 			}
 		}
@@ -174,7 +198,7 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 	_ = ctx
 
 	pcfPr := PcfPolicyResponse{}
-	apiURL := pcf.PcfRootURI + pcf.PcfURI
+	apiURL := pcf.RootURI + pcf.LocationPrefixURI
 	var req *http.Request
 	var res *http.Response
 	var resbody []byte
@@ -183,43 +207,48 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 	sessid := string(appSessionID)
 	b, err := json.Marshal(body)
 	if err != nil {
-		fmt.Printf("Failed go error in marshalling PATCH body error:%s", err)
+		fmt.Printf("Failed marshaling PATCH body:%s", err)
 		goto END
 	}
 	fmt.Println(sessid)
-	log.Infof("Triggering PCF /* PATCH */ :" + apiURL + sessid)
+	log.Infof("Triggering PCF Policy Authorization PATCH :" + apiURL + sessid)
 	req, err = http.NewRequest("PATCH", apiURL+sessid, bytes.NewBuffer(b))
-	req.Header.Set("User-Agent", "NEF-OPENNESS-2006")
+	req.Header.Set("User-Agent", pcf.UserAgent)
 	req.Header.Set("Content-Type", "application/merge-patch+json")
 	req = req.WithContext(ctx)
 	if err != nil {
-		fmt.Printf("Failed go error in creating PATCH request:%s", err)
+		fmt.Printf("Failed creating PATCH request:%s", err)
 		goto END
 	}
 	res, err = pcf.HTTPClient.Do(req)
 
 	if err != nil {
-		fmt.Printf("Failed go error in receiving PATCH response:%s", err)
+		fmt.Printf("Failed receiving PATCH response:%s", err)
 		goto END
 	}
 
 	log.Infof("Body in the response =>")
 	resbody, err = ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Printf("Failed go error in reading PATCH response body:%s", err)
+		fmt.Printf("Failed reading PATCH response body:%s", err)
 		goto END
 
 	}
 	log.Infof(string(resbody))
 
 	appSessionID = AppSessionID(sessid)
-	defer res.Body.Close()
+	defer func() {
+		err = res.Body.Close()
+		if err != nil {
+			log.Errf("response body was not closed properly")
+		}
+	}()
 
 	if res.StatusCode == 200 {
 		appSessionContext = AppSessionContext{}
 		err = json.Unmarshal(resbody, &appSessionContext)
 		if err != nil {
-			fmt.Printf("Failed go error in unmarshalling PATCH response body:%s", err)
+			fmt.Printf("Failed unmarshaling PATCH response body:%s", err)
 			goto END
 		}
 		log.Infof("PCFs PolicyAuthorizationUpdate AppSessionID %s updated",
@@ -231,10 +260,10 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 	} else {
 		problemDetails = ProblemDetails{}
 		contentType := res.Header.Get("Content-type")
-		if contentType == "application/problem+json" {
+		if contentType == pdContentType {
 			err = json.Unmarshal(resbody, &problemDetails)
 			if err != nil {
-				fmt.Printf("Failed go error in unmarshalling PATCH response body:%s", err)
+				fmt.Printf("Failed unmarshaling PATCH response body:%s", err)
 				goto END
 			}
 		}
@@ -267,22 +296,22 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 	var req *http.Request
 	var res *http.Response
 	var resbody []byte
-	apiURL := pcf.PcfRootURI + pcf.PcfURI + sessid + "/delete"
-
 	var err error
-	log.Infof("Triggering PCF /* DELETE */ : " + apiURL)
+	apiURL := pcf.RootURI + pcf.LocationPrefixURI + sessid + "/delete"
+
+	log.Infof("Triggering PCF Policy Authorization Delete :" + apiURL)
 	req, err = http.NewRequest("POST", apiURL, nil)
-	req.Header.Set("User-Agent", "NEF-OPENNESS-2006")
+	req.Header.Set("User-Agent", pcf.UserAgent)
 	req.Header.Set("Content-Type", "application/json")
 	req = req.WithContext(ctx)
 	if err != nil {
-		fmt.Printf("Failed go error in creating DELETE request:%s", err)
+		fmt.Printf("Failed creating DELETE request:%s", err)
 		goto END
 	}
 	res, err = pcf.HTTPClient.Do(req)
 
 	if err != nil {
-		fmt.Printf("Failed go error in receiving DELETE response:%s", err)
+		fmt.Printf("Failed receiving DELETE response:%s", err)
 		goto END
 	}
 
@@ -296,11 +325,16 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 		log.Infof("Body in the response =>")
 		resbody, err = ioutil.ReadAll(res.Body)
 		if err != nil {
-			fmt.Printf("Failed go error in reading DELETE response body:%s", err)
+			fmt.Printf("Failed reading DELETE response body:%s", err)
 			goto END
 
 		}
-		defer res.Body.Close()
+		defer func() {
+			err = res.Body.Close()
+			if err != nil {
+				log.Errf("response body was not closed properly")
+			}
+		}()
 		log.Infof(string(resbody))
 		/* err = json.Unmarshal(body, &eventnoti)
 		if err != nil {
@@ -330,7 +364,7 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 		string(appSessionID))
 	_ = ctx
 
-	apiURL := pcf.PcfRootURI + pcf.PcfURI
+	apiURL := pcf.RootURI + pcf.LocationPrefixURI
 	pcfPr := PcfPolicyResponse{}
 	sessid := string(appSessionID)
 	var res *http.Response
@@ -339,37 +373,43 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 	var problemDetails ProblemDetails
 	var err error
 	var resbody []byte
-	log.Infof("Triggering PCF /* GET */ : " + apiURL + sessid)
+	log.Infof("Triggering PCF Policy Authorization GET : " + apiURL + sessid)
 	req, err = http.NewRequest("GET", apiURL+sessid, nil)
 	if err != nil {
-		fmt.Printf("Failed go error in creating GET request:%s", err)
+		fmt.Printf("Failed creating GET request:%s", err)
 		goto END
 
 	}
-	req.Header.Set("User-Agent", "NEF-OPENNESS-2006")
+	req.Header.Set("User-Agent", pcf.UserAgent)
 	req.Header.Set("Content-Type", "application/json")
 	req = req.WithContext(ctx)
 	res, err = pcf.HTTPClient.Do(req)
 	if err != nil {
-		fmt.Printf("Failed go error in creating GET response:%s", err)
+		fmt.Printf("Failed creating GET response:%s", err)
 		goto END
 
 	}
 	log.Infof("Body in the response =>")
 	resbody, err = ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Printf("Failed go error in reading GET response body:%s", err)
+		fmt.Printf("Failed reading GET response body:%s", err)
 		goto END
 
 	}
 	log.Infof(string(resbody))
-	defer res.Body.Close()
+	defer func() {
+		err = res.Body.Close()
+		if err != nil {
+			log.Errf("response body was not closed properly")
+
+		}
+	}()
 
 	if res.StatusCode == 200 {
 		appSessionContext = AppSessionContext{}
 		err = json.Unmarshal(resbody, &appSessionContext)
 		if err != nil {
-			fmt.Printf("Failed go error in unmarshalling POST response body:%s", err)
+			fmt.Printf("Failed unmarshaling POST response body:%s", err)
 			goto END
 		}
 		log.Infof("PCFs PolicyAuthorizationGet AppSessionID %s found",
@@ -381,10 +421,10 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 	} else {
 		problemDetails = ProblemDetails{}
 		contentType := res.Header.Get("Content-type")
-		if contentType == "application/problem+json" {
+		if contentType == pdContentType {
 			err = json.Unmarshal(resbody, &problemDetails)
 			if err != nil {
-				fmt.Printf("Failed go error in unmarshalling POST response body:%s", err)
+				fmt.Printf("Failed unmarshaling POST response body:%s", err)
 				goto END
 			}
 		}
