@@ -68,7 +68,7 @@ func (c *PolicyAuthAPIClient) callAPI(request *http.Request) (
 func getLocationPrefixURI(srvCfg *ServerConfig, cfg *GenericCliConfig) (
 	string, error) {
 
-	uri := srvCfg.Hostname + srvCfg.CNCAEndpoint +
+	uri := "https://" + srvCfg.Hostname + srvCfg.CNCAEndpoint +
 		cfg.LocationPrefixURI
 	return uri, nil
 }
@@ -274,6 +274,7 @@ func validatePAAuthToken(a *PolicyAuthAPIClient) {
 func genHTTPClient(cfg *GenericCliConfig) (*http.Client, error) {
 
 	if cfg.Protocol == "https" {
+		var tlsCfg *tls.Config
 		CACert, err := ioutil.ReadFile(cfg.CliCertPath)
 		if err != nil {
 			log.Errf("Error: %v", err)
@@ -283,7 +284,12 @@ func genHTTPClient(cfg *GenericCliConfig) (*http.Client, error) {
 		CACertPool := x509.NewCertPool()
 		CACertPool.AppendCertsFromPEM(CACert)
 
-		var tlsCfg *tls.Config
+		tlsCfg = &tls.Config{
+			RootCAs: CACertPool,
+		}
+		// Below commented code is for Debug purpose only. Uncomment it
+		// to enable skipping certificate verification.
+		/* ------Linter warning disable------
 		if cfg.VerifyCerts {
 			tlsCfg = &tls.Config{
 				RootCAs: CACertPool,
@@ -293,6 +299,7 @@ func genHTTPClient(cfg *GenericCliConfig) (*http.Client, error) {
 				InsecureSkipVerify: true,
 			}
 		}
+		*/
 
 		switch cfg.ProtocolVer {
 		case "1.1":

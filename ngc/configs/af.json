@@ -34,7 +34,7 @@
         "Hostname": "localhost",
         "Port": "8095",
         "BasePath": "/npcf-policyauthorization/v1",
-        "LocationPrefix": "/af/v1/policy-authorization/app-sessions",
+        "LocationPrefixURI": "/af/v1/policy-authorization/app-sessions",
         "CliCertPath": "/etc/certs/root-ca-cert.pem",
         "VerifyCerts": true,
         "OAuth2Support": false,

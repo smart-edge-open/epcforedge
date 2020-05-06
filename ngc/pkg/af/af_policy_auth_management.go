@@ -122,7 +122,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := strings.Split(url.String(), "app-sessions")
+	res := strings.Split(url.String(), "v1")
 	uri += res[1]
 
 	w.Header().Set("Location", uri)

@@ -118,6 +118,20 @@ AF configurable parameters list:
 | NEFPFDBasePath      | URL used by AF to access NEF PFD management                                         |
 | OAuth2Support       | OAuth2 support in AF                                                                |
 
+AF configurable parameters list for Policy Authorization (Indicated by CliPaConfig):
+
+| Param               | Description                                                                         |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| Protocol            | Protocol used between AF and PCF (http/https)                                       |
+| ProtocolVer         | HTTP/s Protocol version (1.1/2.0)                                                   |
+| Hostname            | PCF Hostname used by AF                                                             |
+| Port                | PCF Port number to which AF sends request                                           |
+| BasePath            | URL used by AF to access PCF for Policy authorization                               |
+| LocationPrefixURI   | The API prefix for Policy Authorization                                             |
+| CliCertPath         | Path for certificates to be used by AF client to communicate with PCF               |
+| OAuth2Support       | OAuth2 authorization support between AF and PCF                                     |
+| NotifURI            | Notification URL to which AF will recieve notifications from PCF                    |
+
 To run af, just execute as below:
 ```sh
 ./af
