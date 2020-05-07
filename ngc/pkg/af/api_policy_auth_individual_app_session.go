@@ -19,6 +19,18 @@ var (
 // PolicyAuthIndividualAppSessAPIService PolicyAuthService type
 type PolicyAuthIndividualAppSessAPIService policyAuthService
 
+func handleApSessDeleteErrResp(v *ProblemDetails,
+	respBody []byte) error {
+
+	err := json.Unmarshal(respBody, v)
+	if err != nil {
+		log.Errf("Error in unmarshalling response body, " +
+			"DeleteAppSession: " + err.Error())
+		return err
+	}
+	return nil
+}
+
 // DeleteAppSession API handler
 /*
  * DeleteAppSession Deletes an existing Individual Application Session Context
@@ -79,7 +91,8 @@ func (a *PolicyAuthIndividualAppSessAPIService) DeleteAppSession(
 		return retVal, nil, httpResponse, err
 	}
 
-	if httpResponse.StatusCode == 200 {
+	switch httpResponse.StatusCode {
+	case 200:
 		err = json.Unmarshal(respBody, &retVal)
 		if err != nil {
 			log.Errf("Error in unmarshalling json, " +
@@ -87,21 +100,14 @@ func (a *PolicyAuthIndividualAppSessAPIService) DeleteAppSession(
 			httpResponse.StatusCode = 500
 		}
 		return retVal, nil, httpResponse, err
-	}
-
-	switch httpResponse.StatusCode {
+	case 204:
+		return retVal, nil, httpResponse, err
 	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
 		if httpResponse.StatusCode == 401 {
 			validatePAAuthToken(a.client)
 		}
 		var v *ProblemDetails = new(ProblemDetails)
-		err = json.Unmarshal(respBody, v)
-		if err != nil {
-			log.Errf("Error in unmarshalling response body, " +
-				"DeleteAppSession: " + err.Error())
-			httpResponse.StatusCode = 500
-			return retVal, nil, httpResponse, err
-		}
+		err = handleApSessDeleteErrResp(v, respBody)
 		return retVal, v, httpResponse, err
 	}
 
@@ -178,7 +184,6 @@ func (a *PolicyAuthIndividualAppSessAPIService) GetAppSession(
 		if err != nil {
 			log.Errf("Error in unmarshalling response body, " +
 				"GetAppSession: " + err.Error())
-			httpResponse.StatusCode = 500
 			return retVal, nil, httpResponse, err
 		}
 		return retVal, v, httpResponse, err
@@ -261,7 +266,6 @@ func (a *PolicyAuthIndividualAppSessAPIService) ModAppSession(
 		if err != nil {
 			log.Errf("Error in unmarshalling response body, " +
 				"ModAppSession: " + err.Error())
-			httpResponse.StatusCode = 500
 			return retVal, nil, httpResponse, err
 		}
 		return retVal, v, httpResponse, err

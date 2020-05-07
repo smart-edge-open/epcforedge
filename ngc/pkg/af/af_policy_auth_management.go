@@ -122,8 +122,12 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := strings.Split(url.String(), "v1")
-	uri += res[1]
+	res := strings.Split(url.String(), "app-sessions")
+	if len(res) == 2 {
+		uri += res[1]
+	} else {
+		log.Errf("Location header returned from PCF is INCORRECT")
+	}
 
 	w.Header().Set("Location", uri)
 	w.WriteHeader(httpResp.StatusCode)
@@ -158,6 +162,7 @@ func handlePAErrorResp(probDetails *ProblemDetails, err error,
 				http.StatusInternalServerError)
 			return
 		}
+		log.Infoln(w)
 		_, err = (*w).Write(probDetailsJSON)
 		if err != nil {
 			log.Errf("Response write error in " + funcName +
@@ -234,6 +239,11 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(httpResp.StatusCode)
+	if httpResp.StatusCode == 204 {
+		return
+	}
+
 	appSessJSON, err := json.Marshal(appSessResp)
 	if err != nil {
 		logPolicyRespErr(&w, "Json marshal error in "+
@@ -242,7 +252,6 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(httpResp.StatusCode)
 	_, err = w.Write(appSessJSON)
 	if err != nil {
 		log.Errf("Response write error in DeletePolicyAuthAppSessions")

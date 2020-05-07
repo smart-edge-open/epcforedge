@@ -90,7 +90,6 @@ func (a *PolicyAuthAppSessionAPIService) PostAppSessions(ctx _context.Context,
 		if err != nil {
 			log.Errf("Error in unmarshalling response body, " +
 				"PostAppSession: " + err.Error())
-			httpResponse.StatusCode = 500
 			return retVal, nil, httpResponse, err
 		}
 		return retVal, v, httpResponse, err

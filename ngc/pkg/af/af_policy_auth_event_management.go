@@ -23,10 +23,9 @@ func handleEventSubscResp(w *http.ResponseWriter, locationPrefixURI string,
 	eventSubscResp EventSubscResponse, httpResp *http.Response) {
 
 	var (
-		respBody  []byte
-		err       error
-		setLocURL bool
-		url       *url.URL
+		respBody []byte
+		err      error
+		url      *url.URL
 	)
 
 	if eventSubscResp.eventSubscReq != nil {
@@ -36,7 +35,6 @@ func handleEventSubscResp(w *http.ResponseWriter, locationPrefixURI string,
 				" in PolicyAuthEventSubsc: "+err.Error(),
 				http.StatusInternalServerError)
 		}
-		setLocURL = true
 	} else if eventSubscResp.evsNotif != nil {
 		respBody, err = json.Marshal(eventSubscResp.evsNotif)
 		if err != nil {
@@ -44,7 +42,6 @@ func handleEventSubscResp(w *http.ResponseWriter, locationPrefixURI string,
 				" in PolicyAuthEventSubsc: "+err.Error(),
 				http.StatusInternalServerError)
 		}
-		setLocURL = true
 	} else if eventSubscResp.probDetails != nil {
 		respBody, err = json.Marshal(eventSubscResp.probDetails)
 		if err != nil {
@@ -52,30 +49,33 @@ func handleEventSubscResp(w *http.ResponseWriter, locationPrefixURI string,
 				" in PolicyAuthEventSubsc: "+err.Error(),
 				http.StatusInternalServerError)
 		}
-		setLocURL = false
 	} else {
 		(*w).WriteHeader(httpResp.StatusCode)
 		return
-	}
-
-	if setLocURL {
-		uri := locationPrefixURI
-		if url, err = httpResp.Location(); err != nil {
-			logPolicyRespErr(w, "PolicyAuthEventSubsc: "+
-				err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		res := strings.Split(url.String(), "app-sessions")
-		uri += res[1]
-
-		(*w).Header().Set("Location", uri)
 	}
 
 	_, err = (*w).Write(respBody)
 	if err != nil {
 		log.Errf("Response write error in " +
 			"PolicyAuthEvemtSubsc: " + err.Error())
+	}
+
+	if httpResp.StatusCode == 201 {
+		uri := locationPrefixURI
+		if url, err = httpResp.Location(); err != nil {
+			logPolicyRespErr(w, "PolicyAuthEventSubsc: "+
+				err.Error(), httpResp.StatusCode)
+			return
+		}
+
+		res := strings.Split(url.String(), "app-sessions")
+		if len(res) == 2 {
+			uri += res[1]
+		} else {
+			log.Errf("Location URI from PCF is INCORRECT")
+		}
+
+		(*w).Header().Set("Location", uri)
 	}
 
 	(*w).WriteHeader(httpResp.StatusCode)
