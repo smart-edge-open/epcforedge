@@ -272,6 +272,9 @@ type AppSessionContextReqData struct {
 	UeIpv4   IPv4Addr `json:"ueIpv4,omitempty"`
 	UeIpv6   IPv6Addr `json:"ueIpv6,omitempty"`
 	UeMac    MacAddr  `json:"ueMac,omitempty"`
+	// This parameter is present only if websocket delivery of notification
+	// is requested by consumer for events
+	AfwebsockNotifConfig *AfwebsockNotifConfig `json:"afwebsockNotifConfig,omitempty"`
 }
 
 // AppSessionContextRespData struct
@@ -322,9 +325,13 @@ type AppSessionContextUpdateData struct {
 	// Contains an identity of a sponsor.
 	SponID     string           `json:"sponId,omitempty"`
 	SponStatus SponsoringStatus `json:"sponStatus,omitempty"`
+	// This parameter is present only if websocket delivery of notification
+	// is requested by consumer for events
+	AfwebsockNotifConfig *AfwebsockNotifConfig `json:"afwebsockNotifConfig,omitempty"`
 }
 
-// AppSessionContext Represents an Individual Application Session Context resource.
+// AppSessionContext Represents an Individual Application Session
+// Context resource
 type AppSessionContext struct {
 	AscReqData  *AppSessionContextReqData  `json:"ascReqData,omitempty"`
 	AscRespData *AppSessionContextRespData `json:"ascRespData,omitempty"`
@@ -484,12 +491,12 @@ type TerminationInfo struct {
 // UpPathChgEvent struct
 type UpPathChgEvent struct {
 	// string providing an URI formatted according to IETF RFC 3986.
-	NotificationURI string `json:"notificationUri"`
+	NotificationURI string `json:"notificationUri,omitempty"`
 	/*
 	 * It is used to set the value of Notification Correlation ID in the
 	 * notification sent by the SMF.
 	 */
-	NotifCorreID string         `json:"notifCorreId"`
+	NotifCorreID string         `json:"notifCorreId,omitempty"`
 	DnaiChgType  DNAIChangeType `json:"dnaiChgType"`
 }
 
