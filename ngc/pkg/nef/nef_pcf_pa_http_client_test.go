@@ -85,7 +85,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}, nil
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			appid, pcr, err1 := pcfc.PolicyAuthorizationCreate(ctx, ascreq)
 			Expect(err1).ShouldNot(HaveOccurred())
 			Expect(string(appid)).To(Equal("1234test"))
@@ -121,7 +122,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}, nil
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ascreq, ngcnef.AppSessionID("test1234"))
 			Expect(err1).ShouldNot(HaveOccurred())
 
@@ -147,7 +149,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}, nil
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			pcr, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).ShouldNot(HaveOccurred())
 
@@ -168,7 +171,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}, nil
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).ShouldNot(HaveOccurred())
 
@@ -205,7 +209,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}, nil
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			appid, pcr, err1 := pcfc.PolicyAuthorizationCreate(ctx, ascreq)
 			Expect(err1).Should(HaveOccurred())
 			Expect(string(appid)).To(Equal(""))
@@ -242,7 +247,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}, nil
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ascreq, ngcnef.AppSessionID("test1234"))
 			Expect(err1).Should(HaveOccurred())
 			Expect(pcr.Pd).ToNot(Equal(nil))
@@ -270,7 +276,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}, nil
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			pcr, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).Should(HaveOccurred())
 			Expect(pcr.Pd).ToNot(Equal(nil))
@@ -290,7 +297,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}, nil
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).Should(HaveOccurred())
 
@@ -305,7 +313,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					return nil, err
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			_, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).Should(HaveOccurred())
 
@@ -318,7 +327,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					return nil, err
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			_, _, err1 := pcfc.PolicyAuthorizationCreate(ctx, ngcnef.AppSessionContext{})
 			Expect(err1).Should(HaveOccurred())
 
@@ -331,7 +341,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					return nil, err
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			appid := ngcnef.AppSessionID("")
 			_, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ngcnef.AppSessionContextUpdateData{}, appid)
 			Expect(err1).Should(HaveOccurred())
@@ -345,7 +356,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					return nil, err
 				})
 
-			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507", LocationPrefixURI: "/npcf-policyauthorization/v1/app-sessions/"}
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
 			_, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).Should(HaveOccurred())
 
