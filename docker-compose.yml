@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2019-2020 Intel Corporation
+
+version: "3.4"
+
+services:
+  cups-ui:
+    image: cups:latest
+    read_only: true
+    build:
+      context: ../epcforedge/ui/cups
+      args:
+        REACT_APP_CUPS_API: "${REACT_APP_CUPS_API}"
+        LANDING_UI_URL: "${LANDING_UI_URL}"
+    ports:
+      - 3010:80/tcp
+    environment:
+      REACT_APP_CUPS_API: "${REACT_APP_CUPS_API}"
+      LANDING_UI_URL: "${LANDING_UI_URL}"
+  cnca-ui:
+    image: cnca:latest
+    build:
+      context: ../epcforedge/ui/cnca
+      args:
+        REACT_APP_CNCA_AF_API: "${REACT_APP_CNCA_AF_API}"
+        REACT_APP_CNCA_5GOAM_API: "${REACT_APP_CNCA_5GOAM_API}"
+        LANDING_UI_URL: "${LANDING_UI_URL}"
+    ports:
+      - 3020:80/tcp
+    environment:
+      REACT_APP_CNCA_AF_API: "${REACT_APP_CNCA_AF_API}"
+      REACT_APP_CNCA_5GOAM_API: "${REACT_APP_CNCA_5GOAM_API}"
+      LANDING_UI_URL: "${LANDING_UI_URL}"
