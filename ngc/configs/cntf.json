@@ -1,6 +1,6 @@
 {
     "CNTFAPIRoot": "localhost",
-    "LocationPrefix": "/npcf-policyauthorization/v1/",
+    "LocationPrefix": "/npcf-policyauthorization/v1/app-sessions/",
     "MaxASCSupport": 10,
     "HTTPConfig": {
         "Endpoint": ":8096"

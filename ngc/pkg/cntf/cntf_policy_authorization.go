@@ -297,6 +297,8 @@ func PolicyAuthorizationAppSessionSubscribe(w http.ResponseWriter,
 			}
 
 			w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+			loc := NgcData.paData.locPrefix + ascID + "/" + "events-subscription"
+			w.Header().Set("Location", loc)
 
 			w.WriteHeader(http.StatusCreated)
 
@@ -306,6 +308,7 @@ func PolicyAuthorizationAppSessionSubscribe(w http.ResponseWriter,
 				log.Errf("Write Failed: %v", err)
 				return
 			}
+
 			log.Infof("HTTP Response sent: %d", http.StatusCreated)
 			return
 		}
