@@ -6,7 +6,7 @@
 
 export GO111MODULE = on
 
-.PHONY: build af oam nef lint test-unit-af test-unit-nef test-unit-oam test-cntf
+.PHONY: build af oam nef lint test-unit-af test-unit-nef test-unit-oam test-unit-cntf
 TMP_DIR:=$(shell mktemp -d)
 BUILD_DIR ?=dist
 CERTS_DIR ?=/etc/certs
