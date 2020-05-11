@@ -8,13 +8,16 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"net/url"
 	"strconv"
-	"strings"
 	"sync/atomic"
 
 	"github.com/gorilla/mux"
 )
+
+var contentTypeJSON string = "application/json"
+
+// Notif correlId in upPatchChgEvent struct
+var notifCorreID int32 = 1
 
 func getAppSessionID(r *http.Request) string {
 	vars := mux.Vars(r)
@@ -55,11 +58,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 	var (
 		err         error
 		appSess     AppSessionContext
-		appSessResp AppSessionContext
-		httpResp    *http.Response
-		probDetails *ProblemDetails
 		appSessJSON []byte
-		url         *url.URL
 	)
 
 	funcName := "CreatePolicyAuthAppSessions: "
@@ -90,7 +89,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiClient := afCtx.cfg.policyAuthAPIClient
+	apiClient := afCtx.data.policyAuthAPIClient
 	if apiClient == nil {
 		logPolicyRespErr(&w, "nil policyAuthAPIClient in "+
 			"CreatePolicyAuthAppSessions",
@@ -98,15 +97,18 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	appSessResp, probDetails, httpResp, err =
-		apiClient.PolicyAuthAppSessionAPI.PostAppSessions(cliCtx,
-			appSess)
+	//	appSessResp, probDetails, httpResp, err =
+	apiResp, err := apiClient.PostAppSessions(cliCtx,
+		appSess)
 
+	probDetails := apiResp.probDetails
+	httpResp := apiResp.httpResp
 	if err != nil || probDetails != nil {
 		handlePAErrorResp(probDetails, err, &w, httpResp, funcName)
 		return
 	}
 
+	appSessResp := apiResp.appSessCtx
 	appSessJSON, err = json.Marshal(appSessResp)
 	if err != nil {
 		logPolicyRespErr(&w, "Json marshal error in "+
@@ -115,21 +117,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uri := apiClient.locationPrefixURI
-	if url, err = httpResp.Location(); err != nil {
-		logPolicyRespErr(&w, "CreatePolicyAuthAppSessions: "+
-			err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	res := strings.Split(url.String(), "app-sessions")
-	if len(res) == 2 {
-		uri += res[1]
-	} else {
-		log.Errf("Location header returned from PCF is INCORRECT")
-	}
-
-	w.Header().Set("Location", uri)
+	w.Header().Set("Location", apiResp.locationURI)
 	w.WriteHeader(httpResp.StatusCode)
 
 	_, err = w.Write(appSessJSON)
@@ -162,14 +150,14 @@ func handlePAErrorResp(probDetails *ProblemDetails, err error,
 				http.StatusInternalServerError)
 			return
 		}
-		log.Infoln(w)
+
+		(*w).WriteHeader(httpResp.StatusCode)
 		_, err = (*w).Write(probDetailsJSON)
 		if err != nil {
 			log.Errf("Response write error in " + funcName +
 				err.Error())
 			return
 		}
-		(*w).WriteHeader(httpResp.StatusCode)
 		return
 	}
 
@@ -196,9 +184,7 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	var (
 		err           error
 		eventSubscReq EventsSubscReqData
-		appSessResp   AppSessionContext
-		httpResp      *http.Response
-		probDetails   *ProblemDetails
+		apiResp       PcfPAResponse
 	)
 
 	funcName := "DeletePolicyAuthAppSession: "
@@ -220,7 +206,7 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiClient := afCtx.cfg.policyAuthAPIClient
+	apiClient := afCtx.data.policyAuthAPIClient
 	if apiClient == nil {
 		logPolicyRespErr(&w, "nil policyAuthAPIClient in "+
 			"DeletePolicyAuthAppSessions",
@@ -230,10 +216,11 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
 	appSessionID := getAppSessionID(r)
 
-	appSessResp, probDetails, httpResp, err =
-		apiClient.PolicyAuthIndividualAppSessAPI.
-			DeleteAppSession(cliCtx, appSessionID, &eventSubscReq)
+	apiResp, err = apiClient.DeleteAppSession(cliCtx,
+		appSessionID, &eventSubscReq)
 
+	httpResp := apiResp.httpResp
+	probDetails := apiResp.probDetails
 	if err != nil || probDetails != nil {
 		handlePAErrorResp(probDetails, err, &w, httpResp, funcName)
 		return
@@ -244,6 +231,7 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	appSessResp := apiResp.appSessCtx
 	appSessJSON, err := json.Marshal(appSessResp)
 	if err != nil {
 		logPolicyRespErr(&w, "Json marshal error in "+
@@ -263,10 +251,8 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err         error
-		appSessResp AppSessionContext
-		httpResp    *http.Response
-		probDetails *ProblemDetails
+		err     error
+		apiResp PcfPAResponse
 	)
 
 	funcName := "GetPolicyAuthAppSession: "
@@ -280,7 +266,7 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	cliCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	apiClient := afCtx.cfg.policyAuthAPIClient
+	apiClient := afCtx.data.policyAuthAPIClient
 	if apiClient == nil {
 		logPolicyRespErr(&w, "nil policyAuthAPIClient in "+
 			"GetPolicyAuthAppSessions",
@@ -291,15 +277,16 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	appSessionID := getAppSessionID(r)
 
-	appSessResp, probDetails, httpResp, err =
-		apiClient.PolicyAuthIndividualAppSessAPI.GetAppSession(cliCtx,
-			appSessionID)
+	apiResp, err = apiClient.GetAppSession(cliCtx, appSessionID)
 
+	probDetails := apiResp.probDetails
+	httpResp := apiResp.httpResp
 	if err != nil || probDetails != nil {
 		handlePAErrorResp(probDetails, err, &w, httpResp, funcName)
 		return
 	}
 
+	appSessResp := apiResp.appSessCtx
 	appSessRespJSON, err := json.Marshal(appSessResp)
 	if err != nil {
 		logPolicyRespErr(&w, "Json marshal error in "+
@@ -320,12 +307,10 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err               error
-		appSessUpdateData AppSessionContextUpdateData
-		appSessResp       AppSessionContext
-		httpResp          *http.Response
-		probDetails       *ProblemDetails
-		appSessJSON       []byte
+		err           error
+		ascUpdateData AppSessionContextUpdateData
+		appSessJSON   []byte
+		apiResp       PcfPAResponse
 	)
 
 	funcName := "ModifyPolicyAuthAppSession: "
@@ -341,7 +326,7 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	err = json.NewDecoder(r.Body).Decode(&appSessUpdateData)
+	err = json.NewDecoder(r.Body).Decode(&ascUpdateData)
 	if err != nil {
 		log.Errf("Policy auth app sess create error in json decode %s",
 			err.Error())
@@ -349,12 +334,12 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if appSessUpdateData.EvSubsc != nil {
-		appSessUpdateData.EvSubsc.NotifURI = afCtx.cfg.CliPcfCfg.
+	if ascUpdateData.EvSubsc != nil {
+		ascUpdateData.EvSubsc.NotifURI = afCtx.cfg.CliPcfCfg.
 			NotifURI
 	}
 
-	apiClient := afCtx.cfg.policyAuthAPIClient
+	apiClient := afCtx.data.policyAuthAPIClient
 	if apiClient == nil {
 		logPolicyRespErr(&w, "nil policyAuthAPIClient in "+
 			"ModifyPolicyAuthAppSessions",
@@ -364,15 +349,17 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
 	appSessionID := getAppSessionID(r)
 
-	appSessResp, probDetails, httpResp, err =
-		apiClient.PolicyAuthIndividualAppSessAPI.ModAppSession(cliCtx,
-			appSessionID, appSessUpdateData)
+	apiResp, err = apiClient.ModAppSession(cliCtx, appSessionID,
+		ascUpdateData)
 
+	probDetails := apiResp.probDetails
+	httpResp := apiResp.httpResp
 	if err != nil || probDetails != nil {
 		handlePAErrorResp(probDetails, err, &w, httpResp, funcName)
 		return
 	}
 
+	appSessResp := apiResp.appSessCtx
 	appSessJSON, err = json.Marshal(appSessResp)
 	if err != nil {
 		logPolicyRespErr(&w, "Json marshal error in "+

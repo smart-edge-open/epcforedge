@@ -7,27 +7,17 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"net/url"
-	"strings"
 )
 
-// EventSubscResponse struct anyof EventSusbscReqData, EventNotification,
-// ProblemDetails
-type EventSubscResponse struct {
-	eventSubscReq *EventsSubscReqData
-	evsNotif      *EventsNotification
-	probDetails   *ProblemDetails
-}
-
-func handleEventSubscResp(w *http.ResponseWriter, locationPrefixURI string,
-	eventSubscResp EventSubscResponse, httpResp *http.Response) {
+func handleEventSubscResp(w *http.ResponseWriter,
+	eventSubscResp EventSubscResponse) {
 
 	var (
 		respBody []byte
 		err      error
-		url      *url.URL
 	)
 
+	httpResp := eventSubscResp.httpResp
 	if eventSubscResp.eventSubscReq != nil {
 		respBody, err = json.Marshal(eventSubscResp.eventSubscReq)
 		if err != nil {
@@ -61,21 +51,8 @@ func handleEventSubscResp(w *http.ResponseWriter, locationPrefixURI string,
 	}
 
 	if httpResp.StatusCode == 201 {
-		uri := locationPrefixURI
-		if url, err = httpResp.Location(); err != nil {
-			logPolicyRespErr(w, "PolicyAuthEventSubsc: "+
-				err.Error(), httpResp.StatusCode)
-			return
-		}
 
-		res := strings.Split(url.String(), "app-sessions")
-		if len(res) == 2 {
-			uri += res[1]
-		} else {
-			log.Errf("Location URI from PCF is INCORRECT")
-		}
-
-		(*w).Header().Set("Location", uri)
+		(*w).Header().Set("Location", eventSubscResp.locationURI)
 	}
 
 	(*w).WriteHeader(httpResp.StatusCode)
@@ -87,7 +64,6 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 	var (
 		err            error
 		eventSubscReq  EventsSubscReqData
-		httpResp       *http.Response
 		eventSubscResp EventSubscResponse
 	)
 
@@ -114,7 +90,7 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 	eventSubscReq.NotifURI = afCtx.cfg.CliPcfCfg.NotifURI
 	appSessionID := getAppSessionID(r)
 
-	apiClient := afCtx.cfg.policyAuthAPIClient
+	apiClient := afCtx.data.policyAuthAPIClient
 	if apiClient == nil {
 		logPolicyRespErr(&w, "nil policyAuthAPIClient in "+
 			"PolicyAuthAppEventSubs",
@@ -122,10 +98,10 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	eventSubscResp, httpResp, err =
-		apiClient.PolicyAuthEventSubsAPI.UpdateEventsSubsc(cliCtx,
-			appSessionID, &eventSubscReq)
+	eventSubscResp, err = apiClient.UpdateEventsSubsc(cliCtx, appSessionID,
+		&eventSubscReq)
 
+	httpResp := eventSubscResp.httpResp
 	if err != nil {
 		if httpResp != nil {
 			logPolicyRespErr(&w, "PolicyAuthAppEventSubs: "+
@@ -137,17 +113,15 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handleEventSubscResp(&w, apiClient.locationPrefixURI, eventSubscResp,
-		httpResp)
+	handleEventSubscResp(&w, eventSubscResp)
 }
 
 // PolicyAuthEventDelete Event delete request handler
 func PolicyAuthEventDelete(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err         error
-		httpResp    *http.Response
-		probDetails *ProblemDetails
+		err     error
+		evsResp EventSubscResponse
 	)
 
 	funcName := "PolicyAuthEventDelete: "
@@ -165,7 +139,7 @@ func PolicyAuthEventDelete(w http.ResponseWriter, r *http.Request) {
 
 	appSessionID := getAppSessionID(r)
 
-	apiClient := afCtx.cfg.policyAuthAPIClient
+	apiClient := afCtx.data.policyAuthAPIClient
 	if apiClient == nil {
 		logPolicyRespErr(&w, "nil policyAuthAPIClient in "+
 			"PolicyAuthAppEventDelete",
@@ -173,10 +147,10 @@ func PolicyAuthEventDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	probDetails, httpResp, err =
-		apiClient.PolicyAuthEventSubsAPI.DeleteEventsSubsc(cliCtx,
-			appSessionID)
+	evsResp, err = apiClient.DeleteEventsSubsc(cliCtx, appSessionID)
 
+	probDetails := evsResp.probDetails
+	httpResp := evsResp.httpResp
 	if err != nil || probDetails != nil {
 		handlePAErrorResp(probDetails, err, &w, httpResp, funcName)
 		return

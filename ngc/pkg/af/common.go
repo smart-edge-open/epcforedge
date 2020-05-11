@@ -4,20 +4,54 @@
 package af
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"math"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
+	oauth2 "github.com/otcshare/epcforedge/ngc/pkg/oauth2"
+	"golang.org/x/net/http2"
 )
 
 //TransIDMax var
 var TransIDMax = math.MaxInt32
+
+/*
+func getLocationPrefixURI(srvCfg *ServerConfig, cfg *GenericCliConfig) (
+	string, error) {
+
+	uri := "https://" + srvCfg.Hostname + srvCfg.CNCAEndpoint +
+		cfg.LocationPrefixURI
+	return uri, nil
+}
+*/
+
+func getPcfOAuth2Token() (token string, err error) {
+
+	token, err = oauth2.GetAccessToken()
+	if err == nil {
+		log.Infoln("Got Pcf OAuth2 Access Token: " + token)
+	}
+	return token, err
+}
+
+/*
+func getRootNotfiURI(srvCfg *SrvCfg, cfg *GenericCliConfig) (
+	string, error) {
+
+	uri := "https://" + srvCfg.Hostname + srvCfg.Port + cfg.NotifURI
+	return uri, nil
+}
+*/
 
 func getStatusCode(r *http.Response) int {
 	if r != nil {
@@ -57,6 +91,92 @@ func genAFTransID(trans TransactionIDs) int {
 		}
 	}
 	return 0
+}
+
+func genHTTPClient(cfg *GenericCliConfig) (*http.Client, error) {
+
+	if cfg.Protocol == "https" {
+		var tlsCfg *tls.Config
+		CACert, err := ioutil.ReadFile(cfg.CliCertPath)
+		if err != nil {
+			log.Errf("Error: %v", err)
+			return nil, err
+		}
+
+		CACertPool := x509.NewCertPool()
+		CACertPool.AppendCertsFromPEM(CACert)
+
+		tlsCfg = &tls.Config{
+			RootCAs: CACertPool,
+		}
+		// Below commented code is for Debug purpose only. Uncomment it
+		// to enable skipping certificate verification.
+		/* ------Linter warning disable------
+		if cfg.VerifyCerts {
+			tlsCfg = &tls.Config{
+				RootCAs: CACertPool,
+			}
+		} else {
+			tlsCfg = &tls.Config{
+				InsecureSkipVerify: true,
+			}
+		}
+		*/
+
+		switch cfg.ProtocolVer {
+		case "1.1":
+			httpClient := &http.Client{
+				Timeout: 15 * time.Second,
+				Transport: &http.Transport{
+					TLSClientConfig: tlsCfg,
+				},
+			}
+			return httpClient, nil
+		case "2.0":
+			httpClient := &http.Client{
+				Timeout: 15 * time.Second,
+				Transport: &http2.Transport{
+					TLSClientConfig: tlsCfg,
+				},
+			}
+			return httpClient, nil
+		default:
+			err = errors.New("Unsupported protocol version" +
+				cfg.ProtocolVer)
+			log.Errf("%s", err.Error())
+			return nil, err
+		}
+	} else if cfg.Protocol == "http" {
+		switch cfg.ProtocolVer {
+		case "1.1":
+			httpClient := &http.Client{
+				Timeout: 15 * time.Second,
+			}
+			return httpClient, nil
+		case "2.0":
+			httpClient := &http.Client{
+				Timeout: 15 * time.Second,
+				Transport: &http2.Transport{
+					AllowHTTP: true,
+					DialTLS: func(network, addr string,
+						cfg *tls.Config) (
+						net.Conn, error) {
+						return net.Dial(network, addr)
+					},
+				},
+			}
+			return httpClient, nil
+		default:
+			err := errors.New("Unsupported protocol version" +
+				cfg.ProtocolVer)
+			log.Errf("%s", err.Error())
+			return nil, err
+		}
+	}
+
+	err := errors.New("Not recognizable Protocol")
+	log.Errf("%s", err.Error())
+	return nil, err
 }
 
 func genTransactionID(afCtx *Context) (int, error) {
@@ -296,6 +416,27 @@ func updateAppLink(cfg Config, r *http.Request,
 	}
 	return appSelf, nil
 
+}
+
+func validateCliPACfg(paCfg *GenericCliConfig) (err error) {
+
+	if paCfg == nil {
+		err = errors.New("Nil policy auth cli configuration")
+		log.Errf("%s", err.Error())
+		return err
+	}
+	return nil
+}
+
+func validatePAAuthToken(a *PolicyAuthAPIClient) {
+
+	var err error
+	if a.cfg.OAuth2Support {
+		a.oAuth2Token, err = getPcfOAuth2Token()
+		if err != nil {
+			log.Errf("Oauth2 token refresh error")
+		}
+	}
 }
 
 func errRspHeader(w *http.ResponseWriter, method string,

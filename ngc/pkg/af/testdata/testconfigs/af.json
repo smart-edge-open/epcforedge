@@ -1,6 +1,7 @@
 {
     "AfId": "1",
     "LocationPrefixPfd": "/af/v1/pfd/",
+    "LocationPrefixPA": "/af/v1/policy-authorization/app-sessions",
     "UserAgent": "NGC-AF",
     "ServerConfig": {
         "CNCAEndpoint": ":8080",
@@ -9,14 +10,6 @@
         "UIEndpoint": "http://localhost:3020",
         "ServerCertPath": "/etc/certs/server-cert.pem",
         "ServerKeyPath": "/etc/certs/server-key.pem"
-    },
-    "NotifSrvConfig": {
-        "Protocol": "https",
-        "ProtocolVer": "2.0",
-        "Hostname": "localhost",
-        "Port": "8051",
-        "CertPath": "/etc/certs/server-cert.pem",
-        "KeyPath": "/etc/certs/server-key.pem"
     },
     "CliConfig": {
         "Protocol": "https",
@@ -34,7 +27,6 @@
         "Hostname": "localhost",
         "Port": "8095",
         "BasePath": "/npcf-policyauthorization/v1",
-        "LocationPrefixURI": "/af/v1/policy-authorization/app-sessions",
         "CliCertPath": "/etc/certs/root-ca-cert.pem",
         "VerifyCerts": true,
         "OAuth2Support": false,

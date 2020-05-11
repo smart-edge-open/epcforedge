@@ -41,27 +41,20 @@ type ServerConfig struct {
 	ServerKeyPath  string `json:"ServerKeyPath"`
 }
 
-type notifSrvConfig struct {
-	Protocol string `json:"protocol"`
-	Hostname string `json:"hostname"`
-	Port     string `json:"port"`
-	// lint warning
-	//	protocolVer string `json:"ProtocolVer"`
-	//	certPath    string `json:"CertPath"`
-	//	keyPath     string `json:"KeyPath"`
-}
-
 //Config struct
 type Config struct {
-	AfID                string            `json:"AfId"`
-	AfAPIRoot           string            `json:"AfAPIRoot"`
-	LocationPrefixPfd   string            `json:"LocationPrefixPfd"`
-	UserAgent           string            `json:"UserAgent"`
-	SrvCfg              ServerConfig      `json:"ServerConfig"`
-	NotifSrvCfg         *notifSrvConfig   `json:"NotifSrvConfig"`
-	CliCfg              CliConfig         `json:"CliConfig"`
-	CliPcfCfg           *GenericCliConfig `json:"CliPAConfig"`
-	policyAuthAPIClient *PolicyAuthAPIClient
+	AfID              string            `json:"AfId"`
+	AfAPIRoot         string            `json:"AfAPIRoot"`
+	LocationPrefixPfd string            `json:"LocationPrefixPfd"`
+	LocationPrefixPA  string            `json:"LocationPrefixPA"`
+	UserAgent         string            `json:"UserAgent"`
+	SrvCfg            ServerConfig      `json:"ServerConfig"`
+	CliCfg            CliConfig         `json:"CliConfig"`
+	CliPcfCfg         *GenericCliConfig `json:"CliPAConfig"`
+}
+
+type afData struct {
+	policyAuthAPIClient pcfPolicyAuthAPI
 }
 
 //Context struct
@@ -69,6 +62,7 @@ type Context struct {
 	subscriptions NotifSubscryptions
 	transactions  TransactionIDs
 	cfg           Config
+	data          afData
 }
 
 var (
@@ -186,13 +180,36 @@ func runServer(ctx context.Context, afCtx *Context) error {
 	return nil
 }
 
+/*
+ * function to initialize different variable specific to Policy Authorization
+ * - Initiate Policy auth api client which is reused for connecting to PCF
+ * - Initiate Notification URI to be used while sending req to PCF
+ */
+func initPACfg(afCtx *Context) (err error) {
+
+	paCfg := afCtx.cfg.CliPcfCfg
+	err = validateCliPACfg(paCfg)
+	if err != nil {
+		log.Errf("Policy Auth client configuration invalid")
+		return err
+	}
+
+	afCtx.data.policyAuthAPIClient, err =
+		NewPolicyAuthAPIClient(&afCtx.cfg)
+	if err != nil {
+		log.Errf("Unable to create policy auth api client")
+		return err
+	}
+
+	return nil
+}
+
 func printGenericClientConfig(cfg *GenericCliConfig) {
 	log.Infoln("Protocol: ", cfg.Protocol)
 	log.Infoln("ProtocolVer: ", cfg.ProtocolVer)
 	log.Infoln("Hostname: ", cfg.Hostname)
 	log.Infoln("Port: ", cfg.Port)
 	log.Infoln("BasePath: ", cfg.BasePath)
-	log.Infoln("LocationPrefixURI: ", cfg.LocationPrefixURI)
 	log.Infoln("CliCertPath: ", cfg.CliCertPath)
 	log.Infoln("OAuth2Support: ", cfg.OAuth2Support)
 	log.Infoln("NotifURI: ", cfg.NotifURI)
