@@ -18,12 +18,17 @@ func handleEventSubscResp(w *http.ResponseWriter,
 	)
 
 	httpResp := eventSubscResp.httpResp
+	if httpResp.StatusCode == 201 {
+		(*w).Header().Set("Location", eventSubscResp.locationURI)
+	}
+
 	if eventSubscResp.eventSubscReq != nil {
 		respBody, err = json.Marshal(eventSubscResp.eventSubscReq)
 		if err != nil {
 			logPolicyRespErr(w, "Json marshal error (eventSubsc)"+
 				" in PolicyAuthEventSubsc: "+err.Error(),
 				http.StatusInternalServerError)
+			return
 		}
 	} else if eventSubscResp.evsNotif != nil {
 		respBody, err = json.Marshal(eventSubscResp.evsNotif)
@@ -31,6 +36,7 @@ func handleEventSubscResp(w *http.ResponseWriter,
 			logPolicyRespErr(w, "Json marshal error (evsNotif)"+
 				" in PolicyAuthEventSubsc: "+err.Error(),
 				http.StatusInternalServerError)
+			return
 		}
 	} else if eventSubscResp.probDetails != nil {
 		respBody, err = json.Marshal(eventSubscResp.probDetails)
@@ -38,24 +44,20 @@ func handleEventSubscResp(w *http.ResponseWriter,
 			logPolicyRespErr(w, "Json marshal error (probDetails)"+
 				" in PolicyAuthEventSubsc: "+err.Error(),
 				http.StatusInternalServerError)
+			return
 		}
 	} else {
 		(*w).WriteHeader(httpResp.StatusCode)
 		return
 	}
 
+	(*w).WriteHeader(httpResp.StatusCode)
 	_, err = (*w).Write(respBody)
 	if err != nil {
 		log.Errf("Response write error in " +
 			"PolicyAuthEvemtSubsc: " + err.Error())
 	}
 
-	if httpResp.StatusCode == 201 {
-
-		(*w).Header().Set("Location", eventSubscResp.locationURI)
-	}
-
-	(*w).WriteHeader(httpResp.StatusCode)
 }
 
 // PolicyAuthEventSubsc Event susbscription request handler

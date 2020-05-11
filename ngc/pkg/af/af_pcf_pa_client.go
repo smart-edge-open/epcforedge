@@ -536,23 +536,25 @@ func handleUpdateEventResp(respBody []byte, httpResp *http.Response,
 		evsNotifResp   EventsNotification
 	)
 
+	retVal.httpResp = httpResp
 	switch httpResp.StatusCode {
 	case 200, 201:
 		retVal.locationURI = getLocationURI(httpResp, c)
 
 		err = json.Unmarshal(respBody, &eventSubscResp)
-		if err == nil {
-			retVal.eventSubscReq = &eventSubscResp
-			return retVal, nil
+		if err != nil {
+			log.Errf("Error in unmarshalling response body, " +
+				"UpdateEventSubsc: " + err.Error())
+			httpResp.StatusCode = 500
+			return retVal, err
 		}
+		retVal.eventSubscReq = &eventSubscResp
+
 		err = json.Unmarshal(respBody, &evsNotifResp)
 		if err == nil {
 			retVal.evsNotif = &evsNotifResp
-			return retVal, nil
 		}
-		log.Errf("Error in unmarshalling response body, " +
-			"UpdateEventSubsc: " + err.Error())
-		return retVal, err
+		return retVal, nil
 
 	case 204:
 		return retVal, nil
