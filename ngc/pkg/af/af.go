@@ -188,6 +188,7 @@ func runServer(ctx context.Context, afCtx *Context) error {
 func initPACfg(afCtx *Context) (err error) {
 
 	paCfg := afCtx.cfg.CliPcfCfg
+	cfg := afCtx.cfg
 	err = validateCliPACfg(paCfg)
 	if err != nil {
 		log.Errf("Policy Auth client configuration invalid")
@@ -195,11 +196,17 @@ func initPACfg(afCtx *Context) (err error) {
 	}
 
 	afCtx.data.policyAuthAPIClient, err =
-		NewPolicyAuthAPIClient(&afCtx.cfg)
+		NewPolicyAuthAPIClient(&cfg)
 	if err != nil {
 		log.Errf("Unable to create policy auth api client")
 		return err
 	}
+
+	pcfPANotifURI = "https://" + cfg.SrvCfg.Hostname +
+		cfg.SrvCfg.NotifPort + paCfg.NotifURI
+
+	smfPANotifURI = "https://" + cfg.SrvCfg.Hostname +
+		cfg.SrvCfg.NotifPort + paCfg.NotifURI + "/smfnotify"
 
 	return nil
 }

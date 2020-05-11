@@ -100,6 +100,12 @@ var notifRoutes = Routes{
 		"/af/v1/policy-authorization/terminate",
 		PolicyAuthEventNotifTerminate,
 	},
+	Route{
+		"PolicyAuthSMFNotify",
+		strings.ToUpper("Post"),
+		"/af/v1/policy-authorization/smfnotify",
+		PolicyAuthSMFNotify,
+	},
 }
 
 var afRoutes = Routes{

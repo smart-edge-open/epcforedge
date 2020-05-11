@@ -8,16 +8,15 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
-	"sync/atomic"
 
 	"github.com/gorilla/mux"
 )
 
 var contentTypeJSON string = "application/json"
 
-// Notif correlId in upPatchChgEvent struct
-var notifCorreID int32 = 1
+var smfPANotifURI string
+
+var pcfPANotifURI string
 
 func getAppSessionID(r *http.Request) string {
 	vars := mux.Vars(r)
@@ -30,26 +29,43 @@ func logPolicyRespErr(w *http.ResponseWriter, err string, statusCode int) {
 	(*w).WriteHeader(statusCode)
 }
 
-func setAppSessNotifURICorreID(appSess *AppSessionContext, afCtx *Context) (
-	err error) {
+func setAppSessNotifURI(appSess *AppSessionContext, afCtx *Context) {
 
 	ascReqData := appSess.AscReqData
-	if ascReqData == nil {
-		err = errors.New("Nil AppSessionContextReqData")
-		log.Errf("%s", err.Error())
-		return err
-	}
-
-	ascReqData.NotifURI = afCtx.cfg.CliPcfCfg.NotifURI
+	ascReqData.NotifURI = pcfPANotifURI
 
 	afRoutReq := ascReqData.AfRoutReq
 	if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
-		id := atomic.AddInt32(&notifCorreID, 1)
-		afRoutReq.UpPathChgSub.NotifCorreID = strconv.Itoa(int(id))
-	} else {
-		log.Errf("notif correl id is not set due to wrong req data")
+		afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
 	}
+
+	for _, medCompn := range ascReqData.MedComponents {
+		afRoutReq := medCompn.AfRoutReq
+		if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
+			afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
+		}
+	}
+
+	if ascReqData.EvSubsc != nil {
+		ascReqData.EvSubsc.NotifURI = pcfPANotifURI
+	}
+}
+
+func validateAppSessCtx(appSess *AppSessionContext) (err error) {
+
+	ascReqData := appSess.AscReqData
+	if ascReqData == nil {
+		err = errors.New("nil ascReqData")
+		return err
+	}
+
 	return nil
+	/*
+		switch ascReqData.SuppFeat {
+		case "InfluenceOnTrafficRouting":
+			return nil
+	*/
+
 }
 
 // CreatePolicyAuthAppSessions func create one or more App Session Ctx
@@ -82,12 +98,14 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = setAppSessNotifURICorreID(&appSess, afCtx)
+	err = validateAppSessCtx(&appSess)
 	if err != nil {
 		logPolicyRespErr(&w, "CreatePolicyAuthAppSessions: "+
 			err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	setAppSessNotifURI(&appSess, afCtx)
 
 	apiClient := afCtx.data.policyAuthAPIClient
 	if apiClient == nil {
@@ -303,6 +321,26 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func setAppSessUpdateDataNotifURI(ascUpdateData *AppSessionContextUpdateData,
+	afCtx *Context) {
+
+	afRoutReq := ascUpdateData.AfRoutReq
+	if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
+		afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
+	}
+
+	if ascUpdateData.EvSubsc != nil {
+		ascUpdateData.EvSubsc.NotifURI = pcfPANotifURI
+	}
+
+	for _, medCompn := range ascUpdateData.MedComponents {
+		afRoutReq := medCompn.AfRoutReq
+		if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
+			afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
+		}
+	}
+}
+
 // ModifyPolicyAuthAppSession func modifies App Session Ctx
 func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
@@ -334,10 +372,7 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ascUpdateData.EvSubsc != nil {
-		ascUpdateData.EvSubsc.NotifURI = afCtx.cfg.CliPcfCfg.
-			NotifURI
-	}
+	setAppSessUpdateDataNotifURI(&ascUpdateData, afCtx)
 
 	apiClient := afCtx.data.policyAuthAPIClient
 	if apiClient == nil {

@@ -127,7 +127,6 @@ AF configurable parameters list for Policy Authorization (Indicated by CliPaConf
 | Hostname            | PCF Hostname used by AF                                                             |
 | Port                | PCF Port number to which AF sends request                                           |
 | BasePath            | URL used by AF to access PCF for Policy authorization                               |
-| LocationPrefixURI   | The API prefix for Policy Authorization                                             |
 | CliCertPath         | Path for certificates to be used by AF client to communicate with PCF               |
 | OAuth2Support       | OAuth2 authorization support between AF and PCF                                     |
 | NotifURI            | Notification URL to which AF will recieve notifications from PCF                    |

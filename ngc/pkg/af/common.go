@@ -25,16 +25,6 @@ import (
 //TransIDMax var
 var TransIDMax = math.MaxInt32
 
-/*
-func getLocationPrefixURI(srvCfg *ServerConfig, cfg *GenericCliConfig) (
-	string, error) {
-
-	uri := "https://" + srvCfg.Hostname + srvCfg.CNCAEndpoint +
-		cfg.LocationPrefixURI
-	return uri, nil
-}
-*/
-
 func getPcfOAuth2Token() (token string, err error) {
 
 	token, err = oauth2.GetAccessToken()
@@ -43,15 +33,6 @@ func getPcfOAuth2Token() (token string, err error) {
 	}
 	return token, err
 }
-
-/*
-func getRootNotfiURI(srvCfg *SrvCfg, cfg *GenericCliConfig) (
-	string, error) {
-
-	uri := "https://" + srvCfg.Hostname + srvCfg.Port + cfg.NotifURI
-	return uri, nil
-}
-*/
 
 func getStatusCode(r *http.Response) int {
 	if r != nil {

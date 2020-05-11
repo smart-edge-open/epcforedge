@@ -23,8 +23,6 @@ func PolicyAuthEventNotify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
 	err = json.NewDecoder(r.Body).Decode(&eventNotif)
 	if err != nil {
 		logPolicyRespErr(&w, "Json Decode error in "+
@@ -51,12 +49,36 @@ func PolicyAuthEventNotifTerminate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-
 	err = json.NewDecoder(r.Body).Decode(&termInfo)
 	if err != nil {
 		logPolicyRespErr(&w, "Json Decode error in "+
 			"PolicyAuthEventNotifTerminate: "+err.Error(),
+			http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(204)
+}
+
+// PolicyAuthSMFNotify Event notification termination handler
+func PolicyAuthSMFNotify(w http.ResponseWriter, r *http.Request) {
+
+	var (
+		err   error
+		event NsmfEventExposureNotification
+	)
+
+	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
+	if afCtx == nil {
+		logPolicyRespErr(&w, "nil afCtx in PolicyAuthSMFNotify",
+			http.StatusInternalServerError)
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&event)
+	if err != nil {
+		logPolicyRespErr(&w, "Json Decode error in "+
+			"PolicyAuthSMFNotify: "+err.Error(),
 			http.StatusBadRequest)
 		return
 	}

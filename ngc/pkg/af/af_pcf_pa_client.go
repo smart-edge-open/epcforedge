@@ -22,7 +22,6 @@ type PolicyAuthAPIClient struct {
 	oAuth2Token       string
 	httpClient        *http.Client
 	rootURI           string
-	rootNotifURI      string
 	userAgent         string
 	locationPrefixURI string
 }
@@ -80,9 +79,6 @@ func NewPolicyAuthAPIClient(cfg *Config) (*PolicyAuthAPIClient, error) {
 	c.rootURI = paCfg.Protocol + "://" + paCfg.Hostname + ":" + paCfg.Port +
 		paCfg.BasePath
 	c.userAgent = cfg.UserAgent
-
-	c.rootNotifURI = "https://" + cfg.SrvCfg.Hostname +
-		cfg.SrvCfg.NotifPort + paCfg.NotifURI
 
 	c.locationPrefixURI = "https://" + cfg.SrvCfg.Hostname +
 		cfg.SrvCfg.CNCAEndpoint + cfg.LocationPrefixPA

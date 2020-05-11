@@ -89,7 +89,7 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	eventSubscReq.NotifURI = afCtx.cfg.CliPcfCfg.NotifURI
+	eventSubscReq.NotifURI = pcfPANotifURI
 	appSessionID := getAppSessionID(r)
 
 	apiClient := afCtx.data.policyAuthAPIClient
