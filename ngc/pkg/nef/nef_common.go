@@ -5,15 +5,9 @@
 package ngcnef
 
 import (
-	"bytes"
-	"context"
 	"encoding/json"
-	"encoding/xml"
-	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"path/filepath"
 	"regexp"
 )
@@ -114,99 +108,4 @@ func loadJSONConfig(configPath string, config interface{}) error {
 		return err
 	}
 	return json.Unmarshal(cfgData, &config)
-}
-
-// Set request body from an interface{}
-func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer,
-	err error) {
-
-	if bodyBuf == nil {
-		bodyBuf = &bytes.Buffer{}
-	}
-
-	if reader, ok := body.(io.Reader); ok {
-		_, err = bodyBuf.ReadFrom(reader)
-	} else if b, ok := body.([]byte); ok {
-		_, err = bodyBuf.Write(b)
-	} else if s, ok := body.(string); ok {
-		_, err = bodyBuf.WriteString(s)
-	} else if s, ok := body.(*string); ok {
-		_, err = bodyBuf.WriteString(*s)
-	} else if jsonCheck.MatchString(contentType) {
-		err = json.NewEncoder(bodyBuf).Encode(body)
-	} else if xmlCheck.MatchString(contentType) {
-		err = xml.NewEncoder(bodyBuf).Encode(body)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	if bodyBuf.Len() == 0 {
-		err = fmt.Errorf("invalid body type %s", contentType)
-		return nil, err
-	}
-	return bodyBuf, nil
-}
-
-//prepareRequest build the request
-func prepareRequest(
-	ctx context.Context,
-	path string, method string,
-	reqBody interface{},
-	headerParams map[string]string,
-) (httpRequest *http.Request, err error) {
-
-	var body *bytes.Buffer
-
-	// Detect reqBody type and post.
-	if reqBody != nil {
-		reqContentType := headerParams["Content-Type"]
-
-		body, err = setBody(reqBody, reqContentType)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Setup path and query parameters
-	url, err := url.Parse(path)
-	if err != nil {
-		log.Errf("url parsing error, path = %s", path)
-		return nil, err
-	}
-
-	// Generate a new request
-	if body != nil {
-		httpRequest, err = http.NewRequest(method, url.String(), body)
-	} else {
-		httpRequest, err = http.NewRequest(method, url.String(), nil)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	// add header parameters, if any
-	if len(headerParams) > 0 {
-		headers := http.Header{}
-		for h, v := range headerParams {
-			headers.Set(h, v)
-		}
-		httpRequest.Header = headers
-	}
-
-	// Add the user agent to the request.
-	//httpRequest.Header.Add("User-Agent", c.UserAgent)
-
-	if ctx != nil {
-		// add context to the request
-		httpRequest = httpRequest.WithContext(ctx)
-	}
-	return httpRequest, nil
-}
-func closeRespBody(r *http.Response) {
-	err := r.Body.Close()
-	if err != nil {
-		log.Errf("response body was not closed properly")
-	}
 }

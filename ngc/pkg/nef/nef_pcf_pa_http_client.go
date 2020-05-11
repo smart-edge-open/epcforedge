@@ -6,16 +6,11 @@ package ngcnef
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
-
-	"golang.org/x/net/http2"
 )
 
 // PcfClient is an implementation of the Pcf Authorization
@@ -30,55 +25,12 @@ type PcfClient struct {
 
 const pdContentType string = "application/problem+json"
 
-//HTTPclient creates a new HTTP Client
-func genHTTPClient(cfg *Config) (*http.Client, error) {
-
-	HTTPClient := &http.Client{
-		Timeout: 15 * time.Second,
-	}
-
-	if cfg.PcfPolicyAuthorizationConfig.Protocol == "https" {
-		CACert, err1 := ioutil.ReadFile(cfg.PcfPolicyAuthorizationConfig.ClientCert)
-		if err1 != nil {
-			fmt.Printf("NEF Certification loading Error: %v", err1)
-			return nil, err1
-
-		}
-
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(CACert)
-		var tlsConfig *tls.Config
-		if !cfg.PcfPolicyAuthorizationConfig.VerifyCerts {
-			tlsConfig = &tls.Config{
-				InsecureSkipVerify: true,
-			}
-
-		} else {
-			tlsConfig = &tls.Config{
-				RootCAs: caCertPool,
-			}
-
-		}
-		HTTPClient.Transport = &http.Transport{
-			TLSClientConfig: tlsConfig,
-		}
-		if cfg.PcfPolicyAuthorizationConfig.ProtocolVer == "2.0" {
-
-			HTTPClient.Transport = &http2.Transport{
-				TLSClientConfig: tlsConfig,
-			}
-		}
-
-	}
-	return HTTPClient, nil
-}
-
 //NewPCFPolicyAuthHTTPClient creates a new PCF Client
 func NewPCFPolicyAuthHTTPClient(cfg *Config) (*PcfClient, error) {
 
 	c := &PcfClient{}
 	var err error
-	c.HTTPClient, err = genHTTPClient(cfg)
+	c.HTTPClient, err = genHTTPClient(cfg.PcfPolicyAuthorizationConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -87,6 +39,16 @@ func NewPCFPolicyAuthHTTPClient(cfg *Config) (*PcfClient, error) {
 	c.RootURI = base + cfg.PcfPolicyAuthorizationConfig.Port
 	c.ResourceURI = cfg.PcfPolicyAuthorizationConfig.ResourceURI
 	c.UserAgent = cfg.UserAgent
+	if c.Pcfcfg.OAuth2Support {
+		token, err := getPcfOAuth2Token()
+		if err != nil {
+			log.Errf("Pcf OAuth2 Token retrieval error: " +
+				err.Error())
+			return nil, err
+		}
+		c.OAuth2Token = token
+	}
+
 	log.Infoln("PCF Client created with the following configuration:")
 	log.Infoln("Protocol: ", cfg.PcfPolicyAuthorizationConfig.Protocol)
 	log.Infoln("Version: ", cfg.PcfPolicyAuthorizationConfig.ProtocolVer)
@@ -109,7 +71,7 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 	var appsesid string
 	var req *http.Request
 	var res *http.Response
-
+	var err error
 	var appSessionContext AppSessionContext
 	var problemDetails ProblemDetails
 	appSessionID := AppSessionID("")
@@ -118,14 +80,8 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 	headerParams := make(map[string]string)
 	headerParams["Content-Type"] = contentType
 	headerParams["User-Agent"] = pcf.UserAgent
-	postbody, err := json.Marshal(body)
-	if err != nil {
-		fmt.Printf("Failed marshaling POST body :%s", err)
-		goto END
 
-	}
-
-	req, err = prepareRequest(ctx, apiURL, "POST", postbody,
+	req, err = pcf.prepareRequest(ctx, apiURL, "POST", body,
 		headerParams)
 	if err != nil {
 		goto END
@@ -163,6 +119,10 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 		pcfPr.Pd = nil
 
 	} else {
+		if res.StatusCode == 401 {
+			validatePAAuthToken(pcf)
+		}
+
 		problemDetails = ProblemDetails{}
 		respContentType := res.Header.Get("Content-type")
 		if respContentType == pdContentType {
@@ -202,18 +162,14 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 	var resbody []byte
 	var appSessionContext AppSessionContext
 	var problemDetails ProblemDetails
-
+	var err error
 	fmt.Println(sessid)
 	log.Infof("Triggering PCF Policy Authorization PATCH :" + apiURL)
 	headerParams := make(map[string]string)
 	headerParams["Content-Type"] = "application/merge-patch+json"
 	headerParams["User-Agent"] = pcf.UserAgent
-	patchbody, err := json.Marshal(body)
-	if err != nil {
-		fmt.Printf("Failed marshaling PATCH body:%s", err)
-		goto END
-	}
-	req, err = prepareRequest(ctx, apiURL, "PATCH", patchbody,
+
+	req, err = pcf.prepareRequest(ctx, apiURL, "PATCH", body,
 		headerParams)
 	if err != nil {
 		goto END
@@ -252,6 +208,10 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 		pcfPr.Asc = &appSessionContext
 
 	} else {
+		if res.StatusCode == 401 {
+			validatePAAuthToken(pcf)
+		}
+
 		problemDetails = ProblemDetails{}
 		respContentType := res.Header.Get("Content-type")
 		if respContentType == pdContentType {
@@ -299,7 +259,7 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 	headerParams["Content-Type"] = contentType
 	headerParams["User-Agent"] = pcf.UserAgent
 
-	req, err = prepareRequest(ctx, apiURL, "POST", nil,
+	req, err = pcf.prepareRequest(ctx, apiURL, "POST", nil,
 		headerParams)
 	if err != nil {
 		goto END
@@ -335,9 +295,20 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 		pcfPr.ResponseCode = uint16(res.StatusCode)
 
 	} else {
-
+		if res.StatusCode == 401 {
+			validatePAAuthToken(pcf)
+		}
 		respContentType := res.Header.Get("Content-type")
 		if respContentType == pdContentType {
+			log.Infof("Body in the response =>")
+			resbody, err = ioutil.ReadAll(res.Body)
+			if err != nil {
+				fmt.Printf("Failed reading DELETE response body:%s", err)
+				goto END
+
+			}
+			defer closeRespBody(res)
+			log.Infof(string(resbody))
 			problemDetails := ProblemDetails{}
 			err = json.Unmarshal(resbody, &problemDetails)
 			if err != nil {
@@ -380,7 +351,7 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 	headerParams := make(map[string]string)
 	headerParams["Content-Type"] = contentType
 	headerParams["User-Agent"] = pcf.UserAgent
-	req, err = prepareRequest(ctx, apiURL, "GET", nil,
+	req, err = pcf.prepareRequest(ctx, apiURL, "GET", nil,
 		headerParams)
 	if err != nil {
 		goto END
@@ -416,6 +387,9 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 		pcfPr.Asc = &appSessionContext
 
 	} else {
+		if res.StatusCode == 401 {
+			validatePAAuthToken(pcf)
+		}
 		problemDetails = ProblemDetails{}
 		respContentType := res.Header.Get("Content-type")
 		if respContentType == pdContentType {

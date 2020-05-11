@@ -54,6 +54,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					time.Sleep(2 * time.Second)
 				})
 		})
+
 	})
 	Describe("client request methods to PCF", func() {
 		Specify("Sending valid POST request ", func() {
@@ -86,7 +87,9 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			appid, pcr, err1 := pcfc.PolicyAuthorizationCreate(ctx, ascreq)
 			Expect(err1).ShouldNot(HaveOccurred())
 			Expect(string(appid)).To(Equal("1234test"))
@@ -123,7 +126,9 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ascreq, ngcnef.AppSessionID("test1234"))
 			Expect(err1).ShouldNot(HaveOccurred())
 
@@ -150,7 +155,9 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).ShouldNot(HaveOccurred())
 
@@ -172,11 +179,41 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).ShouldNot(HaveOccurred())
 
 			Expect(int(pcr.ResponseCode)).To(Equal(http.StatusNoContent))
+
+		})
+		Specify("Sending valid 200 DELETE request ", func() {
+			By("Preparing response")
+			resBody, err := ioutil.ReadFile(
+				NefTestCfgBasepath + "pcf_pa_del_200_resp.json")
+			Expect(err).ShouldNot(HaveOccurred())
+			resBodyBytes := bytes.NewReader(resBody)
+			httpclient :=
+				testingPCFClient(func(req *http.Request) (*http.Response, error) {
+					// Test request parameters
+					return &http.Response{
+						StatusCode: 200,
+						// Send response to be tested
+						Body: ioutil.NopCloser(resBodyBytes),
+						// Must be set to non-nil value or it panics
+						Header: make(http.Header),
+					}, nil
+				})
+
+			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
+			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
+			Expect(err1).ShouldNot(HaveOccurred())
+
+			Expect(int(pcr.ResponseCode)).To(Equal(http.StatusOK))
 
 		})
 		Specify("Sending invalid POST request ", func() {
@@ -210,7 +247,9 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			appid, pcr, err1 := pcfc.PolicyAuthorizationCreate(ctx, ascreq)
 			Expect(err1).Should(HaveOccurred())
 			Expect(string(appid)).To(Equal(""))
@@ -246,9 +285,10 @@ var _ = Describe("NefPcfPaRestClient", func() {
 						Header: respHeader,
 					}, nil
 				})
-
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ascreq, ngcnef.AppSessionID("test1234"))
 			Expect(err1).Should(HaveOccurred())
 			Expect(pcr.Pd).ToNot(Equal(nil))
@@ -277,28 +317,38 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).Should(HaveOccurred())
 			Expect(pcr.Pd).ToNot(Equal(nil))
 			Expect(int(pcr.ResponseCode)).To(Equal(http.StatusNotFound))
 		})
 		Specify("Sending invalid DELETE request ", func() {
-
+			By("Preparing response")
+			resBody, err := ioutil.ReadFile(
+				NefTestCfgBasepath + "pcf_pa_get_err_resp.json")
+			Expect(err).ShouldNot(HaveOccurred())
+			resBodyBytes := bytes.NewReader(resBody)
 			httpclient :=
 				testingPCFClient(func(req *http.Request) (*http.Response, error) {
 					// Test request parameters
+					respHeader := make(http.Header)
+					respHeader.Set("Content-Type", "application/problem+json")
 					return &http.Response{
 						StatusCode: 404,
 						// Send response to be tested
-						Body: ioutil.NopCloser(nil),
+						Body: ioutil.NopCloser(resBodyBytes),
 						// Must be set to non-nil value or it panics
-						Header: make(http.Header),
+						Header: respHeader,
 					}, nil
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).Should(HaveOccurred())
 
@@ -314,7 +364,9 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			_, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).Should(HaveOccurred())
 
@@ -328,7 +380,9 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			_, _, err1 := pcfc.PolicyAuthorizationCreate(ctx, ngcnef.AppSessionContext{})
 			Expect(err1).Should(HaveOccurred())
 
@@ -342,7 +396,9 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			appid := ngcnef.AppSessionID("")
 			_, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ngcnef.AppSessionContextUpdateData{}, appid)
 			Expect(err1).Should(HaveOccurred())
@@ -357,7 +413,9 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/"}
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
+				OAuth2Token: "teststring"}
 			_, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
 			Expect(err1).Should(HaveOccurred())
 

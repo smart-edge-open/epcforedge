@@ -25,7 +25,7 @@
             "snssai": "snssai1_value"
         }
     ],
-    "OAuth2Support": false,
+    "OAuth2Support": true,
     "PcfPolicyAuthorizationConfig":
      {
          "Protocol":"https",
@@ -35,7 +35,7 @@
          "Hostname": "localhost",
          "Port": "29507",
          "ResourceURI":"/npcf-policyauthorization/v1/app-sessions/",
-         "OAuth2Support":false
+         "OAuth2Support":true
                   
      }
 }
