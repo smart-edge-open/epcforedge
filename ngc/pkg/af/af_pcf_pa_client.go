@@ -4,7 +4,6 @@
 package af
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -13,6 +12,8 @@ import (
 	"net/url"
 	"strings"
 )
+
+var userAgent string = "ngc-af"
 
 // PolicyAuthAPIClient type
 // In most cases there should be only one, shared, PolicyAuthAPIClient.
@@ -99,74 +100,6 @@ func NewPolicyAuthAPIClient(cfg *Config) (*PolicyAuthAPIClient, error) {
 	return c, nil
 }
 
-// prepareRequest build the request
-func (c *PolicyAuthAPIClient) prepareRequest(
-	ctx context.Context,
-	path string, method string,
-	reqBody interface{},
-	headerParams map[string]string,
-) (httpRequest *http.Request, err error) {
-
-	var body *bytes.Buffer
-
-	// Detect reqBody type and post.
-	if reqBody != nil {
-		reqContentType := headerParams["Content-Type"]
-
-		body, err = setBody(reqBody, reqContentType)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Setup path and query parameters
-	url, err := url.Parse(path)
-	if err != nil {
-		log.Errf("url parsing error, path = %s", path)
-		return nil, err
-	}
-
-	// Generate a new request
-	if body != nil {
-		httpRequest, err = http.NewRequest(method, url.String(), body)
-	} else {
-		httpRequest, err = http.NewRequest(method, url.String(), nil)
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	// add header parameters, if any
-	if len(headerParams) > 0 {
-		headers := http.Header{}
-		for h, v := range headerParams {
-			headers.Set(h, v)
-		}
-		httpRequest.Header = headers
-	}
-
-	// Add the user agent to the request.
-	httpRequest.Header.Add("User-Agent", c.userAgent)
-
-	if ctx != nil {
-		// add context to the request
-		httpRequest = httpRequest.WithContext(ctx)
-
-		// Walk through any authentication.
-		if c.cfg.OAuth2Support {
-			token := c.oAuth2Token
-			if token == "" {
-				err = errors.New("Nil Ouath2Token in " +
-					"PcfApiClient Struct")
-				return nil, err
-			}
-			httpRequest.Header.Add("Authorization", "Bearer "+token)
-		}
-
-	}
-	return httpRequest, nil
-}
-
 // PostAppSessions API handler
 /*
  * PostAppSessions Creates a new Individual Application Session Context resource
@@ -194,7 +127,9 @@ func (c *PolicyAuthAPIClient) PostAppSessions(ctx context.Context,
 
 	postBody = &appSessionContext
 
-	r, err := c.prepareRequest(ctx, path, httpMethod, postBody,
+	headerParams["Authorization"] = c.oAuth2Token
+
+	r, err := c.cfg.prepareRequest(ctx, path, httpMethod, postBody,
 		headerParams)
 	if err != nil {
 		return retVal, err
@@ -307,7 +242,9 @@ func (c *PolicyAuthAPIClient) DeleteAppSession(
 		reqBody = eventSubscReq
 	}
 
-	r, err := c.prepareRequest(ctx, path, httpMethod, reqBody,
+	headerParams["Authorization"] = c.oAuth2Token
+
+	r, err := c.cfg.prepareRequest(ctx, path, httpMethod, reqBody,
 		headerParams)
 	if err != nil {
 		return retVal, err
@@ -382,7 +319,9 @@ func (c *PolicyAuthAPIClient) GetAppSession(
 	headerParams := make(map[string]string)
 	headerParams["Accept"] = contentTypeJSON
 
-	r, err := c.prepareRequest(ctx, path, httpMethod, reqBody,
+	headerParams["Authorization"] = c.oAuth2Token
+
+	r, err := c.cfg.prepareRequest(ctx, path, httpMethod, reqBody,
 		headerParams)
 	if err != nil {
 		return retVal, err
@@ -467,7 +406,10 @@ func (c *PolicyAuthAPIClient) ModAppSession(
 
 	// body params
 	patchBody = &ascUpdateData
-	r, err := c.prepareRequest(ctx, path, httpMethod, patchBody,
+
+	headerParams["Authorization"] = c.oAuth2Token
+
+	r, err := c.cfg.prepareRequest(ctx, path, httpMethod, patchBody,
 		headerParams)
 	if err != nil {
 		return retVal, err
@@ -612,7 +554,9 @@ func (c *PolicyAuthAPIClient) UpdateEventsSubsc(ctx context.Context,
 		reqBody = eventSubscReq
 	}
 
-	r, err := c.prepareRequest(ctx, path, httpMethod, reqBody,
+	headerParams["Authorization"] = c.oAuth2Token
+
+	r, err := c.cfg.prepareRequest(ctx, path, httpMethod, reqBody,
 		headerParams)
 	if err != nil {
 		return retVal, err
@@ -664,7 +608,9 @@ func (c *PolicyAuthAPIClient) DeleteEventsSubsc(ctx context.Context,
 	headerParams := make(map[string]string)
 	headerParams["Accept"] = contentTypeJSON
 
-	r, err := c.prepareRequest(ctx, path, httpMethod, reqBody,
+	headerParams["Authorization"] = c.oAuth2Token
+
+	r, err := c.cfg.prepareRequest(ctx, path, httpMethod, reqBody,
 		headerParams)
 	if err != nil {
 		return retVal, err

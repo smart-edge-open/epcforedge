@@ -51,12 +51,53 @@ func setAppSessNotifURI(appSess *AppSessionContext, afCtx *Context) {
 	}
 }
 
+type paSuppFeat struct {
+	inflOnTrafficRouting bool
+	sponsConnectivity    bool
+	medComnVersioning    bool
+}
+
+func decodeSuppFeat(suppFeat string) (retVal paSuppFeat, err error) {
+
+	retVal.inflOnTrafficRouting = false
+	retVal.sponsConnectivity = false
+	retVal.medComnVersioning = false
+
+	if len(suppFeat) == 1 {
+		switch suppFeat {
+		case "0":
+			return retVal
+		case "1":
+			return retVal
+		}
+	}
+}
+
 func validateAppSessCtx(appSess *AppSessionContext) (err error) {
 
 	ascReqData := appSess.AscReqData
 	if ascReqData == nil {
 		err = errors.New("nil ascReqData")
 		return err
+	}
+
+	if ascReqData.NotifURI == "" {
+		err = errors.New("nil notifURI in req data")
+		return err
+	}
+
+	if ascReqData.UeIpv4 == "" && ascReqData.UeIpv6 == "" &&
+		ascReqData.UeMac == "" {
+		err = errors.New("UE Add info not present in asc Req data")
+		return err
+	}
+
+	suppFeat := ascReqData.SuppFeat
+	if suppFeat != "" {
+		paSuppFeat, err = decodeSuppFeat(suppFeat)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

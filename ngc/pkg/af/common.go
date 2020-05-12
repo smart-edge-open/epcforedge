@@ -4,6 +4,8 @@
 package af
 
 import (
+	"bytes"
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -158,6 +160,67 @@ func genHTTPClient(cfg *GenericCliConfig) (*http.Client, error) {
 	err := errors.New("Not recognizable Protocol")
 	log.Errf("%s", err.Error())
 	return nil, err
+}
+
+// prepareRequest build the request
+func (c *GenericCliConfig) prepareRequest(
+	ctx context.Context,
+	path string, method string,
+	reqBody interface{},
+	headerParams map[string]string,
+) (httpRequest *http.Request, err error) {
+
+	var body *bytes.Buffer
+
+	// Detect reqBody type and post.
+	if reqBody != nil {
+		reqContentType := headerParams["Content-Type"]
+
+		body, err = setBody(reqBody, reqContentType)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Setup path and query parameters
+	url, err := url.Parse(path)
+	if err != nil {
+		log.Errf("url parsing error, path = %s", path)
+		return nil, err
+	}
+
+	// Generate a new request
+	if body != nil {
+		httpRequest, err = http.NewRequest(method, url.String(), body)
+	} else {
+		httpRequest, err = http.NewRequest(method, url.String(), nil)
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	// add header parameters, if any
+	if len(headerParams) > 0 {
+		headers := http.Header{}
+		for h, v := range headerParams {
+			if h == "Authorization" && c.OAuth2Support {
+				v = "Bearer " + v
+				headers.Set(h, v)
+			} else {
+				headers.Set(h, v)
+			}
+		}
+		httpRequest.Header = headers
+	}
+
+	// Add the user agent to the request.
+	httpRequest.Header.Add("User-Agent", userAgent)
+
+	if ctx != nil {
+		// add context to the request
+		httpRequest = httpRequest.WithContext(ctx)
+	}
+	return httpRequest, nil
 }
 
 func genTransactionID(afCtx *Context) (int, error) {
