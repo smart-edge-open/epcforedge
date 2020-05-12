@@ -6,7 +6,6 @@ package af
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -51,61 +50,59 @@ func setAppSessNotifURI(appSess *AppSessionContext, afCtx *Context) {
 	}
 }
 
-type paSuppFeat struct {
-	inflOnTrafficRouting bool
-	sponsConnectivity    bool
-	medComnVersioning    bool
-}
+func setAppSessUpdateDataNotifURI(ascUpdateData *AppSessionContextUpdateData,
+	afCtx *Context) {
 
-func decodeSuppFeat(suppFeat string) (retVal paSuppFeat, err error) {
+	afRoutReq := ascUpdateData.AfRoutReq
+	if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
+		afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
+	}
 
-	retVal.inflOnTrafficRouting = false
-	retVal.sponsConnectivity = false
-	retVal.medComnVersioning = false
+	if ascUpdateData.EvSubsc != nil {
+		ascUpdateData.EvSubsc.NotifURI = pcfPANotifURI
+	}
 
-	if len(suppFeat) == 1 {
-		switch suppFeat {
-		case "0":
-			return retVal
-		case "1":
-			return retVal
+	for _, medCompn := range ascUpdateData.MedComponents {
+		afRoutReq := medCompn.AfRoutReq
+		if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
+			afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
 		}
 	}
 }
 
-func validateAppSessCtx(appSess *AppSessionContext) (err error) {
+func handlePAErrorResp(probDetails *ProblemDetails, err error,
+	w *http.ResponseWriter, httpResp *http.Response, funcName string) {
 
-	ascReqData := appSess.AscReqData
-	if ascReqData == nil {
-		err = errors.New("nil ascReqData")
-		return err
+	var probDetailsJSON []byte
+	if err != nil {
+		if httpResp != nil {
+			logPolicyRespErr(w, funcName+err.Error(),
+				httpResp.StatusCode)
+		} else {
+			logPolicyRespErr(w, funcName+err.Error(),
+				http.StatusInternalServerError)
+		}
+		return
 	}
 
-	if ascReqData.NotifURI == "" {
-		err = errors.New("nil notifURI in req data")
-		return err
-	}
-
-	if ascReqData.UeIpv4 == "" && ascReqData.UeIpv6 == "" &&
-		ascReqData.UeMac == "" {
-		err = errors.New("UE Add info not present in asc Req data")
-		return err
-	}
-
-	suppFeat := ascReqData.SuppFeat
-	if suppFeat != "" {
-		paSuppFeat, err = decodeSuppFeat(suppFeat)
+	if probDetails != nil {
+		probDetailsJSON, err = json.Marshal(probDetails)
 		if err != nil {
-			return err
+			logPolicyRespErr(w, "Json marshal error (probDetials)"+
+				" in "+funcName+err.Error(),
+				http.StatusInternalServerError)
+			return
 		}
-	}
 
-	return nil
-	/*
-		switch ascReqData.SuppFeat {
-		case "InfluenceOnTrafficRouting":
-			return nil
-	*/
+		(*w).WriteHeader(httpResp.StatusCode)
+		_, err = (*w).Write(probDetailsJSON)
+		if err != nil {
+			log.Errf("Response write error in " + funcName +
+				err.Error())
+			return
+		}
+		return
+	}
 
 }
 
@@ -186,64 +183,13 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handlePAErrorResp(probDetails *ProblemDetails, err error,
-	w *http.ResponseWriter, httpResp *http.Response, funcName string) {
-
-	var probDetailsJSON []byte
-	if err != nil {
-		if httpResp != nil {
-			logPolicyRespErr(w, funcName+err.Error(),
-				httpResp.StatusCode)
-		} else {
-			logPolicyRespErr(w, funcName+err.Error(),
-				http.StatusInternalServerError)
-		}
-		return
-	}
-
-	if probDetails != nil {
-		probDetailsJSON, err = json.Marshal(probDetails)
-		if err != nil {
-			logPolicyRespErr(w, "Json marshal error (probDetials)"+
-				" in "+funcName+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
-
-		(*w).WriteHeader(httpResp.StatusCode)
-		_, err = (*w).Write(probDetailsJSON)
-		if err != nil {
-			log.Errf("Response write error in " + funcName +
-				err.Error())
-			return
-		}
-		return
-	}
-
-}
-
-func decodeEventSubscReq(r *http.Request, w http.ResponseWriter,
-	eventSubscReq *EventsSubscReqData) (err error) {
-
-	if r.Body != nil && r.ContentLength > 0 {
-		err = json.NewDecoder(r.Body).Decode(eventSubscReq)
-		if err != nil {
-			logPolicyRespErr(&w, "Json decode error in "+
-				"DeletePolicyAuthAppSession: "+err.Error(),
-				http.StatusBadRequest)
-			return err
-		}
-	}
-	return nil
-}
-
 // DeletePolicyAuthAppSession func deletes an App Session Ctx
 func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err           error
-		eventSubscReq EventsSubscReqData
-		apiResp       PcfPAResponse
+		err        error
+		evsReqData EventsSubscReqData
+		apiResp    PcfPAResponse
 	)
 
 	funcName := "DeletePolicyAuthAppSession: "
@@ -260,7 +206,7 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	// Check if body is not null then decode
-	err = decodeEventSubscReq(r, w, &eventSubscReq)
+	err = decodeValidateEventSubscReq(r, w, &evsReqData)
 	if err != nil {
 		return
 	}
@@ -276,7 +222,7 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	appSessionID := getAppSessionID(r)
 
 	apiResp, err = apiClient.DeleteAppSession(cliCtx,
-		appSessionID, &eventSubscReq)
+		appSessionID, &evsReqData)
 
 	httpResp := apiResp.httpResp
 	probDetails := apiResp.probDetails
@@ -362,26 +308,6 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func setAppSessUpdateDataNotifURI(ascUpdateData *AppSessionContextUpdateData,
-	afCtx *Context) {
-
-	afRoutReq := ascUpdateData.AfRoutReq
-	if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
-		afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
-	}
-
-	if ascUpdateData.EvSubsc != nil {
-		ascUpdateData.EvSubsc.NotifURI = pcfPANotifURI
-	}
-
-	for _, medCompn := range ascUpdateData.MedComponents {
-		afRoutReq := medCompn.AfRoutReq
-		if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
-			afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
-		}
-	}
-}
-
 // ModifyPolicyAuthAppSession func modifies App Session Ctx
 func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 
@@ -413,6 +339,12 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = validateAscUpdateData(&ascUpdateData)
+	if err != nil {
+		logPolicyRespErr(&w, funcName+err.Error(),
+			http.StatusBadRequest)
+		return
+	}
 	setAppSessUpdateDataNotifURI(&ascUpdateData, afCtx)
 
 	apiClient := afCtx.data.policyAuthAPIClient

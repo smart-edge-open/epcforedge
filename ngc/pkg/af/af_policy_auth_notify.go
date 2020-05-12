@@ -57,6 +57,13 @@ func PolicyAuthEventNotifTerminate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = validateTermInfo(&termInfo)
+	if err != nil {
+		logPolicyRespErr(&w, "PolicyAuthEventNotifTerminate:"+
+			err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	w.WriteHeader(204)
 }
 

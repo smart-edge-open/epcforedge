@@ -65,7 +65,7 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 
 	var (
 		err            error
-		eventSubscReq  EventsSubscReqData
+		evsReqData     EventsSubscReqData
 		eventSubscResp EventSubscResponse
 	)
 
@@ -81,7 +81,7 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	err = json.NewDecoder(r.Body).Decode(&eventSubscReq)
+	err = json.NewDecoder(r.Body).Decode(&evsReqData)
 	if err != nil {
 		logPolicyRespErr(&w, "Json Decode error in "+
 			"PolicyAuthAppEventSubs: "+err.Error(),
@@ -89,7 +89,13 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	eventSubscReq.NotifURI = pcfPANotifURI
+	if len(evsReqData.Events) == 0 {
+		logPolicyRespErr(&w, "PolicyAuthAppEventSubs : Event "+
+			"subscription array empty", http.StatusBadRequest)
+		return
+	}
+
+	evsReqData.NotifURI = pcfPANotifURI
 	appSessionID := getAppSessionID(r)
 
 	apiClient := afCtx.data.policyAuthAPIClient
@@ -101,7 +107,7 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 	}
 
 	eventSubscResp, err = apiClient.UpdateEventsSubsc(cliCtx, appSessionID,
-		&eventSubscReq)
+		&evsReqData)
 
 	httpResp := eventSubscResp.httpResp
 	if err != nil {
