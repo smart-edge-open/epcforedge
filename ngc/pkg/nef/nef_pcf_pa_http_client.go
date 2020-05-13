@@ -42,8 +42,7 @@ func NewPCFPolicyAuthHTTPClient(cfg *Config) (*PcfClient, error) {
 	if c.Pcfcfg.OAuth2Support {
 		token, err := getPcfOAuth2Token()
 		if err != nil {
-			log.Errf("Pcf OAuth2 Token retrieval error: " +
-				err.Error())
+			log.Errf("Pcf OAuth2 Token retrieval error: " + err.Error())
 			return nil, err
 		}
 		c.OAuth2Token = token
@@ -66,22 +65,33 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 	log.Infof("PCFs PolicyAuthorizationCreate Entered")
 	_ = ctx
 
+	var (
+		appsesid          string
+		req               *http.Request
+		res               *http.Response
+		err               error
+		appSessionContext AppSessionContext
+		problemDetails    ProblemDetails
+		resbody           []byte
+	)
 	pcfPr := PcfPolicyResponse{}
 	apiURL := pcf.RootURI + pcf.ResourceURI
-	var appsesid string
-	var req *http.Request
-	var res *http.Response
-	var err error
-	var appSessionContext AppSessionContext
-	var problemDetails ProblemDetails
 	appSessionID := AppSessionID("")
-	var resbody []byte
-	log.Infof("Triggering PCF Policy Authorization POST :" + apiURL)
 	headerParams := make(map[string]string)
+
+	log.Infof("Triggering PCF Policy Authorization POST :" + apiURL)
+
 	headerParams["Content-Type"] = contentType
 	headerParams["User-Agent"] = pcf.UserAgent
-
-	req, err = pcf.prepareRequest(ctx, apiURL, "POST", body,
+	if pcf.Pcfcfg.OAuth2Support {
+		token := pcf.OAuth2Token
+		if token == "" {
+			err = errors.New("Nil Ouath2Token in PcfClient Struct")
+			goto END
+		}
+		headerParams["Authorization"] = "Bearer " + token
+	}
+	req, err = prepareRequest(ctx, apiURL, "POST", body,
 		headerParams)
 	if err != nil {
 		goto END
@@ -97,6 +107,7 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 	resbody, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Printf("Failed reading POST response body:%s", err)
+		pcfPr.ResponseCode = uint16(res.StatusCode)
 		goto END
 
 	}
@@ -153,23 +164,32 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 	log.Infof("PCFs PolicyAuthorizationUpdate Entered for AppSessionID %s",
 		string(appSessionID))
 	_ = ctx
-
+	var (
+		req               *http.Request
+		res               *http.Response
+		resbody           []byte
+		appSessionContext AppSessionContext
+		problemDetails    ProblemDetails
+		err               error
+	)
 	pcfPr := PcfPolicyResponse{}
 	sessid := string(appSessionID)
 	apiURL := pcf.RootURI + pcf.ResourceURI + sessid
-	var req *http.Request
-	var res *http.Response
-	var resbody []byte
-	var appSessionContext AppSessionContext
-	var problemDetails ProblemDetails
-	var err error
-	fmt.Println(sessid)
-	log.Infof("Triggering PCF Policy Authorization PATCH :" + apiURL)
 	headerParams := make(map[string]string)
+
+	log.Infof("Triggering PCF Policy Authorization PATCH :" + apiURL)
+
 	headerParams["Content-Type"] = "application/merge-patch+json"
 	headerParams["User-Agent"] = pcf.UserAgent
-
-	req, err = pcf.prepareRequest(ctx, apiURL, "PATCH", body,
+	if pcf.Pcfcfg.OAuth2Support {
+		token := pcf.OAuth2Token
+		if token == "" {
+			err = errors.New("Nil Ouath2Token in PcfClient Struct")
+			goto END
+		}
+		headerParams["Authorization"] = "Bearer " + token
+	}
+	req, err = prepareRequest(ctx, apiURL, "PATCH", body,
 		headerParams)
 	if err != nil {
 		goto END
@@ -186,6 +206,7 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 	resbody, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Printf("Failed reading PATCH response body:%s", err)
+		pcfPr.ResponseCode = uint16(res.StatusCode)
 		goto END
 
 	}
@@ -245,21 +266,30 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 		string(appSessionID))
 	_ = ctx
 
+	var (
+		req     *http.Request
+		res     *http.Response
+		resbody []byte
+		err     error
+	)
 	pcfPr := PcfPolicyResponse{}
 	sessid := string(appSessionID)
-	var req *http.Request
-	var res *http.Response
-	var resbody []byte
-	var err error
 	apiURL := pcf.RootURI + pcf.ResourceURI + sessid + "/delete"
+	headerParams := make(map[string]string)
 
 	log.Infof("Triggering PCF Policy Authorization Delete :" + apiURL)
 
-	headerParams := make(map[string]string)
 	headerParams["Content-Type"] = contentType
 	headerParams["User-Agent"] = pcf.UserAgent
-
-	req, err = pcf.prepareRequest(ctx, apiURL, "POST", nil,
+	if pcf.Pcfcfg.OAuth2Support {
+		token := pcf.OAuth2Token
+		if token == "" {
+			err = errors.New("Nil Ouath2Token in PcfClient Struct")
+			goto END
+		}
+		headerParams["Authorization"] = "Bearer " + token
+	}
+	req, err = prepareRequest(ctx, apiURL, "POST", nil,
 		headerParams)
 	if err != nil {
 		goto END
@@ -337,21 +367,33 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 	log.Infof("PCFs PolicyAuthorizationGet Entered for AppSessionID %s",
 		string(appSessionID))
 	_ = ctx
+
+	var (
+		res               *http.Response
+		req               *http.Request
+		appSessionContext AppSessionContext
+		problemDetails    ProblemDetails
+		err               error
+		resbody           []byte
+	)
 	sessid := string(appSessionID)
 	apiURL := pcf.RootURI + pcf.ResourceURI + sessid
 	pcfPr := PcfPolicyResponse{}
-
-	var res *http.Response
-	var req *http.Request
-	var appSessionContext AppSessionContext
-	var problemDetails ProblemDetails
-	var err error
-	var resbody []byte
-	log.Infof("Triggering PCF Policy Authorization GET : " + apiURL)
 	headerParams := make(map[string]string)
+
+	log.Infof("Triggering PCF Policy Authorization GET : " + apiURL)
+
 	headerParams["Content-Type"] = contentType
 	headerParams["User-Agent"] = pcf.UserAgent
-	req, err = pcf.prepareRequest(ctx, apiURL, "GET", nil,
+	if pcf.Pcfcfg.OAuth2Support {
+		token := pcf.OAuth2Token
+		if token == "" {
+			err = errors.New("Nil Ouath2Token in PcfClient Struct")
+			goto END
+		}
+		headerParams["Authorization"] = "Bearer " + token
+	}
+	req, err = prepareRequest(ctx, apiURL, "GET", nil,
 		headerParams)
 	if err != nil {
 		goto END
@@ -366,6 +408,7 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 	resbody, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Printf("Failed reading GET response body:%s", err)
+		pcfPr.ResponseCode = uint16(res.StatusCode)
 		goto END
 
 	}

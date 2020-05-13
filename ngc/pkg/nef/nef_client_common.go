@@ -58,7 +58,7 @@ func setBody(body interface{}, contentType string) (bodyBuf *bytes.Buffer,
 }
 
 //prepareRequest build the request
-func (c *PcfClient) prepareRequest(
+func prepareRequest(
 	ctx context.Context,
 	path string, method string,
 	reqBody interface{},
@@ -115,15 +115,7 @@ func (c *PcfClient) prepareRequest(
 	if ctx != nil {
 		// add context to the request
 		httpRequest = httpRequest.WithContext(ctx)
-		if c.Pcfcfg.OAuth2Support {
-			token := c.OAuth2Token
-			if token == "" {
-				err = errors.New("Nil Ouath2Token in " +
-					"PcfApiClient Struct")
-				return nil, err
-			}
-			httpRequest.Header.Add("Authorization", "Bearer "+token)
-		}
+
 	}
 	return httpRequest, nil
 }
