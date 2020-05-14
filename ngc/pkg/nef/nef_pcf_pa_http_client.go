@@ -32,6 +32,7 @@ func NewPCFPolicyAuthHTTPClient(cfg *Config) (*PcfClient, error) {
 	var err error
 	c.HTTPClient, err = genHTTPClient(cfg.PcfPolicyAuthorizationConfig)
 	if err != nil {
+		fmt.Printf("Error creating HTTP client :%s", err)
 		return nil, err
 	}
 	c.Pcfcfg = cfg.PcfPolicyAuthorizationConfig
@@ -56,6 +57,26 @@ func NewPCFPolicyAuthHTTPClient(cfg *Config) (*PcfClient, error) {
 	log.Infoln("Resource URI: ", c.RootURI+c.ResourceURI)
 	return c, nil
 }
+func (pcf *PcfClient) addheaderparams(method string) (map[string]string, error) {
+	headerParams := make(map[string]string)
+	if method == "PATCH" {
+		headerParams["Content-Type"] = "application/merge-patch+json"
+	} else {
+		headerParams["Content-Type"] = contentType
+	}
+
+	headerParams["User-Agent"] = pcf.UserAgent
+	if pcf.Pcfcfg.OAuth2Support {
+		token := pcf.OAuth2Token
+		if token == "" {
+			err := errors.New("Nil Ouath2Token in PcfClient Struct")
+			return nil, err
+		}
+		headerParams["Authorization"] = "Bearer " + token
+	}
+	return headerParams, nil
+
+}
 
 //PolicyAuthorizationCreate is a actual implementation
 // Successful response : 201 and body contains AppSessionContext
@@ -77,23 +98,17 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 	pcfPr := PcfPolicyResponse{}
 	apiURL := pcf.RootURI + pcf.ResourceURI
 	appSessionID := AppSessionID("")
-	headerParams := make(map[string]string)
-
+	headerParams, err := pcf.addheaderparams("POST")
+	if err != nil {
+		fmt.Printf("Error in adding header parameters :%s", err)
+		goto END
+	}
 	log.Infof("Triggering PCF Policy Authorization POST :" + apiURL)
 
-	headerParams["Content-Type"] = contentType
-	headerParams["User-Agent"] = pcf.UserAgent
-	if pcf.Pcfcfg.OAuth2Support {
-		token := pcf.OAuth2Token
-		if token == "" {
-			err = errors.New("Nil Ouath2Token in PcfClient Struct")
-			goto END
-		}
-		headerParams["Authorization"] = "Bearer " + token
-	}
 	req, err = prepareRequest(ctx, apiURL, "POST", body,
 		headerParams)
 	if err != nil {
+		fmt.Printf("Error in creating POST request :%s", err)
 		goto END
 	}
 
@@ -175,23 +190,18 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 	pcfPr := PcfPolicyResponse{}
 	sessid := string(appSessionID)
 	apiURL := pcf.RootURI + pcf.ResourceURI + sessid
-	headerParams := make(map[string]string)
+	headerParams, err := pcf.addheaderparams("PATCH")
+	if err != nil {
+		fmt.Printf("Error in adding header parameters :%s", err)
+		goto END
+	}
 
 	log.Infof("Triggering PCF Policy Authorization PATCH :" + apiURL)
 
-	headerParams["Content-Type"] = "application/merge-patch+json"
-	headerParams["User-Agent"] = pcf.UserAgent
-	if pcf.Pcfcfg.OAuth2Support {
-		token := pcf.OAuth2Token
-		if token == "" {
-			err = errors.New("Nil Ouath2Token in PcfClient Struct")
-			goto END
-		}
-		headerParams["Authorization"] = "Bearer " + token
-	}
 	req, err = prepareRequest(ctx, apiURL, "PATCH", body,
 		headerParams)
 	if err != nil {
+		fmt.Printf("Error in creating PATCH request :%s", err)
 		goto END
 	}
 
@@ -275,23 +285,18 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 	pcfPr := PcfPolicyResponse{}
 	sessid := string(appSessionID)
 	apiURL := pcf.RootURI + pcf.ResourceURI + sessid + "/delete"
-	headerParams := make(map[string]string)
+	headerParams, err := pcf.addheaderparams("DELETE")
+	if err != nil {
+		fmt.Printf("Error in adding header parameters :%s", err)
+		goto END
+	}
 
 	log.Infof("Triggering PCF Policy Authorization Delete :" + apiURL)
 
-	headerParams["Content-Type"] = contentType
-	headerParams["User-Agent"] = pcf.UserAgent
-	if pcf.Pcfcfg.OAuth2Support {
-		token := pcf.OAuth2Token
-		if token == "" {
-			err = errors.New("Nil Ouath2Token in PcfClient Struct")
-			goto END
-		}
-		headerParams["Authorization"] = "Bearer " + token
-	}
 	req, err = prepareRequest(ctx, apiURL, "POST", nil,
 		headerParams)
 	if err != nil {
+		fmt.Printf("Error in creating DELETE request :%s", err)
 		goto END
 	}
 
@@ -301,7 +306,6 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 		fmt.Printf("Failed receiving DELETE response:%s", err)
 		goto END
 	}
-
 	if res.StatusCode == 204 {
 		log.Infof("PCFs PolicyAuthorizationDelete AppSessionID %s found",
 			sessid)
@@ -354,6 +358,7 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 		}
 		pcfPr.ResponseCode = uint16(res.StatusCode)
 	}
+
 	log.Infof("PCFs PolicyAuthorizationDelete Exited for AppSessionID %s",
 		sessid)
 END:
@@ -379,23 +384,17 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 	sessid := string(appSessionID)
 	apiURL := pcf.RootURI + pcf.ResourceURI + sessid
 	pcfPr := PcfPolicyResponse{}
-	headerParams := make(map[string]string)
-
+	headerParams, err := pcf.addheaderparams("GET")
+	if err != nil {
+		fmt.Printf("Error in creating adding header parameters :%s", err)
+		goto END
+	}
 	log.Infof("Triggering PCF Policy Authorization GET : " + apiURL)
 
-	headerParams["Content-Type"] = contentType
-	headerParams["User-Agent"] = pcf.UserAgent
-	if pcf.Pcfcfg.OAuth2Support {
-		token := pcf.OAuth2Token
-		if token == "" {
-			err = errors.New("Nil Ouath2Token in PcfClient Struct")
-			goto END
-		}
-		headerParams["Authorization"] = "Bearer " + token
-	}
 	req, err = prepareRequest(ctx, apiURL, "GET", nil,
 		headerParams)
 	if err != nil {
+		fmt.Printf("Error in creating GET request :%s", err)
 		goto END
 	}
 	res, err = pcf.HTTPClient.Do(req)
