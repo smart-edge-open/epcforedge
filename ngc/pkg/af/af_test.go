@@ -2250,6 +2250,376 @@ var _ = Describe("AF", func() {
 			})
 
 		})
+		Describe("Policy Authorization SMF Notification", func() {
+
+			It("POST SMF notification for missing body", func() {
+
+				By("Preparing request")
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8081/af/v1/policy-authorization/"+
+						"smfnotify",
+					nil)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+
+			})
+
+			It("POST SMF notification json parsing fialed", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/policy_auth/SMF_AF_NOTIF_err.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8081/af/v1/policy-authorization/"+
+						"smfnotify",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+
+			})
+
+			It("POST SMF notification notifid missing", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/policy_auth/SMF_AF_NOTIF_no_id.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8081/af/v1/policy-authorization/"+
+						"smfnotify",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+
+			})
+
+			It("POST SMF notification event notifs missing", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/policy_auth/SMF_AF_NOTIF_no_evts.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8081/af/v1/policy-authorization/"+
+						"smfnotify",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			})
+
+			It("POST SMF  notification up_path_ch events missing", func() {
+
+				By("Reading json file")
+				reqBody, err := ioutil.ReadFile(
+					"./testdata/policy_auth/SMF_AF_NOTIF_no_upfs.json")
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Preparing request")
+				reqBodyBytes := bytes.NewReader(reqBody)
+				req, err := http.NewRequest(http.MethodPost,
+					"http://localhost:8081/af/v1/policy-authorization/"+
+						"smfnotify",
+					reqBodyBytes)
+				Expect(err).ShouldNot(HaveOccurred())
+
+				By("Sending request")
+				resp := httptest.NewRecorder()
+				ctx := context.WithValue(req.Context(),
+					KeyType("af-ctx"), af.AfCtx)
+				af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+			})
+
+			It("POST SMF notification for missing correlation id",
+				func() {
+
+					By("Reading json file")
+					reqBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/SMF_AF_NOTIF_01.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Preparing request")
+					reqBodyBytes := bytes.NewReader(reqBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8081/af/v1/policy-authorization/"+
+							"smfnotify",
+						reqBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx := context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+					Expect(resp.Code).To(Equal(http.StatusNotFound))
+
+				})
+
+			Context("PolicyAuth POST", func() {
+				Specify("Sending POST 001 request", func() {
+					By("Reading json file")
+					reqBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XPOST_01.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Preparing request")
+					reqBodyBytes := bytes.NewReader(reqBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8080/af/v1/policy-authorization/"+
+							"app-sessions",
+						reqBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx := context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					resBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XPOST_01.json")
+					Expect(err).ShouldNot(HaveOccurred())
+					resBodyBytes := bytes.NewReader(resBody)
+					header := make(http.Header)
+					header.Set("Location",
+						"https://localhost:8095/af/v1/policy-authorization/"+
+							"app-sessions/5001")
+					httpclient :=
+						testingAFClient(func(req *http.Request) *http.Response {
+							// Test request parameters
+							return &http.Response{
+								StatusCode: 201,
+								// Send response to be tested
+								Body: ioutil.NopCloser(resBodyBytes),
+								// Must be set to non-nil value or it panics
+								Header: header,
+							}
+						})
+
+					af.TestAf = true
+					af.SetHTTPClient(httpclient)
+					af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+					af.TestAf = false
+					Expect(resp.Code).To(Equal(http.StatusCreated))
+
+				})
+
+				It("POST SMF notification with correct correlationId",
+					func() {
+
+						By("Reading json file")
+						reqBody, err := ioutil.ReadFile(
+							"./testdata/policy_auth/SMF_AF_NOTIF_01.json")
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Preparing request")
+						reqBodyBytes := bytes.NewReader(reqBody)
+						req, err := http.NewRequest(http.MethodPost,
+							"http://localhost:8081/af/v1/policy-authorization/"+
+								"smfnotify",
+							reqBodyBytes)
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Sending request")
+						resp := httptest.NewRecorder()
+						ctx := context.WithValue(req.Context(),
+							KeyType("af-ctx"), af.AfCtx)
+						af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+						Expect(resp.Code).To(Equal(http.StatusNoContent))
+
+					})
+
+				Context("PolicyAuth PATCH", func() {
+					Specify("Sending PATCH 001 request", func() {
+						By("Reading json file")
+						reqBody, err := ioutil.ReadFile(
+							"./testdata/policy_auth/AF_NB_PA_XPATCH_01.json")
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Preparing request")
+						reqBodyBytes := bytes.NewReader(reqBody)
+						req, err := http.NewRequest(http.MethodPatch,
+							"http://localhost:8080/af/v1/policy-authorization/"+
+								"app-sessions/5001",
+							reqBodyBytes)
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Sending request")
+						resp := httptest.NewRecorder()
+						ctx := context.WithValue(req.Context(),
+							KeyType("af-ctx"), af.AfCtx)
+						resBody, err := ioutil.ReadFile(
+							"./testdata/policy_auth/AF_NB_PA_XPOST_01.json")
+						Expect(err).ShouldNot(HaveOccurred())
+						resBodyBytes := bytes.NewReader(resBody)
+						httpclient :=
+							testingAFClient(func(req *http.Request) *http.Response {
+								// Test request parameters
+								return &http.Response{
+									StatusCode: 200,
+									// Send response to be tested
+									Body: ioutil.NopCloser(resBodyBytes),
+									// Must be set to non-nil value or it panics
+									Header: make(http.Header),
+								}
+							})
+
+						af.TestAf = true
+						af.SetHTTPClient(httpclient)
+						af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+						af.TestAf = false
+						Expect(resp.Code).To(Equal(http.StatusOK))
+
+					})
+				})
+
+				Context("PolicyAuth DELETE", func() {
+					Specify("Sending PATCH 001 request", func() {
+						req, err := http.NewRequest(http.MethodPost,
+							"http://localhost:8080/af/v1/policy-authorization/"+
+								"app-sessions/5001/delete",
+							nil)
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Sending request")
+						resp := httptest.NewRecorder()
+						ctx := context.WithValue(req.Context(),
+							KeyType("af-ctx"), af.AfCtx)
+						httpclient :=
+							testingAFClient(func(req *http.Request) *http.Response {
+								// Test request parameters
+								return &http.Response{
+									StatusCode: 204,
+									// Send response to be tested
+									Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+									// Must be set to non-nil value or it panics
+									Header: make(http.Header),
+								}
+							})
+
+						af.TestAf = true
+						af.SetHTTPClient(httpclient)
+						af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+						af.TestAf = false
+						Expect(resp.Code).To(Equal(http.StatusNoContent))
+
+					})
+				})
+
+				Context("PolicyAuth POST", func() {
+					Specify("Sending POST 002 request", func() {
+						By("Reading json file")
+						reqBody, err := ioutil.ReadFile(
+							"./testdata/policy_auth/AF_NB_PA_XPOST_02.json")
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Preparing request")
+						reqBodyBytes := bytes.NewReader(reqBody)
+						req, err := http.NewRequest(http.MethodPost,
+							"http://localhost:8080/af/v1/policy-authorization/"+
+								"app-sessions",
+							reqBodyBytes)
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Sending request")
+						resp := httptest.NewRecorder()
+						ctx := context.WithValue(req.Context(),
+							KeyType("af-ctx"), af.AfCtx)
+						resBody, err := ioutil.ReadFile(
+							"./testdata/policy_auth/AF_NB_PA_XPOST_02.json")
+						Expect(err).ShouldNot(HaveOccurred())
+						resBodyBytes := bytes.NewReader(resBody)
+						header := make(http.Header)
+						header.Set("Location",
+							"https://localhost:8095/af/v1/"+
+								"policy-authorization/app-sessions/5001")
+						httpclient :=
+							testingAFClient(func(req *http.Request) *http.Response {
+								// Test request parameters
+								return &http.Response{
+									StatusCode: 201,
+									// Send response to be tested
+									Body: ioutil.NopCloser(resBodyBytes),
+									// Must be set to non-nil value or it panics
+									Header: header,
+								}
+							})
+
+						af.TestAf = true
+						af.SetHTTPClient(httpclient)
+						af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+						af.TestAf = false
+						Expect(resp.Code).To(Equal(http.StatusCreated))
+
+					})
+				})
+
+				Context("PolicyAuth PATCH - Both ws and notifyURI", func() {
+					Specify("Sending PATCH 001 request", func() {
+						By("Reading json file")
+						reqBody, err := ioutil.ReadFile(
+							"./testdata/policy_auth/AF_NB_PA_XPATCH_01.json")
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Preparing request")
+						reqBodyBytes := bytes.NewReader(reqBody)
+						req, err := http.NewRequest(http.MethodPatch,
+							"http://localhost:8080/af/v1/policy-authorization/"+
+								"app-sessions/5001",
+							reqBodyBytes)
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Sending request")
+						resp := httptest.NewRecorder()
+						ctx := context.WithValue(req.Context(),
+							KeyType("af-ctx"), af.AfCtx)
+						af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+						Expect(resp.Code).To(Equal(http.StatusBadRequest))
+
+					})
+				})
+
+			})
+		})
 
 	})
 

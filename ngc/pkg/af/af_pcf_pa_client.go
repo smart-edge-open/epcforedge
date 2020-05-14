@@ -29,9 +29,13 @@ type PolicyAuthAPIClient struct {
 
 // callAPI do the request.
 func (c *PolicyAuthAPIClient) callAPI(request *http.Request) (
-	*http.Response, error) {
+	resp *http.Response, err error) {
 
-	resp, err := c.httpClient.Do(request)
+	if TestAf {
+		resp, err = HTTPClient.Do(request)
+	} else {
+		resp, err = c.httpClient.Do(request)
+	}
 	if err != nil {
 		return resp, err
 	}

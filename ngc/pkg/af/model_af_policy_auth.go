@@ -496,7 +496,7 @@ type UpPathChgEvent struct {
 	 * It is used to set the value of Notification Correlation ID in the
 	 * notification sent by the SMF.
 	 */
-	NotifCorreID string         `json:"notifCorreId,omitempty"`
+	NotifCorreID string         `json:"notifCorreId"`
 	DnaiChgType  DNAIChangeType `json:"dnaiChgType"`
 }
 

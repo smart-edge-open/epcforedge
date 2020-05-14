@@ -193,7 +193,7 @@
             }
         ],
         "upPathChgSub": {
-            "notificationUri": "http://example.com/notif",
+            "notificationUri": "http://localhost:9000/notification",
             "notifCorreId": "1234",
             "dnaiChgType": "EARLY"
         }
@@ -415,7 +415,7 @@
                     }
                 ],
                 "upPathChgSub": {
-                    "notificationUri": "http://example.com/notif",
+            	    "notificationUri": "http://localhost:9000/notification",
                     "notifCorreId": "1234",
                     "dnaiChgType": "EARLY"
                 }
@@ -706,7 +706,7 @@
             }
         ],
         "upPathChgSub": {
-            "notificationUri": "http://example.com/notif",
+            "notificationUri": "http://localhost:9000/notification",
             "notifCorreId": "1234",
             "dnaiChgType": "EARLY"
         }
@@ -928,7 +928,7 @@
                     }
                 ],
                 "upPathChgSub": {
-                    "notificationUri": "http://example.com/notif",
+            	    "notificationUri": "http://localhost:9000/notification",
                     "notifCorreId": "1234",
                     "dnaiChgType": "EARLY"
                 }

@@ -55,12 +55,14 @@ type Config struct {
 
 type afData struct {
 	policyAuthAPIClient pcfPolicyAuthAPI
+	notifyAPIClient     notifyClientAPI
 }
 
 //Context struct
 type Context struct {
 	subscriptions NotifSubscryptions
 	transactions  TransactionIDs
+	appSessionsEv AppSessEv
 	cfg           Config
 	data          afData
 }
@@ -90,6 +92,11 @@ func runServer(ctx context.Context, afCtx *Context) error {
 	afCtx.subscriptions = make(NotifSubscryptions)
 
 	err = initPACfg(afCtx)
+	if err != nil {
+		return err
+	}
+
+	err = initNotify(afCtx)
 	if err != nil {
 		return err
 	}
