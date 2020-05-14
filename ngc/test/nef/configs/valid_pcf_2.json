@@ -27,14 +27,14 @@
     ],
     "PcfPolicyAuthorizationConfig":
      {
-         "Protocol":"https",
+         "Protocol":"http",
          "ProtocolVer":"2.0",
          "VerifyCerts":false,
          "ClientCert":"/etc/certs/pcf.pem",
          "Hostname": "localhost",
          "Port": "29507",
          "LocationPrefixURI":"/npcf-policyauthorization/v1/app-sessions/",
-         "OAuth2Support":true
+         "OAuth2Support":false
                   
      }
 }
