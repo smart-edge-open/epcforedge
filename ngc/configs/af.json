@@ -1,6 +1,8 @@
 {
     "AfId": "1",
     "LocationPrefixPfd": "/af/v1/pfd/",
+    "LocationPrefixPA": "/af/v1/policy-authorization/app-sessions",
+    "UserAgent": "NGC-AF",
     "ServerConfig": {
         "CNCAEndpoint": ":8050",
         "Hostname": "localhost",
@@ -18,5 +20,16 @@
         "UserAgent": "NGC-AF",
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem",
         "OAuth2Support": true
+    },
+    "CliPAConfig": {
+        "Protocol": "https",
+        "ProtocolVer": "2.0",
+        "Hostname": "localhost",
+        "Port": "8095",
+        "BasePath": "/npcf-policyauthorization/v1",
+        "CliCertPath": "/etc/certs/root-ca-cert.pem",
+        "VerifyCerts": true,
+        "OAuth2Support": false,
+        "NotifURI": "/af/v1/policy-authorization"
     }
 }

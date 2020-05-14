@@ -1,6 +1,8 @@
 {
     "AfId": "1",
     "LocationPrefixPfd": "/af/v1/pfd/",
+    "LocationPrefixPA": "/af/v1/policy-authorization/app-sessions",
+    "UserAgent": "NGC-AF",
     "ServerConfig": {
         "CNCAEndpoint": ":8080",
         "Hostname": "localhost",
@@ -17,6 +19,17 @@
         "NEFPFDBasePath": "/3gpp-pfd-management/v1",
         "UserAgent": "NGC-AF",
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem",
-	"OAuth2Support": true
+        "OAuth2Support": true
+    },
+    "CliPAConfig": {
+        "Protocol": "https",
+        "ProtocolVer": "2.0",
+        "Hostname": "localhost",
+        "Port": "8095",
+        "BasePath": "/npcf-policyauthorization/v1",
+        "CliCertPath": "/etc/certs/root-ca-cert.pem",
+        "VerifyCerts": true,
+        "OAuth2Support": false,
+        "NotifURI": "/af/v1/policy-authorization"
     }
 }
