@@ -160,7 +160,17 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 	probDetails := apiResp.probDetails
 	httpResp := apiResp.httpResp
 	if err != nil || probDetails != nil {
+		if len(apiResp.retryAfter) > 0 {
+			w.Header().Set("Retry-After", apiResp.retryAfter)
+		}
 		handlePAErrorResp(probDetails, err, &w, httpResp, funcName)
+
+		return
+	}
+
+	w.Header().Set("Location", apiResp.locationURI)
+	if httpResp.StatusCode == 303 {
+		w.WriteHeader(httpResp.StatusCode)
 		return
 	}
 
@@ -173,7 +183,6 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Location", apiResp.locationURI)
 	w.WriteHeader(httpResp.StatusCode)
 
 	_, err = w.Write(appSessJSON)
@@ -208,6 +217,8 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	// Check if body is not null then decode
 	err = decodeValidateEventSubscReq(r, w, &evsReqData)
 	if err != nil {
+		logPolicyRespErr(&w, "DeletePolicyAuthAppSessions: "+
+			err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -363,6 +374,10 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	probDetails := apiResp.probDetails
 	httpResp := apiResp.httpResp
 	if err != nil || probDetails != nil {
+		if len(apiResp.retryAfter) > 0 {
+			w.Header().Set("Retry-After", apiResp.retryAfter)
+		}
+
 		handlePAErrorResp(probDetails, err, &w, httpResp, funcName)
 		return
 	}

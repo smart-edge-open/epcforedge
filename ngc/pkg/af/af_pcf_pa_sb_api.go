@@ -24,6 +24,7 @@ type PcfPAResponse struct {
 	probDetails *ProblemDetails
 	httpResp    *http.Response
 	locationURI string
+	retryAfter  string
 }
 
 // pcfPolicyAuthAPI defines the interfaces that are exposed for POLICY AUTH

@@ -60,6 +60,22 @@ func getLocationURI(httpResp *http.Response, c *PolicyAuthAPIClient) string {
 	return uri
 }
 
+func setRetryAfterHeader(retVal *PcfPAResponse, httpResp *http.Response) (
+	err error) {
+
+	if httpResp.StatusCode == 403 {
+		retryAfter := httpResp.Header.Get("Retry-After")
+		if len(retryAfter) == 0 {
+			httpResp.StatusCode = http.
+				StatusInternalServerError
+			err = errors.New("Nil Retry-After header in response")
+			return err
+		}
+		retVal.retryAfter = retryAfter
+	}
+	return nil
+}
+
 // NewPolicyAuthAPIClient - helper func
 /*
  * NewAPIClient creates a new API client. Basically create new http client if
@@ -99,6 +115,56 @@ func NewPolicyAuthAPIClient(cfg *Config) (*PolicyAuthAPIClient, error) {
 
 	return c, nil
 }
+func (c *PolicyAuthAPIClient) handlePostAppSessResp(httpResp *http.Response,
+	respBody []byte, retVal *PcfPAResponse) (err error) {
+
+	switch httpResp.StatusCode {
+	case 201:
+		var asc *AppSessionContext = new(AppSessionContext)
+		err = json.Unmarshal(respBody, asc)
+		if err != nil {
+			log.Errf("Error in unmarshalling json, " +
+				"PostAppSession: " + err.Error())
+			httpResp.StatusCode = 500
+		}
+		retVal.locationURI = getLocationURI(httpResp, c)
+		retVal.httpResp = httpResp
+		retVal.appSessCtx = asc
+		return err
+	case 303:
+		retVal.locationURI = getLocationURI(httpResp, c)
+		return nil
+	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
+		if httpResp.StatusCode == 401 {
+			validatePAAuthToken(c)
+		}
+
+		err = setRetryAfterHeader(retVal, httpResp)
+		if err != nil {
+			log.Errf("PostAppSession: " + err.Error())
+			return err
+		}
+
+		retVal.httpResp = httpResp
+
+		var v *ProblemDetails = new(ProblemDetails)
+		err = json.Unmarshal(respBody, v)
+		if err != nil {
+			log.Errf("Error in unmarshalling response body, " +
+				"PostAppSession: " + err.Error())
+			return err
+		}
+
+		retVal.probDetails = v
+		return err
+	}
+
+	err = errors.New(string(respBody))
+	log.Errf("PostAppSess- PCF Returned Error: " +
+		string(respBody))
+	retVal.httpResp = httpResp
+	return err
+}
 
 // PostAppSessions API handler
 /*
@@ -135,61 +201,26 @@ func (c *PolicyAuthAPIClient) PostAppSessions(ctx context.Context,
 		return retVal, err
 	}
 
-	httpResponse, err := c.callAPI(r)
-	if err != nil || httpResponse == nil {
-		retVal.httpResp = httpResponse
+	httpResp, err := c.callAPI(r)
+	if err != nil || httpResp == nil {
+		retVal.httpResp = httpResp
 		return retVal, err
 	}
 
-	respBody, err := ioutil.ReadAll(httpResponse.Body)
+	respBody, err := ioutil.ReadAll(httpResp.Body)
 	defer func() {
-		err = httpResponse.Body.Close()
+		err = httpResp.Body.Close()
 		if err != nil {
 			log.Errf("Resp Body wasn't closed properly" +
 				err.Error())
 		}
 	}()
 	if err != nil {
-		retVal.httpResp = httpResponse
+		retVal.httpResp = httpResp
 		return retVal, err
 	}
 
-	switch httpResponse.StatusCode {
-	case 201:
-		var asc *AppSessionContext = new(AppSessionContext)
-		err = json.Unmarshal(respBody, asc)
-		if err != nil {
-			log.Errf("Error in unmarshalling json, " +
-				"PostAppSession: " + err.Error())
-			httpResponse.StatusCode = 500
-		}
-		retVal.locationURI = getLocationURI(httpResponse, c)
-		retVal.httpResp = httpResponse
-		retVal.appSessCtx = asc
-		return retVal, err
-	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
-		if httpResponse.StatusCode == 401 {
-			validatePAAuthToken(c)
-		}
-
-		retVal.httpResp = httpResponse
-
-		var v *ProblemDetails = new(ProblemDetails)
-		err = json.Unmarshal(respBody, v)
-		if err != nil {
-			log.Errf("Error in unmarshalling response body, " +
-				"PostAppSession: " + err.Error())
-			return retVal, err
-		}
-
-		retVal.probDetails = v
-		return retVal, err
-	}
-
-	err = errors.New(string(respBody))
-	log.Errf("PostAppSess- PCF Returned Error: " +
-		string(respBody))
-	retVal.httpResp = httpResponse
+	err = c.handlePostAppSessResp(httpResp, respBody, &retVal)
 	return retVal, err
 }
 
@@ -250,15 +281,15 @@ func (c *PolicyAuthAPIClient) DeleteAppSession(
 		return retVal, err
 	}
 
-	httpResponse, err := c.callAPI(r)
-	retVal.httpResp = httpResponse
-	if err != nil || httpResponse == nil {
+	httpResp, err := c.callAPI(r)
+	retVal.httpResp = httpResp
+	if err != nil || httpResp == nil {
 		return retVal, err
 	}
 
-	respBody, err := ioutil.ReadAll(httpResponse.Body)
+	respBody, err := ioutil.ReadAll(httpResp.Body)
 	defer func() {
-		err = httpResponse.Body.Close()
+		err = httpResp.Body.Close()
 		if err != nil {
 			log.Errf("Resp Body wasn't closed properly" +
 				err.Error())
@@ -268,21 +299,21 @@ func (c *PolicyAuthAPIClient) DeleteAppSession(
 		return retVal, err
 	}
 
-	switch httpResponse.StatusCode {
+	switch httpResp.StatusCode {
 	case 200:
 		var asc *AppSessionContext = new(AppSessionContext)
 		err = json.Unmarshal(respBody, &asc)
 		if err != nil {
 			log.Errf("Error in unmarshalling json, " +
 				"DeleteAppSession: " + err.Error())
-			httpResponse.StatusCode = 500
+			httpResp.StatusCode = 500
 		}
 		retVal.appSessCtx = asc
 		return retVal, err
 	case 204:
 		return retVal, nil
 	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
-		if httpResponse.StatusCode == 401 {
+		if httpResp.StatusCode == 401 {
 			validatePAAuthToken(c)
 		}
 		var v *ProblemDetails = new(ProblemDetails)
@@ -327,15 +358,15 @@ func (c *PolicyAuthAPIClient) GetAppSession(
 		return retVal, err
 	}
 
-	httpResponse, err := c.callAPI(r)
-	retVal.httpResp = httpResponse
-	if err != nil || httpResponse == nil {
+	httpResp, err := c.callAPI(r)
+	retVal.httpResp = httpResp
+	if err != nil || httpResp == nil {
 		return retVal, err
 	}
 
-	respBody, err := ioutil.ReadAll(httpResponse.Body)
+	respBody, err := ioutil.ReadAll(httpResp.Body)
 	defer func() {
-		err = httpResponse.Body.Close()
+		err = httpResp.Body.Close()
 		if err != nil {
 			log.Errf("Resp Body wasn't closed properly" +
 				err.Error())
@@ -345,24 +376,24 @@ func (c *PolicyAuthAPIClient) GetAppSession(
 		return retVal, err
 	}
 
-	switch httpResponse.StatusCode {
+	switch httpResp.StatusCode {
 	case 200:
 		var asc *AppSessionContext = new(AppSessionContext)
 		err = json.Unmarshal(respBody, &asc)
 		if err != nil {
 			log.Errf("Error in unmarshalling json, " +
 				"GetAppSession: " + err.Error())
-			httpResponse.StatusCode = 500
+			httpResp.StatusCode = 500
 		}
 		retVal.appSessCtx = asc
 		return retVal, err
 	case 400, 401, 403, 404, 406, 429, 500, 503:
-		if httpResponse.StatusCode == 401 {
+		if httpResp.StatusCode == 401 {
 			validatePAAuthToken(c)
 		}
 		var v *ProblemDetails = new(ProblemDetails)
 		err = json.Unmarshal(respBody, v)
-		retVal.httpResp = httpResponse
+		retVal.httpResp = httpResp
 		if err != nil {
 			log.Errf("Error in unmarshalling response body, " +
 				"GetAppSession: " + err.Error())
@@ -415,15 +446,15 @@ func (c *PolicyAuthAPIClient) ModAppSession(
 		return retVal, err
 	}
 
-	httpResponse, err := c.callAPI(r)
-	retVal.httpResp = httpResponse
-	if err != nil || httpResponse == nil {
+	httpResp, err := c.callAPI(r)
+	retVal.httpResp = httpResp
+	if err != nil || httpResp == nil {
 		return retVal, err
 	}
 
-	respBody, err := ioutil.ReadAll(httpResponse.Body)
+	respBody, err := ioutil.ReadAll(httpResp.Body)
 	defer func() {
-		err = httpResponse.Body.Close()
+		err = httpResp.Body.Close()
 		if err != nil {
 			log.Errf("Resp Body wasn't closed properly" +
 				err.Error())
@@ -433,21 +464,28 @@ func (c *PolicyAuthAPIClient) ModAppSession(
 		return retVal, err
 	}
 
-	switch httpResponse.StatusCode {
+	switch httpResp.StatusCode {
 	case 200:
 		var asc *AppSessionContext = new(AppSessionContext)
 		err = json.Unmarshal(respBody, &asc)
 		if err != nil {
 			log.Errf("Error in unmarshalling json, " +
 				"ModAppSession: " + err.Error())
-			httpResponse.StatusCode = 500
+			httpResp.StatusCode = 500
 		}
 		retVal.appSessCtx = asc
 		return retVal, err
 	case 400, 401, 403, 404, 411, 413, 415, 429, 500, 503:
-		if httpResponse.StatusCode == 401 {
+		if httpResp.StatusCode == 401 {
 			validatePAAuthToken(c)
 		}
+
+		err = setRetryAfterHeader(&retVal, httpResp)
+		if err != nil {
+			log.Errf("ModAppSession: " + err.Error())
+			return retVal, err
+		}
+
 		var v *ProblemDetails = new(ProblemDetails)
 		err = json.Unmarshal(respBody, v)
 		if err != nil {
@@ -562,15 +600,15 @@ func (c *PolicyAuthAPIClient) UpdateEventsSubsc(ctx context.Context,
 		return retVal, err
 	}
 
-	httpResponse, err := c.callAPI(r)
-	retVal.httpResp = httpResponse
-	if err != nil || httpResponse == nil {
+	httpResp, err := c.callAPI(r)
+	retVal.httpResp = httpResp
+	if err != nil || httpResp == nil {
 		return retVal, err
 	}
 
-	respBody, err := ioutil.ReadAll(httpResponse.Body)
+	respBody, err := ioutil.ReadAll(httpResp.Body)
 	defer func() {
-		err = httpResponse.Body.Close()
+		err = httpResp.Body.Close()
 		if err != nil {
 			log.Errf("Resp Body wasn't closed properly" +
 				err.Error())
@@ -580,7 +618,7 @@ func (c *PolicyAuthAPIClient) UpdateEventsSubsc(ctx context.Context,
 		return retVal, err
 	}
 
-	retVal, err = handleUpdateEventResp(respBody, httpResponse,
+	retVal, err = handleUpdateEventResp(respBody, httpResp,
 		c)
 	return retVal, err
 
@@ -616,15 +654,15 @@ func (c *PolicyAuthAPIClient) DeleteEventsSubsc(ctx context.Context,
 		return retVal, err
 	}
 
-	httpResponse, err := c.callAPI(r)
-	retVal.httpResp = httpResponse
-	if err != nil || httpResponse == nil {
+	httpResp, err := c.callAPI(r)
+	retVal.httpResp = httpResp
+	if err != nil || httpResp == nil {
 		return retVal, err
 	}
 
-	respBody, err := ioutil.ReadAll(httpResponse.Body)
+	respBody, err := ioutil.ReadAll(httpResp.Body)
 	defer func() {
-		err = httpResponse.Body.Close()
+		err = httpResp.Body.Close()
 		if err != nil {
 			log.Errf("Resp Body wasn't closed properly" +
 				err.Error())
@@ -634,12 +672,12 @@ func (c *PolicyAuthAPIClient) DeleteEventsSubsc(ctx context.Context,
 		return retVal, err
 	}
 
-	switch httpResponse.StatusCode {
+	switch httpResp.StatusCode {
 	case 204:
 		return retVal, nil
 
 	case 400, 401, 403, 404, 429, 500, 503:
-		if httpResponse.StatusCode == 401 {
+		if httpResp.StatusCode == 401 {
 			validatePAAuthToken(c)
 		}
 		var v *ProblemDetails = new(ProblemDetails)

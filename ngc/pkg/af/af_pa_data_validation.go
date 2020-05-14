@@ -24,10 +24,8 @@ func decodeValidateEventSubscReq(r *http.Request, w http.ResponseWriter,
 			return err
 		}
 
-		if len(evsReqData.Events) == 0 {
-			err = errors.New("decodeValidateEvsReqData: " +
-				"nil events subsc array")
-			log.Errf(err.Error())
+		err = validateEventSubsc(evsReqData)
+		if err != nil {
 			return err
 		}
 	}
@@ -181,48 +179,6 @@ func decodeSuppFeat(suppFeat string) (retVal paSuppFeat, err error) {
 	retVal.medComnVersioning = false
 
 	var parsedFeat byte
-	parsedFeat, err = parseSuppFeat(suppFeat)
-	if err != nil {
-		return retVal, err
-	}
-
-	switch parsedFeat {
-	case '0':
-		return retVal, nil
-	case '1':
-		retVal.inflOnTrafficRouting = true
-		return retVal, nil
-	case '2':
-		retVal.sponsConnectivity = true
-		return retVal, nil
-	case '3':
-		retVal.inflOnTrafficRouting = true
-		retVal.sponsConnectivity = true
-		return retVal, nil
-	case '4':
-		retVal.medComnVersioning = true
-		return retVal, nil
-	case '5':
-		retVal.inflOnTrafficRouting = true
-		retVal.medComnVersioning = true
-		return retVal, nil
-	case '6':
-		retVal.sponsConnectivity = true
-		retVal.medComnVersioning = true
-		return retVal, nil
-	case '7':
-		retVal.inflOnTrafficRouting = true
-		retVal.sponsConnectivity = true
-		retVal.medComnVersioning = true
-		return retVal, nil
-	default:
-		err = errors.New("Invalid supported feature")
-		return retVal, err
-	}
-}
-
-func parseSuppFeat(suppFeat string) (parsedFeat byte, err error) {
-
 	length := len(suppFeat)
 	if length == 1 {
 		parsedFeat = suppFeat[0]
@@ -230,13 +186,32 @@ func parseSuppFeat(suppFeat string) (parsedFeat byte, err error) {
 		for i := 0; i < length-1; i++ {
 			if suppFeat[i] != '0' {
 				err = errors.New("Invalid supported feature")
-				return parsedFeat, err
+				return retVal, err
 			}
 		}
 		index := length - 1
 		parsedFeat = suppFeat[index]
 	}
-	return parsedFeat, nil
+
+	if parsedFeat < '0' || parsedFeat > '7' {
+		err = errors.New("Invalid supported feature")
+		return retVal, err
+	}
+
+	bitMask := parsedFeat - '0'
+	if bitMask&1 == 1 {
+		retVal.inflOnTrafficRouting = true
+	}
+
+	if bitMask&2 == 2 {
+		retVal.sponsConnectivity = true
+	}
+
+	if bitMask&4 == 4 {
+		retVal.medComnVersioning = true
+	}
+
+	return retVal, nil
 }
 
 func validateMedComponents(medCompns map[string]MediaComponent,
@@ -247,15 +222,15 @@ func validateMedComponents(medCompns map[string]MediaComponent,
 	}
 
 	for _, medComp := range medCompns {
-		if medComp.MedCompN != 0 {
-			err = errors.New("validateMedCopmn: MedCopmN = 0")
+		if medComp.MedCompN == 0 {
+			err = errors.New("validateMedCompn: MedCompN = 0")
 			return err
 		}
 
 		if len(medComp.MedSubComps) != 0 {
 			for _, medSubComp := range medComp.MedSubComps {
 				if medSubComp.FNum == 0 {
-					err = errors.New("validateMedCopmn: " +
+					err = errors.New("validateMedCompn: " +
 						"fNum = 0")
 					return err
 				}
@@ -268,7 +243,7 @@ func validateMedComponents(medCompns map[string]MediaComponent,
 
 		if feat.inflOnTrafficRouting {
 			if medComp.AfRoutReq == nil {
-				err = errors.New("validateMedCopmn: " +
+				err = errors.New("validateMedCompn: " +
 					"nil AfRoutReq")
 				return err
 			}
@@ -276,7 +251,7 @@ func validateMedComponents(medCompns map[string]MediaComponent,
 
 		if feat.medComnVersioning {
 			if medComp.ContVer == 0 {
-				err = errors.New("validateMedCopmn: " +
+				err = errors.New("validateMedCompn: " +
 					"ContVer = 0 ")
 				return err
 			}

@@ -49,21 +49,3 @@ type GenericCliConfig struct {
 	VerifyCerts   bool   `json:"VerifyCerts"`
 	NotifURI      string `json:"NotifURI"`
 }
-
-// NewCliPcfConfiguration create new client pcf config struct
-func NewCliPcfConfiguration(afCtx *Context) *GenericCliConfig {
-
-	cfg := &GenericCliConfig{
-		Protocol:      afCtx.cfg.CliPcfCfg.Protocol,
-		ProtocolVer:   afCtx.cfg.CliPcfCfg.ProtocolVer,
-		Port:          afCtx.cfg.CliPcfCfg.Port,
-		Hostname:      afCtx.cfg.CliPcfCfg.Hostname,
-		BasePath:      afCtx.cfg.CliPcfCfg.BasePath,
-		CliCertPath:   afCtx.cfg.CliPcfCfg.CliCertPath,
-		OAuth2Support: afCtx.cfg.CliPcfCfg.OAuth2Support,
-		NotifURI:      afCtx.cfg.CliPcfCfg.NotifURI,
-		VerifyCerts:   afCtx.cfg.CliPcfCfg.VerifyCerts,
-	}
-
-	return cfg
-}

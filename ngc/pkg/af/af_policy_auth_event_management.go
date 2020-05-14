@@ -30,25 +30,17 @@ func handleEventSubscResp(w *http.ResponseWriter,
 				http.StatusInternalServerError)
 			return
 		}
-	} else if eventSubscResp.evsNotif != nil {
-		respBody, err = json.Marshal(eventSubscResp.evsNotif)
-		if err != nil {
-			logPolicyRespErr(w, "Json marshal error (evsNotif)"+
-				" in PolicyAuthEventSubsc: "+err.Error(),
-				http.StatusInternalServerError)
-			return
-		}
+	}
+
+	if eventSubscResp.evsNotif != nil {
+		log.Infoln("Notification Received as part of event subscribe")
 	} else if eventSubscResp.probDetails != nil {
 		respBody, err = json.Marshal(eventSubscResp.probDetails)
 		if err != nil {
 			logPolicyRespErr(w, "Json marshal error (probDetails)"+
 				" in PolicyAuthEventSubsc: "+err.Error(),
 				http.StatusInternalServerError)
-			return
 		}
-	} else {
-		(*w).WriteHeader(httpResp.StatusCode)
-		return
 	}
 
 	(*w).WriteHeader(httpResp.StatusCode)
@@ -89,9 +81,10 @@ func PolicyAuthEventSubsc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(evsReqData.Events) == 0 {
-		logPolicyRespErr(&w, "PolicyAuthAppEventSubs : Event "+
-			"subscription array empty", http.StatusBadRequest)
+	err = validateEventSubsc(&evsReqData)
+	if err != nil {
+		logPolicyRespErr(&w, "PolicyAuthAppEventSubs : "+
+			err.Error(), http.StatusBadRequest)
 		return
 	}
 
