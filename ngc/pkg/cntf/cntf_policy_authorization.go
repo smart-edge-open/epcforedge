@@ -41,8 +41,10 @@ func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 	/*Check if max subscription reached */
 	if len(NgcData.paData.asc) > NgcData.paData.ascMax {
 		log.Info("Maximum Context creation reached")
-		log.Info("ASC MAX Permitted", NgcData.paData.ascMax)
+		log.Info("ASC MAX Permitted: ", NgcData.paData.ascMax)
 		w.WriteHeader(http.StatusInternalServerError)
+		writeErrRespBody(&w, "Maximum ASC limit reached",
+			http.StatusInternalServerError)
 		return
 	}
 
@@ -100,6 +102,22 @@ func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 
 }
 
+func writeErrRespBody(w *http.ResponseWriter, detail string, statusCode int) {
+	var probDetails ProblemDetails
+	probDetails.Detail = detail
+	probDetails.Status = int32(statusCode)
+
+	body, err := json.Marshal(probDetails)
+	if err != nil {
+		log.Errf("Write failed: %v", err)
+		return
+	}
+	_, err2 := (*w).Write(body)
+	if err2 != nil {
+		log.Errf("Write failed: %v", err)
+	}
+}
+
 //PolicyAuthorizationAppSessionGet Get
 func PolicyAuthorizationAppSessionGet(w http.ResponseWriter,
 	r *http.Request) {
@@ -116,6 +134,8 @@ func PolicyAuthorizationAppSessionGet(w http.ResponseWriter,
 			if err2 != nil {
 				log.Errf("Write Failed: %v", err2)
 				w.WriteHeader(http.StatusInternalServerError)
+				writeErrRespBody(&w, "Internal Server Error",
+					http.StatusInternalServerError)
 				return
 			}
 
@@ -134,6 +154,8 @@ func PolicyAuthorizationAppSessionGet(w http.ResponseWriter,
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
+	writeErrRespBody(&w, "The requested AppSession Context doesn't exist",
+		http.StatusNotFound)
 	log.Infof("HTTP Response sent: %d", http.StatusNotFound)
 }
 
@@ -226,6 +248,8 @@ func PolicyAuthorizationAppSessionPatch(w http.ResponseWriter,
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
+	writeErrRespBody(&w, "The requested resource "+ascID+" doesn't exist",
+		http.StatusNotFound)
 	log.Infof("HTTP Response sent: %d", http.StatusNotFound)
 }
 
@@ -249,6 +273,8 @@ func PolicyAuthorizationAppSessionDelete(w http.ResponseWriter,
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
+	writeErrRespBody(&w, "The requested resource "+ascID+" doesn't exist",
+		http.StatusNotFound)
 	log.Infof("HTTP Response sent: %d", http.StatusNotFound)
 }
 
@@ -314,6 +340,8 @@ func PolicyAuthorizationAppSessionSubscribe(w http.ResponseWriter,
 		}
 	}
 	w.WriteHeader(http.StatusNotFound)
+	writeErrRespBody(&w, "The requested AppSession Context doesn't exist",
+		http.StatusNotFound)
 	log.Infof("HTTP Response sent: %d", http.StatusNotFound)
 }
 
@@ -337,6 +365,8 @@ func PolicyAuthorizationAppSessionUnsubscribe(w http.ResponseWriter,
 	}
 
 	w.WriteHeader(http.StatusNotFound)
+	writeErrRespBody(&w, "The requested AppSession Context doesn't exist",
+		http.StatusNotFound)
 	log.Infof("HTTP Response sent: %d", http.StatusNotFound)
 }
 
