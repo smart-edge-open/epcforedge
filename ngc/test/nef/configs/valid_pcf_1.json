@@ -28,8 +28,8 @@
     "PcfPolicyAuthorizationConfig":
      {
          "Protocol":"https",
-         "ProtocolVer":"2.0",
-         "VerifyCerts":true,
+         "ProtocolVer":"1.1",
+         "VerifyCerts":false,
          "ClientCert":"/etc/certs/pcf.pem",
          "Hostname": "localhost",
          "Port": "29507",

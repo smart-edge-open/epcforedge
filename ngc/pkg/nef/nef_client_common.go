@@ -201,7 +201,7 @@ func genHTTPClient(cfg *PcfPolicyAuthorizationConfig) (*http.Client, error) {
 }
 func getPcfOAuth2Token() (token string, err error) {
 
-	if TestPcf == true {
+	if TestPcf {
 		token = "test"
 	} else {
 		token, err = oauth2.GetAccessToken()

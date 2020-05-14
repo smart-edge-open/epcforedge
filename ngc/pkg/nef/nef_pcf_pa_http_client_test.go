@@ -39,7 +39,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 		cancel context.CancelFunc
 	)
 	Describe("client request methods to PCF", func() {
-		Context("Initializing PCF client with HTTP 2.0", func() {
+		Context("Initializing PCF client with HTTP 2.0/https", func() {
 			It("Will init NefServer",
 				func() {
 					ctx, cancel = context.WithCancel(context.Background())
@@ -54,7 +54,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					time.Sleep(2 * time.Second)
 				})
 		})
-		Context("Initializing PCF client with HTTP 1.1", func() {
+		Context("Initializing PCF client with HTTP 2.0/http", func() {
 			It("Will init NefServer",
 				func() {
 					ctx, cancel = context.WithCancel(context.Background())
@@ -63,6 +63,21 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					go func() {
 
 						err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid_pcf_2.json")
+						Expect(err).To(BeNil())
+
+					}()
+					time.Sleep(2 * time.Second)
+				})
+		})
+		Context("Initializing PCF client with HTTP 1.1/https", func() {
+			It("Will init NefServer",
+				func() {
+					ctx, cancel = context.WithCancel(context.Background())
+
+					defer cancel()
+					go func() {
+
+						err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid_pcf_1.json")
 						Expect(err).To(BeNil())
 
 					}()
@@ -379,7 +394,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
-			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ngcnef.AppSessionContextUpdateData{}, ngcnef.AppSessionID(""))
+			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ngcnef.AppSessionContextUpdateData{},
+				ngcnef.AppSessionID(""))
 			Expect(err1).Should(HaveOccurred())
 			Expect(int(pcr.ResponseCode)).To(Equal(http.StatusUnauthorized))
 
@@ -397,7 +413,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: ""}
-			_, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ngcnef.AppSessionContextUpdateData{}, ngcnef.AppSessionID(""))
+			_, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ngcnef.AppSessionContextUpdateData{},
+				ngcnef.AppSessionID(""))
 			Expect(err1).Should(HaveOccurred())
 
 		})

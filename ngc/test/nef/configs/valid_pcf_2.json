@@ -34,7 +34,7 @@
          "Hostname": "localhost",
          "Port": "29507",
          "LocationPrefixURI":"/npcf-policyauthorization/v1/app-sessions/",
-         "OAuth2Support":false
+         "OAuth2Support":true
                   
      }
 }

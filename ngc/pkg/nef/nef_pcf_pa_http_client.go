@@ -77,6 +77,17 @@ func (pcf *PcfClient) addheaderparams(method string) (map[string]string, error) 
 	return headerParams, nil
 
 }
+func getprobdetails(resbody []byte, respContentType string) (*ProblemDetails, error) {
+	problemDetails := ProblemDetails{}
+	if respContentType == pdContentType {
+		e := json.Unmarshal(resbody, &problemDetails)
+		if e != nil {
+			fmt.Printf("Failed unmarshaling POST response body:%s", e)
+			return &problemDetails, e
+		}
+	}
+	return &problemDetails, nil
+}
 
 //PolicyAuthorizationCreate is a actual implementation
 // Successful response : 201 and body contains AppSessionContext
@@ -92,7 +103,6 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 		res               *http.Response
 		err               error
 		appSessionContext AppSessionContext
-		problemDetails    ProblemDetails
 		resbody           []byte
 	)
 	pcfPr := PcfPolicyResponse{}
@@ -117,12 +127,11 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 		fmt.Printf("Failed receiving POST response:%s", err)
 		goto END
 	}
-
+	pcfPr.ResponseCode = uint16(res.StatusCode)
 	log.Infof("Body in the response =>")
 	resbody, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Printf("Failed reading POST response body:%s", err)
-		pcfPr.ResponseCode = uint16(res.StatusCode)
 		goto END
 
 	}
@@ -140,7 +149,6 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 			fmt.Printf("Failed unmarshaling POST response body:%s", err)
 			goto END
 		}
-		pcfPr.ResponseCode = uint16(res.StatusCode)
 		pcfPr.Asc = &appSessionContext
 		pcfPr.Pd = nil
 
@@ -149,19 +157,11 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 			validatePAAuthToken(pcf)
 		}
 
-		problemDetails = ProblemDetails{}
-		respContentType := res.Header.Get("Content-type")
-		if respContentType == pdContentType {
-			e := json.Unmarshal(resbody, &problemDetails)
-			if e != nil {
-				fmt.Printf("Failed unmarshaling POST response body:%s", e)
-				goto END
-			}
-		}
 		log.Infof("PCFs PolicyAuthorizationCreate failed ")
-		pcfPr.ResponseCode = uint16(res.StatusCode)
-		pcfPr.Pd = &problemDetails
-		if err == nil {
+		pcfPr.Pd, err = getprobdetails(resbody, res.Header.Get("Content-type"))
+		if err != nil {
+			goto END
+		} else {
 			err = errors.New("failed post")
 		}
 
@@ -184,7 +184,6 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 		res               *http.Response
 		resbody           []byte
 		appSessionContext AppSessionContext
-		problemDetails    ProblemDetails
 		err               error
 	)
 	pcfPr := PcfPolicyResponse{}
@@ -211,12 +210,11 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 		fmt.Printf("Failed receiving PATCH response:%s", err)
 		goto END
 	}
-
+	pcfPr.ResponseCode = uint16(res.StatusCode)
 	log.Infof("Body in the response =>")
 	resbody, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Printf("Failed reading PATCH response body:%s", err)
-		pcfPr.ResponseCode = uint16(res.StatusCode)
 		goto END
 
 	}
@@ -235,7 +233,6 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 		log.Infof("PCFs PolicyAuthorizationUpdate AppSessionID %s updated",
 			string(appSessionID))
 
-		pcfPr.ResponseCode = uint16(res.StatusCode)
 		pcfPr.Asc = &appSessionContext
 
 	} else {
@@ -243,20 +240,12 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 			validatePAAuthToken(pcf)
 		}
 
-		problemDetails = ProblemDetails{}
-		respContentType := res.Header.Get("Content-type")
-		if respContentType == pdContentType {
-			err = json.Unmarshal(resbody, &problemDetails)
-			if err != nil {
-				fmt.Printf("Failed unmarshaling PATCH response body:%s", err)
-				goto END
-			}
-		}
 		log.Infof("PCFs PolicyAuthorizationUpdate AppSessionID %s not found",
 			string(appSessionID))
-		pcfPr.ResponseCode = uint16(res.StatusCode)
-		pcfPr.Pd = &problemDetails
-		if err == nil {
+		pcfPr.Pd, err = getprobdetails(resbody, res.Header.Get("Content-type"))
+		if err != nil {
+			goto END
+		} else {
 			err = errors.New("failed patch")
 		}
 	}
@@ -306,10 +295,10 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 		fmt.Printf("Failed receiving DELETE response:%s", err)
 		goto END
 	}
+	pcfPr.ResponseCode = uint16(res.StatusCode)
 	if res.StatusCode == 204 {
 		log.Infof("PCFs PolicyAuthorizationDelete AppSessionID %s found",
 			sessid)
-		pcfPr.ResponseCode = uint16(res.StatusCode)
 
 	} else if res.StatusCode == 200 {
 		//var eventnoti EventsNotification
@@ -326,37 +315,21 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 		 if err != nil {
 			 fmt.Printf("Failed go error :%s", err)
 		 } */
-		pcfPr.ResponseCode = uint16(res.StatusCode)
 
 	} else {
 		if res.StatusCode == 401 {
 			validatePAAuthToken(pcf)
 		}
-		respContentType := res.Header.Get("Content-type")
-		if respContentType == pdContentType {
-			log.Infof("Body in the response =>")
-			resbody, err = ioutil.ReadAll(res.Body)
-			if err != nil {
-				fmt.Printf("Failed reading DELETE response body:%s", err)
-				goto END
 
-			}
-			defer closeRespBody(res)
-			log.Infof(string(resbody))
-			problemDetails := ProblemDetails{}
-			err = json.Unmarshal(resbody, &problemDetails)
-			if err != nil {
-				fmt.Printf("Failed unmarshaling DELETE response body:%s", err)
-				goto END
-			}
-			pcfPr.Pd = &problemDetails
-		}
 		log.Infof("PCFs PolicyAuthorizationDelete AppSessionID %s not found",
 			sessid)
-		if err == nil {
-			err = errors.New("failed delete")
+		pcfPr.Pd, err = getprobdetails(resbody, res.Header.Get("Content-type"))
+		if err != nil {
+			goto END
+		} else {
+			err = errors.New("failed patch")
 		}
-		pcfPr.ResponseCode = uint16(res.StatusCode)
+
 	}
 
 	log.Infof("PCFs PolicyAuthorizationDelete Exited for AppSessionID %s",
@@ -377,7 +350,6 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 		res               *http.Response
 		req               *http.Request
 		appSessionContext AppSessionContext
-		problemDetails    ProblemDetails
 		err               error
 		resbody           []byte
 	)
@@ -403,11 +375,11 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 		goto END
 
 	}
+	pcfPr.ResponseCode = uint16(res.StatusCode)
 	log.Infof("Body in the response =>")
 	resbody, err = ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Printf("Failed reading GET response body:%s", err)
-		pcfPr.ResponseCode = uint16(res.StatusCode)
 		goto END
 
 	}
@@ -425,30 +397,21 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 		log.Infof("PCFs PolicyAuthorizationGet AppSessionID %s found",
 			string(appSessionID))
 
-		pcfPr.ResponseCode = uint16(res.StatusCode)
 		pcfPr.Asc = &appSessionContext
 
 	} else {
 		if res.StatusCode == 401 {
 			validatePAAuthToken(pcf)
 		}
-		problemDetails = ProblemDetails{}
-		respContentType := res.Header.Get("Content-type")
-		if respContentType == pdContentType {
-			err = json.Unmarshal(resbody, &problemDetails)
-			if err != nil {
-				fmt.Printf("Failed unmarshaling GET response body:%s", err)
-				goto END
-			}
-		}
+
 		log.Infof("PCFs PolicyAuthorizationGet AppSessionID %s not found",
 			string(appSessionID))
-		if err == nil {
-			err = errors.New("failed get")
+		pcfPr.Pd, err = getprobdetails(resbody, res.Header.Get("Content-type"))
+		if err != nil {
+			goto END
+		} else {
+			err = errors.New("failed patch")
 		}
-
-		pcfPr.ResponseCode = uint16(res.StatusCode)
-		pcfPr.Pd = &problemDetails
 	}
 END:
 	return pcfPr, err
