@@ -30,7 +30,7 @@
          "Protocol":"http",
          "ProtocolVer":"2.0",
          "VerifyCerts":false,
-         "ClientCert":"/etc/certs/pcf.pem",
+         "ClientCert":"/etc/certs/root-ca-cert.pem",
          "Hostname": "localhost",
          "Port": "29507",
          "LocationPrefixURI":"/npcf-policyauthorization/v1/app-sessions/",
