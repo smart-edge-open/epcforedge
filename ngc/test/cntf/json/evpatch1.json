@@ -1,0 +1,19 @@
+{
+    "events": [
+        {
+            "event": "AfEvent",
+            "notifMethod": "NotifMethod123"
+        },
+        {
+            "event": "AfEvent",
+            "notifMethod": "NotifMethod321"
+        }
+    ],
+    "notifUri": "www.abc.com",
+    "usgThres": {
+        "duration": 100,
+        "totalVolume": 1000,
+        "downlinkVolume": 500,
+        "uplinkVolume": 200
+    }
+}

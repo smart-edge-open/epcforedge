@@ -1,6 +1,6 @@
 ```text
 SPDX-License-Identifier: Apache-2.0
-Copyright © 2019 Intel Corporation 
+Copyright © 2019-2020 Intel Corporation 
 ```
 # 1. Introduction
 ## Directory Structure
@@ -118,6 +118,19 @@ AF configurable parameters list:
 | NEFPFDBasePath      | URL used by AF to access NEF PFD management                                         |
 | OAuth2Support       | OAuth2 support in AF                                                                |
 
+AF configurable parameters list for Policy Authorization (Indicated by CliPaConfig):
+
+| Param               | Description                                                                         |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| Protocol            | Protocol used between AF and PCF (http/https)                                       |
+| ProtocolVer         | HTTP/s Protocol version (1.1/2.0)                                                   |
+| Hostname            | PCF Hostname used by AF                                                             |
+| Port                | PCF Port number to which AF sends request                                           |
+| BasePath            | URL used by AF to access PCF for Policy authorization                               |
+| CliCertPath         | Path for certificates to be used by AF client to communicate with PCF               |
+| OAuth2Support       | OAuth2 authorization support between AF and PCF                                     |
+| NotifURI            | Notification URL to which AF will recieve notifications from PCF                    |
+
 To run af, just execute as below:
 ```sh
 ./af
@@ -217,6 +230,69 @@ Step 1 : Change to the nef folder
 cd ngc/test/nef/nef-cli-scripts
 ```
 Step 2 : Run Curl Test Scripts to simulate HTTP Request to NEF.
+
+## CNTF
+
+### Build
+
+To build cntf:
+
+```sh
+make cntf
+```
+Generated bin will be put under `ngc/dist`
+
+### Configure and Run CNTF bin
+
+CNTF Config Example File - `cntf.json` located at `ngc/configs`
+
+#### The configurable parameters list:
+
+| Param                     | Description                                                                                                                                                             |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CntfAPIRoot                | The API root of the CNTF i.e. ip address or domain name                                                                                                                  |
+| LocationPrefix            | The API prefix  |
+| MaxASCSupport             | The maximum number of Application Session Context supported by CNTF |
+| HTTPConfig                | The fields under this describe the configuration for the HTTP Endpoint                                                                                                  |
+| Endpoint                  | The end point where the CNTF server needs to listen for HTTP 1.1 requests.Format ipaddress:port                                                                          |
+| HTTP2Config               | The fields under this describe the configuration for the HTTP2 Endpoint                                                                                                 |
+| Endpoint                  | The end point where the CNTF server needs to listen for HTTP 2.1 requests. Format ipaddress:port                                                                         |
+| CNTFServerCert             | The file path containing the CNTF Server public key                                                                                                                      |
+| CNTFServerKey              | The file path containing the CNTF Server private key                                                                                                                     |
+| AfClientCert              | The file path containing the AF Server public key                                                                                                                       |
+| OAuth2Support             | OAuth2 support in CNTF                                                                                                                                                   |
+
+#### Run CNTF
+To run cntf, just execute as below:
+```sh
+./cntf
+```
+> NOTE: 
+1. The CNTF will load configuration from `/configs/cntf.json`, so before execution please have nef configuration file in the configs folder
+2. The CNTF certificates need to be available in the location mentioned in the configuration
+
+### CNTF Unit and API Testing
+
+The Unit and API Testing should be performed in a local development environment. 
+
+To run only unit tests and generate coverage report:
+```sh
+make test-unit-cntf
+```
+
+> NOTE: Before executing unit test, need to install ginkgo as below:
+
+```sh
+$ go get github.com/onsi/ginkgo/ginkgo
+$ go get github.com/onsi/gomega/...
+```
+To run API Testing:
+
+Step 1 : Change to the cntf folder
+```sh
+cd ngc/test/cntf/cntf-cli-scripts
+```
+Step 2 : Run Curl Test Scripts to simulate HTTP Request to CNTF.
 
 ## Lint
 

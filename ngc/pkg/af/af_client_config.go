@@ -36,3 +36,16 @@ func NewConfiguration(afCtx *Context) *CliConfig {
 
 	return cfg
 }
+
+// GenericCliConfig struct
+type GenericCliConfig struct {
+	Protocol      string `json:"Protocol"`
+	ProtocolVer   string `json:"ProtocolVer"`
+	Hostname      string `json:"Hostname"`
+	Port          string `json:"Port"`
+	BasePath      string `json:"BasePath"`
+	CliCertPath   string `json:"CliCertPath"`
+	OAuth2Support bool   `json:"OAuth2Support"`
+	VerifyCerts   bool   `json:"VerifyCerts"`
+	NotifURI      string `json:"NotifURI"`
+}
