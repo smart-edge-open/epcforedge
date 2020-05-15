@@ -6,9 +6,6 @@ package af
 // AfwebsockNotifConfig Websocket configuration for delivering AF notifications
 // for all Policy Authorization Events
 type AfwebsockNotifConfig struct {
-	// The Websocket Uri used for Notification delivery.
-	// This is set by AF and is present in the response from AF to consumer
-	WebsocketURI string `json:"websocketUri,omitempty"`
 	// Set by the consumer to indicate that the Websocket delivery is requested.
 	RequestWebsocketURI bool `json:"requestWebsocketUri,omitempty"`
 	// Unique Identification of the consumer. Set by consumer

@@ -63,7 +63,6 @@ func (c *NotificationAPIClient) NotificationUpPathEvent(notifURI NotificationURI
 	}
 
 	resp, err := c.httpClient.Do(r)
-	log.Infoln("AFter the client request")
 	if err != nil || resp == nil {
 		return err
 	}

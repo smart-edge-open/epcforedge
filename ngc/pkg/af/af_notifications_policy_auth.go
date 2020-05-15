@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// NotificationURI to store the notification URI
+// NotificationURI to store the notification URI of consumer
 type NotificationURI string
 
 // EventInfo stores information for all Events of an appSessionID
@@ -72,6 +72,7 @@ func getAppSessFromURL(url string) string {
 	return aID[1]
 }
 
+/* Updating the notificationURI in afRouteReq in response*/
 func updateRouteReqInResp(afRouteReq *RoutingRequirement,
 	afCtx *Context) (err error) {
 	if afRouteReq != nil && afRouteReq.UpPathChgSub != nil {
@@ -87,6 +88,9 @@ func updateRouteReqInResp(afRouteReq *RoutingRequirement,
 	return err
 }
 
+/* This function updates the consumer notificationURI in response
+which was replaced by AF and also sends back websocketURI
+if websocket delivery is requested*/
 func updateAppSessInResp(appSess *AppSessionContext,
 	appSessionID string, afCtx *Context) (err error) {
 	ascReqData := appSess.AscReqData
@@ -101,7 +105,7 @@ func updateAppSessInResp(appSess *AppSessionContext,
 		return nil
 	}
 	if evInfo.wsReq {
-		//TODO update the websocketURI
+		//TODO update the websocketURI in AscRespData
 		return nil
 	}
 	afRouteReq := ascReqData.AfRoutReq
@@ -123,6 +127,8 @@ func updateAppSessInResp(appSess *AppSessionContext,
 	return err
 }
 
+/* To check if websocket delivery is requested in ascReqData. Both websocket and
+notificationURI is not allowed in one appSession */
 func chkAppSessCreateForWs(appSess AppSessionContext,
 	evInfo *EventInfo) (err error) {
 
@@ -146,24 +152,26 @@ func chkAppSessCreateForWs(appSess AppSessionContext,
 	return nil
 }
 
-func chkAppSessUpdateForWs(appSessUpdate AppSessionContextUpdateData,
+/* To check if websocket delivery is requested in ascUpdateData. Both websocket
+and notificationURI is not allowed in one appSession */
+func chkAppSessUpdateForWs(ascUpdateData AppSessionContextUpdateData,
 	evInfo *EventInfo) (err error) {
 
-	if appSessUpdate.AfwebsockNotifConfig != nil {
-		if appSessUpdate.AfwebsockNotifConfig.RequestWebsocketURI {
+	if ascUpdateData.AfwebsockNotifConfig != nil {
+		if ascUpdateData.AfwebsockNotifConfig.RequestWebsocketURI {
 			if evInfo.wsReq {
 				err = errors.New("Websocket Already Established with consumer")
 				return err
 			}
 			evInfo.wsReq = true
-			evInfo.consumerID = appSessUpdate.AfwebsockNotifConfig.ConsumerID
+			evInfo.consumerID = ascUpdateData.AfwebsockNotifConfig.ConsumerID
 		}
 	}
 	return nil
 
 }
 
-/* setAppSessNotifParams updates the notificationURI/NotifURI with
+/* setAppSessNotifParams updates the notificationURI/NotifURI in ascReqData with
 AF generated one and stores the notification related params*/
 func setAppSessNotifParams(appSess *AppSessionContext,
 	evInfo *EventInfo, afCtx *Context) (err error) {
@@ -182,7 +190,8 @@ func setAppSessNotifParams(appSess *AppSessionContext,
 		ascReqData.EvSubsc.NotifURI = pcfPANotifURI
 	}
 
-	// To update the notification URI in afRoueReq
+	// To update the notification URI in afRoueReq and store it for
+	// sending notifications
 	err = updateRouteReqParamsCreate(ascReqData.AfRoutReq, evInfo, afCtx)
 	if err != nil {
 		return err
@@ -199,12 +208,22 @@ func setAppSessNotifParams(appSess *AppSessionContext,
 	return err
 }
 
+/* modifyAppSessNotifParams in ascUpdateData updates the
+notificationURI/NotifURI with AF generated one and stores the
+notification related params*/
 func modifyAppSessNotifParams(ascUpdateData *AppSessionContextUpdateData,
-	evInfo *EventInfo, appSessionID string, afCtx *Context) (err error) {
+	appSessionID string, afCtx *Context) (err error) {
 
 	if ascUpdateData == nil {
 		err = errors.New("Nil AppSessionContextUpdateData")
 		return err
+	}
+
+	evInfo := afCtx.appSessionsEv[appSessionID]
+
+	if evInfo == nil {
+		// No event information was present prior for this appSessionID
+		evInfo = new(EventInfo)
 	}
 
 	err = chkAppSessUpdateForWs(*ascUpdateData, evInfo)
@@ -228,10 +247,12 @@ func modifyAppSessNotifParams(ascUpdateData *AppSessionContextUpdateData,
 			return err
 		}
 	}
+
 	afCtx.appSessionsEv[appSessionID] = evInfo
 	return err
 }
 
+/* This function checks if correlID is unique*/
 func chkCorrelIDExists(corrID string, evInfo *EventInfo,
 	afCtx *Context) bool {
 
@@ -362,6 +383,8 @@ func updateRouteReqParamsUpdate(afRouteReq *RoutingRequirement, evInfo *EventInf
 	return nil
 }
 
+/* This function is called when SMF UP_PATH_CH notification is received.
+It maps the notification into NotificationUpPathChg and sends to consumer*/
 func sendUpPathEventNotification(corrID string, afCtx *Context,
 	nsmEvNo NsmfEventNotification) {
 
@@ -390,7 +413,7 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 	ev.TargetTrafficRoute = nsmEvNo.TargetTraRouting
 
 	if evInfo.wsReq {
-		// Send over websocket
+		// TODO: Send over websocket
 
 	} else {
 

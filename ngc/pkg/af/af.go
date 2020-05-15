@@ -56,6 +56,8 @@ type Config struct {
 type afData struct {
 	policyAuthAPIClient pcfPolicyAuthAPI
 	notifyAPIClient     notifyClientAPI
+	// TODO websocket connections of all consumers, consumerID is the key
+	//consumerConns      ConsumerConns
 }
 
 //Context struct
@@ -91,12 +93,7 @@ func runServer(ctx context.Context, afCtx *Context) error {
 	afCtx.transactions = make(TransactionIDs)
 	afCtx.subscriptions = make(NotifSubscryptions)
 
-	err = initPACfg(afCtx)
-	if err != nil {
-		return err
-	}
-
-	err = initNotify(afCtx)
+	err = initAFData(afCtx)
 	if err != nil {
 		return err
 	}
@@ -185,6 +182,13 @@ func runServer(ctx context.Context, afCtx *Context) error {
 	<-stopServerCh
 	<-stopServerCh
 	return nil
+}
+
+func initAFData(afCtx *Context) (err error) {
+	if err = initPACfg(afCtx); err == nil {
+		err = initNotify(afCtx)
+	}
+	return err
 }
 
 /*

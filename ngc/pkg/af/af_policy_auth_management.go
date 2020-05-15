@@ -96,14 +96,8 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = validateAppSessCtx(&appSess)
-	if err != nil {
-		logPolicyRespErr(&w, "CreatePolicyAuthAppSessions: "+
-			err.Error(), http.StatusBadRequest)
-		return
-	}
+	err = validateSetupAppSessCtx(&appSess, &evInfo, afCtx)
 
-	err = setAppSessNotifParams(&appSess, &evInfo, afCtx)
 	if err != nil {
 		logPolicyRespErr(&w, "CreatePolicyAuthAppSessions: "+
 			err.Error(), http.StatusBadRequest)
@@ -132,6 +126,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Location", apiResp.locationURI)
+
 	if httpResp.StatusCode == 303 {
 		w.WriteHeader(httpResp.StatusCode)
 		return
@@ -313,7 +308,6 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		ascUpdateData AppSessionContextUpdateData
 		appSessJSON   []byte
 		apiResp       PcfPAResponse
-		evInfo        EventInfo
 	)
 
 	funcName := "ModifyPolicyAuthAppSession: "
@@ -347,13 +341,7 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if afCtx.appSessionsEv[appSessionID] != nil {
-
-		evInfo = *(afCtx.appSessionsEv[appSessionID])
-	}
-
-	err = modifyAppSessNotifParams(&ascUpdateData, &evInfo,
-		appSessionID, afCtx)
+	err = modifyAppSessNotifParams(&ascUpdateData, appSessionID, afCtx)
 	if err != nil {
 		logPolicyRespErr(&w, "ModifyPolicyAuthAppSession: "+
 			err.Error(), http.StatusBadRequest)

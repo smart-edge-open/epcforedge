@@ -2366,10 +2366,10 @@ var _ = Describe("AF", func() {
 					KeyType("af-ctx"), af.AfCtx)
 				af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
 
-				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+				Expect(resp.Code).To(Equal(http.StatusNoContent))
 			})
 
-			It("POST SMF notification for missing correlation id",
+			It("POST SMF notification for invalid correlation id",
 				func() {
 
 					By("Reading json file")
@@ -2391,7 +2391,7 @@ var _ = Describe("AF", func() {
 						KeyType("af-ctx"), af.AfCtx)
 					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
 
-					Expect(resp.Code).To(Equal(http.StatusNotFound))
+					Expect(resp.Code).To(Equal(http.StatusNoContent))
 
 				})
 

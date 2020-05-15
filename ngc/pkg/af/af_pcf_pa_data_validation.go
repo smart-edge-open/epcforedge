@@ -61,6 +61,17 @@ func validateEventSubsc(evsReqData *EventsSubscReqData) (err error) {
 	return nil
 }
 
+func validateSetupAppSessCtx(appSess *AppSessionContext, evInfo *EventInfo,
+	afCtx *Context) (err error) {
+
+	if err = validateAppSessCtx(appSess); err == nil {
+		err = setAppSessNotifParams(appSess, evInfo, afCtx)
+	}
+
+	return err
+
+}
+
 func validateAppSessCtx(appSess *AppSessionContext) (err error) {
 
 	var suppFeatures paSuppFeat
