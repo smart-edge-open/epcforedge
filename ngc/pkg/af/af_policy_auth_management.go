@@ -135,6 +135,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 	appSessionID = getAppSessFromURL(apiResp.locationURI)
 
 	afCtx.appSessionsEv[appSessionID] = &evInfo
+	log.Infoln("Added the Event Info for appSessionID ", appSessionID)
 
 	appSessResp := apiResp.appSessCtx
 	err = updateAppSessInResp(appSessResp, appSessionID, afCtx)
@@ -280,7 +281,7 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	err = updateAppSessInResp(appSessResp, appSessionID, afCtx)
 	if err != nil {
 		logPolicyRespErr(&w, "Updating the response "+
-			"CreatePolicyAuthAppSessions: "+err.Error(),
+			"GetPolicyAuthAppSessions: "+err.Error(),
 			http.StatusInternalServerError)
 		return
 	}

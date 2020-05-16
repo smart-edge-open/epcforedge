@@ -249,6 +249,7 @@ func modifyAppSessNotifParams(ascUpdateData *AppSessionContextUpdateData,
 	}
 
 	afCtx.appSessionsEv[appSessionID] = evInfo
+	log.Infoln("Updated the Event Info for appSessionID ", appSessionID)
 	return err
 }
 
@@ -315,6 +316,7 @@ func updateRouteReqParamsCreate(afRouteReq *RoutingRequirement,
 			afRouteReq.UpPathChgSub.NotificationURI = smfPANotifURI
 
 		} else if !evInfo.wsReq {
+			err = errors.New("Neither WS nor notificationURI present")
 			return err
 
 		} else {
