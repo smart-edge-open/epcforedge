@@ -117,7 +117,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			appid, pcr, err1 := pcfc.PolicyAuthorizationCreate(ctx, ascreq)
@@ -156,7 +156,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ascreq, ngcnef.AppSessionID("test1234"))
@@ -185,7 +185,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
@@ -209,7 +209,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
@@ -237,7 +237,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
@@ -277,7 +277,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			appid, pcr, err1 := pcfc.PolicyAuthorizationCreate(ctx, ascreq)
@@ -309,7 +309,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			appid, pcr, err1 := pcfc.PolicyAuthorizationCreate(ctx, ngcnef.AppSessionContext{})
@@ -328,7 +328,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: ""}
 			appid, _, err1 := pcfc.PolicyAuthorizationCreate(ctx, ngcnef.AppSessionContext{})
@@ -366,7 +366,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					}, nil
 				})
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ascreq, ngcnef.AppSessionID("test1234"))
@@ -391,7 +391,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ngcnef.AppSessionContextUpdateData{},
@@ -410,7 +410,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: ""}
 			_, err1 := pcfc.PolicyAuthorizationUpdate(ctx, ngcnef.AppSessionContextUpdateData{},
@@ -440,7 +440,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
@@ -464,7 +464,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID(""))
@@ -482,7 +482,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: ""}
 			_, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID(""))
@@ -510,7 +510,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))
@@ -535,7 +535,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			pcr, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID(""))
@@ -553,7 +553,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: ""}
 			_, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID(""))
@@ -569,7 +569,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			_, err1 := pcfc.PolicyAuthorizationGet(ctx, ngcnef.AppSessionID("1234test"))
@@ -585,7 +585,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			_, _, err1 := pcfc.PolicyAuthorizationCreate(ctx, ngcnef.AppSessionContext{})
@@ -601,7 +601,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			appid := ngcnef.AppSessionID("")
@@ -618,7 +618,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				})
 
 			pcfc := ngcnef.PcfClient{HTTPClient: httpclient, RootURI: "https://localhost:29507",
-				ResourceURI: "/npcf-policyauthorization/v1/app-sessions/",
+				ResourceURI: "/npcf-policyauthorization/v1/app-sessions",
 				Pcfcfg:      &ngcnef.PcfPolicyAuthorizationConfig{OAuth2Support: true},
 				OAuth2Token: "teststring"}
 			_, err1 := pcfc.PolicyAuthorizationDelete(ctx, ngcnef.AppSessionID("1234test"))

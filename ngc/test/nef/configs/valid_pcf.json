@@ -33,7 +33,7 @@
          "ClientCert":"/etc/certs/root-ca-cert.pem",
          "Hostname": "localhost",
          "Port": "29507",
-         "LocationPrefixURI":"/npcf-policyauthorization/v1/app-sessions/",
+         "ResourceURI":"/npcf-policyauthorization/v1/app-sessions/",
          "OAuth2Support":true
                   
      }

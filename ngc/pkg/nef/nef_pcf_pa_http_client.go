@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 // PcfClient is an implementation of the Pcf Authorization
@@ -141,6 +142,10 @@ func (pcf *PcfClient) PolicyAuthorizationCreate(ctx context.Context,
 
 	if res.StatusCode == 201 {
 		appsesid = res.Header.Get("Location")
+		if strings.Contains(appsesid, "http") {
+			index := strings.LastIndex(appsesid, "/")
+			appsesid = appsesid[index+1:]
+		}
 		log.Infof("appsessionid" + appsesid)
 		appSessionID = AppSessionID(appsesid)
 		appSessionContext = AppSessionContext{}
@@ -188,7 +193,7 @@ func (pcf *PcfClient) PolicyAuthorizationUpdate(ctx context.Context,
 	)
 	pcfPr := PcfPolicyResponse{}
 	sessid := string(appSessionID)
-	apiURL := pcf.RootURI + pcf.ResourceURI + sessid
+	apiURL := pcf.RootURI + pcf.ResourceURI + "/" + sessid
 	headerParams, err := pcf.addheaderparams("PATCH")
 	if err != nil {
 		fmt.Printf("Error in adding header parameters :%s", err)
@@ -273,7 +278,7 @@ func (pcf *PcfClient) PolicyAuthorizationDelete(ctx context.Context,
 	)
 	pcfPr := PcfPolicyResponse{}
 	sessid := string(appSessionID)
-	apiURL := pcf.RootURI + pcf.ResourceURI + sessid + "/delete"
+	apiURL := pcf.RootURI + pcf.ResourceURI + "/" + sessid + "/delete"
 	headerParams, err := pcf.addheaderparams("DELETE")
 	if err != nil {
 		fmt.Printf("Error in adding header parameters :%s", err)
@@ -354,7 +359,7 @@ func (pcf *PcfClient) PolicyAuthorizationGet(ctx context.Context,
 		resbody           []byte
 	)
 	sessid := string(appSessionID)
-	apiURL := pcf.RootURI + pcf.ResourceURI + sessid
+	apiURL := pcf.RootURI + pcf.ResourceURI + "/" + sessid
 	pcfPr := PcfPolicyResponse{}
 	headerParams, err := pcf.addheaderparams("GET")
 	if err != nil {
