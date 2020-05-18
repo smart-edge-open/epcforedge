@@ -37,6 +37,8 @@ func initNotify(afCtx *Context) (err error) {
 
 }
 
+/* This function Validates the Notification URI provided by consumer
+https is not supported */
 func validateNotifyURI(notifyURI string) error {
 	/* Check the url type - if its https or http */
 	u, err := url.Parse(notifyURI)
@@ -51,21 +53,24 @@ func validateNotifyURI(notifyURI string) error {
 	return nil
 }
 
+/* This function fetches the event Information
+corresponding to a notifCorrelId. e.g on receiving a SMF notification with
+correlID, AF will call this function to get the EventInfo which stores either
+ws or notificationURI */
 func getAppSessFromCorrID(corrID string, afCtx *Context) (evInfo *EventInfo,
 	err error) {
 
 	for _, value := range afCtx.appSessionsEv {
 
-		for key := range value.upPathEv {
+		if _, found := value.upPathEv[corrID]; found {
+			return value, nil
 
-			if key == corrID {
-				return value, nil
-			}
 		}
 	}
 	return evInfo, errors.New("AppSession Event Info Not Found")
 }
 
+/* To fetch the application session ID from location URL*/
 func getAppSessFromURL(url string) string {
 	res := strings.Split(url, "app-sessions")
 	aID := strings.Split(res[1], "/")
@@ -127,8 +132,8 @@ func updateAppSessInResp(appSess *AppSessionContext,
 	return err
 }
 
-/* To check if websocket delivery is requested in ascReqData. Both websocket and
-notificationURI is not allowed in one appSession */
+/* To check if websocket delivery is requested in ascReqData.It stores websocket
+specific params */
 func chkAppSessCreateForWs(appSess AppSessionContext,
 	evInfo *EventInfo) (err error) {
 
@@ -152,8 +157,8 @@ func chkAppSessCreateForWs(appSess AppSessionContext,
 	return nil
 }
 
-/* To check if websocket delivery is requested in ascUpdateData. Both websocket
-and notificationURI is not allowed in one appSession */
+/* To check if websocket delivery is requested in ascUpdateData. It stores
+websocket specific params  */
 func chkAppSessUpdateForWs(ascUpdateData AppSessionContextUpdateData,
 	evInfo *EventInfo) (err error) {
 
@@ -171,8 +176,9 @@ func chkAppSessUpdateForWs(ascUpdateData AppSessionContextUpdateData,
 
 }
 
-/* setAppSessNotifParams updates the notificationURI/NotifURI in ascReqData with
-AF generated one and stores the notification related params*/
+/* setAppSessNotifParams updates the NotifURI in ascReqData. It checks websocket
+params and invokes updateRouteReqParamsCreate to update notificationURI.
+This is invoked for CreatePolicyAuth */
 func setAppSessNotifParams(appSess *AppSessionContext,
 	evInfo *EventInfo, afCtx *Context) (err error) {
 
@@ -208,9 +214,9 @@ func setAppSessNotifParams(appSess *AppSessionContext,
 	return err
 }
 
-/* modifyAppSessNotifParams in ascUpdateData updates the
-notificationURI/NotifURI with AF generated one and stores the
-notification related params*/
+/* modifyAppSessNotifParams checks websocket params and invokes
+updateRouteReqParamsUpdate to update notificationURI.
+ This is invoked for ModifyPolicyAuth */
 func modifyAppSessNotifParams(ascUpdateData *AppSessionContextUpdateData,
 	appSessionID string, afCtx *Context) (err error) {
 
@@ -278,6 +284,8 @@ func chkCorrelIDExists(corrID string, evInfo *EventInfo,
 	return false
 }
 
+/* This function updates the notificationURI in AfRouteReq for UP_PATH_CHANGE
+with AF generated URI. This is invoked for CreatePolicyAuth*/
 func updateRouteReqParamsCreate(afRouteReq *RoutingRequirement,
 	evInfo *EventInfo, afCtx *Context) (err error) {
 
@@ -334,6 +342,8 @@ func updateRouteReqParamsCreate(afRouteReq *RoutingRequirement,
 	return nil
 }
 
+/* This function updates the notificationURI in AfRouteReq for UP_PATH_CHANGE
+with AF generated URI. This is invoked for ModifyPolicyAuth*/
 func updateRouteReqParamsUpdate(afRouteReq *RoutingRequirement, evInfo *EventInfo,
 	afCtx *Context) (err error) {
 

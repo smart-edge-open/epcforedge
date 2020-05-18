@@ -96,7 +96,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = validateSetupAppSessCtx(&appSess, &evInfo, afCtx)
+	err = validateAndSetupAppSessCtx(&appSess, &evInfo, afCtx)
 
 	if err != nil {
 		logPolicyRespErr(&w, "CreatePolicyAuthAppSessions: "+
