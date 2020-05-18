@@ -14,9 +14,9 @@
     },
     "HTTP2Config": {
         "Endpoint": ":8090",
-        "NefServerCert": "../../test/nef/certs/server-cert.pem",
-        "NefServerKey":  "../../test/nef/certs/server-key.pem",
-        "AfClientCert": "../../test/nef/certs/root-ca-cert.pem"
+        "NefServerCert": "/etc/certs/server-cert.pem",
+        "NefServerKey":  "/etc/certs/server-key.pem",
+        "AfClientCert": "/etc/certs/root-ca-cert.pem"
     },
     "AfServiceID": [
         {
