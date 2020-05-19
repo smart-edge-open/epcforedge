@@ -8,8 +8,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
+	"os/exec"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -39,9 +43,35 @@ var _ = Describe("NefPcfPaRestClient", func() {
 		cancel context.CancelFunc
 	)
 	Describe("client request methods to PCF", func() {
+		Context("Generating certificates for testing", func() {
+			It("Will generate certificates",
+
+				func() {
+					os.Mkdir("../../test/nef/certs", os.ModePerm)
+					cmd := exec.Command("./../../scripts/genCerts.sh", "-t", "DNS", "-h", "localhost")
+					var out bytes.Buffer
+					cmd.Stdout = &out
+					err := cmd.Run()
+					if err != nil {
+						log.Println(err)
+					}
+					fmt.Println("Output \n", out.String())
+					cmd = exec.Command("mv", "root-ca-cert.pem", "root-ca-cert.srl", "root-ca-key.pem", "server-cert.pem", "server-key.pem", "server-request.csr", "extfile.cnf", "../../test/nef/certs")
+
+					cmd.Stdout = &out
+					err = cmd.Run()
+					if err != nil {
+						log.Println(err)
+					}
+
+					time.Sleep(2 * time.Second)
+				})
+		})
 		Context("Initializing PCF client with HTTP 2.0/https", func() {
 			It("Will init NefServer",
+
 				func() {
+
 					ctx, cancel = context.WithCancel(context.Background())
 
 					defer cancel()
@@ -81,6 +111,21 @@ var _ = Describe("NefPcfPaRestClient", func() {
 						Expect(err).To(BeNil())
 
 					}()
+					time.Sleep(2 * time.Second)
+				})
+		})
+		Context("Deleting certificates folder for testing", func() {
+			It("Will delete certs folder",
+
+				func() {
+					cmd := exec.Command("rm", "-rf", "../../test/nef/certs")
+					var out bytes.Buffer
+					cmd.Stdout = &out
+					err := cmd.Run()
+					if err != nil {
+						log.Println(err)
+					}
+
 					time.Sleep(2 * time.Second)
 				})
 		})

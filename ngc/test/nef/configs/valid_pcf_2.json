@@ -14,9 +14,9 @@
     },
     "HTTP2Config": {
         "Endpoint": ":8090",
-        "NefServerCert": "/etc/certs/server-cert.pem",
-        "NefServerKey":  "/etc/certs/server-key.pem",
-        "AfClientCert": "/etc/certs/root-ca-cert.pem"
+        "NefServerCert": "../../test/nef/certs/server-cert.pem",
+        "NefServerKey":  "../../test/nef/certs/server-key.pem",
+        "AfClientCert": "../../test/nef/certs/root-ca-cert.pem"
     },
     "AfServiceID": [
         {
@@ -30,7 +30,7 @@
          "Protocol":"http",
          "ProtocolVer":"2.0",
          "VerifyCerts":false,
-         "ClientCert":"/etc/certs/root-ca-cert.pem",
+         "ClientCert":"../../test/nef/certs/root-ca-cert.pem",
          "Hostname": "localhost",
          "Port": "29507",
          "ResourceURI":"/npcf-policyauthorization/v1/app-sessions/",
