@@ -55,7 +55,6 @@ type Config struct {
 
 type afData struct {
 	policyAuthAPIClient pcfPolicyAuthAPI
-	notifyAPIClient     notifyClientAPI
 	// TODO websocket connections of all consumers, consumerID is the key
 	//consumerConns      ConsumerConns
 }
@@ -186,7 +185,7 @@ func runServer(ctx context.Context, afCtx *Context) error {
 
 func initAFData(afCtx *Context) (err error) {
 	if err = initPACfg(afCtx); err == nil {
-		err = initNotify(afCtx)
+		initNotify(afCtx)
 	}
 	return err
 }
@@ -253,6 +252,7 @@ func printConfig(cfg Config) {
 	log.Infoln("NEFPFDBasePath: ", cfg.CliCfg.NEFPFDBasePath)
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
 	log.Infoln("NEFCliCertPath: ", cfg.CliCfg.NEFCliCertPath)
+	log.Infoln("NotifyClientCertPath: ", cfg.CliCfg.NotifyClientCertPath)
 	log.Infoln("OAuth2Support: ", cfg.CliCfg.OAuth2Support)
 	log.Infoln("--------------- CLIENT TO PCF (Policy Auth)---------------")
 	printGenericClientConfig(cfg.CliPcfCfg)

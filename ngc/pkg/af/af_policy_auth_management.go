@@ -68,11 +68,10 @@ func handlePAErrorResp(probDetails *ProblemDetails, err error,
 func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 
 	var (
-		err          error
-		appSess      AppSessionContext
-		appSessJSON  []byte
-		appSessionID string
-		evInfo       EventInfo
+		err         error
+		appSess     AppSessionContext
+		appSessJSON []byte
+		evInfo      EventInfo
 	)
 
 	funcName := "CreatePolicyAuthAppSessions: "
@@ -132,16 +131,10 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	appSessionID = getAppSessFromURL(apiResp.locationURI)
-
-	afCtx.appSessionsEv[appSessionID] = &evInfo
-	log.Infoln("Added the Event Info for appSessionID ", appSessionID)
-
 	appSessResp := apiResp.appSessCtx
-	err = updateAppSessInResp(appSessResp, appSessionID, afCtx)
+	err = setAppSessInfo(apiResp.locationURI, &evInfo, appSessResp, afCtx)
 	if err != nil {
-		logPolicyRespErr(&w, "Updating the response "+
-			"CreatePolicyAuthAppSessions: "+err.Error(),
+		logPolicyRespErr(&w, "CreatePolicyAuthAppSessions: "+err.Error(),
 			http.StatusInternalServerError)
 		return
 	}

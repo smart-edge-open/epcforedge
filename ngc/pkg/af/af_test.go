@@ -2636,30 +2636,6 @@ var _ = Describe("AF", func() {
 
 				})
 
-				Specify("Sending POST 002 request - duplicate correlID", func() {
-					By("Reading json file")
-					reqBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPOST_02.json")
-					Expect(err).ShouldNot(HaveOccurred())
-
-					By("Preparing request")
-					reqBodyBytes := bytes.NewReader(reqBody)
-					req, err := http.NewRequest(http.MethodPost,
-						"http://localhost:8080/af/v1/policy-authorization/"+
-							"app-sessions",
-						reqBodyBytes)
-					Expect(err).ShouldNot(HaveOccurred())
-
-					By("Sending request")
-					resp := httptest.NewRecorder()
-					ctx := context.WithValue(req.Context(),
-						KeyType("af-ctx"), af.AfCtx)
-
-					af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
-					Expect(resp.Code).To(Equal(http.StatusBadRequest))
-
-				})
-
 				Specify("Sending PATCH 001 request - Both ws and notifyURI", func() {
 					By("Reading json file")
 					reqBody, err := ioutil.ReadFile(

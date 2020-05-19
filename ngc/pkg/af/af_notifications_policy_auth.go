@@ -25,16 +25,26 @@ type EventInfo struct {
 // AppSessEv This stores the Event Information for appSessions
 type AppSessEv map[string]*EventInfo
 
-func initNotify(afCtx *Context) (err error) {
+func initNotify(afCtx *Context) {
 	afCtx.appSessionsEv = make(AppSessEv)
-	afCtx.data.notifyAPIClient, err =
-		NewAFNotifyAPIClient(afCtx)
-	if err != nil {
-		log.Errf("Unable to create notification api client")
-		return err
-	}
-	return nil
+}
 
+/* This function creates the GenericConfig based on notificationURI
+The GenericConfig returned is used for generatijng the HTTP client */
+func generateCliCfg(notifyURI string,
+	afCtx *Context) (*GenericCliConfig, error) {
+	u, err := url.Parse(notifyURI)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := &GenericCliConfig{
+		Protocol:      u.Scheme,
+		ProtocolVer:   "2.0",
+		OAuth2Support: false,
+		CliCertPath:   afCtx.cfg.CliCfg.NotifyClientCertPath,
+	}
+	return cfg, nil
 }
 
 /* This function Validates the Notification URI provided by consumer
@@ -46,8 +56,8 @@ func validateNotifyURI(notifyURI string) error {
 		return err
 	}
 
-	// https is not supported
-	if u.Scheme != "http" {
+	if u.Scheme != "https" && u.Scheme != "http" {
+
 		return errors.New("Unsupported url scheme")
 	}
 	return nil
@@ -71,10 +81,14 @@ func getAppSessFromCorrID(corrID string, afCtx *Context) (evInfo *EventInfo,
 }
 
 /* To fetch the application session ID from location URL*/
-func getAppSessFromURL(url string) string {
+func getAppSessFromURL(url string) (string, error) {
 	res := strings.Split(url, "app-sessions")
-	aID := strings.Split(res[1], "/")
-	return aID[1]
+	if len(res) == 2 {
+		aID := strings.Split(res[1], "/")
+		return aID[1], nil
+	}
+	return "", errors.New("Location Header Incorrect")
+
 }
 
 /* Updating the notificationURI in afRouteReq in response*/
@@ -90,6 +104,25 @@ func updateRouteReqInResp(afRouteReq *RoutingRequirement,
 
 		}
 	}
+	return err
+}
+
+/* This function performs the following functionality:
+- Sets the EventInfo in appSessionsEv w.r.t appSessionID
+- Updates the Application Session Context in response by invoking
+  updateAppSessInResp */
+func setAppSessInfo(url string, evInfo *EventInfo,
+	appSessResp *AppSessionContext, afCtx *Context) error {
+
+	appSessionID, err := getAppSessFromURL(url)
+	if err != nil {
+		return err
+	}
+
+	afCtx.appSessionsEv[appSessionID] = evInfo
+	log.Infoln("Added the Event Info for appSessionID ", appSessionID)
+
+	err = updateAppSessInResp(appSessResp, appSessionID, afCtx)
 	return err
 }
 
@@ -259,31 +292,6 @@ func modifyAppSessNotifParams(ascUpdateData *AppSessionContextUpdateData,
 	return err
 }
 
-/* This function checks if correlID is unique*/
-func chkCorrelIDExists(corrID string, evInfo *EventInfo,
-	afCtx *Context) bool {
-
-	// Check within the current request
-	for k := range evInfo.upPathEv {
-		if k == corrID {
-			/*Already present*/
-			return true
-		}
-	}
-	// Check in all appSessions stored
-	for _, value := range afCtx.appSessionsEv {
-
-		for key := range value.upPathEv {
-
-			if key == corrID {
-				/*Already present*/
-				return true
-			}
-		}
-	}
-	return false
-}
-
 /* This function updates the notificationURI in AfRouteReq for UP_PATH_CHANGE
 with AF generated URI. This is invoked for CreatePolicyAuth*/
 func updateRouteReqParamsCreate(afRouteReq *RoutingRequirement,
@@ -302,11 +310,6 @@ func updateRouteReqParamsCreate(afRouteReq *RoutingRequirement,
 		}
 
 		notifyID := afRouteReq.UpPathChgSub.NotifCorreID
-
-		if chkCorrelIDExists(notifyID, evInfo, afCtx) {
-			err = errors.New("Notif CorrelID already exists")
-			return err
-		}
 
 		if evInfo.upPathEv == nil {
 			evInfo.upPathEv = make(map[string]NotificationURI)
@@ -401,7 +404,8 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 	nsmEvNo NsmfEventNotification) {
 
 	var (
-		ev NotificationUpPathChg
+		ev        NotificationUpPathChg
+		apiClient notifyClientAPI
 	)
 	// Map the content of NsmfEventExposureNotification to NotificationUpPathChg
 	evInfo, err := getAppSessFromCorrID(corrID, afCtx)
@@ -434,13 +438,18 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 			corrID,
 			notificationURI)
 
-		apiClient := afCtx.data.notifyAPIClient
-		if apiClient == nil {
-			log.Errln("PolicyAuthSMFNotify nil notifyAPIClient")
+		cfg, err := generateCliCfg(string(notificationURI), afCtx)
+		if err != nil {
+			log.Errln("Error in Generating NewAFNotifyAPIClient")
+			return
+		}
+		apiClient, err = NewAFNotifyAPIClient(afCtx, cfg)
+		if err != nil {
+			log.Errln("Error in Generating NewAFNotifyAPIClient")
 			return
 		}
 		// Send the request towards Consumer
-		err := apiClient.NotificationUpPathEvent(notificationURI, ev)
+		err = apiClient.NotificationUpPathEvent(notificationURI, ev)
 		if err != nil {
 			log.Errf("UP_PATH_CHANGE Sending to consumer failed : %s",
 				err.Error())

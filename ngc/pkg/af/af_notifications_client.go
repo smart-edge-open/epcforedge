@@ -80,14 +80,8 @@ func (c *NotificationAPIClient) NotificationUpPathEvent(notifURI NotificationURI
 }
 
 // NewAFNotifyAPIClient To generate a new Notification Client
-func NewAFNotifyAPIClient(afCtx *Context) (*NotificationAPIClient, error) {
-
-	cfg := &GenericCliConfig{
-		Protocol:      "http",
-		ProtocolVer:   "2.0",
-		OAuth2Support: false,
-		VerifyCerts:   false,
-	}
+func NewAFNotifyAPIClient(afCtx *Context,
+	cfg *GenericCliConfig) (*NotificationAPIClient, error) {
 
 	c := &NotificationAPIClient{}
 
