@@ -1,7 +1,8 @@
+#!/bin/bash
+
 #SPDX-License-Identifier: Apache-2.0
 #Copyright � 2020 Intel Corporation
 
-#!/bin/bash
 # A simple bash script which export the configured variables.
 # Http/https port on which nef is listening
 export http_port=8061

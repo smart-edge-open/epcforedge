@@ -1,7 +1,7 @@
+#!/bin/bash
+
 #SPDX-License-Identifier: Apache-2.0
 #Copyright � 2020 Intel Corporation
-
-#!/bin/bash
 
 source test_nef.sh
 #post request with sub_id=0,json file as post body,expected response code(for success case) and AF id  
