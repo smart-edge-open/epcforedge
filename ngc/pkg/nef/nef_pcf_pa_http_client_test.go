@@ -56,7 +56,9 @@ var _ = Describe("NefPcfPaRestClient", func() {
 						log.Println(err)
 					}
 					fmt.Println("Output \n", out.String())
-					cmd = exec.Command("mv", "root-ca-cert.pem", "root-ca-cert.srl", "root-ca-key.pem", "server-cert.pem", "server-key.pem", "server-request.csr", "extfile.cnf", "../../test/nef/certs")
+					cmd = exec.Command("mv", "root-ca-cert.pem", "root-ca-cert.srl",
+						"root-ca-key.pem", "server-cert.pem", "server-key.pem",
+						"server-request.csr", "extfile.cnf", "../../test/nef/certs")
 
 					cmd.Stdout = &out
 					err = cmd.Run()
