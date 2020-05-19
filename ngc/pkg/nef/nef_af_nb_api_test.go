@@ -68,10 +68,8 @@ var _ = Describe("Test NEF Server NB API's ", func() {
 					ctx, cancel = context.WithCancel(context.Background())
 					defer cancel()
 					go func() {
-
 						err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid.json")
 						Expect(err).To(BeNil())
-
 					}()
 					time.Sleep(2 * time.Second)
 				})
