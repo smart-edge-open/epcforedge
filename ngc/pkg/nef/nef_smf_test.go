@@ -30,10 +30,10 @@ var _ = Describe("NefSmf", func() {
 			defer cancel()
 			go func() {
 				fmt.Println("** Starting the NEF server ***")
-				generateCerts()
+
 				err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid.json")
 				Expect(err).To(BeNil())
-				removeCerts()
+
 			}()
 			time.Sleep(2 * time.Second)
 		})

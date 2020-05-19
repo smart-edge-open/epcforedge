@@ -75,6 +75,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 		ctx    context.Context
 		cancel context.CancelFunc
 	)
+	generateCerts()
 	Describe("client request methods to PCF", func() {
 
 		Context("Initializing PCF client with HTTP 2.0/https", func() {
@@ -87,11 +88,12 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					defer cancel()
 					go func() {
 						ngcnef.TestPcf = true
-						generateCerts()
+
 						err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid_pcf.json")
 						Expect(err).To(BeNil())
 
 					}()
+
 					time.Sleep(2 * time.Second)
 				})
 		})
@@ -107,6 +109,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 						Expect(err).To(BeNil())
 
 					}()
+
 					time.Sleep(2 * time.Second)
 				})
 		})
@@ -120,12 +123,13 @@ var _ = Describe("NefPcfPaRestClient", func() {
 
 						err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid_pcf_1.json")
 						Expect(err).To(BeNil())
-						removeCerts()
+
 					}()
+
 					time.Sleep(2 * time.Second)
 				})
 		})
-
+		removeCerts()
 	})
 	Describe("client request methods to PCF", func() {
 		Specify("Sending valid POST request ", func() {
