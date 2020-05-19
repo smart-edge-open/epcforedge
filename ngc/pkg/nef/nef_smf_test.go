@@ -8,13 +8,14 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	ngcnef "github.com/otcshare/epcforedge/ngc/pkg/nef"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"time"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	ngcnef "github.com/otcshare/epcforedge/ngc/pkg/nef"
 )
 
 var _ = Describe("NefSmf", func() {
@@ -29,8 +30,10 @@ var _ = Describe("NefSmf", func() {
 			defer cancel()
 			go func() {
 				fmt.Println("** Starting the NEF server ***")
+				generateCerts()
 				err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid.json")
 				Expect(err).To(BeNil())
+				removeCerts()
 			}()
 			time.Sleep(2 * time.Second)
 		})

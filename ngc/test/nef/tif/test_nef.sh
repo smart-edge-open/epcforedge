@@ -1,3 +1,6 @@
+#SPDX-License-Identifier: Apache-2.0
+#Copyright � 2020 Intel Corporation
+
 #!/bin/bash
 
 # Script to build & send http/https request to server and validate the response.

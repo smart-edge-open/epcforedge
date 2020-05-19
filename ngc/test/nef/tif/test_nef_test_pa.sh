@@ -1,3 +1,6 @@
+#SPDX-License-Identifier: Apache-2.0
+#Copyright � 2020 Intel Corporation
+
 #!/bin/bash
 
 source test_nef.sh

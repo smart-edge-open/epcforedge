@@ -36,6 +36,39 @@ func testingPCFClient(fn RoundTripFunc) *http.Client {
 	}
 
 }
+func generateCerts() {
+	os.Mkdir("../../test/nef/certs", os.ModePerm)
+	cmd := exec.Command("./../../scripts/genCerts.sh", "-t", "DNS", "-h", "localhost")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println("Output \n", out.String())
+	cmd = exec.Command("mv", "root-ca-cert.pem", "root-ca-cert.srl",
+		"root-ca-key.pem", "server-cert.pem", "server-key.pem",
+		"server-request.csr", "extfile.cnf", "../../test/nef/certs")
+
+	cmd.Stdout = &out
+	err = cmd.Run()
+	if err != nil {
+		log.Println(err)
+	}
+
+	time.Sleep(2 * time.Second)
+}
+func removeCerts() {
+	cmd := exec.Command("rm", "-rf", "../../test/nef/certs")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		log.Println(err)
+	}
+
+	time.Sleep(2 * time.Second)
+}
 
 var _ = Describe("NefPcfPaRestClient", func() {
 	var (
@@ -43,32 +76,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 		cancel context.CancelFunc
 	)
 	Describe("client request methods to PCF", func() {
-		Context("Generating certificates for testing", func() {
-			It("Will generate certificates",
 
-				func() {
-					os.Mkdir("../../test/nef/certs", os.ModePerm)
-					cmd := exec.Command("./../../scripts/genCerts.sh", "-t", "DNS", "-h", "localhost")
-					var out bytes.Buffer
-					cmd.Stdout = &out
-					err := cmd.Run()
-					if err != nil {
-						log.Println(err)
-					}
-					fmt.Println("Output \n", out.String())
-					cmd = exec.Command("mv", "root-ca-cert.pem", "root-ca-cert.srl",
-						"root-ca-key.pem", "server-cert.pem", "server-key.pem",
-						"server-request.csr", "extfile.cnf", "../../test/nef/certs")
-
-					cmd.Stdout = &out
-					err = cmd.Run()
-					if err != nil {
-						log.Println(err)
-					}
-
-					time.Sleep(2 * time.Second)
-				})
-		})
 		Context("Initializing PCF client with HTTP 2.0/https", func() {
 			It("Will init NefServer",
 
@@ -79,6 +87,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 					defer cancel()
 					go func() {
 						ngcnef.TestPcf = true
+						generateCerts()
 						err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid_pcf.json")
 						Expect(err).To(BeNil())
 
@@ -111,23 +120,8 @@ var _ = Describe("NefPcfPaRestClient", func() {
 
 						err := ngcnef.Run(ctx, NefTestCfgBasepath+"valid_pcf_1.json")
 						Expect(err).To(BeNil())
-
+						removeCerts()
 					}()
-					time.Sleep(2 * time.Second)
-				})
-		})
-		Context("Deleting certificates folder for testing", func() {
-			It("Will delete certs folder",
-
-				func() {
-					cmd := exec.Command("rm", "-rf", "../../test/nef/certs")
-					var out bytes.Buffer
-					cmd.Stdout = &out
-					err := cmd.Run()
-					if err != nil {
-						log.Println(err)
-					}
-
 					time.Sleep(2 * time.Second)
 				})
 		})
@@ -153,7 +147,7 @@ var _ = Describe("NefPcfPaRestClient", func() {
 				testingPCFClient(func(req *http.Request) (*http.Response, error) {
 					// Test request parameters
 					respHeader := make(http.Header)
-					respHeader.Set("Location", "1234test")
+					respHeader.Set("Location", "http://1234test")
 					return &http.Response{
 						StatusCode: 201,
 						// Send response to be tested
