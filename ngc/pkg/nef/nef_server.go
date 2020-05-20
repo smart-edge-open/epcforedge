@@ -44,10 +44,14 @@ type HTTP2Config struct {
 
 //PcfPolicyAuthorizationConfig Contains the configuration for the PcfPolicyAuthorization
 type PcfPolicyAuthorizationConfig struct {
-	Scheme     string `json:"scheme"`
-	ClientCert string `json:"ClientCert"`
-	APIRoot    string `json:"ApiRoot"`
-	URI        string `json:"Uri"`
+	Protocol      string `json:"protocol"`
+	ProtocolVer   string `json:"protocolVer"`
+	ClientCert    string `json:"ClientCert"`
+	Hostname      string `json:"hostname"`
+	Port          string `json:"port"`
+	ResourceURI   string `json:"resourceURI"`
+	VerifyCerts   bool   `json:"verifyCerts"`
+	OAuth2Support bool   `json:"oAuth2Support"`
 }
 
 // Config contains NEF Module Configuration Data Structure
