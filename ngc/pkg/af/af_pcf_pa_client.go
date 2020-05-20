@@ -29,9 +29,13 @@ type PolicyAuthAPIClient struct {
 
 // callAPI do the request.
 func (c *PolicyAuthAPIClient) callAPI(request *http.Request) (
-	*http.Response, error) {
+	resp *http.Response, err error) {
 
-	resp, err := c.httpClient.Do(request)
+	if TestAf {
+		resp, err = HTTPClient.Do(request)
+	} else {
+		resp, err = c.httpClient.Do(request)
+	}
 	if err != nil {
 		return resp, err
 	}
@@ -39,6 +43,7 @@ func (c *PolicyAuthAPIClient) callAPI(request *http.Request) (
 	return resp, err
 }
 
+/* This  function builds the AF specific location URI*/
 func getLocationURI(httpResp *http.Response, c *PolicyAuthAPIClient) string {
 	var (
 		locURL *url.URL
@@ -60,6 +65,7 @@ func getLocationURI(httpResp *http.Response, c *PolicyAuthAPIClient) string {
 	return uri
 }
 
+/* This function sets the Retr-After Header incase of StatusForbidden*/
 func setRetryAfterHeader(retVal *PcfPAResponse, httpResp *http.Response) (
 	err error) {
 
@@ -115,6 +121,8 @@ func NewPolicyAuthAPIClient(cfg *Config) (*PolicyAuthAPIClient, error) {
 
 	return c, nil
 }
+
+/* This function handles the response for Create PolicyAuth*/
 func (c *PolicyAuthAPIClient) handlePostAppSessResp(httpResp *http.Response,
 	respBody []byte, retVal *PcfPAResponse) (err error) {
 
@@ -224,6 +232,7 @@ func (c *PolicyAuthAPIClient) PostAppSessions(ctx context.Context,
 	return retVal, err
 }
 
+/* This function handles the response for Delete Policy Auth*/
 func handleApSessDeleteErrResp(v *ProblemDetails,
 	respBody []byte) error {
 
@@ -503,6 +512,7 @@ func (c *PolicyAuthAPIClient) ModAppSession(
 	return retVal, err
 }
 
+/* This function handles the response for Modify Policy Auth*/
 func handleUpdateEventResp(respBody []byte, httpResp *http.Response,
 	c *PolicyAuthAPIClient) (
 	retVal EventSubscResponse, err error) {

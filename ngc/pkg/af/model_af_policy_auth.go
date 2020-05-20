@@ -299,6 +299,10 @@ type AppSessionContextRespData struct {
 	 * Notification_websocket(1), Notification_test_event(2)
 	 */
 	SuppFeat string `json:"suppFeat,omitempty"`
+
+	// The Websocket Uri used for Notification delivery.
+	// This is set by AF and is present in the response from AF to consumer
+	WebsocketURI string `json:"websocketUri,omitempty"`
 }
 
 // AppSessionContextUpdateData struct
@@ -496,7 +500,7 @@ type UpPathChgEvent struct {
 	 * It is used to set the value of Notification Correlation ID in the
 	 * notification sent by the SMF.
 	 */
-	NotifCorreID string         `json:"notifCorreId,omitempty"`
+	NotifCorreID string         `json:"notifCorreId"`
 	DnaiChgType  DNAIChangeType `json:"dnaiChgType"`
 }
 
