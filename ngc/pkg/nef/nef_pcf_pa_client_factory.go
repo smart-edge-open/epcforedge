@@ -6,6 +6,13 @@ package ngcnef
 
 func initializePcfClient(cfg Config) PcfPolicyAuthorization {
 
-	return NewPCFClient(&cfg)
-
+	if cfg.PcfPolicyAuthorizationConfig == nil {
+		log.Infof("PcfPolicyAuthorizationConfig is not configured")
+		return NewPCFClient(&cfg)
+	}
+	pcf, err := NewPCFPolicyAuthHTTPClient(&cfg)
+	if err == nil {
+		return pcf
+	}
+	return nil
 }
