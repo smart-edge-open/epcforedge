@@ -546,19 +546,19 @@ type AFAscReqData struct {
 		// Gpsi
 		Gpsi string `yaml:"gpsi,omitempty"`
 		/*
-				         * A string used to indicate the features supported by an API that is
-			        	 * used as defined in subclause 6.6 in 3GPP TS 29.500 [1]. The string
-				         * shall contain a bitmask indicating supported features in hexadecimal
-				         * representation. Each character in the string shall take a value of
-				         * \"0\" to \"9\" or \"A\" to \"F\" and shall represent the support of 4
-			       		 * features as described in table 5.2.2-3. The most significant
-				         * character representing the highest-numbered features shall appear
-			           	 * first in the string, and the character representing features 1 to 4
-			         	 * shall appear last in the string. The list of features and their
-			         	 * numbering (starting with 1) are defined separately for each API.
-			         	 * Possible features for traffic influencing are
-			         	 * Notification_websocket(1), Notification_test_event(2)
-		*/
+		* A string used to indicate the features supported by an API that is
+		* used as defined in subclause 6.6 in 3GPP TS 29.500 [1]. The string
+		* shall contain a bitmask indicating supported features in hexadecimal
+		* representation. Each character in the string shall take a value of
+		* \"0\" to \"9\" or \"A\" to \"F\" and shall represent the support of 4
+		* features as described in table 5.2.2-3. The most significant
+		* character representing the highest-numbered features shall appear
+		* first in the string, and the character representing features 1 to 4
+		* shall appear last in the string. The list of features and their
+		* numbering (starting with 1) are defined separately for each API.
+		* Possible features for traffic influencing are
+		* Notification_websocket(1), Notification_test_event(2)
+		 */
 		SuppFeat string `yaml:"suppFeat"`
 		// string identifying a Ipv4 address formatted in the \"dotted decimal\" notation as defined in IETF RFC 1166.
 		UeIpv4 string `yaml:"ueIpv4,omitempty"`
