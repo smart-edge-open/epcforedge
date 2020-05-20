@@ -86,6 +86,26 @@ var notifRoutes = Routes{
 		DefaultNotifURL,
 		NotificationPost,
 	},
+
+	// Policy auth notification routes
+	Route{
+		"PolicyAuthEventNotify",
+		strings.ToUpper("Post"),
+		"/af/v1/policy-authorization/notify",
+		PolicyAuthEventNotify,
+	},
+	Route{
+		"PolicyAuthEventNotifTerminate",
+		strings.ToUpper("Post"),
+		"/af/v1/policy-authorization/terminate",
+		PolicyAuthEventNotifTerminate,
+	},
+	Route{
+		"PolicyAuthSMFNotify",
+		strings.ToUpper("Post"),
+		"/af/v1/policy-authorization/smfnotify",
+		PolicyAuthSMFNotify,
+	},
 }
 
 var afRoutes = Routes{
@@ -195,5 +215,49 @@ var afRoutes = Routes{
 		strings.ToUpper("Patch"),
 		"/af/v1/pfd/transactions/{transactionId}/applications/{appId}",
 		PatchPfdAppTransaction,
+	},
+
+	// Policy Authorization routes
+
+	Route{
+		"CreatePolicyAuthAppSessions",
+		strings.ToUpper("Post"),
+		"/af/v1/policy-authorization/app-sessions",
+		CreatePolicyAuthAppSessions,
+	},
+
+	Route{
+		"GetPolicyAuthAppSession",
+		strings.ToUpper("Get"),
+		"/af/v1/policy-authorization/app-sessions/{appSessionId}",
+		GetPolicyAuthAppSession,
+	},
+
+	Route{
+		"ModifyPolicyAuthAppSession",
+		strings.ToUpper("Patch"),
+		"/af/v1/policy-authorization/app-sessions/{appSessionId}",
+		ModifyPolicyAuthAppSession,
+	},
+
+	Route{
+		"DeletePolicyAuthAppSession",
+		strings.ToUpper("Post"),
+		"/af/v1/policy-authorization/app-sessions/{appSessionId}/delete",
+		DeletePolicyAuthAppSession,
+	},
+
+	Route{
+		"PolicyAuthEventSubsc",
+		strings.ToUpper("Put"),
+		"/af/v1/policy-authorization/app-sessions/{appSessionId}/events-subscription",
+		PolicyAuthEventSubsc,
+	},
+
+	Route{
+		"PolicyAuthEventDelete",
+		strings.ToUpper("Delete"),
+		"/af/v1/policy-authorization/app-sessions/{appSessionId}/events-subscription",
+		PolicyAuthEventDelete,
 	},
 }

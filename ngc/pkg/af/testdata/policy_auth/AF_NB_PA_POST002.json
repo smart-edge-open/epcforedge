@@ -1,0 +1,531 @@
+{
+    "ascReqData": {
+        "afAppId": "PolicyAuthAppId01",
+        "afRoutReq": {
+            "appReloc": true,
+            "routeToLocs": [
+                {
+                    "dnai": "DNAI_RTL1",
+                    "routeProfId": "RouteInfo_ProfId01",
+                    "routeInfo": {
+                        "ipv4Addr": "196.168.0.1",
+                        "ipv6Addr": "2001:db8:a0b:12f0::1",
+                        "portNumber": 12345
+                    }
+                },
+                {
+                    "dnai": "DNAI_RTL2",
+                    "routeProfId": "RouteInfo_ProfId02",
+                    "routeInfo": {
+                        "ipv4Addr": "196.168.0.1",
+                        "ipv6Addr": "2001:db8:a0b:12f0::1",
+                        "portNumber": 12345
+                    }
+                }
+            ],
+            "spVal": {
+                "presenceInfoList": {
+                    "PreInfo1": {
+                        "praId": "PraId_01",
+                        "presenceState": "PRESENT",
+                        "trackingAreaList": [
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "tac": "tac01"
+                            },
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "tac": "tac02"
+                            }
+                        ],
+                        "ecgiList": [
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "eutraCellId": "EutraCellId01"
+                            },
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "eutraCellId": "EutraCellId02"
+                            }
+                        ],
+                        "ncgiList": [
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "nrCellId": "NrCellId01"
+                            },
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "nrCellId": "NrCellId02"
+                            }
+                        ],
+                        "globalRanNodeIdList": [
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "n3IwfId": "N3IwId",
+                                "gNbId": {
+                                    "bitLength": 32,
+                                    "gNBValue": "GNB01"
+                                },
+                                "ngeNbId": "NgeNbId"
+                            },
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "n3IwfId": "N3IwfId01",
+                                "gNbId": {
+                                    "bitLength": 32,
+                                    "gNBValue": "GNB01"
+                                },
+                                "ngeNbId": "NgeNbId"
+                            }
+                        ]
+                    },
+                    "PreInfo2": {
+                        "praId": "PraId_02",
+                        "presenceState": "PRESENT",
+                        "trackingAreaList": [
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "tac": "tac01"
+                            },
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "tac": "tac02"
+                            }
+                        ],
+                        "ecgiList": [
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "eutraCellId": "EutraCellId01"
+                            },
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "eutraCellId": "EutraCellId02"
+                            }
+                        ],
+                        "ncgiList": [
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "nrCellId": "NrCellId01"
+                            },
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "nrCellId": "NrCellId02"
+                            }
+                        ],
+                        "globalRanNodeIdList": [
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "n3IwfId": "N3IwId",
+                                "gNbId": {
+                                    "bitLength": 32,
+                                    "gNBValue": "GNB01"
+                                },
+                                "ngeNbId": "NgeNbId"
+                            },
+                            {
+                                "plmnId": {
+                                    "mcc": "010",
+                                    "mnc": "101"
+                                },
+                                "n3IwfId": "N3IwfId01",
+                                "gNbId": {
+                                    "bitLength": 32,
+                                    "gNBValue": "GNB01"
+                                },
+                                "ngeNbId": "NgeNbId"
+                            }
+                        ]
+                    }
+                }
+            },
+            "tempVals": [
+                {
+                    "startTime": "10:30",
+                    "stopTime": "11:30"
+                },
+                {
+                    "startTime": "12:30",
+                    "stopTime": "13:30"
+                }
+            ],
+            "upPathChgSub": {
+                "notificationUri": "http://example.com/notif",
+                "notifCorreId": "1234",
+                "dnaiChgType": "EARLY"
+            }
+        },
+        "aspId": "PolicyAuthAspId01",
+        "bdtRefId": "PolicyAuthBdtRefId01",
+        "dnn": "PolicyAuthDnn01",
+        "evSubsc": {
+            "events": [
+                {
+                    "event": "AfEvent",
+                    "notifMethod": "NotifMethod"
+                },
+                {
+                    "event": "AfEvent",
+                    "notifMethod": "NotifMethod"
+                }
+            ],
+            "notifUri": "www.example.com",
+            "usgThres": {
+                "duration": 100,
+                "totalVolume": 1000,
+                "downlinkVolume": 500,
+                "uplinkVolume": 200
+            }
+        },
+        "medComponents": {
+            "MC1": {
+                "afAppId": "MCAfAppId01",
+                "afRoutReq": {
+                    "appReloc": true,
+                    "routeToLocs": [
+                        {
+                            "dnai": "DNAI_RTL1",
+                            "routeProfId": "RouteInfo_ProfId01",
+                            "routeInfo": {
+                                "ipv4Addr": "196.168.0.1",
+                                "ipv6Addr": "2001:db8:a0b:12f0::1",
+                                "portNumber": 12345
+                            }
+                        },
+                        {
+                            "dnai": "DNAI_RTL2",
+                            "routeProfId": "RouteInfo_ProfId02",
+                            "routeInfo": {
+                                "ipv4Addr": "196.168.0.1",
+                                "ipv6Addr": "2001:db8:a0b:12f0::1",
+                                "portNumber": 12345
+                            }
+                        }
+                    ],
+                    "spVal": {
+                        "presenceInfoList": {
+                            "PreInfo1": {
+                                "praId": "PraId_01",
+                                "presenceState": "PRESENT",
+                                "trackingAreaList": [
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "tac": "tac01"
+                                    },
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "tac": "tac02"
+                                    }
+                                ],
+                                "ecgiList": [
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "eutraCellId": "EutraCellId01"
+                                    },
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "eutraCellId": "EutraCellId02"
+                                    }
+                                ],
+                                "ncgiList": [
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "nrCellId": "NrCellId01"
+                                    },
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "nrCellId": "NrCellId02"
+                                    }
+                                ],
+                                "globalRanNodeIdList": [
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "n3IwfId": "N3IwId",
+                                        "gNbId": {
+                                            "bitLength": 32,
+                                            "gNBValue": "GNB01"
+                                        },
+                                        "ngeNbId": "NgeNbId"
+                                    },
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "n3IwfId": "N3IwfId01",
+                                        "gNbId": {
+                                            "bitLength": 32,
+                                            "gNBValue": "GNB01"
+                                        },
+                                        "ngeNbId": "NgeNbId"
+                                    }
+                                ]
+                            },
+                            "PreInfo2": {
+                                "praId": "PraId_02",
+                                "presenceState": "PRESENT",
+                                "trackingAreaList": [
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "tac": "tac01"
+                                    },
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "tac": "tac02"
+                                    }
+                                ],
+                                "ecgiList": [
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "eutraCellId": "EutraCellId01"
+                                    },
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "eutraCellId": "EutraCellId02"
+                                    }
+                                ],
+                                "ncgiList": [
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "nrCellId": "NrCellId01"
+                                    },
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "nrCellId": "NrCellId02"
+                                    }
+                                ],
+                                "globalRanNodeIdList": [
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "n3IwfId": "N3IwId",
+                                        "gNbId": {
+                                            "bitLength": 32,
+                                            "gNBValue": "GNB01"
+                                        },
+                                        "ngeNbId": "NgeNbId"
+                                    },
+                                    {
+                                        "plmnId": {
+                                            "mcc": "010",
+                                            "mnc": "101"
+                                        },
+                                        "n3IwfId": "N3IwfId01",
+                                        "gNbId": {
+                                            "bitLength": 32,
+                                            "gNBValue": "GNB01"
+                                        },
+                                        "ngeNbId": "NgeNbId"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "tempVals": [
+                        {
+                            "startTime": "10:30",
+                            "stopTime": "11:30"
+                        },
+                        {
+                            "startTime": "12:30",
+                            "stopTime": "13:30"
+                        }
+                    ],
+                    "upPathChgSub": {
+                        "notificationUri": "http://example.com/notif",
+                        "notifCorreId": "1234",
+                        "dnaiChgType": "EARLY"
+                    }
+                },
+                "contVer": 123,
+                "codecs": [
+                    "AMR",
+                    "AMR-WB"
+                ],
+                "fStatus": "Enabled",
+                "marBwDl": "1000",
+                "marBwUl": "2000",
+                "medCompN": 12,
+                "medSubComps": {
+                    "msc1": {
+                        "ethfDescs": [
+                            {
+                                "destMacAddr": "12:13:14:15:16:17",
+                                "ethType": "eathType01",
+                                "fDesc": "FDesc01",
+                                "fDir": "FDir",
+                                "sourceMacAddr": "17:16:15:14:13:12",
+                                "vlanTags": [
+                                    "vlantag01",
+                                    "vlantag02"
+                                ]
+                            },
+                            {
+                                "destMacAddr": "12:13:14:15:16:17",
+                                "ethType": "eathType01",
+                                "fDesc": "FDesc01",
+                                "fDir": "FDir",
+                                "sourceMacAddr": "17:16:15:14:13:12",
+                                "vlanTags": [
+                                    "vlantag01",
+                                    "vlantag02"
+                                ]
+                            }
+                        ],
+                        "fNum": 121,
+                        "fDescs": [
+                            "FDescs1",
+                            "FDescs2"
+                        ],
+                        "fStatus": "FlowStatus",
+                        "marBwDl": "100",
+                        "marBwUl": "200"
+                    },
+                    "msc2": {
+                        "ethfDescs": [
+                            {
+                                "destMacAddr": "12:13:14:15:16:17",
+                                "ethType": "eathType01",
+                                "fDesc": "FDesc01",
+                                "fDir": "FDir",
+                                "sourceMacAddr": "17:16:15:14:13:12",
+                                "vlanTags": [
+                                    "vlantag01",
+                                    "vlantag02"
+                                ]
+                            },
+                            {
+                                "destMacAddr": "12:13:14:15:16:17",
+                                "ethType": "eathType01",
+                                "fDesc": "FDesc01",
+                                "fDir": "FDir",
+                                "sourceMacAddr": "17:16:15:14:13:12",
+                                "vlanTags": [
+                                    "vlantag01",
+                                    "vlantag02"
+                                ]
+                            }
+                        ],
+                        "fNum": 321,
+                        "fDescs": [
+                            "FDescs1",
+                            "FDescs2"
+                        ],
+                        "fStatus": "FlowStatus",
+                        "marBwDl": "100",
+                        "marBwUl": "200"
+                    }
+                },
+                "medType": "AUDIO",
+                "mirBwDl": "2000",
+                "mirBwUl": "5000",
+                "resPrio": "PRIO_1"
+            },
+            "MC2": {
+                "medCompN": 0
+            }
+        },
+        "ipDomain": "PolicyAuthIPDomain",
+        "mpsId": "PolicyAuthMspId01",
+        "notifUri": "http://afservice:9050/policyAuthorizationNotif",
+        "sliceInfo": {
+            "sst": 100,
+            "sd": "PolicyAuthSd_01"
+        },
+        "sponId": "PolicyAuthSponId01",
+        "sponStatus": "PolicyAuthSponStatus01",
+        "supi": "PolicyAuthSupi01",
+        "gpsi": "PolicyAuthGprs01",
+        "suppFeat": "0",
+        "ueIpv4": "127.0.0.1",
+        "ueIpv6": "2001:db8:a0b:12f0::1",
+        "ueMac": "23:24:25:26:27:28"
+    },
+    "ascRespData": {},
+    "evsNotif": {}
+}

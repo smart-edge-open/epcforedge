@@ -9,6 +9,14 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
+	"regexp"
+)
+
+const contentType string = "application/json"
+
+var (
+	jsonCheck = regexp.MustCompile("(?i:[application|text]/json)")
+	xmlCheck  = regexp.MustCompile("(?i:[application|text]/xml)")
 )
 
 func closeReqBody(r *http.Request) {
@@ -99,5 +107,5 @@ func loadJSONConfig(configPath string, config interface{}) error {
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(cfgData, config)
+	return json.Unmarshal(cfgData, &config)
 }

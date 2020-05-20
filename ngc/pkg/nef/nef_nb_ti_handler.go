@@ -869,6 +869,8 @@ func nefSBPCFPost(pcfSub *afSubscription, nefCtx *nefContext,
 	appSessCtx.AscReqData.UeMac = ti.MacAddr
 	appSessCtx.AscReqData.NotifURI = string(ti.NotificationDestination)
 	appSessCtx.AscReqData.SuppFeat = ti.SuppFeat
+	appSessCtx.AscReqData.EvSubsc = &EventsSubscReqData{}
+	appSessCtx.AscReqData.EvSubsc.NotifURI = string(ti.NotificationDestination)
 	appSessCtx.EvsNotif.EvSubsURI = ""
 	//Populating DNN and NW Slice Info and SUPI in App Session Context
 	for _, afServIdcounter := range nefCtx.cfg.AfServiceIDs {
