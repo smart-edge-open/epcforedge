@@ -65,11 +65,13 @@ func PolicyAuthorizationAppSessionCreate(w http.ResponseWriter,
 	}
 
 	AscRespData := getAppSessionContextRespData()
-	EvsNotif := getEventsNotification()
-	EvsNotif.EvSubsURI = asc.AscReqData.EvSubsc.NotifURI
+	if asc.AscReqData.EvSubsc != nil {
+		EvsNotif := getEventsNotification()
+		EvsNotif.EvSubsURI = asc.AscReqData.EvSubsc.NotifURI
+		asc.EvsNotif = &EvsNotif
+	}
 
 	asc.AscRespData = &AscRespData
-	asc.EvsNotif = &EvsNotif
 
 	loc, ascID := genLocURI()
 	log.Info("Location Header", loc)
