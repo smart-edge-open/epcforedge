@@ -47,6 +47,14 @@ var pfdCmd = &cobra.Command{
 	SilenceUsage: true,
 }
 
+//paCmd represents the policy authorization commands
+var paCmd = &cobra.Command{
+	Use:          "policy-authorization",
+	Short:        "Policy Authorization (PA) command line",
+	Args:         cobra.MaximumNArgs(6),
+	SilenceUsage: true,
+}
+
 func init() {
 
 	const help = `
@@ -75,9 +83,36 @@ Flags:
   -f, --filename   YAML configuration file
 
 `
+
+	const paHelp = `
+  Policy Authorization (PA) command line
+
+Usage:
+  Create an application session context in the PCF:
+	cnca policy-authorization apply -f <config.yml>
+  Get single application session context:
+	cnca policy-authorization get <appSessionID>
+  Update single app-session:
+	cnca policy-authorization patch <appSessionID> -f <config_patch.yml>
+  Delete single app-session:
+	cnca policy-authorization delete <appSessionID>
+  Subscribe
+	cnca policy-authorization subscribe <appSessionID> -f <config_sub.yml>
+  Unsubscribe
+	cnca policy-authorization unsubscribe <appSessionID>
+
+Flags:
+  -h, --help       help
+  -f, --filename   YAML configuration file
+
+`
 	// add `pfd` command
 	cncaCmd.AddCommand(pfdCmd)
 	pfdCmd.SetHelpTemplate(help)
+
+	//add `policy-authorization` cmd
+	cncaCmd.AddCommand(paCmd)
+	paCmd.SetHelpTemplate(paHelp)
 }
 
 // Execute CNCA agent

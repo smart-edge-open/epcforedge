@@ -90,6 +90,33 @@ var pfdDeleteCmd = &cobra.Command{
 	},
 }
 
+// paDeleteCmd represents the delete command
+var paDeleteCmd = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete an active NGC AF Application Session",
+	Args:  cobra.MaximumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+
+		if len(args) < 1 {
+			fmt.Println(errors.New("Missing input(s)"))
+			return
+		}
+
+		if args[0] != "" {
+			err := AFDeletePaAppSession(args[0])
+			if err != nil {
+				klog.Info(err)
+				return
+			}
+			fmt.Printf("Policy-authorization app session %s deleted\n", args[0])
+			return
+		}
+
+		fmt.Println(errors.New("Invalid input(s)"))
+
+	},
+}
+
 func init() {
 
 	const help = `Delete an active LTE CUPS userplane or NGC AF TI subscription
@@ -120,6 +147,18 @@ Flags:
   -h, --help   help
 `
 
+	const paHelp = `Delete an active NGC AF Application Session
+
+Usage:
+  cnca policy-authorization delete <appSessionId>
+
+Example:
+  cnca policy-authorization delete <appSessionId>
+
+Flags:
+  -h, --help   help
+`
+
 	// add `delete` command
 	cncaCmd.AddCommand(deleteCmd)
 	deleteCmd.SetHelpTemplate(help)
@@ -127,4 +166,8 @@ Flags:
 	// add pfd `delete` command
 	pfdCmd.AddCommand(pfdDeleteCmd)
 	pfdDeleteCmd.SetHelpTemplate(pfdHelp)
+
+	//add pa `delete` command
+	paCmd.AddCommand(paDeleteCmd)
+	paDeleteCmd.SetHelpTemplate(paHelp)
 }
