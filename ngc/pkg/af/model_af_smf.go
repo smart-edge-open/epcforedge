@@ -4,17 +4,6 @@
 
 package af
 
-// Dnai : string identifying the Data Network Area Identifier
-type Dnai string
-
-// DnaiChangeType : string identifying the DNAI change type
-// Possible values are
-// - EARLY: Early notification of UP path reconfiguration.
-// - EARLY_LATE: Early and late notification of UP path reconfiguration. This
-// value shall only be present in the subscription to the DNAI change event.
-// - LATE: Late notification of UP path reconfiguration.
-type DnaiChangeType string
-
 // DateTime is in the date-time format
 type DateTime string
 
@@ -25,10 +14,6 @@ type PduSessionID uint8
 // pattern: '^(imsi-[0-9]{5,15}|nai-.+|.+)$'
 type Supi string
 
-// Gpsi : Generic Public Servie Identifiers asssociated wit the UE
-// pattern '^(msisdn-[0-9]{5,15}|extid-[^@]+@[^@]+|.+)$'
-type Gpsi string
-
 // IPv6Prefix : string representing the Ipv6 Prefix
 // pattern: '^((:|(0?|([1-9a-f][0-9a-f]{0,3}))):)((0?|([1-9a-f][0-9a-f]{0,3}))
 // :){0,6}(:|(0?|([1-9a-f][0-9a-f]{0,3})))(\/(([0-9])|([0-9]{2})|(1[0-1][0-9])
@@ -37,10 +22,6 @@ type Gpsi string
 // (\/.+)$'
 // example: '2001:db8:abcd:12::0/64'
 type IPv6Prefix string
-
-// MacAddr48 : Identifies a MAC address
-// pattern: '^([0-9a-fA-F]{2})((-[0-9a-fA-F]{2}){5})$'
-type MacAddr48 string
 
 // NsmfEventExposureNotification Provides Information about observed events
 type NsmfEventExposureNotification struct {
@@ -53,12 +34,12 @@ type NsmfEventExposureNotification struct {
 	// Notifications about Individual Events
 	// Note 3GPP 29508 defines this as EventNotification but this conflicts with
 	//  3GPP 29522 EventNotification so rename it
-	EventNotifs []NsmEventNotification `json:"eventNotifs"`
+	EventNotifs []NsmfEventNotification `json:"eventNotifs"`
 }
 
-// NsmEventNotification describes about the Notifications about Individual
+// NsmfEventNotification describes about the Notifications about Individual
 // Events from SMF
-type NsmEventNotification struct {
+type NsmfEventNotification struct {
 	// Event that is notified.
 	Event SmfEvent `json:"event"`
 	// Time at which the event is observed.
@@ -68,27 +49,27 @@ type NsmEventNotification struct {
 	Supi Supi `json:"supi,omitempty"`
 	// Identifies a GPSI. It shall contain an MSISDN. It is included when it is
 	// available and the subscription applies to a group of UE(s) or any UE.
-	Gpsi Gpsi `json:"gpsi,omitempty"`
+	Gpsi GPSI `json:"gpsi,omitempty"`
 	// Source DN Access Identifier. Shall be included for event "UP_PATH_CH"
 	// if the DNAI changed (NOTE).
-	SourceDnai Dnai `json:"sourceDnai,omitempty"`
+	SourceDnai DNAI `json:"sourceDnai,omitempty"`
 	// Target DN Access Identifier. Shall be included for event "UP_PATH_CH"
 	// if the DNAI changed (NOTE).
-	TargetDnai Dnai `json:"targetDnai,omitempty"`
+	TargetDnai DNAI `json:"targetDnai,omitempty"`
 	// DNAI Change Type. Shall be included for event "UP_PATH_CH".
-	DnaiChgType DnaiChangeType `json:"dnaiChgType,omitempty"`
+	DnaiChgType DNAIChangeType `json:"dnaiChgType,omitempty"`
 	// The IPv4 Address of the served UE for the source DNAI. May be included
 	// for event "UP_PATH_CH".
-	SourceUeIpv4Addr IPv4Addr `json:"sourceUeIpv4Addr,omitempty"`
+	SourceUeIpv4Addr SrcUEIPv4Addr `json:"sourceUeIpv4Addr,omitempty"`
 	// The Ipv6 Address Prefix of the served UE for the source DNAI. May
 	// be included for event "UP_PATH_CH".
-	SourceUeIpv6Prefix IPv6Prefix `json:"sourceUeIpv6Prefix,omitempty"`
+	SourceUeIpv6Prefix SrcUEIPv6Prefix `json:"sourceUeIpv6Prefix,omitempty"`
 	// The IPv4 Address of the served UE for the target DNAI. May be included
 	// for event "UP_PATH_CH".
-	TargetUeIpv4Addr IPv4Addr `json:"targetUeIpv4Addr,omitempty"`
+	TargetUeIpv4Addr TgtUEIPv4Addr `json:"targetUeIpv4Addr,omitempty"`
 	// The Ipv6 Address Prefix of the served UE for the target DNAI. May
 	// be included for event "UP_PATH_CH".
-	TargetUeIpv6Prefix IPv6Prefix `json:"targetUeIpv6Prefix,omitempty"`
+	TargetUeIpv6Prefix TgtUEIPv6Prefix `json:"targetUeIpv6Prefix,omitempty"`
 	// N6 traffic routing information for the source DNAI. Shall be included
 	// for event "UP_PATH_CH".
 	SourceTraRouting RouteToLocation `json:"sourceTraRouting,omitempty"`
@@ -96,7 +77,7 @@ type NsmEventNotification struct {
 	// for event "UP_PATH_CH".
 	TargetTraRouting RouteToLocation `json:"targetTraRouting,omitempty"`
 	// UE MAC address. May be included for event "UP_PATH_CH".
-	UeMac MacAddr48 `json:"ueMac,omitempty"`
+	UeMac UEMac `json:"ueMac,omitempty"`
 	// Added IPv4 Address(es). May be included for event "UE_IP_CH".
 	AdIpv4Addr IPv4Addr `json:"adIpv4Addr,omitempty"`
 	// Added Ipv6 Address Prefix(es). May be included for event "UE_IP_CH".

@@ -28,48 +28,6 @@ func logPolicyRespErr(w *http.ResponseWriter, err string, statusCode int) {
 	(*w).WriteHeader(statusCode)
 }
 
-func setAppSessNotifURI(appSess *AppSessionContext, afCtx *Context) {
-
-	ascReqData := appSess.AscReqData
-	ascReqData.NotifURI = pcfPANotifURI
-
-	afRoutReq := ascReqData.AfRoutReq
-	if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
-		afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
-	}
-
-	for _, medCompn := range ascReqData.MedComponents {
-		afRoutReq := medCompn.AfRoutReq
-		if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
-			afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
-		}
-	}
-
-	if ascReqData.EvSubsc != nil {
-		ascReqData.EvSubsc.NotifURI = pcfPANotifURI
-	}
-}
-
-func setAppSessUpdateDataNotifURI(ascUpdateData *AppSessionContextUpdateData,
-	afCtx *Context) {
-
-	afRoutReq := ascUpdateData.AfRoutReq
-	if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
-		afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
-	}
-
-	if ascUpdateData.EvSubsc != nil {
-		ascUpdateData.EvSubsc.NotifURI = pcfPANotifURI
-	}
-
-	for _, medCompn := range ascUpdateData.MedComponents {
-		afRoutReq := medCompn.AfRoutReq
-		if afRoutReq != nil && afRoutReq.UpPathChgSub != nil {
-			afRoutReq.UpPathChgSub.NotificationURI = smfPANotifURI
-		}
-	}
-}
-
 func handlePAErrorResp(probDetails *ProblemDetails, err error,
 	w *http.ResponseWriter, httpResp *http.Response, funcName string) {
 
@@ -113,6 +71,7 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		err         error
 		appSess     AppSessionContext
 		appSessJSON []byte
+		evInfo      EventInfo
 	)
 
 	funcName := "CreatePolicyAuthAppSessions: "
@@ -136,14 +95,13 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = validateAppSessCtx(&appSess)
+	err = validateAndSetupAppSessCtx(&appSess, &evInfo, afCtx)
+
 	if err != nil {
 		logPolicyRespErr(&w, "CreatePolicyAuthAppSessions: "+
 			err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	setAppSessNotifURI(&appSess, afCtx)
 
 	apiClient := afCtx.data.policyAuthAPIClient
 	if apiClient == nil {
@@ -153,7 +111,6 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//	appSessResp, probDetails, httpResp, err =
 	apiResp, err := apiClient.PostAppSessions(cliCtx,
 		appSess)
 
@@ -164,17 +121,24 @@ func CreatePolicyAuthAppSessions(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Retry-After", apiResp.retryAfter)
 		}
 		handlePAErrorResp(probDetails, err, &w, httpResp, funcName)
-
 		return
 	}
 
 	w.Header().Set("Location", apiResp.locationURI)
+
 	if httpResp.StatusCode == 303 {
 		w.WriteHeader(httpResp.StatusCode)
 		return
 	}
 
 	appSessResp := apiResp.appSessCtx
+	err = setAppSessInfo(apiResp.locationURI, &evInfo, appSessResp, afCtx)
+	if err != nil {
+		logPolicyRespErr(&w, "CreatePolicyAuthAppSessions: "+err.Error(),
+			http.StatusInternalServerError)
+		return
+	}
+
 	appSessJSON, err = json.Marshal(appSessResp)
 	if err != nil {
 		logPolicyRespErr(&w, "Json marshal error in "+
@@ -242,6 +206,10 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Close the websocket if no other notifyId
+	log.Infoln("Deleting the appSessionsEv for appSessionID", appSessionID)
+	delete(afCtx.appSessionsEv, appSessionID)
+
 	w.WriteHeader(httpResp.StatusCode)
 	if httpResp.StatusCode == 204 {
 		return
@@ -303,6 +271,13 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	appSessResp := apiResp.appSessCtx
+	err = updateAppSessInResp(appSessResp, appSessionID, afCtx)
+	if err != nil {
+		logPolicyRespErr(&w, "Updating the response "+
+			"GetPolicyAuthAppSessions: "+err.Error(),
+			http.StatusInternalServerError)
+		return
+	}
 	appSessRespJSON, err := json.Marshal(appSessResp)
 	if err != nil {
 		logPolicyRespErr(&w, "Json marshal error in "+
@@ -349,6 +324,9 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	appSessionID := getAppSessionID(r)
+
+	log.Infoln("App SessionID received in PATCH ", appSessionID)
 
 	err = validateAscUpdateData(&ascUpdateData)
 	if err != nil {
@@ -356,7 +334,13 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 			http.StatusBadRequest)
 		return
 	}
-	setAppSessUpdateDataNotifURI(&ascUpdateData, afCtx)
+
+	err = modifyAppSessNotifParams(&ascUpdateData, appSessionID, afCtx)
+	if err != nil {
+		logPolicyRespErr(&w, "ModifyPolicyAuthAppSession: "+
+			err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	apiClient := afCtx.data.policyAuthAPIClient
 	if apiClient == nil {
@@ -365,8 +349,6 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-
-	appSessionID := getAppSessionID(r)
 
 	apiResp, err = apiClient.ModAppSession(cliCtx, appSessionID,
 		ascUpdateData)
@@ -383,6 +365,14 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	appSessResp := apiResp.appSessCtx
+	err = updateAppSessInResp(appSessResp, appSessionID, afCtx)
+	if err != nil {
+		logPolicyRespErr(&w, "Updating the response "+
+			"ModifyPolicyAuthAppSessions: "+err.Error(),
+			http.StatusInternalServerError)
+		return
+	}
+
 	appSessJSON, err = json.Marshal(appSessResp)
 	if err != nil {
 		logPolicyRespErr(&w, "Json marshal error in "+

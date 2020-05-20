@@ -67,12 +67,14 @@ func PolicyAuthEventNotifTerminate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(204)
 }
 
-// PolicyAuthSMFNotify Event notification termination handler
-func PolicyAuthSMFNotify(w http.ResponseWriter, r *http.Request) {
+// PolicyAuthSMFNotify Handler for SMF UP_PATH_CH notifications
+func PolicyAuthSMFNotify(w http.ResponseWriter,
+	r *http.Request) {
 
 	var (
-		err   error
-		event NsmfEventExposureNotification
+		smfEv        NsmfEventExposureNotification
+		nsmEvNo      NsmfEventNotification
+		upEventFound bool
 	)
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
@@ -82,13 +84,50 @@ func PolicyAuthSMFNotify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = json.NewDecoder(r.Body).Decode(&event)
-	if err != nil {
+	if r.Body == nil {
+		log.Errf("PolicyAuthSMFNotify Empty Body")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	// Retrieve the event notification information from the request
+	if err := json.NewDecoder(r.Body).Decode(&smfEv); err != nil {
 		logPolicyRespErr(&w, "Json Decode error in "+
-			"PolicyAuthSMFNotify: "+err.Error(),
+			"PolicyAuthSMFNotify:",
 			http.StatusBadRequest)
 		return
 	}
 
-	w.WriteHeader(204)
+	// Validate the content of the NsmfEventExposureNotification
+	// Check if notification id is present
+	if smfEv.NotifID == "" {
+		logPolicyRespErr(&w, "Missing notif id in "+
+			"PolicyAuthSMFNotify: ",
+			http.StatusBadRequest)
+		return
+	}
+
+	// Check if notification events with UP_PATH_CH is present
+	if len(smfEv.EventNotifs) == 0 {
+		logPolicyRespErr(&w, "Missing event notifs in "+
+			"PolicyAuthSMFNotify: ",
+			http.StatusBadRequest)
+		return
+	}
+
+	for _, nsmEvNo = range smfEv.EventNotifs {
+		if nsmEvNo.Event == "UP_PATH_CH" {
+			log.Infof("PolicyAuthSMFNotify found an entry for UP_PATH_CH")
+			upEventFound = true
+			break
+		}
+
+	}
+
+	if upEventFound {
+
+		sendUpPathEventNotification(smfEv.NotifID, afCtx, nsmEvNo)
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+
 }

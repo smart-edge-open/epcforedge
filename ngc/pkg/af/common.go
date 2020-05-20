@@ -80,6 +80,10 @@ func genHTTPClient(cfg *GenericCliConfig) (*http.Client, error) {
 
 	if cfg.Protocol == "https" {
 		var tlsCfg *tls.Config
+
+		if len(cfg.CliCertPath) == 0 {
+			return nil, errors.New("Certificate Path Nil")
+		}
 		CACert, err := ioutil.ReadFile(cfg.CliCertPath)
 		if err != nil {
 			log.Errf("Error: %v", err)

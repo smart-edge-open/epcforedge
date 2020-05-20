@@ -38,15 +38,15 @@ OAM Config Example File - `oam.json` locates at `ngc/configs`
 
 The configurable parameters list:
 
-| Param          | Description                                                                   |
-| -------------- | ----------------------------------------------------------------------------  |
-| TlsEndpoint    | HTTPS(TLS) EndPoint. (Not support for this release)                           |
-| OpenEndpoint   | HTTP2 EndPoint. Used by CNCA to access OAM via HTTP2                          |
-| NgcEndpoint    | NGC EndPoint. Used by OAM to access NGC                                       |
-| NgcType        | NGC Type. Now only support APISTUB test mode.                                 |
-| NgcTestData    | NGC TestData Path. Used by APISTUB testdata                                   |
-| ServerCertPath | Path to SSL certs used by OAM server for CNCA/UI HTTP2 Requests               |
-| ServerKeyPath  | Path to keys used by OAM server for HTTP2 connection between CNCA/UI and OAM  |
+| Param          | Description                                                                  |
+| -------------- | ---------------------------------------------------------------------------- |
+| TlsEndpoint    | HTTPS(TLS) EndPoint. (Not support for this release)                          |
+| OpenEndpoint   | HTTP2 EndPoint. Used by CNCA to access OAM via HTTP2                         |
+| NgcEndpoint    | NGC EndPoint. Used by OAM to access NGC                                      |
+| NgcType        | NGC Type. Now only support APISTUB test mode.                                |
+| NgcTestData    | NGC TestData Path. Used by APISTUB testdata                                  |
+| ServerCertPath | Path to SSL certs used by OAM server for CNCA/UI HTTP2 Requests              |
+| ServerKeyPath  | Path to keys used by OAM server for HTTP2 connection between CNCA/UI and OAM |
 
 To run oam, just execute as below:
 ```sh
@@ -99,37 +99,38 @@ AF sample code, generated bin will be put under ngc/dist
 
 AF configurable parameters list:
 
-| Param               | Description                                                                         |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| AfID                | AF ID provided by OAM during AF registration                                        |
-| CNCAEndpoint        | HTTP2 EndPoint. Used by CNCA to access AF via HTTP2                                 |
-| Hostname            | Provided by AF to NEF. Part of URL used by  notifications                           |
-| NotifPort           | NGC EndPoint. Used by NEF to send notifications to AF                               |
-| UIEndpoint          | CNCA UI EndPoint Used by AF                                                         |
-| ServerCertPath      | Path to certs used by AF server for CNCA HTTP2 Requests and NEF HTTP2 notification  |
-| ServerKeyPath       | Path to keys used for HTTP2 connection between AF-CNCA and AF-NEF                   |
-| Protocol            | Protocol used between AF and NEF                                                    |
-| NEFHostname         | NEF Hostname used by AF                                                             |
-| NEFPort             | NEF Port used by AF for sending requests to NEF                                     |
-| NEFBasePath         | URL used by AF to access NEF Traffic Influence                                      |
-| UserAgent           | Used by AF client connecting to NEF                                                 |
-| NEFClientCertPath   | Path to certs used by AF client                                                     |
-| LocationPrefixPfd   | The API prefix for PFD management                                                   |
-| NEFPFDBasePath      | URL used by AF to access NEF PFD management                                         |
-| OAuth2Support       | OAuth2 support in AF                                                                |
+| Param                | Description                                                                        |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| AfID                 | AF ID provided by OAM during AF registration                                       |
+| CNCAEndpoint         | HTTP2 EndPoint. Used by CNCA to access AF via HTTP2                                |
+| Hostname             | Provided by AF to NEF. Part of URL used by  notifications                          |
+| NotifPort            | NGC EndPoint. Used by NEF to send notifications to AF                              |
+| UIEndpoint           | CNCA UI EndPoint Used by AF                                                        |
+| ServerCertPath       | Path to certs used by AF server for CNCA HTTP2 Requests and NEF HTTP2 notification |
+| ServerKeyPath        | Path to keys used for HTTP2 connection between AF-CNCA and AF-NEF                  |
+| Protocol             | Protocol used between AF and NEF                                                   |
+| NEFHostname          | NEF Hostname used by AF                                                            |
+| NEFPort              | NEF Port used by AF for sending requests to NEF                                    |
+| NEFBasePath          | URL used by AF to access NEF Traffic Influence                                     |
+| UserAgent            | Used by AF client connecting to NEF                                                |
+| NEFClientCertPath    | Path to certs used by AF client                                                    |
+| LocationPrefixPfd    | The API prefix for PFD management                                                  |
+| NEFPFDBasePath       | URL used by AF to access NEF PFD management                                        |
+| OAuth2Support        | OAuth2 support in AF                                                               |
+| NotifyClientCertPath | Path to certs used by AF client towards Notification consumer                      |
 
 AF configurable parameters list for Policy Authorization (Indicated by CliPaConfig):
 
-| Param               | Description                                                                         |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| Protocol            | Protocol used between AF and PCF (http/https)                                       |
-| ProtocolVer         | HTTP/s Protocol version (1.1/2.0)                                                   |
-| Hostname            | PCF Hostname used by AF                                                             |
-| Port                | PCF Port number to which AF sends request                                           |
-| BasePath            | URL used by AF to access PCF for Policy authorization                               |
-| CliCertPath         | Path for certificates to be used by AF client to communicate with PCF               |
-| OAuth2Support       | OAuth2 authorization support between AF and PCF                                     |
-| NotifURI            | Notification URL to which AF will recieve notifications from PCF                    |
+| Param         | Description                                                           |
+| ------------- | --------------------------------------------------------------------- |
+| Protocol      | Protocol used between AF and PCF (http/https)                         |
+| ProtocolVer   | HTTP/s Protocol version (1.1/2.0)                                     |
+| Hostname      | PCF Hostname used by AF                                               |
+| Port          | PCF Port number to which AF sends request                             |
+| BasePath      | URL used by AF to access PCF for Policy authorization                 |
+| CliCertPath   | Path for certificates to be used by AF client to communicate with PCF |
+| OAuth2Support | OAuth2 authorization support between AF and PCF                       |
+| NotifURI      | Notification URL to which AF will recieve notifications from PCF      |
 
 To run af, just execute as below:
 ```sh
@@ -248,19 +249,19 @@ CNTF Config Example File - `cntf.json` located at `ngc/configs`
 
 #### The configurable parameters list:
 
-| Param                     | Description                                                                                                                                                             |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CntfAPIRoot                | The API root of the CNTF i.e. ip address or domain name                                                                                                                  |
-| LocationPrefix            | The API prefix  |
-| MaxASCSupport             | The maximum number of Application Session Context supported by CNTF |
-| HTTPConfig                | The fields under this describe the configuration for the HTTP Endpoint                                                                                                  |
-| Endpoint                  | The end point where the CNTF server needs to listen for HTTP 1.1 requests.Format ipaddress:port                                                                          |
-| HTTP2Config               | The fields under this describe the configuration for the HTTP2 Endpoint                                                                                                 |
-| Endpoint                  | The end point where the CNTF server needs to listen for HTTP 2.1 requests. Format ipaddress:port                                                                         |
-| CNTFServerCert             | The file path containing the CNTF Server public key                                                                                                                      |
-| CNTFServerKey              | The file path containing the CNTF Server private key                                                                                                                     |
-| AfClientCert              | The file path containing the AF Server public key                                                                                                                       |
-| OAuth2Support             | OAuth2 support in CNTF                                                                                                                                                   |
+| Param          | Description                                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------ |
+| CntfAPIRoot    | The API root of the CNTF i.e. ip address or domain name                                          |
+| LocationPrefix | The API prefix                                                                                   |
+| MaxASCSupport  | The maximum number of Application Session Context supported by CNTF                              |
+| HTTPConfig     | The fields under this describe the configuration for the HTTP Endpoint                           |
+| Endpoint       | The end point where the CNTF server needs to listen for HTTP 1.1 requests.Format ipaddress:port  |
+| HTTP2Config    | The fields under this describe the configuration for the HTTP2 Endpoint                          |
+| Endpoint       | The end point where the CNTF server needs to listen for HTTP 2.1 requests. Format ipaddress:port |
+| CNTFServerCert | The file path containing the CNTF Server public key                                              |
+| CNTFServerKey  | The file path containing the CNTF Server private key                                             |
+| AfClientCert   | The file path containing the AF Server public key                                                |
+| OAuth2Support  | OAuth2 support in CNTF                                                                           |
 
 #### Run CNTF
 To run cntf, just execute as below:

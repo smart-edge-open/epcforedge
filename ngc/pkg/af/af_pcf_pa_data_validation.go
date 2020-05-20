@@ -15,6 +15,7 @@ type paSuppFeat struct {
 	medComnVersioning    bool
 }
 
+/* This function Decodes the Event Subscription rqeuest*/
 func decodeValidateEventSubscReq(r *http.Request, w http.ResponseWriter,
 	evsReqData *EventsSubscReqData) (err error) {
 
@@ -35,6 +36,7 @@ func decodeValidateEventSubscReq(r *http.Request, w http.ResponseWriter,
 	return nil
 }
 
+/* This function validates Event Subscription*/
 func validateEventSubsc(evsReqData *EventsSubscReqData) (err error) {
 
 	if evsReqData == nil {
@@ -61,6 +63,23 @@ func validateEventSubsc(evsReqData *EventsSubscReqData) (err error) {
 	return nil
 }
 
+/* This function performs the following functionality:
+- Validates the AppSessionContext for the mandatory parameters
+- Updates the notificationURI/NotifURI in ascReqData and stores Notification
+   params*/
+
+func validateAndSetupAppSessCtx(appSess *AppSessionContext, evInfo *EventInfo,
+	afCtx *Context) (err error) {
+
+	if err = validateAppSessCtx(appSess); err == nil {
+		err = setAppSessNotifParams(appSess, evInfo, afCtx)
+	}
+
+	return err
+
+}
+
+/* This function valides the NotifURI, suppFeat, EvSubsc and Medcomponents*/
 func validateAppSessCtx(appSess *AppSessionContext) (err error) {
 
 	var suppFeatures paSuppFeat
@@ -113,6 +132,8 @@ func validateAppSessCtx(appSess *AppSessionContext) (err error) {
 	return nil
 }
 
+/* This function validates the Supported Features and fields w.r.t the
+individual feature*/
 func validateSuppFeatAscReqData(ascReqData *AppSessionContextReqData,
 	suppFeatures *paSuppFeat) (err error) {
 
@@ -160,6 +181,8 @@ func validateSuppFeatAscReqData(ascReqData *AppSessionContextReqData,
 	return nil
 }
 
+/* This function validates the AppSessionContextUpdateData mandatory
+parameters */
 func validateAscUpdateData(ascUpdateData *AppSessionContextUpdateData) (
 	err error) {
 
@@ -175,6 +198,7 @@ func validateAscUpdateData(ascUpdateData *AppSessionContextUpdateData) (
 	return nil
 }
 
+/* This function decodes the Supported Features bitmap */
 func decodeSuppFeat(suppFeat string) (retVal paSuppFeat, err error) {
 
 	retVal.inflOnTrafficRouting = false
@@ -217,6 +241,7 @@ func decodeSuppFeat(suppFeat string) (retVal paSuppFeat, err error) {
 	return retVal, nil
 }
 
+/* This function validates the Media Components w.r.t features enabled*/
 func validateMedComponents(medCompns map[string]MediaComponent,
 	feat *paSuppFeat) (err error) {
 
@@ -263,6 +288,7 @@ func validateMedComponents(medCompns map[string]MediaComponent,
 	return nil
 }
 
+/* This function validates the Termination Request from PCF */
 func validateTermInfo(termInfo *TerminationInfo) (err error) {
 
 	if len(termInfo.ResURI) == 0 {

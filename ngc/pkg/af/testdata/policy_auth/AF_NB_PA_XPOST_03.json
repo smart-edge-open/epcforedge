@@ -723,7 +723,11 @@
         "suppFeat": "007",
         "ueIpv4": "127.0.0.1",
         "ueIpv6": "2001:db8:a0b:12f0::1",
-        "ueMac": "23:24:25:26:27:28"
+        "ueMac": "23:24:25:26:27:28",
+        "afwebsockNotifConfig": {
+             "requestWebsocketUri": true,
+             "consumerID": "ConsumerID1"
+         }
     },
     "ascRespData": {},
     "evsNotif": {}

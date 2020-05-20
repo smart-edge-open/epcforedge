@@ -194,7 +194,6 @@
                 }
             ],
             "upPathChgSub": {
-                "notificationUri": "http://localhost:8450/notification",
                 "notifCorreId": "1234",
                 "dnaiChgType": "EARLY"
             }
@@ -417,7 +416,6 @@
                         }
                     ],
                     "upPathChgSub": {
-                        "notificationUri": "http://localhost:8450/notification",
                         "notifCorreId": "1235",
                         "dnaiChgType": "EARLY"
                     }
@@ -700,7 +698,6 @@
                         }
                     ],
                     "upPathChgSub": {
-                        "notificationUri": "http://localhost:8450/notification",
                         "notifCorreId": "1236",
                         "dnaiChgType": "EARLY"
                     }
