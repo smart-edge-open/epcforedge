@@ -27,6 +27,7 @@ type AppSessEv map[string]*EventInfo
 
 func initNotify(afCtx *Context) {
 	afCtx.appSessionsEv = make(AppSessEv)
+	afCtx.data.consumerConns = make(ConsumerConns)
 }
 
 /* This function creates the GenericConfig based on notificationURI
@@ -142,8 +143,10 @@ func updateAppSessInResp(appSess *AppSessionContext,
 		log.Infoln("Event Information not present, Nothing to update")
 		return nil
 	}
+
+	// TODO only for first time wsReq
 	if evInfo.wsReq {
-		//TODO update the websocketURI in AscRespData
+		updateAppSessRspForWS(appSess, afCtx)
 		return nil
 	}
 	afRouteReq := ascReqData.AfRoutReq
@@ -406,6 +409,7 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 	var (
 		ev        NotificationUpPathChg
 		apiClient notifyClientAPI
+		cfg       *GenericCliConfig
 	)
 	// Map the content of NsmfEventExposureNotification to NotificationUpPathChg
 	evInfo, err := getAppSessFromCorrID(corrID, afCtx)
@@ -429,7 +433,7 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 	ev.TargetTrafficRoute = nsmEvNo.TargetTraRouting
 
 	if evInfo.wsReq {
-		// TODO: Send over websocket
+		err = sendUpPathOnWs(evInfo, ev, afCtx)
 
 	} else {
 
@@ -438,7 +442,7 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 			corrID,
 			notificationURI)
 
-		cfg, err := generateCliCfg(string(notificationURI), afCtx)
+		cfg, err = generateCliCfg(string(notificationURI), afCtx)
 		if err != nil {
 			log.Errln("Error in Generating NewAFNotifyAPIClient")
 			return
@@ -450,10 +454,11 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 		}
 		// Send the request towards Consumer
 		err = apiClient.NotificationUpPathEvent(notificationURI, ev)
-		if err != nil {
-			log.Errf("UP_PATH_CHANGE Sending to consumer failed : %s",
-				err.Error())
-			return
-		}
 	}
+	if err != nil {
+		log.Errf("UP_PATH_CHANGE Sending to consumer failed : %s",
+			err.Error())
+		return
+	}
+
 }

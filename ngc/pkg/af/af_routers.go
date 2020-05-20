@@ -79,6 +79,41 @@ func NewNotifRouter(afCtx *Context) *mux.Router {
 	return router
 }
 
+// NewNotifWSRouter function
+func NewNotifWSRouter(afCtx *Context) *mux.Router {
+	router := mux.NewRouter().StrictSlash(true)
+	for _, route := range notifWSRoutes {
+		var handler http.Handler = route.HandlerFunc
+		handler = afLogger(handler, route.Name)
+
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(handler)
+	}
+	router.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := context.WithValue(
+				r.Context(),
+				keyType("af-ctx"),
+				afCtx)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	})
+
+	return router
+}
+
+var notifWSRoutes = Routes{
+	Route{
+		"GetNotifications",
+		strings.ToUpper("Get"),
+		"/af/v1/af-notifications",
+		GetNotifications,
+	},
+}
+
 var notifRoutes = Routes{
 	Route{
 		"NotificationPost",

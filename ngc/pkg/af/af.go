@@ -33,30 +33,32 @@ var nefAccessToken string
 
 // ServerConfig struct
 type ServerConfig struct {
-	CNCAEndpoint   string `json:"CNCAEndpoint"`
-	Hostname       string `json:"Hostname"`
-	NotifPort      string `json:"NotifPort"`
-	UIEndpoint     string `json:"UIEndpoint"`
-	ServerCertPath string `json:"ServerCertPath"`
-	ServerKeyPath  string `json:"ServerKeyPath"`
+	CNCAEndpoint       string `json:"CNCAEndpoint"`
+	Hostname           string `json:"Hostname"`
+	NotifPort          string `json:"NotifPort"`
+	NotifWebsocketPort string `json:"NotifWebsocketPort"`
+	UIEndpoint         string `json:"UIEndpoint"`
+	ServerCertPath     string `json:"ServerCertPath"`
+	ServerKeyPath      string `json:"ServerKeyPath"`
 }
 
 //Config struct
 type Config struct {
-	AfID              string            `json:"AfId"`
-	AfAPIRoot         string            `json:"AfAPIRoot"`
-	LocationPrefixPfd string            `json:"LocationPrefixPfd"`
-	LocationPrefixPA  string            `json:"LocationPrefixPA"`
-	UserAgent         string            `json:"UserAgent"`
-	SrvCfg            ServerConfig      `json:"ServerConfig"`
-	CliCfg            CliConfig         `json:"CliConfig"`
-	CliPcfCfg         *GenericCliConfig `json:"CliPAConfig"`
+	AfID                string            `json:"AfId"`
+	AfAPIRoot           string            `json:"AfAPIRoot"`
+	LocationPrefixPfd   string            `json:"LocationPrefixPfd"`
+	LocationPrefixPA    string            `json:"LocationPrefixPA"`
+	PrefixNotifications string            `json:"PrefixNotifications"`
+	UserAgent           string            `json:"UserAgent"`
+	SrvCfg              ServerConfig      `json:"ServerConfig"`
+	CliCfg              CliConfig         `json:"CliConfig"`
+	CliPcfCfg           *GenericCliConfig `json:"CliPAConfig"`
 }
 
 type afData struct {
 	policyAuthAPIClient pcfPolicyAuthAPI
-	// TODO websocket connections of all consumers, consumerID is the key
-	//consumerConns      ConsumerConns
+	// Websocket connections of all consumers, consumerID is the key
+	consumerConns ConsumerConns
 }
 
 //Context struct
@@ -76,6 +78,8 @@ var (
 	AfRouter *mux.Router
 	//NotifRouter public var
 	NotifRouter *mux.Router
+	//NotifWSRouter Router for Notifications Websockets
+	NotifWSRouter *mux.Router
 )
 
 func runServer(ctx context.Context, afCtx *Context) error {
@@ -99,6 +103,14 @@ func runServer(ctx context.Context, afCtx *Context) error {
 
 	AfRouter = NewAFRouter(afCtx)
 	NotifRouter = NewNotifRouter(afCtx)
+	NotifWSRouter = NewNotifWSRouter(afCtx)
+
+	serverNotifWS := &http.Server{
+		Addr:         afCtx.cfg.SrvCfg.NotifWebsocketPort,
+		Handler:      NotifWSRouter,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
 
 	serverCNCA := &http.Server{
 		Addr:         afCtx.cfg.SrvCfg.CNCAEndpoint,
@@ -136,7 +148,7 @@ func runServer(ctx context.Context, afCtx *Context) error {
 		log.Infoln("OAuth2 DISABLED")
 	}
 
-	stopServerCh := make(chan bool, 2)
+	stopServerCh := make(chan bool, 3)
 	go func(stopServerCh chan bool) {
 		<-ctx.Done()
 		log.Info("Executing graceful stop")
@@ -148,6 +160,10 @@ func runServer(ctx context.Context, afCtx *Context) error {
 			log.Errf("Could not close AF Notifications server: %#v", err)
 		}
 		log.Info("AF Notification server stopped")
+		if err = serverNotifWS.Close(); err != nil {
+			log.Errf("Could not close AF Notifications WS server: %#v", err)
+		}
+		log.Info("AF Notification WS server stopped")
 		stopServerCh <- true
 	}(stopServerCh)
 
@@ -160,6 +176,20 @@ func runServer(ctx context.Context, afCtx *Context) error {
 
 			log.Errf("AF Notifications server error: " + err.Error())
 		}
+
+		stopServerCh <- true
+	}(stopServerCh)
+
+	go func(stopServerCh chan bool) {
+		log.Infof("Serving AF WS Notifications on: %s",
+			afCtx.cfg.SrvCfg.NotifWebsocketPort)
+		if err = serverNotifWS.ListenAndServeTLS(
+			afCtx.cfg.SrvCfg.ServerCertPath,
+			afCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
+
+			log.Errf("AF Notifications WS server error: " + err.Error())
+		}
+
 		stopServerCh <- true
 	}(stopServerCh)
 
@@ -178,6 +208,7 @@ func runServer(ctx context.Context, afCtx *Context) error {
 		return err
 	}
 
+	<-stopServerCh
 	<-stopServerCh
 	<-stopServerCh
 	return nil
@@ -237,11 +268,14 @@ func printConfig(cfg Config) {
 	log.Infoln("********************* NGC AF CONFIGURATION ******************")
 	log.Infoln("AfID: ", cfg.AfID)
 	log.Infoln("LocationPrefixPfd ", cfg.LocationPrefixPfd)
+	log.Infoln("LocationPrefixPA ", cfg.LocationPrefixPA)
+	log.Infoln("PrefixNotifications ", cfg.PrefixNotifications)
 	log.Infoln("-------------------------- CNCA SERVER ----------------------")
 	log.Infoln("CNCAEndpoint: ", cfg.SrvCfg.CNCAEndpoint)
 	log.Infoln("-------------------- NEF NOTIFICATIONS SERVER ---------------")
 	log.Infoln("Hostname: ", cfg.SrvCfg.Hostname)
 	log.Infoln("NotifPort: ", cfg.SrvCfg.NotifPort)
+	log.Infoln("NotifWebsocketPort: ", cfg.SrvCfg.NotifWebsocketPort)
 	log.Infoln("ServerCertPath: ", cfg.SrvCfg.ServerCertPath)
 	log.Infoln("ServerKeyPath: ", cfg.SrvCfg.ServerKeyPath)
 	log.Infoln("UIEndpoint: ", cfg.SrvCfg.UIEndpoint)

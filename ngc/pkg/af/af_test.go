@@ -6,12 +6,17 @@ package af_test
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
+	"github.com/gorilla/websocket"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
@@ -36,6 +41,37 @@ func testingAFClient(fn RoundTripFunc) *http.Client {
 
 	return &http.Client{
 		Transport: fn,
+	}
+
+}
+
+// connectConsumer sends a consumer notifications GET request to the appliance
+func connectWsAF(socket *websocket.Dialer, header *http.Header) *websocket.Conn {
+	By("Sending consumer notification GET request")
+	conn, resp, err := socket.Dial("wss://localhost:8082/af/v1/af-notifications", *header)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	By("Comparing GET response code")
+	defer resp.Body.Close()
+	Expect(resp.Status).To(Equal("101 Switching Protocols"))
+
+	return conn
+}
+
+func getNotifyFromConn(conn *websocket.Conn, response *af.Afnotification,
+	corrID string) {
+	conn.SetReadDeadline(time.Now().Add(time.Second * 3))
+	By("Reading message from web socket connection")
+	err := conn.ReadJSON(response)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	By("Received notification struct decoding")
+	if response.Event == af.UPPathChangeEvent {
+		var ev af.NotificationUpPathChg
+
+		err = json.Unmarshal(response.Payload, &ev)
+		Expect(err).ShouldNot(HaveOccurred())
+		Expect(ev.NotifyID).To(Equal(corrID))
 	}
 
 }
@@ -2536,10 +2572,17 @@ var _ = Describe("AF", func() {
 				})
 
 				Specify("Sending DELETE request", func() {
+					By("Reading json file")
+					reqBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XDELETE_01.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Preparing request")
+					reqBodyBytes := bytes.NewReader(reqBody)
 					req, err := http.NewRequest(http.MethodPost,
 						"http://localhost:8080/af/v1/policy-authorization/"+
 							"app-sessions/5001/delete",
-						nil)
+						reqBodyBytes)
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("Sending request")
@@ -2702,10 +2745,17 @@ var _ = Describe("AF", func() {
 				})
 
 				Specify("Sending DELETE request", func() {
+					By("Reading json file")
+					reqBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XDELETE_01.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Preparing request")
+					reqBodyBytes := bytes.NewReader(reqBody)
 					req, err := http.NewRequest(http.MethodPost,
 						"http://localhost:8080/af/v1/policy-authorization/"+
 							"app-sessions/5001/delete",
-						nil)
+						reqBodyBytes)
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("Sending request")
@@ -2780,6 +2830,114 @@ var _ = Describe("AF", func() {
 					Expect(resp.Code).To(Equal(http.StatusBadRequest))
 
 				})
+
+			})
+
+			Context("PolicyAuth POST/UPDATE/DELETE - Websocket", func() {
+				Specify("Sending POST request - ws", func() {
+					By("Reading json file")
+					reqBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XPOST_02_ws.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Preparing request")
+					reqBodyBytes := bytes.NewReader(reqBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8080/af/v1/policy-authorization/"+
+							"app-sessions",
+						reqBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx := context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					resBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XPOST_02_ws.json")
+					Expect(err).ShouldNot(HaveOccurred())
+					resBodyBytes := bytes.NewReader(resBody)
+					header := make(http.Header)
+					header.Set("Location",
+						"https://localhost:8095/af/v1/"+
+							"policy-authorization/app-sessions/5001")
+					httpclient :=
+						testingAFClient(func(req *http.Request) *http.Response {
+							// Test request parameters
+							return &http.Response{
+								StatusCode: 201,
+								// Send response to be tested
+								Body: ioutil.NopCloser(resBodyBytes),
+								// Must be set to non-nil value or it panics
+								Header: header,
+							}
+						})
+
+					af.TestAf = true
+					af.SetHTTPClient(httpclient)
+					af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+					af.TestAf = false
+					Expect(resp.Code).To(Equal(http.StatusCreated))
+					var appSess af.AppSessionContext
+					// Decode response to check for websocketURI
+					err = json.NewDecoder(resp.Body).Decode(&appSess)
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(appSess.AscRespData.WebsocketURI).ShouldNot(Equal(""))
+
+				})
+
+				Specify("Websocket Connect and Notification Receive",
+					func() {
+
+						// Connect to Websocket
+
+						CACert, err := ioutil.ReadFile("/etc/certs/root-ca-cert.pem")
+						Expect(err).ShouldNot(HaveOccurred())
+
+						CACertPool := x509.NewCertPool()
+						CACertPool.AppendCertsFromPEM(CACert)
+
+						var socket = websocket.Dialer{
+							ReadBufferSize:  512,
+							WriteBufferSize: 512,
+							TLSClientConfig: &tls.Config{
+								RootCAs: CACertPool,
+							},
+						}
+
+						var header = http.Header{}
+						header["Origin"] = []string{"ConsumerID1"}
+
+						conn := connectWsAF(&socket, &header)
+						defer conn.Close()
+
+						By("Reading json file")
+						reqBody, err := ioutil.ReadFile(
+							"./testdata/policy_auth/SMF_AF_NOTIF_ws.json")
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Preparing request")
+						reqBodyBytes := bytes.NewReader(reqBody)
+						req, err := http.NewRequest(http.MethodPost,
+							"http://localhost:8081/af/v1/policy-authorization/"+
+								"smfnotify",
+							reqBodyBytes)
+						Expect(err).ShouldNot(HaveOccurred())
+
+						By("Sending request")
+						resp := httptest.NewRecorder()
+						ctx := context.WithValue(req.Context(),
+							KeyType("af-ctx"), af.AfCtx)
+						af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+						Expect(resp.Code).To(Equal(http.StatusNoContent))
+						var afEvent af.Afnotification
+						getNotifyFromConn(conn, &afEvent, "1240")
+						// Testing second connection, old connection is closed
+						conn2 := connectWsAF(&socket, &header)
+						defer conn2.Close()
+
+					})
+
 			})
 
 		})
