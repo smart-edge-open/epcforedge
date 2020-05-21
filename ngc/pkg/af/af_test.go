@@ -11,10 +11,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
+	ngcnef "github.com/otcshare/epcforedge/ngc/pkg/nef"
 )
 
 func TestAf(t *testing.T) {
@@ -46,9 +48,29 @@ var _ = Describe("AF", func() {
 		ctx         context.Context
 		srvCancel   context.CancelFunc
 		afIsRunning bool
+		cancel      context.CancelFunc
 	)
 
 	Describe("Cnca client request methods to AF : ", func() {
+
+		Context("Initializing NEF with stub PCF client", func() {
+			It("Will init NefServer",
+
+				func() {
+
+					ctx, cancel = context.WithCancel(context.Background())
+
+					//defer cancel()
+					go func() {
+						ngcnef.TestPcf = true
+						err := ngcnef.Run(ctx, "./testdata/testconfigs/nef.json")
+						Expect(err).To(BeNil())
+
+					}()
+
+					time.Sleep(2 * time.Second)
+				})
+		})
 
 		Context("Subscription GET ALL", func() {
 
@@ -2788,6 +2810,9 @@ var _ = Describe("AF", func() {
 	Describe("Stop the AF Server", func() {
 		It("Disconnect AF Server", func() {
 			srvCancel()
+		})
+		It("Disconnect NEF Server", func() {
+			cancel()
 		})
 	})
 })

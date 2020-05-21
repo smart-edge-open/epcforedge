@@ -14,7 +14,7 @@
     "CliConfig": {
         "Protocol": "https",
         "NEFHostname": "localhost",
-        "NEFPort": ":8060",
+        "NEFPort": ":8070",
         "NEFBasePath": "/3gpp-traffic-influence/v1",
         "NEFPFDBasePath": "/3gpp-pfd-management/v1",
         "UserAgent": "NGC-AF",
