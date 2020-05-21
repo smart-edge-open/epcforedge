@@ -4,6 +4,7 @@
 package af
 
 import (
+	"encoding/json"
 	"errors"
 	"net/url"
 	"strings"
@@ -110,8 +111,8 @@ func updateRouteReqInResp(afRouteReq *RoutingRequirement,
 
 /* This function performs the following functionality:
 - Sets the EventInfo in appSessionsEv w.r.t appSessionID
-- Updates the Application Session Context in response by invoking
-  updateAppSessInResp */
+- Updates the Application Session Context for wsURI/notificationURI in response
+ by invoking updateAppSessInResp */
 func setAppSessInfo(url string, evInfo *EventInfo,
 	appSessResp *AppSessionContext, afCtx *Context) error {
 
@@ -126,9 +127,9 @@ func setAppSessInfo(url string, evInfo *EventInfo,
 	return err
 }
 
-/* This function updates the consumer notificationURI in response
-which was replaced by AF and also sends back websocketURI
-if websocket delivery is requested*/
+/*  sendWs true means the response just needs to
+be updated for websocketURI, otherwise the notificationURI is replaced by
+consumer sent URI*/
 func updateAppSessInResp(appSess *AppSessionContext,
 	appSessionID string, afCtx *Context, sendWs bool) (err error) {
 
@@ -137,6 +138,7 @@ func updateAppSessInResp(appSess *AppSessionContext,
 		updateAppSessRspForWS(appSess, afCtx)
 		return nil
 	}
+
 	ascReqData := appSess.AscReqData
 	if ascReqData == nil {
 		log.Infoln("Nil Application Session Context Request Data")
@@ -434,7 +436,20 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 	ev.TargetTrafficRoute = nsmEvNo.TargetTraRouting
 
 	if evInfo.wsReq {
-		err = sendUpPathOnWs(evInfo, ev, afCtx)
+
+		var afEvent Afnotification
+		var payload []byte
+		afEvent.Event = UPPathChangeEvent
+		payload, err = json.Marshal(ev)
+		if err != nil {
+			log.Err(err)
+			return
+		}
+		afEvent.Payload = payload
+		log.Infof("PolicyAuthSMFNotify [NotifID, ConsumerID] => [%s,%s]",
+			corrID,
+			evInfo.consumerID)
+		err = sendNotificationOnWs(evInfo.consumerID, &afEvent, afCtx)
 
 	} else {
 

@@ -4,7 +4,6 @@
 package af
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -20,11 +19,6 @@ func chkConsumerID(r *http.Request) bool {
 
 	afCtx := r.Context().Value(keyType("af-ctx")).(*Context)
 	consumerID := r.Header.Get("Origin")
-
-	if len(consumerID) == 0 {
-		log.Errf("Authentication Failure")
-		return false
-	}
 
 	for _, v := range afCtx.appSessionsEv {
 		if v.wsReq {
@@ -43,7 +37,8 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin: chkConsumerID,
 }
 
-// Upgrade upgrades the connection to webSocket
+// Upgrade upgrades the connection to webSocket, sends a success or failure
+// response to client
 func Upgrade(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -51,6 +46,17 @@ func Upgrade(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
 		return ws, err
 	}
 	return ws, nil
+}
+
+/* This goroutine reads and checks for errors(close by consumer)
+If any read error then it closes the connection */
+func readLoop(c *websocket.Conn) {
+	for {
+		if _, _, err := c.NextReader(); err != nil {
+			_ = c.Close()
+			break
+		}
+	}
 }
 
 // createWsConn creates a websocket connection for a consumer
@@ -74,20 +80,22 @@ func createWsConn(w http.ResponseWriter, r *http.Request,
 	err = removeWsConn(origin, afCtx)
 	if err != nil {
 		log.Errf("Error in closing connection %s", err.Error())
-		return http.StatusInternalServerError,
-			errors.New("Unable to close previous connection")
+
 	}
 
-	// Upgrade the new connection to websocket
+	// Upgrade the new connection to websocket and sends a success/failure
+	// response code
 	ws, err = Upgrade(w, r)
 	if err != nil {
-		return http.StatusInternalServerError, err
+		return 0, err
 	}
 
 	// Store the connection for consumer
 	afCtx.data.consumerConns[origin] = ws
-	log.Infoln("Added consumer conn for consumerID ", origin)
 
+	// Start the goroutine to check for read errors
+	go readLoop(ws)
+	log.Infoln("Added consumer conn for consumerID ", origin)
 	return 0, nil
 }
 
@@ -101,7 +109,7 @@ func chkRemoveWSConn(evInfo *EventInfo, appSessionID string,
 		return nil
 	}
 	consumerID := evInfo.consumerID
-	// if ConsumerID is present for any other appSession, don't delete
+	// if ConsumerID is present for any other appSession, don't remove
 	for key, v := range afCtx.appSessionsEv {
 		if v.consumerID == consumerID {
 			if key == appSessionID {
@@ -165,44 +173,36 @@ func GetNotifications(w http.ResponseWriter, r *http.Request) {
 }
 
 /* This function sends the Notification to consumer on websocket */
-func sendUpPathOnWs(evInfo *EventInfo, ev NotificationUpPathChg,
+func sendNotificationOnWs(consumerID string, afEvent interface{},
 	afCtx *Context) error {
-
-	var (
-		afEvent    Afnotification
-		consumerID string
-	)
-
-	consumerID = evInfo.consumerID
 
 	if len(consumerID) == 0 {
 		return errors.New("ConsumerID nil")
 	}
 
+	// Fetching the connection for the consumer
 	conn := afCtx.data.consumerConns[consumerID]
 	if conn == nil {
 		return errors.New("Consumer Connection Not found")
 	}
 
-	afEvent.Event = UPPathChangeEvent
-	payload, err := json.Marshal(ev)
+	err := conn.WriteJSON(afEvent)
 	if err != nil {
-		log.Err(err)
-		return err
+		if err.Error() == "tls: use of closed connection" {
+			log.Infoln("Removing connection as it is closed")
+			delete(afCtx.data.consumerConns, consumerID)
+		}
 	}
-
-	afEvent.Payload = payload
-	err = conn.WriteJSON(afEvent)
 	return err
 
 }
 
 /* This function builds the AF websocketURI to be shared with consumer */
-func getWSNotificationURI(afCtx *Context) (wsURI string) {
+func getWSNotificationURI(afCtx *Context) string {
 
-	wsURI = "https//" + afCtx.cfg.SrvCfg.Hostname +
-		afCtx.cfg.SrvCfg.NotifWebsocketPort + afCtx.cfg.PrefixNotifications
-	return wsURI
+	return ("https//" + afCtx.cfg.SrvCfg.Hostname +
+		afCtx.cfg.SrvCfg.NotifWebsocketPort + afCtx.cfg.PrefixNotifications)
+
 }
 
 /* This function updates the AppSessionContextRespData with AF websocketURI
@@ -215,9 +215,11 @@ func updateAppSessRspForWS(appSess *AppSessionContext,
 		wsURI         string
 	)
 
+	// To fetch the AF websocketURI
 	wsURI = getWSNotificationURI(afCtx)
 	ascRespData := appSess.AscRespData
 
+	/* If RspData is present, update that else create and send*/
 	if ascRespData == nil {
 		ascRespDataWS.WebsocketURI = wsURI
 		appSess.AscRespData = &ascRespDataWS

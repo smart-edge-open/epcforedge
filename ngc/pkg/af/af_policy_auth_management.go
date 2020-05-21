@@ -206,9 +206,10 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Close the websocket if no other notifyId
 	log.Infoln("Deleting the appSessionsEv for appSessionID", appSessionID)
 	evInfo := afCtx.appSessionsEv[appSessionID]
+	// Close the websocket if consumer is not subscribed for any
+	// other appSession
 	err = chkRemoveWSConn(evInfo, appSessionID, afCtx)
 	if err != nil {
 		log.Errf(err.Error())
@@ -276,6 +277,7 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	appSessResp := apiResp.appSessCtx
+	// websocket parameters not to be updated in GET response
 	err = updateAppSessInResp(appSessResp, appSessionID, afCtx, false)
 	if err != nil {
 		logPolicyRespErr(&w, "Updating the response "+
@@ -341,6 +343,7 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// sendWs if true, websocketURI need to be updated in response
 	sendWs, err = modifyAppSessNotifParams(&ascUpdateData, appSessionID, afCtx)
 	if err != nil {
 		logPolicyRespErr(&w, "ModifyPolicyAuthAppSession: "+
