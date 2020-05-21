@@ -2,7 +2,7 @@
     "AfId": "1",
     "LocationPrefixPfd": "/af/v1/pfd/",
     "LocationPrefixPA": "/af/v1/policy-authorization/app-sessions",
-    "PrefixNotifications": "/af/v1/notifications",
+    "NotifWebsocketURI": "/af/v1/notifications",
     "UserAgent": "NGC-AF",
     "ServerConfig": {
         "CNCAEndpoint": ":8080",

@@ -118,6 +118,8 @@ AF configurable parameters list:
 | NEFPFDBasePath       | URL used by AF to access NEF PFD management                                        |
 | OAuth2Support        | OAuth2 support in AF                                                               |
 | NotifyClientCertPath | Path to certs used by AF client towards Notification consumer                      |
+| NotifWebsocketPort   | AF Websocket port for Notifications                                                |
+| NotifWebsocketURI    | AF Websocket URI for Notifications                                                 |
 
 AF configurable parameters list for Policy Authorization (Indicated by CliPaConfig):
 

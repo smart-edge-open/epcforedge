@@ -44,15 +44,15 @@ type ServerConfig struct {
 
 //Config struct
 type Config struct {
-	AfID                string            `json:"AfId"`
-	AfAPIRoot           string            `json:"AfAPIRoot"`
-	LocationPrefixPfd   string            `json:"LocationPrefixPfd"`
-	LocationPrefixPA    string            `json:"LocationPrefixPA"`
-	PrefixNotifications string            `json:"PrefixNotifications"`
-	UserAgent           string            `json:"UserAgent"`
-	SrvCfg              ServerConfig      `json:"ServerConfig"`
-	CliCfg              CliConfig         `json:"CliConfig"`
-	CliPcfCfg           *GenericCliConfig `json:"CliPAConfig"`
+	AfID              string            `json:"AfId"`
+	AfAPIRoot         string            `json:"AfAPIRoot"`
+	LocationPrefixPfd string            `json:"LocationPrefixPfd"`
+	LocationPrefixPA  string            `json:"LocationPrefixPA"`
+	NotifWebsocketURI string            `json:"NotifWebsocketURI"`
+	UserAgent         string            `json:"UserAgent"`
+	SrvCfg            ServerConfig      `json:"ServerConfig"`
+	CliCfg            CliConfig         `json:"CliConfig"`
+	CliPcfCfg         *GenericCliConfig `json:"CliPAConfig"`
 }
 
 type afData struct {
@@ -286,7 +286,7 @@ func printConfig(cfg Config) {
 	log.Infoln("AfID: ", cfg.AfID)
 	log.Infoln("LocationPrefixPfd ", cfg.LocationPrefixPfd)
 	log.Infoln("LocationPrefixPA ", cfg.LocationPrefixPA)
-	log.Infoln("PrefixNotifications ", cfg.PrefixNotifications)
+	log.Infoln("NotifWebsocketURI ", cfg.NotifWebsocketURI)
 	log.Infoln("-------------------------- CNCA SERVER ----------------------")
 	log.Infoln("CNCAEndpoint: ", cfg.SrvCfg.CNCAEndpoint)
 	log.Infoln("-------------------- NEF NOTIFICATIONS SERVER ---------------")

@@ -24,6 +24,7 @@ type EventInfo struct {
 }
 
 // AppSessEv This stores the Event Information for appSessions
+// key is appSessionID
 type AppSessEv map[string]*EventInfo
 
 func initNotify(afCtx *Context) {

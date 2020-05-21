@@ -6,12 +6,20 @@ package af
 import (
 	"errors"
 	"net/http"
+	"sync"
 
 	"github.com/gorilla/websocket"
 )
 
+// ConsumerConnection Websocket Connection details of a consumer
+type ConsumerConnection struct {
+	connection *websocket.Conn
+	// gorilla websocket doesn't allow concurrent writes
+	control sync.Mutex
+}
+
 // ConsumerConns websocket connections where key is consumerID
-type ConsumerConns map[string]*websocket.Conn
+type ConsumerConns map[string]*ConsumerConnection
 
 /* This function validates the consumeID of Origin Header in
 websocket establishment request, checks whether known at AF */
@@ -65,8 +73,9 @@ func createWsConn(w http.ResponseWriter, r *http.Request,
 	afCtx *Context) (int, error) {
 
 	var (
-		err error
-		ws  *websocket.Conn
+		err  error
+		ws   *websocket.Conn
+		conn ConsumerConnection
 	)
 
 	//Check for Origin Header
@@ -90,11 +99,12 @@ func createWsConn(w http.ResponseWriter, r *http.Request,
 		return 0, err
 	}
 
+	conn.connection = ws
 	// Store the connection for consumer
-	afCtx.data.consumerConns[origin] = ws
+	afCtx.data.consumerConns[origin] = &conn
 
 	// Start the goroutine to check for read errors
-	go readLoop(ws)
+	go readLoop(conn.connection)
 	log.Infoln("Added consumer conn for consumerID ", origin)
 	return 0, nil
 }
@@ -134,12 +144,14 @@ func removeWsConn(consumerID string, afCtx *Context) error {
 		closeMessage := websocket.FormatCloseMessage(
 			websocket.CloseServiceRestart,
 			"Closing this connection")
-		err := foundConn.WriteMessage(msgType, closeMessage)
+		foundConn.control.Lock()
+		err := foundConn.connection.WriteMessage(msgType, closeMessage)
 		if err != nil {
 			log.Info("Failed to send close message to connection")
 			return err
 		}
-		err = foundConn.Close()
+		foundConn.control.Unlock()
+		err = foundConn.connection.Close()
 		if err != nil {
 			return err
 		}
@@ -186,13 +198,15 @@ func sendNotificationOnWs(consumerID string, afEvent interface{},
 		return errors.New("Consumer Connection Not found")
 	}
 
-	err := conn.WriteJSON(afEvent)
+	conn.control.Lock()
+	err := conn.connection.WriteJSON(afEvent)
 	if err != nil {
 		if err.Error() == "tls: use of closed connection" {
-			log.Infoln("Removing connection as it is closed")
+			log.Infoln("Deleting connection as it is already closed")
 			delete(afCtx.data.consumerConns, consumerID)
 		}
 	}
+	conn.control.Unlock()
 	return err
 
 }
@@ -201,7 +215,7 @@ func sendNotificationOnWs(consumerID string, afEvent interface{},
 func getWSNotificationURI(afCtx *Context) string {
 
 	return ("https//" + afCtx.cfg.SrvCfg.Hostname +
-		afCtx.cfg.SrvCfg.NotifWebsocketPort + afCtx.cfg.PrefixNotifications)
+		afCtx.cfg.SrvCfg.NotifWebsocketPort + afCtx.cfg.NotifWebsocketURI)
 
 }
 
