@@ -82,6 +82,42 @@ var (
 	NotifWSRouter *mux.Router
 )
 
+/* Go Routine Starting WS Server */
+func startWSServer(server *http.Server, afCtx *Context,
+	stopServerCh chan bool) {
+
+	if server != nil {
+		log.Infof("Serving AF WS Notifications on: %s",
+			afCtx.cfg.SrvCfg.NotifWebsocketPort)
+		if err := server.ListenAndServeTLS(
+			afCtx.cfg.SrvCfg.ServerCertPath,
+			afCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
+
+			log.Errf("AF Notifications WS server error: " + err.Error())
+		}
+	}
+
+	stopServerCh <- true
+}
+
+/* Go Routine Starting Notif Server */
+func startNotifyServer(server *http.Server, afCtx *Context,
+	stopServerCh chan bool) {
+
+	if server != nil {
+		log.Infof("Serving AF Notifications on: %s",
+			afCtx.cfg.SrvCfg.NotifPort)
+		if err := server.ListenAndServeTLS(
+			afCtx.cfg.SrvCfg.ServerCertPath,
+			afCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
+
+			log.Errf("AF Notifications server error: " + err.Error())
+		}
+	}
+
+	stopServerCh <- true
+}
+
 func runServer(ctx context.Context, afCtx *Context) error {
 
 	var err error
@@ -167,31 +203,13 @@ func runServer(ctx context.Context, afCtx *Context) error {
 		stopServerCh <- true
 	}(stopServerCh)
 
-	go func(stopServerCh chan bool) {
-		log.Infof("Serving AF Notifications on: %s",
-			afCtx.cfg.SrvCfg.NotifPort)
-		if err = serverNotif.ListenAndServeTLS(
-			afCtx.cfg.SrvCfg.ServerCertPath,
-			afCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
+	/* Go Routine for starting AF Notify Server (HTTP2.0 with TLS) */
+	go startNotifyServer(serverNotif, afCtx, stopServerCh)
 
-			log.Errf("AF Notifications server error: " + err.Error())
-		}
-
-		stopServerCh <- true
-	}(stopServerCh)
-
-	go func(stopServerCh chan bool) {
-		log.Infof("Serving AF WS Notifications on: %s",
-			afCtx.cfg.SrvCfg.NotifWebsocketPort)
-		if err = serverNotifWS.ListenAndServeTLS(
-			afCtx.cfg.SrvCfg.ServerCertPath,
-			afCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
-
-			log.Errf("AF Notifications WS server error: " + err.Error())
-		}
-
-		stopServerCh <- true
-	}(stopServerCh)
+	/* Go Routine for starting AF WS Server (HTTP1.1 with TLS)
+	Websockets not supported with HTTP2.0 -
+	 https://github.com/gorilla/websocket/issues/417 */
+	go startWSServer(serverNotifWS, afCtx, stopServerCh)
 
 	if HTTP2Enabled == true {
 		log.Infof("Serving AF (CNCA HTTP2 Requests) on: %s",
@@ -215,9 +233,8 @@ func runServer(ctx context.Context, afCtx *Context) error {
 }
 
 func initAFData(afCtx *Context) (err error) {
-	if err = initPACfg(afCtx); err == nil {
-		initNotify(afCtx)
-	}
+	initNotify(afCtx)
+	err = initPACfg(afCtx)
 	return err
 }
 

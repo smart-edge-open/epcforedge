@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -45,6 +46,24 @@ func testingAFClient(fn RoundTripFunc) *http.Client {
 
 }
 
+func NotificationPost(w http.ResponseWriter, r *http.Request) {
+
+	defer GinkgoRecover()
+	Expect(r.Body).ShouldNot(Equal(nil))
+	log.Println("Protocol:     Method", r.Proto, r.Method)
+	defer r.Body.Close()
+	w.WriteHeader(http.StatusNoContent)
+	w.Header().Set("Content-Type", "application/json")
+
+}
+
+/*
+func startServer(server *httptest.Server, stopServerCh chan bool) {
+
+	server.Start()
+	stopServerCh <- true
+}*/
+
 // connectConsumer sends a consumer notifications GET request to the appliance
 func connectWsAF(socket *websocket.Dialer, header *http.Header) *websocket.Conn {
 	By("Sending consumer notification GET request")
@@ -56,6 +75,18 @@ func connectWsAF(socket *websocket.Dialer, header *http.Header) *websocket.Conn 
 	Expect(resp.Status).To(Equal("101 Switching Protocols"))
 
 	return conn
+}
+
+// connectConsumer sends a consumer notifications GET request to the appliance
+func connectWsAFForbidden(socket *websocket.Dialer, header *http.Header) {
+	By("Sending consumer notification GET request")
+	_, resp, _ := socket.Dial("wss://localhost:8082/af/v1/af-notifications", *header)
+	//Expect(err).ShouldNot(HaveOccurred())
+
+	By("Comparing GET response code")
+	defer resp.Body.Close()
+	Expect(resp.StatusCode).To(Equal(403))
+
 }
 
 func getNotifyFromConn(conn *websocket.Conn, response *af.Afnotification,
@@ -82,6 +113,7 @@ var _ = Describe("AF", func() {
 		ctx         context.Context
 		srvCancel   context.CancelFunc
 		afIsRunning bool
+		server      *httptest.Server
 	)
 
 	Describe("Cnca client request methods to AF : ", func() {
@@ -107,6 +139,7 @@ var _ = Describe("AF", func() {
 			_ = afIsRunning
 
 		})
+
 	})
 
 	Describe("Cnca client request methods to AF : ", func() {
@@ -2551,7 +2584,7 @@ var _ = Describe("AF", func() {
 				Specify("Sending PATCH 003 request - neither ws and notifyURI", func() {
 					By("Reading json file")
 					reqBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPATCH_03.json")
+						"./testdata/policy_auth/AF_NB_PA_XPATCH_no_ws_no_uri.json")
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("Preparing request")
@@ -2612,7 +2645,7 @@ var _ = Describe("AF", func() {
 				Specify("Sending POST 002 request - ws", func() {
 					By("Reading json file")
 					reqBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPOST_02.json")
+						"./testdata/policy_auth/AF_NB_PA_XPOST_ws.json")
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("Preparing request")
@@ -2628,7 +2661,7 @@ var _ = Describe("AF", func() {
 					ctx := context.WithValue(req.Context(),
 						KeyType("af-ctx"), af.AfCtx)
 					resBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPOST_02.json")
+						"./testdata/policy_auth/AF_NB_PA_XPOST_ws.json")
 					Expect(err).ShouldNot(HaveOccurred())
 					resBodyBytes := bytes.NewReader(resBody)
 					header := make(http.Header)
@@ -2658,7 +2691,7 @@ var _ = Describe("AF", func() {
 				Specify("Sending PATCH 002 request - ws already established", func() {
 					By("Reading json file")
 					reqBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPATCH_02.json")
+						"./testdata/policy_auth/AF_NB_PA_XPATCH_ws.json")
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("Preparing request")
@@ -2717,7 +2750,7 @@ var _ = Describe("AF", func() {
 					ctx := context.WithValue(req.Context(),
 						KeyType("af-ctx"), af.AfCtx)
 					resBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPOST_02.json")
+						"./testdata/policy_auth/AF_NB_PA_XPOST_ws.json")
 					Expect(err).ShouldNot(HaveOccurred())
 					resBodyBytes := bytes.NewReader(resBody)
 					header := make(http.Header)
@@ -2786,7 +2819,7 @@ var _ = Describe("AF", func() {
 				Specify("Sending POST 003 request", func() {
 					By("Reading json file")
 					reqBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPOST_03.json")
+						"./testdata/policy_auth/AF_NB_PA_XPOST_both_ws_uri.json")
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("Preparing request")
@@ -2810,7 +2843,7 @@ var _ = Describe("AF", func() {
 				Specify("Sending POST 004 request", func() {
 					By("Reading json file")
 					reqBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPOST_04.json")
+						"./testdata/policy_auth/AF_NB_PA_XPOST_no_ws_no_uri.json")
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("Preparing request")
@@ -2837,7 +2870,7 @@ var _ = Describe("AF", func() {
 				Specify("Sending POST request - ws", func() {
 					By("Reading json file")
 					reqBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPOST_02_ws.json")
+						"./testdata/policy_auth/AF_NB_PA_XPOST_1_corrID_ws.json")
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("Preparing request")
@@ -2853,7 +2886,7 @@ var _ = Describe("AF", func() {
 					ctx := context.WithValue(req.Context(),
 						KeyType("af-ctx"), af.AfCtx)
 					resBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPOST_02_ws.json")
+						"./testdata/policy_auth/AF_NB_PA_XPOST_1_corrID_ws.json")
 					Expect(err).ShouldNot(HaveOccurred())
 					resBodyBytes := bytes.NewReader(resBody)
 					header := make(http.Header)
@@ -2938,6 +2971,208 @@ var _ = Describe("AF", func() {
 
 					})
 
+				Specify("Sending DELETE request", func() {
+					By("Reading json file")
+					reqBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XDELETE_01.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Preparing request")
+					reqBodyBytes := bytes.NewReader(reqBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8080/af/v1/policy-authorization/"+
+							"app-sessions/5001/delete",
+						reqBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx := context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					httpclient :=
+						testingAFClient(func(req *http.Request) *http.Response {
+							// Test request parameters
+							return &http.Response{
+								StatusCode: 204,
+								// Send response to be tested
+								Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+								// Must be set to non-nil value or it panics
+								Header: make(http.Header),
+							}
+						})
+
+					af.TestAf = true
+					af.SetHTTPClient(httpclient)
+					af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+					af.TestAf = false
+					Expect(resp.Code).To(Equal(http.StatusNoContent))
+
+				})
+
+				Specify("Sending POST request - http uri", func() {
+					By("Reading json file")
+
+					// Start a local HTTP server for notifications
+					http.HandleFunc("/notification", NotificationPost)
+					handler := http.HandlerFunc(NotificationPost)
+
+					server = httptest.NewUnstartedServer(handler)
+					server.Config.ReadHeaderTimeout = 10 * time.Second
+					server.Config.WriteTimeout = 10 * time.Second
+					server.Start()
+
+					fmt.Printf("Test Server : %s\n", server.URL)
+					// Close the server when test finishes
+					defer server.Close()
+
+					reqBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XPOST_1_corrID_https_uri.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					var asc af.AppSessionContext
+					err = json.Unmarshal(reqBody, &asc)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					asc.AscReqData.AfRoutReq.UpPathChgSub.NotificationURI = server.URL + "/notification"
+
+					reqBody, err = json.Marshal(asc)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Preparing request")
+					reqBodyBytes := bytes.NewReader(reqBody)
+					req, err := http.NewRequest(http.MethodPost,
+						"http://localhost:8080/af/v1/policy-authorization/"+
+							"app-sessions",
+						reqBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx := context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					resBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XPOST_1_corrID_https_uri.json")
+					Expect(err).ShouldNot(HaveOccurred())
+					resBodyBytes := bytes.NewReader(resBody)
+					header := make(http.Header)
+					header.Set("Location",
+						"https://localhost:8095/af/v1/"+
+							"policy-authorization/app-sessions/5001")
+					httpclient :=
+						testingAFClient(func(req *http.Request) *http.Response {
+							// Test request parameters
+							return &http.Response{
+								StatusCode: 201,
+								// Send response to be tested
+								Body: ioutil.NopCloser(resBodyBytes),
+								// Must be set to non-nil value or it panics
+								Header: header,
+							}
+						})
+
+					af.TestAf = true
+					af.SetHTTPClient(httpclient)
+					af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+					af.TestAf = false
+					Expect(resp.Code).To(Equal(http.StatusCreated))
+
+					// generate Notification
+
+					By("Reading json file")
+					reqBody, err = ioutil.ReadFile(
+						"./testdata/policy_auth/SMF_AF_NOTIF_ws.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Preparing request")
+					reqBodyBytes = bytes.NewReader(reqBody)
+					req, err = http.NewRequest(http.MethodPost,
+						"http://localhost:8081/af/v1/policy-authorization/"+
+							"smfnotify",
+						reqBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp = httptest.NewRecorder()
+					ctx = context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
+
+					Expect(resp.Code).To(Equal(http.StatusNoContent))
+
+				})
+
+				Specify("Sending PATCH update to ws ", func() {
+					By("Reading json file")
+					reqBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XPATCH_1_corrID_ws.json")
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Preparing request")
+					reqBodyBytes := bytes.NewReader(reqBody)
+					req, err := http.NewRequest(http.MethodPatch,
+						"http://localhost:8080/af/v1/policy-authorization/"+
+							"app-sessions/5001",
+						reqBodyBytes)
+					Expect(err).ShouldNot(HaveOccurred())
+
+					By("Sending request")
+					resp := httptest.NewRecorder()
+					ctx := context.WithValue(req.Context(),
+						KeyType("af-ctx"), af.AfCtx)
+					resBody, err := ioutil.ReadFile(
+						"./testdata/policy_auth/AF_NB_PA_XPOST_1_corrID_ws.json")
+					Expect(err).ShouldNot(HaveOccurred())
+					resBodyBytes := bytes.NewReader(resBody)
+					httpclient :=
+						testingAFClient(func(req *http.Request) *http.Response {
+							// Test request parameters
+							return &http.Response{
+								StatusCode: 200,
+								// Send response to be tested
+								Body: ioutil.NopCloser(resBodyBytes),
+								// Must be set to non-nil value or it panics
+								Header: make(http.Header),
+							}
+						})
+
+					af.TestAf = true
+					af.SetHTTPClient(httpclient)
+					af.AfRouter.ServeHTTP(resp, req.WithContext(ctx))
+					af.TestAf = false
+					Expect(resp.Code).To(Equal(http.StatusOK))
+					var appSess af.AppSessionContext
+					// Decode response to check for websocketURI
+					err = json.NewDecoder(resp.Body).Decode(&appSess)
+					Expect(err).ShouldNot(HaveOccurred())
+					Expect(appSess.AscRespData.WebsocketURI).ShouldNot(Equal(""))
+				})
+
+				Specify("Incorrect Websocket Connect - 403",
+					func() {
+
+						// Connect to Websocket
+
+						CACert, err := ioutil.ReadFile("/etc/certs/root-ca-cert.pem")
+						Expect(err).ShouldNot(HaveOccurred())
+
+						CACertPool := x509.NewCertPool()
+						CACertPool.AppendCertsFromPEM(CACert)
+
+						var socket = websocket.Dialer{
+							ReadBufferSize:  512,
+							WriteBufferSize: 512,
+							TLSClientConfig: &tls.Config{
+								RootCAs: CACertPool,
+							},
+						}
+
+						var header = http.Header{}
+						header["Origin"] = []string{"ConsumerID10"}
+
+						connectWsAFForbidden(&socket, &header)
+
+					})
+
 			})
 
 		})
@@ -2946,6 +3181,7 @@ var _ = Describe("AF", func() {
 	Describe("Stop the AF Server", func() {
 		It("Disconnect AF Server", func() {
 			srvCancel()
+			server.Close()
 		})
 	})
 })
