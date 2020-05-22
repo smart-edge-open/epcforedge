@@ -1,0 +1,37 @@
+{
+    "accessType": "3GPP_ACCESS",
+    "anGwAddr": "gateway.com",
+    "evNotifs": [
+        {
+            "event": "QOS_NOTIF",
+            "flows": [
+                {
+                    "contVers": 16,
+                    "fNums": [
+                        12,
+                        14
+                    ],
+                    "medCompN": 10
+                }
+            ]
+        }
+    ],
+    "evSubscUri": "events.com",
+    "events": [
+        {
+            "event": "PLMN_CHG",
+            "notifMethod": "NotifMethod"
+        },
+        {
+            "event": "QOS_NOTIF",
+            "notifMethod": "NotifMethod"
+        }
+    ],
+    "notifUri": "www.example.com",
+    "usgThres": {
+        "downlinkVolume": 500,
+        "duration": 100,
+        "totalVolume": 1000,
+        "uplinkVolume": 200
+    }
+}

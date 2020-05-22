@@ -6,21 +6,15 @@ package af_test
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
+	config "github.com/otcshare/epcforedge/ngc/pkg/config"
 )
-
-func TestAf(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "AF Suite")
-}
 
 type KeyType string
 
@@ -40,41 +34,79 @@ func testingAFClient(fn RoundTripFunc) *http.Client {
 
 }
 
-var _ = Describe("AF", func() {
+func genTestConfig(protocol string, protocolVer string) af.GenericCliConfig {
 
 	var (
-		ctx         context.Context
-		srvCancel   context.CancelFunc
-		afIsRunning bool
+		cfg     af.Config
+		testCfg af.GenericCliConfig
 	)
 
-	Describe("Cnca client request methods to AF : ", func() {
+	err := config.LoadJSONConfig(cfgPath, &cfg)
+	Expect(err).ShouldNot(HaveOccurred())
 
-		Context("Subscription GET ALL", func() {
+	testCfg = *(cfg.CliPcfCfg)
+	testCfg.Protocol = protocol
+	testCfg.ProtocolVer = protocolVer
 
-			By("Starting AF server")
-			var err error
-			ctx, srvCancel = context.WithCancel(context.Background())
-			_ = srvCancel
-			afRunFail := make(chan bool)
-			go func() {
+	return testCfg
+}
 
-				err = af.Run(ctx, "./testdata/testconfigs/af.json")
+var _ = Describe("AF", func() {
 
+	Describe("Utility ", func() {
+		Context("HTTP Client generate", func() {
+			Specify("Generate http 1.1 client", func() {
+				cfg := genTestConfig("http", "1.1")
+
+				By("Create HTTP Client")
+				_, err := af.GenHTTPClient(&cfg)
 				Expect(err).ShouldNot(HaveOccurred())
-				if err != nil {
-					fmt.Printf("Run() exited with error: %#v", err)
-					afIsRunning = false
-					afRunFail <- true
-				}
-			}()
-			_ = afIsRunning
+			})
+
+			Specify("Generate https 1.1 client", func() {
+				cfg := genTestConfig("https", "1.1")
+
+				By("Create HTTP Client")
+				_, err := af.GenHTTPClient(&cfg)
+				Expect(err).ShouldNot(HaveOccurred())
+			})
+
+			Specify("Generate http 2.0 client", func() {
+				cfg := genTestConfig("http", "2.0")
+
+				By("Create HTTP Client")
+				_, err := af.GenHTTPClient(&cfg)
+				Expect(err).ShouldNot(HaveOccurred())
+			})
+
+			Specify("Generate https 2.0 client", func() {
+				cfg := genTestConfig("https", "2.0")
+
+				By("Create HTTP Client")
+				_, err := af.GenHTTPClient(&cfg)
+				Expect(err).ShouldNot(HaveOccurred())
+			})
+
+			Specify("Generate http 3.0 client", func() {
+				cfg := genTestConfig("http", "3.0")
+
+				By("Create HTTP Client")
+				_, err := af.GenHTTPClient(&cfg)
+				Expect(err).Should(HaveOccurred())
+			})
+
+			Specify("Generate https 3.0 client", func() {
+				cfg := genTestConfig("https", "3.0")
+
+				By("Create HTTP Client")
+				_, err := af.GenHTTPClient(&cfg)
+				Expect(err).Should(HaveOccurred())
+			})
 
 		})
 	})
 
 	Describe("Cnca client request methods to AF : ", func() {
-
 		Context("Subscription POST", func() {
 			Specify("Sending POST 001 request", func() {
 				By("Reading json file")
@@ -2782,12 +2814,6 @@ var _ = Describe("AF", func() {
 				})
 			})
 
-		})
-	})
-
-	Describe("Stop the AF Server", func() {
-		It("Disconnect AF Server", func() {
-			srvCancel()
 		})
 	})
 })

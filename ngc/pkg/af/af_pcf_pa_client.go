@@ -92,7 +92,7 @@ func NewPolicyAuthAPIClient(cfg *Config) (*PolicyAuthAPIClient, error) {
 	paCfg := cfg.CliPcfCfg
 	c := &PolicyAuthAPIClient{}
 
-	httpClient, err := genHTTPClient(paCfg)
+	httpClient, err := GenHTTPClient(paCfg)
 	if err != nil {
 		log.Errf("Error in generating http client")
 		return nil, err
@@ -525,7 +525,9 @@ func handleUpdateEventResp(respBody []byte, httpResp *http.Response,
 	retVal.httpResp = httpResp
 	switch httpResp.StatusCode {
 	case 200, 201:
-		retVal.locationURI = getLocationURI(httpResp, c)
+		if httpResp.StatusCode == 201 {
+			retVal.locationURI = getLocationURI(httpResp, c)
+		}
 
 		err = json.Unmarshal(respBody, &eventSubscResp)
 		if err != nil {

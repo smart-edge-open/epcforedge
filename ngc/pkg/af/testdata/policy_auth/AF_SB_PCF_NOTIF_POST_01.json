@@ -1,0 +1,28 @@
+{
+	"AccessType": "3GPP_ACCESS",
+	"AnGwAddr": "10.12.2.3",
+	"EvSubsURI": "https://notifserver:8999/notify",
+	"EvNotifs": {
+		"notif1": {
+			"event": "ACCESS_TYPE_CHANGE",
+			"flows": [
+				{
+					"contVers": [13,14,15],
+					"FNums": [22,23,24],
+					"MedCompN": 12
+				}
+			]
+		},
+		"notif2": {
+			"event": "PLMN_CHG",
+			"flows": [
+				{
+					"contVers": [10,11],
+					"FNums": [20,21],
+					"MedCompN": 10
+				}
+			]
+		}
+	},
+	
+}

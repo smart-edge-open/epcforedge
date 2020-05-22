@@ -29,7 +29,7 @@
         "BasePath": "/npcf-policyauthorization/v1",
         "CliCertPath": "/etc/certs/root-ca-cert.pem",
         "VerifyCerts": true,
-        "OAuth2Support": false,
+        "OAuth2Support": true,
         "NotifURI": "/af/v1/policy-authorization"
     }
 }
