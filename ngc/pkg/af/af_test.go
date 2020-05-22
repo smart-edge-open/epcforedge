@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
 	config "github.com/otcshare/epcforedge/ngc/pkg/config"
-
 )
 
 type KeyType string
@@ -42,9 +41,9 @@ func genTestConfig(protocol string, protocolVer string) af.GenericCliConfig {
 		testCfg af.GenericCliConfig
 	)
 
-	err := config.LoadJSONConfig(cfgPath, &cfg)
+	err := config.LoadJSONConfig(cfgPath+"/af.json", &cfg)
 	Expect(err).ShouldNot(HaveOccurred())
-  testCfg = *(cfg.CliPcfCfg)
+	testCfg = *(cfg.CliPcfCfg)
 	testCfg.Protocol = protocol
 	testCfg.ProtocolVer = protocolVer
 
