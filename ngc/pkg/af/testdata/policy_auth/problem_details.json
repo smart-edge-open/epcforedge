@@ -1,0 +1,8 @@
+{
+    "cause": "Improving code coverage",
+    "detail": "Dummy data for unit testing",
+    "instance": "instance.org",
+    "status": 401,
+    "title": "Af Unit test",
+    "type": "dummyURI.org"
+}

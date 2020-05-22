@@ -92,7 +92,7 @@ func NewPolicyAuthAPIClient(cfg *Config) (*PolicyAuthAPIClient, error) {
 	paCfg := cfg.CliPcfCfg
 	c := &PolicyAuthAPIClient{}
 
-	httpClient, err := genHTTPClient(paCfg)
+	httpClient, err := GenHTTPClient(paCfg)
 	if err != nil {
 		log.Errf("Error in generating http client")
 		return nil, err

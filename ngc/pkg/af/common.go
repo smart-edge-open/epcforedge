@@ -76,7 +76,8 @@ func genAFTransID(trans TransactionIDs) int {
 	return 0
 }
 
-func genHTTPClient(cfg *GenericCliConfig) (*http.Client, error) {
+// GenHTTPClient - create http client based on protcol and protocolver
+func GenHTTPClient(cfg *GenericCliConfig) (*http.Client, error) {
 
 	if cfg.Protocol == "https" {
 		var tlsCfg *tls.Config

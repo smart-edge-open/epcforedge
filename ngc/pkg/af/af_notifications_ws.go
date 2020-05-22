@@ -115,7 +115,7 @@ for any other appSession, then webscoket is not closed.*/
 func chkRemoveWSConn(evInfo *EventInfo, appSessionID string,
 	afCtx *Context) error {
 
-	if !evInfo.wsReq {
+	if evInfo == nil || !evInfo.wsReq {
 		return nil
 	}
 	consumerID := evInfo.consumerID
