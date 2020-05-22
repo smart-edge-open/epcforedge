@@ -194,7 +194,7 @@
                 }
             ],
             "upPathChgSub": {
-                "notificationUri": "https://localhost:8450/notification",
+                "notificationUri": "http://localhost:8450/notification",
                 "notifCorreId": "1240",
                 "dnaiChgType": "EARLY"
             }

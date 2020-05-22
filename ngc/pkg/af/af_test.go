@@ -21,6 +21,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 func TestAf(t *testing.T) {
@@ -50,19 +52,12 @@ func NotificationPost(w http.ResponseWriter, r *http.Request) {
 
 	defer GinkgoRecover()
 	Expect(r.Body).ShouldNot(Equal(nil))
-	log.Println("Protocol:     Method", r.Proto, r.Method)
+	log.Println("Notification Protocol:     Method", r.Proto, r.Method)
 	defer r.Body.Close()
-	w.WriteHeader(http.StatusNoContent)
+
 	w.Header().Set("Content-Type", "application/json")
-
+	w.WriteHeader(http.StatusNoContent)
 }
-
-/*
-func startServer(server *httptest.Server, stopServerCh chan bool) {
-
-	server.Start()
-	stopServerCh <- true
-}*/
 
 // connectConsumer sends a consumer notifications GET request to the appliance
 func connectWsAF(socket *websocket.Dialer, header *http.Header) *websocket.Conn {
@@ -113,7 +108,7 @@ var _ = Describe("AF", func() {
 		ctx         context.Context
 		srvCancel   context.CancelFunc
 		afIsRunning bool
-		server      *httptest.Server
+		notifServer *http.Server
 	)
 
 	Describe("Cnca client request methods to AF : ", func() {
@@ -139,6 +134,30 @@ var _ = Describe("AF", func() {
 			_ = afIsRunning
 
 		})
+
+	})
+
+	Describe("Cnca client request methods to AF : ", func() {
+
+		By("Starting Notify server")
+		stopServerCh := make(chan bool)
+		go func() {
+
+			h2s := &http2.Server{}
+			http.HandleFunc("/notification", NotificationPost)
+			handler := http.HandlerFunc(NotificationPost)
+
+			notifServer = &http.Server{
+				Addr:         ":8450",
+				Handler:      h2c.NewHandler(handler, h2s),
+				ReadTimeout:  10 * time.Second,
+				WriteTimeout: 10 * time.Second,
+			}
+
+			notifServer.ListenAndServe()
+			stopServerCh <- true
+
+		}()
 
 	})
 
@@ -3011,31 +3030,32 @@ var _ = Describe("AF", func() {
 
 				Specify("Sending POST request - http uri", func() {
 					By("Reading json file")
+					/*
+						// Start a local HTTP server for notifications
+						http.HandleFunc("/notification", NotificationPost)
+						handler := http.HandlerFunc(NotificationPost)
 
-					// Start a local HTTP server for notifications
-					http.HandleFunc("/notification", NotificationPost)
-					handler := http.HandlerFunc(NotificationPost)
+						server = httptest.NewUnstartedServer(handler)
+						server.Config.ReadHeaderTimeout = 10 * time.Second
+						server.Config.WriteTimeout = 10 * time.Second
+						server.Start()
 
-					server = httptest.NewUnstartedServer(handler)
-					server.Config.ReadHeaderTimeout = 10 * time.Second
-					server.Config.WriteTimeout = 10 * time.Second
-					server.Start()
+						fmt.Printf("Test Server : %s\n", server.URL)*/
 
-					fmt.Printf("Test Server : %s\n", server.URL)
 					// Close the server when test finishes
-					defer server.Close()
+					//defer server.Close()
 
 					reqBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPOST_1_corrID_https_uri.json")
+						"./testdata/policy_auth/AF_NB_PA_XPOST_1_corrID_http_uri.json")
 					Expect(err).ShouldNot(HaveOccurred())
+					/*
+						var asc af.AppSessionContext
+						err = json.Unmarshal(reqBody, &asc)
+						Expect(err).ShouldNot(HaveOccurred())
 
-					var asc af.AppSessionContext
-					err = json.Unmarshal(reqBody, &asc)
-					Expect(err).ShouldNot(HaveOccurred())
+						asc.AscReqData.AfRoutReq.UpPathChgSub.NotificationURI = server.URL + "/notification"
 
-					asc.AscReqData.AfRoutReq.UpPathChgSub.NotificationURI = server.URL + "/notification"
-
-					reqBody, err = json.Marshal(asc)
+					reqBody, err = json.Marshal(asc)*/
 					Expect(err).ShouldNot(HaveOccurred())
 
 					By("Preparing request")
@@ -3051,7 +3071,7 @@ var _ = Describe("AF", func() {
 					ctx := context.WithValue(req.Context(),
 						KeyType("af-ctx"), af.AfCtx)
 					resBody, err := ioutil.ReadFile(
-						"./testdata/policy_auth/AF_NB_PA_XPOST_1_corrID_https_uri.json")
+						"./testdata/policy_auth/AF_NB_PA_XPOST_1_corrID_http_uri.json")
 					Expect(err).ShouldNot(HaveOccurred())
 					resBodyBytes := bytes.NewReader(resBody)
 					header := make(http.Header)
@@ -3096,7 +3116,6 @@ var _ = Describe("AF", func() {
 					ctx = context.WithValue(req.Context(),
 						KeyType("af-ctx"), af.AfCtx)
 					af.NotifRouter.ServeHTTP(resp, req.WithContext(ctx))
-
 					Expect(resp.Code).To(Equal(http.StatusNoContent))
 
 				})
@@ -3181,7 +3200,7 @@ var _ = Describe("AF", func() {
 	Describe("Stop the AF Server", func() {
 		It("Disconnect AF Server", func() {
 			srvCancel()
-			server.Close()
+			notifServer.Close()
 		})
 	})
 })
