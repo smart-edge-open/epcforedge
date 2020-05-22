@@ -72,9 +72,9 @@ type AppSessionContextReqData struct {
 	// ue Ipv6
 	UeIpv6 Ipv6Addr `json:"ueIpv6,omitempty"`
 	// ue mac
-	UeMac    MacAddr48           `json:"ueMac,omitempty"`
-	NotifURI string              `json:"notifUri"`
-	EvSubsc  *EventsSubscReqData `json:"evSubsc,omitempty"`
+	UeMac    MacAddr48 `json:"ueMac,omitempty"`
+	NotifURI string    `json:"notifUri"`
+
 	// The following fields have been omitted as they are not required for
 	// Traffic Influ feature
 	// evSubsc - Not Required
@@ -85,14 +85,6 @@ type AppSessionContextReqData struct {
 	// mpsId - Required when Multimedia Priority Service is supported
 	// sponId - Required when Sponspored Connnectivity is supported
 	// sponStatus - Required when Sponspored Connnectivity is supported
-}
-
-// EventsSubscReqData Identifies the events the application subscribes to.
-type EventsSubscReqData struct {
-	//Events []EventSubscription `json:"events"`
-	// string providing an URI formatted according to IETF RFC 3986.
-	NotifURI string `json:"notifUri,omitempty"`
-	//UsgThres *UsageThreshold `json:"usgThres,omitempty"`
 }
 
 // AppSessionContextUpdateData Contains the modification(s) to apply to the

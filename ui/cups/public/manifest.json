@@ -1,0 +1,9 @@
+{
+  "short_name": "3GPP CUPS Management",
+  "name": "3GPP CUPS Management",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

@@ -25,5 +25,17 @@
             "snssai": "snssai1_value"
         }
     ],
-    "OAuth2Support": true
+    "OAuth2Support": true,
+    "PcfPolicyAuthorizationConfig":
+     {
+         "Protocol":"https",
+         "ProtocolVer":"2.0",
+         "VerifyCerts":true,
+         "ClientCert":"/etc/certs/root-ca-cert.pem",
+         "Hostname": "localhost",
+         "Port": "8095",
+         "ResourceURI":"/npcf-policyauthorization/v1/app-sessions",
+         "OAuth2Support":true
+    }
+
 }
