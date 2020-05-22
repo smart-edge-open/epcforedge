@@ -15,6 +15,7 @@ import (
 type ConsumerConnection struct {
 	connection *websocket.Conn
 	// gorilla websocket doesn't allow concurrent writes
+	// Mutex per conn for avoiding concurrent writes
 	control sync.Mutex
 }
 
@@ -134,7 +135,8 @@ func chkRemoveWSConn(evInfo *EventInfo, appSessionID string,
 }
 
 /* This function closes the websocket connection of a consumer by
-sending a websocket Close message */
+sending a websocket Close message, mutex use before sending
+Close message*/
 func removeWsConn(consumerID string, afCtx *Context) error {
 
 	foundConn, connFound := afCtx.data.consumerConns[consumerID]
@@ -184,7 +186,8 @@ func GetNotifications(w http.ResponseWriter, r *http.Request) {
 
 }
 
-/* This function sends the Notification to consumer on websocket */
+/* This function sends the Notification to consumer on websocket
+Use of mutex before writing to the connection*/
 func sendNotificationOnWs(consumerID string, afEvent interface{},
 	afCtx *Context) error {
 

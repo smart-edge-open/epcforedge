@@ -128,8 +128,8 @@ func setAppSessInfo(url string, evInfo *EventInfo,
 	return err
 }
 
-/*  sendWs true means the response just needs to
-be updated for websocketURI, otherwise the notificationURI is replaced by
+/*  sendWs true means the response needs to be updated for websocketURI,
+otherwise the notificationURI in AfRouteReq is replaced by
 consumer sent URI*/
 func updateAppSessInResp(appSess *AppSessionContext,
 	appSessionID string, afCtx *Context, sendWs bool) (err error) {
@@ -197,7 +197,8 @@ func chkAppSessCreateForWs(appSess AppSessionContext,
 }
 
 /* To check if websocket delivery is requested in ascUpdateData. It stores
-websocket specific params  */
+websocket specific params , sendWs if set to true - websocketURI to
+be shared with consumer in response*/
 func chkAppSessUpdateForWs(ascUpdateData AppSessionContextUpdateData,
 	evInfo *EventInfo) (sendWs bool, err error) {
 
@@ -256,7 +257,8 @@ func setAppSessNotifParams(appSess *AppSessionContext,
 
 /* modifyAppSessNotifParams checks websocket params and invokes
 updateRouteReqParamsUpdate to update notificationURI.
- This is invoked for ModifyPolicyAuth */
+ This is invoked for ModifyPolicyAuth, sendWs if set to true - websocketURI to
+be shared with consumer in response */
 func modifyAppSessNotifParams(ascUpdateData *AppSessionContextUpdateData,
 	appSessionID string, afCtx *Context) (sendWs bool, err error) {
 
@@ -478,4 +480,17 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 		return
 	}
 
+}
+
+/* This function deletes the EventInfo on  receiving Delete PolicyAuth */
+func deleteNotifyParams(appSessionID string, afCtx *Context) {
+
+	evInfo := afCtx.appSessionsEv[appSessionID]
+	// Close the websocket if consumer is not subscribed for any
+	// other appSession
+	err := chkRemoveWSConn(evInfo, appSessionID, afCtx)
+	if err != nil {
+		log.Errf(err.Error())
+	}
+	delete(afCtx.appSessionsEv, appSessionID)
 }

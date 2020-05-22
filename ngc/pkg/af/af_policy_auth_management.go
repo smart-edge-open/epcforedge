@@ -206,15 +206,7 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Infoln("Deleting the appSessionsEv for appSessionID", appSessionID)
-	evInfo := afCtx.appSessionsEv[appSessionID]
-	// Close the websocket if consumer is not subscribed for any
-	// other appSession
-	err = chkRemoveWSConn(evInfo, appSessionID, afCtx)
-	if err != nil {
-		log.Errf(err.Error())
-	}
-	delete(afCtx.appSessionsEv, appSessionID)
+	deleteNotifyParams(appSessionID, afCtx)
 
 	w.WriteHeader(httpResp.StatusCode)
 	if httpResp.StatusCode == 204 {
