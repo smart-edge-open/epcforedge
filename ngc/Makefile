@@ -39,16 +39,14 @@ lint:
 # Replace the "localhost" in test-unit-af with hostname
 # or Kubernetes service name as per user environment
 
-test-unit-af:	nef
-	@-pkill -f "nef"
+test-unit-af:
 	cp -rf configs ./pkg/af
 	mkdir -p "${CERTS_DIR}"
 	./scripts/genCerts.sh -t DNS -h localhost
 	mv root-ca-cert.pem root-ca-cert.srl root-ca-key.pem server-cert.pem server-key.pem server-request.csr "${CERTS_DIR}"
-	./dist/nef &
 	ginkgo -v -cover ./pkg/af
-	pkill -f "nef"
 	rm -rf pkg/af/configs
+
 test-unit-nef:
 	mkdir -p "${CERTS_DIR}"
 	./scripts/genCerts.sh -t DNS -h localhost
