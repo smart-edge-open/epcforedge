@@ -41,7 +41,7 @@ func genTestConfig(protocol string, protocolVer string) af.GenericCliConfig {
 		testCfg af.GenericCliConfig
 	)
 
-	err := config.LoadJSONConfig(cfgPath, &cfg)
+	err := config.LoadJSONConfig(cfgPath+"/af.json", &cfg)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	testCfg = *(cfg.CliPcfCfg)

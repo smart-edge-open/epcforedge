@@ -16,11 +16,12 @@
     "CliConfig": {
         "Protocol": "https",
         "NEFHostname": "localhost",
-        "NEFPort": ":8060",
+        "NEFPort": ":8070",
         "NEFBasePath": "/3gpp-traffic-influence/v1",
         "NEFPFDBasePath": "/3gpp-pfd-management/v1",
         "UserAgent": "NGC-AF",
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem",
+        "NotifyClientCertPath": "/etc/certs/root-ca-cert.pem",
         "OAuth2Support": true
     },
     "CliPAConfig": {
@@ -31,7 +32,7 @@
         "BasePath": "/npcf-policyauthorization/v1",
         "CliCertPath": "/etc/certs/root-ca-cert.pem",
         "VerifyCerts": true,
-        "OAuth2Support": false,
+        "OAuth2Support": true,
         "NotifURI": "/af/v1/policy-authorization"
     }
 }

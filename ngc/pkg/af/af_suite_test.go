@@ -12,11 +12,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
+	ngcnef "github.com/otcshare/epcforedge/ngc/pkg/nef"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
 
-var cfgPath string = "./testdata/testconfigs/af.json"
+var cfgPath string = "./testdata/testconfigs"
 
 type srvData struct {
 	ctx         context.Context
@@ -35,16 +36,22 @@ func TestAf(t *testing.T) {
 var _ = BeforeSuite(func() {
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
-		err := af.Run(ctx, cfgPath)
+		err := af.Run(ctx, cfgPath+"/af.json")
 		Expect(err).To(BeNil())
 		testSrvData.afIsRunning = true
 	}()
+
+	go func() {
+		ngcnef.TestPcf = true
+		err := ngcnef.Run(ctx, cfgPath+"/nef.json")
+		Expect(err).To(BeNil())
+	}()
+
 	time.Sleep(2 * time.Second)
 	testSrvData.ctx = ctx
 	testSrvData.srvCancel = cancel
 
 	// Start the Notify Server
-	stopServerCh := make(chan bool)
 	go func() {
 
 		h2s := &http2.Server{}
@@ -59,7 +66,6 @@ var _ = BeforeSuite(func() {
 		}
 
 		testSrvData.notifServer.ListenAndServe()
-		stopServerCh <- true
 
 	}()
 
