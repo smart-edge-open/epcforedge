@@ -14,6 +14,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
 	config "github.com/otcshare/epcforedge/ngc/pkg/config"
+
 )
 
 type KeyType string
@@ -43,8 +44,7 @@ func genTestConfig(protocol string, protocolVer string) af.GenericCliConfig {
 
 	err := config.LoadJSONConfig(cfgPath, &cfg)
 	Expect(err).ShouldNot(HaveOccurred())
-
-	testCfg = *(cfg.CliPcfCfg)
+  testCfg = *(cfg.CliPcfCfg)
 	testCfg.Protocol = protocol
 	testCfg.ProtocolVer = protocolVer
 
@@ -57,7 +57,6 @@ var _ = Describe("AF", func() {
 		Context("HTTP Client generate", func() {
 			Specify("Generate http 1.1 client", func() {
 				cfg := genTestConfig("http", "1.1")
-
 				By("Create HTTP Client")
 				_, err := af.GenHTTPClient(&cfg)
 				Expect(err).ShouldNot(HaveOccurred())
