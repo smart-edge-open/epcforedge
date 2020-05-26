@@ -1540,7 +1540,7 @@ var _ = Describe("AF PA", func() {
 
 		})
 
-		Describe("Policy Authorization SMF Notification", func() {
+    Describe("Policy Authorization SMF Notification", func() {
 
 			It("POST SMF notification for missing body", func() {
 

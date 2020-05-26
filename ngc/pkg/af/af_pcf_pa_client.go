@@ -525,7 +525,9 @@ func handleUpdateEventResp(respBody []byte, httpResp *http.Response,
 	retVal.httpResp = httpResp
 	switch httpResp.StatusCode {
 	case 200, 201:
-		retVal.locationURI = getLocationURI(httpResp, c)
+		if httpResp.StatusCode == 201 {
+			retVal.locationURI = getLocationURI(httpResp, c)
+		}
 
 		err = json.Unmarshal(respBody, &eventSubscResp)
 		if err != nil {
