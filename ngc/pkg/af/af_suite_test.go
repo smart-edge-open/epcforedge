@@ -5,6 +5,7 @@ package af_test
 
 import (
 	"context"
+	"net/http"
 	"testing"
 	"time"
 
@@ -12,6 +13,8 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
 	ngcnef "github.com/otcshare/epcforedge/ngc/pkg/nef"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 var cfgPath string = "./testdata/testconfigs"
@@ -20,6 +23,8 @@ type srvData struct {
 	ctx         context.Context
 	srvCancel   context.CancelFunc
 	afIsRunning bool
+	notifServer *http.Server
+	wsURI       string
 }
 
 var testSrvData srvData
@@ -46,8 +51,28 @@ var _ = BeforeSuite(func() {
 	time.Sleep(2 * time.Second)
 	testSrvData.ctx = ctx
 	testSrvData.srvCancel = cancel
+
+	// Start the Notify Server
+	go func() {
+
+		h2s := &http2.Server{}
+		http.HandleFunc("/notification", NotificationPost)
+		handler := http.HandlerFunc(NotificationPost)
+
+		testSrvData.notifServer = &http.Server{
+			Addr:         ":8450",
+			Handler:      h2c.NewHandler(handler, h2s),
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 10 * time.Second,
+		}
+
+		testSrvData.notifServer.ListenAndServe()
+
+	}()
+
 })
 
 var _ = AfterSuite(func() {
 	testSrvData.srvCancel()
+	testSrvData.notifServer.Close()
 })

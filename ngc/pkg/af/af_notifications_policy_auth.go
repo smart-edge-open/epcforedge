@@ -4,6 +4,7 @@
 package af
 
 import (
+	"encoding/json"
 	"errors"
 	"net/url"
 	"strings"
@@ -23,10 +24,12 @@ type EventInfo struct {
 }
 
 // AppSessEv This stores the Event Information for appSessions
+// key is appSessionID
 type AppSessEv map[string]*EventInfo
 
 func initNotify(afCtx *Context) {
 	afCtx.appSessionsEv = make(AppSessEv)
+	afCtx.data.consumerConns = make(ConsumerConns)
 }
 
 /* This function creates the GenericConfig based on notificationURI
@@ -109,8 +112,8 @@ func updateRouteReqInResp(afRouteReq *RoutingRequirement,
 
 /* This function performs the following functionality:
 - Sets the EventInfo in appSessionsEv w.r.t appSessionID
-- Updates the Application Session Context in response by invoking
-  updateAppSessInResp */
+- Updates the Application Session Context for wsURI/notificationURI in response
+ by invoking updateAppSessInResp */
 func setAppSessInfo(url string, evInfo *EventInfo,
 	appSessResp *AppSessionContext, afCtx *Context) error {
 
@@ -121,16 +124,22 @@ func setAppSessInfo(url string, evInfo *EventInfo,
 
 	afCtx.appSessionsEv[appSessionID] = evInfo
 	log.Infoln("Added the Event Info for appSessionID ", appSessionID)
-
-	err = updateAppSessInResp(appSessResp, appSessionID, afCtx)
+	err = updateAppSessInResp(appSessResp, appSessionID, afCtx, evInfo.wsReq)
 	return err
 }
 
-/* This function updates the consumer notificationURI in response
-which was replaced by AF and also sends back websocketURI
-if websocket delivery is requested*/
+/*  sendWs true means the response needs to be updated for websocketURI,
+otherwise the notificationURI in AfRouteReq is replaced by
+consumer sent URI*/
 func updateAppSessInResp(appSess *AppSessionContext,
-	appSessionID string, afCtx *Context) (err error) {
+	appSessionID string, afCtx *Context, sendWs bool) (err error) {
+
+	// If sendWs, update the websocketUri in AppSessRsp and return
+	if sendWs {
+		updateAppSessRspForWS(appSess, afCtx)
+		return nil
+	}
+
 	ascReqData := appSess.AscReqData
 	if ascReqData == nil {
 		log.Infoln("Nil Application Session Context Request Data")
@@ -142,10 +151,7 @@ func updateAppSessInResp(appSess *AppSessionContext,
 		log.Infoln("Event Information not present, Nothing to update")
 		return nil
 	}
-	if evInfo.wsReq {
-		//TODO update the websocketURI in AscRespData
-		return nil
-	}
+
 	afRouteReq := ascReqData.AfRoutReq
 
 	err = updateRouteReqInResp(afRouteReq, afCtx)
@@ -191,21 +197,23 @@ func chkAppSessCreateForWs(appSess AppSessionContext,
 }
 
 /* To check if websocket delivery is requested in ascUpdateData. It stores
-websocket specific params  */
+websocket specific params , sendWs if set to true - websocketURI to
+be shared with consumer in response*/
 func chkAppSessUpdateForWs(ascUpdateData AppSessionContextUpdateData,
-	evInfo *EventInfo) (err error) {
+	evInfo *EventInfo) (sendWs bool, err error) {
 
 	if ascUpdateData.AfwebsockNotifConfig != nil {
 		if ascUpdateData.AfwebsockNotifConfig.RequestWebsocketURI {
 			if evInfo.wsReq {
 				err = errors.New("Websocket Already Established with consumer")
-				return err
+				return false, err
 			}
 			evInfo.wsReq = true
 			evInfo.consumerID = ascUpdateData.AfwebsockNotifConfig.ConsumerID
+			return true, nil
 		}
 	}
-	return nil
+	return false, nil
 
 }
 
@@ -249,13 +257,14 @@ func setAppSessNotifParams(appSess *AppSessionContext,
 
 /* modifyAppSessNotifParams checks websocket params and invokes
 updateRouteReqParamsUpdate to update notificationURI.
- This is invoked for ModifyPolicyAuth */
+ This is invoked for ModifyPolicyAuth, sendWs if set to true - websocketURI to
+be shared with consumer in response */
 func modifyAppSessNotifParams(ascUpdateData *AppSessionContextUpdateData,
-	appSessionID string, afCtx *Context) (err error) {
+	appSessionID string, afCtx *Context) (sendWs bool, err error) {
 
 	if ascUpdateData == nil {
 		err = errors.New("Nil AppSessionContextUpdateData")
-		return err
+		return false, err
 	}
 
 	evInfo := afCtx.appSessionsEv[appSessionID]
@@ -265,9 +274,9 @@ func modifyAppSessNotifParams(ascUpdateData *AppSessionContextUpdateData,
 		evInfo = new(EventInfo)
 	}
 
-	err = chkAppSessUpdateForWs(*ascUpdateData, evInfo)
+	sendWs, err = chkAppSessUpdateForWs(*ascUpdateData, evInfo)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if ascUpdateData.EvSubsc != nil {
@@ -276,20 +285,20 @@ func modifyAppSessNotifParams(ascUpdateData *AppSessionContextUpdateData,
 
 	err = updateRouteReqParamsUpdate(ascUpdateData.AfRoutReq, evInfo, afCtx)
 	if err != nil {
-		return err
+		return false, err
 	}
 	medCompList := ascUpdateData.MedComponents
 	for _, medcomp := range medCompList {
 		afRouteReq := medcomp.AfRoutReq
 		err = updateRouteReqParamsUpdate(afRouteReq, evInfo, afCtx)
 		if err != nil {
-			return err
+			return false, err
 		}
 	}
 
 	afCtx.appSessionsEv[appSessionID] = evInfo
 	log.Infoln("Updated the Event Info for appSessionID ", appSessionID)
-	return err
+	return sendWs, err
 }
 
 /* This function updates the notificationURI in AfRouteReq for UP_PATH_CHANGE
@@ -406,6 +415,7 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 	var (
 		ev        NotificationUpPathChg
 		apiClient notifyClientAPI
+		cfg       *GenericCliConfig
 	)
 	// Map the content of NsmfEventExposureNotification to NotificationUpPathChg
 	evInfo, err := getAppSessFromCorrID(corrID, afCtx)
@@ -429,7 +439,20 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 	ev.TargetTrafficRoute = nsmEvNo.TargetTraRouting
 
 	if evInfo.wsReq {
-		// TODO: Send over websocket
+
+		var afEvent Afnotification
+		var payload []byte
+		afEvent.Event = UPPathChangeEvent
+		payload, err = json.Marshal(ev)
+		if err != nil {
+			log.Err(err)
+			return
+		}
+		afEvent.Payload = payload
+		log.Infof("PolicyAuthSMFNotify [NotifID, ConsumerID] => [%s,%s]",
+			corrID,
+			evInfo.consumerID)
+		err = sendNotificationOnWs(evInfo.consumerID, &afEvent, afCtx)
 
 	} else {
 
@@ -438,7 +461,7 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 			corrID,
 			notificationURI)
 
-		cfg, err := generateCliCfg(string(notificationURI), afCtx)
+		cfg, err = generateCliCfg(string(notificationURI), afCtx)
 		if err != nil {
 			log.Errln("Error in Generating NewAFNotifyAPIClient")
 			return
@@ -450,10 +473,24 @@ func sendUpPathEventNotification(corrID string, afCtx *Context,
 		}
 		// Send the request towards Consumer
 		err = apiClient.NotificationUpPathEvent(notificationURI, ev)
-		if err != nil {
-			log.Errf("UP_PATH_CHANGE Sending to consumer failed : %s",
-				err.Error())
-			return
-		}
 	}
+	if err != nil {
+		log.Errf("UP_PATH_CHANGE Sending to consumer failed : %s",
+			err.Error())
+		return
+	}
+
+}
+
+/* This function deletes the EventInfo on  receiving Delete PolicyAuth */
+func deleteNotifyParams(appSessionID string, afCtx *Context) {
+
+	evInfo := afCtx.appSessionsEv[appSessionID]
+	// Close the websocket if consumer is not subscribed for any
+	// other appSession
+	err := chkRemoveWSConn(evInfo, appSessionID, afCtx)
+	if err != nil {
+		log.Errf(err.Error())
+	}
+	delete(afCtx.appSessionsEv, appSessionID)
 }

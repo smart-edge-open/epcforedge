@@ -206,9 +206,7 @@ func DeletePolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Close the websocket if no other notifyId
-	log.Infoln("Deleting the appSessionsEv for appSessionID", appSessionID)
-	delete(afCtx.appSessionsEv, appSessionID)
+	deleteNotifyParams(appSessionID, afCtx)
 
 	w.WriteHeader(httpResp.StatusCode)
 	if httpResp.StatusCode == 204 {
@@ -271,7 +269,8 @@ func GetPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	appSessResp := apiResp.appSessCtx
-	err = updateAppSessInResp(appSessResp, appSessionID, afCtx)
+	// websocket parameters not to be updated in GET response
+	err = updateAppSessInResp(appSessResp, appSessionID, afCtx, false)
 	if err != nil {
 		logPolicyRespErr(&w, "Updating the response "+
 			"GetPolicyAuthAppSessions: "+err.Error(),
@@ -302,6 +301,7 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		ascUpdateData AppSessionContextUpdateData
 		appSessJSON   []byte
 		apiResp       PcfPAResponse
+		sendWs        bool
 	)
 
 	funcName := "ModifyPolicyAuthAppSession: "
@@ -335,7 +335,8 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = modifyAppSessNotifParams(&ascUpdateData, appSessionID, afCtx)
+	// sendWs if true, websocketURI need to be updated in response
+	sendWs, err = modifyAppSessNotifParams(&ascUpdateData, appSessionID, afCtx)
 	if err != nil {
 		logPolicyRespErr(&w, "ModifyPolicyAuthAppSession: "+
 			err.Error(), http.StatusBadRequest)
@@ -365,7 +366,7 @@ func ModifyPolicyAuthAppSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	appSessResp := apiResp.appSessCtx
-	err = updateAppSessInResp(appSessResp, appSessionID, afCtx)
+	err = updateAppSessInResp(appSessResp, appSessionID, afCtx, sendWs)
 	if err != nil {
 		logPolicyRespErr(&w, "Updating the response "+
 			"ModifyPolicyAuthAppSessions: "+err.Error(),
