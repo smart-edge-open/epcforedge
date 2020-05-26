@@ -73,7 +73,7 @@ type FlowStatus string
 // list of FlowStatus
 const (
 	ULFlowEnabled FlowStatus = "ENABLED-UPLINK"
-	DLFlowEnabled FlowStatus = "ENABLED-UPLINK"
+	DLFlowEnabled FlowStatus = "ENABLED-DOWNLINK"
 	FlowEnabled   FlowStatus = "ENABLED"
 	FlowDisabled  FlowStatus = "DISABLED"
 	FlowRemoved   FlowStatus = "REMOVED"

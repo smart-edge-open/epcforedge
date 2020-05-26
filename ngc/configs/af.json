@@ -2,11 +2,13 @@
     "AfId": "1",
     "LocationPrefixPfd": "/af/v1/pfd/",
     "LocationPrefixPA": "/af/v1/policy-authorization/app-sessions",
+    "NotifWebsocketURI": "/af/v1/af-notifications",
     "UserAgent": "NGC-AF",
     "ServerConfig": {
         "CNCAEndpoint": ":8050",
         "Hostname": "localhost",
         "NotifPort": ":8051",
+        "NotifWebsocketPort": ":8052",
         "UIEndpoint": "http://localhost:3020",
         "ServerCertPath": "/etc/certs/server-cert.pem",
         "ServerKeyPath": "/etc/certs/server-key.pem"

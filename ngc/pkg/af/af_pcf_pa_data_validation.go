@@ -296,8 +296,8 @@ func validateTermInfo(termInfo *TerminationInfo) (err error) {
 		return err
 	}
 
-	if termInfo.TermCause == AllSDFDeactivated ||
-		termInfo.TermCause == PDUSessionTerminated {
+	if !(termInfo.TermCause == AllSDFDeactivated ||
+		termInfo.TermCause == PDUSessionTerminated) {
 		err = errors.New("Invalid TermCause")
 		return err
 	}
