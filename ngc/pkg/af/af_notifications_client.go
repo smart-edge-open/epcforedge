@@ -85,7 +85,7 @@ func NewAFNotifyAPIClient(afCtx *Context,
 
 	c := &NotificationAPIClient{}
 
-	httpClient, err := genHTTPClient(cfg)
+	httpClient, err := GenHTTPClient(cfg)
 	if err != nil {
 		log.Errf("Error in generating http client")
 		return nil, err
