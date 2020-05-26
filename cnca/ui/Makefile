@@ -62,10 +62,10 @@ cups-ui-down:
 	docker-compose stop cups-ui
 
 cups-ui-dev-up:
-	cd ui/cups && yarn install && yarn start
+	cd cups && yarn install && yarn start
 
 cups-ui-test:
-	cd ui/cups && yarn install && yarn build && yarn test
+	cd cups && yarn install && yarn build && yarn test
 
 cnca-ui-up:
 	docker-compose up -d cnca-ui
@@ -74,7 +74,7 @@ cnca-ui-down:
 	docker-compose stop cnca-ui
 
 cnca-ui-dev-up:
-	cd ui/cnca && yarn install && yarn start
+	cd cnca && yarn install && yarn start
 
 cnca-ui-test:
-	cd ui/cnca && yarn install && yarn build && yarn test
+	cd cnca && yarn install && yarn build && yarn test
