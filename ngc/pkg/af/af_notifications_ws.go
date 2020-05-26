@@ -58,10 +58,15 @@ func Upgrade(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
 }
 
 /* This goroutine reads and checks for errors(close by consumer)
-If any read error then it closes the connection */
-func readLoop(c *websocket.Conn) {
+If any read error then it closes the connection. Connection clearing from
+connections map happens as part of Write or when a new connection establishement
+ occurs */
+func readLoop(c *websocket.Conn, consumerID string) {
+	log.Infoln("Started the read loop on websocket for consumer ", consumerID)
 	for {
 		if _, _, err := c.NextReader(); err != nil {
+			log.Errln("Closed the websocket conn in readLoop for consumer ",
+				consumerID)
 			_ = c.Close()
 			break
 		}
@@ -105,14 +110,14 @@ func createWsConn(w http.ResponseWriter, r *http.Request,
 	afCtx.data.consumerConns[origin] = &conn
 
 	// Start the goroutine to check for read errors
-	go readLoop(conn.connection)
+	go readLoop(conn.connection, origin)
 	log.Infoln("Added consumer conn for consumerID ", origin)
 	return 0, nil
 }
 
 /* This function checks whether the ws connection of a consumer can be closed
-It is invoked when Delete Policy Auth is recceived. If consumerID is present
-for any other appSession, then webscoket is not closed.*/
+It is invoked when Delete/Update Policy Auth is recceived. If consumerID is
+present for any other appSession, then websocket is not closed.*/
 func chkRemoveWSConn(evInfo *EventInfo, appSessionID string,
 	afCtx *Context) error {
 
@@ -153,6 +158,7 @@ func removeWsConn(consumerID string, afCtx *Context) error {
 			return err
 		}
 		foundConn.control.Unlock()
+		log.Infoln("Clearing the connection for consumer", consumerID)
 		err = foundConn.connection.Close()
 		if err != nil {
 			return err
@@ -217,13 +223,13 @@ func sendNotificationOnWs(consumerID string, afEvent interface{},
 /* This function builds the AF websocketURI to be shared with consumer */
 func getWSNotificationURI(afCtx *Context) string {
 
-	return ("https//" + afCtx.cfg.SrvCfg.Hostname +
+	return ("wss//" + afCtx.cfg.SrvCfg.Hostname +
 		afCtx.cfg.SrvCfg.NotifWebsocketPort + afCtx.cfg.NotifWebsocketURI)
 
 }
 
 /* This function updates the AppSessionContextRespData with AF websocketURI
-in resp*/
+in Resp*/
 func updateAppSessRspForWS(appSess *AppSessionContext,
 	afCtx *Context) {
 
@@ -236,7 +242,8 @@ func updateAppSessRspForWS(appSess *AppSessionContext,
 	wsURI = getWSNotificationURI(afCtx)
 	ascRespData := appSess.AscRespData
 
-	/* If RspData is present, update that else create and send*/
+	/* If RspData from PCF is present(It is an optional parameter),
+	update that else create an AppSessionContextRespData and send*/
 	if ascRespData == nil {
 		ascRespDataWS.WebsocketURI = wsURI
 		appSess.AscRespData = &ascRespDataWS
