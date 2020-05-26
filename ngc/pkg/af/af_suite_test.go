@@ -24,6 +24,7 @@ type srvData struct {
 	srvCancel   context.CancelFunc
 	afIsRunning bool
 	notifServer *http.Server
+	wsURI       string
 }
 
 var testSrvData srvData

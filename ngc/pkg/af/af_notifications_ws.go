@@ -223,7 +223,7 @@ func sendNotificationOnWs(consumerID string, afEvent interface{},
 /* This function builds the AF websocketURI to be shared with consumer */
 func getWSNotificationURI(afCtx *Context) string {
 
-	return ("wss//" + afCtx.cfg.SrvCfg.Hostname +
+	return ("wss://" + afCtx.cfg.SrvCfg.Hostname +
 		afCtx.cfg.SrvCfg.NotifWebsocketPort + afCtx.cfg.NotifWebsocketURI)
 
 }

@@ -61,7 +61,7 @@ func NotificationPost(w http.ResponseWriter, r *http.Request) {
 // connectConsumer sends a consumer notifications GET request to the appliance
 func connectWsAF(socket *websocket.Dialer, header *http.Header) *websocket.Conn {
 	By("Sending consumer notification GET request")
-	conn, resp, err := socket.Dial("wss://localhost:8082/af/v1/af-notifications", *header)
+	conn, resp, err := socket.Dial(testSrvData.wsURI, *header)
 	Expect(err).ShouldNot(HaveOccurred())
 
 	By("Comparing GET response code")
@@ -74,7 +74,7 @@ func connectWsAF(socket *websocket.Dialer, header *http.Header) *websocket.Conn 
 // connectConsumer sends a consumer notifications GET request to the appliance
 func connectWsAFForbidden(socket *websocket.Dialer, header *http.Header) {
 	By("Sending consumer notification GET request")
-	_, resp, _ := socket.Dial("wss://localhost:8082/af/v1/af-notifications", *header)
+	_, resp, _ := socket.Dial(testSrvData.wsURI, *header)
 	//Expect(err).ShouldNot(HaveOccurred())
 
 	By("Comparing GET response code")
@@ -2071,6 +2071,9 @@ var _ = Describe("AF PA", func() {
 					err = json.NewDecoder(resp.Body).Decode(&appSess)
 					Expect(err).ShouldNot(HaveOccurred())
 					Expect(appSess.AscRespData.WebsocketURI).ShouldNot(Equal(""))
+
+					testSrvData.wsURI = appSess.AscRespData.WebsocketURI
+					log.Println("Websocket URI received is", testSrvData.wsURI)
 
 				})
 
