@@ -71,11 +71,6 @@ var _ = Describe("AF", func() {
 				Expect(err).ShouldNot(HaveOccurred())
 			})
 
-				By("Create HTTP Client")
-				_, err := af.GenHTTPClient(&cfg)
-				Expect(err).ShouldNot(HaveOccurred())
-			})
-
 			Specify("Generate https 1.1 client", func() {
 				cfg := genTestConfig("https", "1.1")
 
@@ -115,8 +110,8 @@ var _ = Describe("AF", func() {
 				_, err := af.GenHTTPClient(&cfg)
 				Expect(err).Should(HaveOccurred())
 			})
-
 		})
+
 	})
 
 	Describe("Cnca client request methods to AF : ", func() {
@@ -2035,5 +2030,5 @@ var _ = Describe("AF", func() {
 
 		})
 
-  })
+	})
 })
