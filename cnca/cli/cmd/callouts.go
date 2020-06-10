@@ -13,12 +13,12 @@ import (
 
 // Connectivity constants
 const (
-	NgcOAMServiceEndpoint      = "http://127.0.0.1:30070/ngcoam/v1/af"
-	NgcAFServiceEndpoint       = "http://127.0.0.1:30050/af/v1"
-	LteOAMServiceEndpoint      = "http://127.0.0.1:8082"
-	NgcOAMServiceHTTP2Endpoint = "https://127.0.0.1:30070/ngcoam/v1/af"
-	NgcAFServiceHTTP2Endpoint  = "https://127.0.0.1:30050/af/v1"
-	LteOAMServiceHTTP2Endpoint = "https://127.0.0.1:8082"
+	NgcOAMServiceEndpoint      = "http://localhost:8070/ngcoam/v1/af"
+	NgcAFServiceEndpoint       = "http://localhost:8050/af/v1"
+	LteOAMServiceEndpoint      = "http://localhost:8082"
+	NgcOAMServiceHTTP2Endpoint = "https://localhost:8070/ngcoam/v1/af"
+	NgcAFServiceHTTP2Endpoint  = "https://localhost:8050/af/v1"
+	LteOAMServiceHTTP2Endpoint = "https://localhost:8082"
 )
 
 // HTTP client
@@ -43,13 +43,6 @@ func getNgcAFPfdServiceURL() string {
 		return NgcAFServiceHTTP2Endpoint + "/pfd/transactions"
 	}
 	return NgcAFServiceEndpoint + "/pfd/transactions"
-}
-
-func getNgcAFPaServiceURL() string {
-	if UseHTTPProtocol == HTTP2 {
-		return NgcAFServiceHTTP2Endpoint + "/policy-authorization/app-sessions"
-	}
-	return NgcAFServiceEndpoint + "/policy-authorization/app-sessions"
 }
 
 func getLteOAMServiceURL() string {
@@ -558,172 +551,5 @@ func AFDeletePfdApplication(transID string, appID string) error {
 		return fmt.Errorf("HTTP failure: %d", resp.StatusCode)
 	}
 
-	return nil
-}
-
-// AFCreatePaAppSession creates new application session at AF
-func AFCreatePaAppSession(appSession []byte) ([]byte, string, error) {
-
-	var appSessionRespData []byte
-	url := getNgcAFPaServiceURL()
-
-	req, err := http.NewRequest("POST", url, bytes.NewReader(appSession))
-	if err != nil {
-		return nil, "", err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		return nil, "", fmt.Errorf("HTTP failure: %d", resp.StatusCode)
-	}
-
-	// retrieve URI of the newly created transaction from response header
-	appSessionLoc := resp.Header.Get("Location")
-	if resp.Body != nil {
-		appSessionRespData, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, "", err
-		}
-	}
-
-	return appSessionRespData, appSessionLoc, nil
-}
-
-// AFGetPaAppSession gets the active application session at AF
-func AFGetPaAppSession(appSessionID string) ([]byte, error) {
-	var appSession []byte
-	var req *http.Request
-	var err error
-
-	url := getNgcAFPaServiceURL() + "/" + appSessionID
-
-	req, err = http.NewRequest("GET", url, nil)
-	if err != nil {
-		return appSession, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return appSession, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return appSession, fmt.Errorf("HTTP failure: %d", resp.StatusCode)
-	}
-
-	appSession, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return appSession, err
-	}
-	return appSession, nil
-}
-
-// AFPatchPaAppSession update an active application session at AF
-func AFPatchPaAppSession(appSessionID string, appSession []byte) ([]byte, error) {
-
-	var appSessionResp []byte
-	url := getNgcAFPaServiceURL() + "/" + appSessionID
-
-	req, err := http.NewRequest("PATCH", url, bytes.NewReader(appSession))
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP failure: %d", resp.StatusCode)
-	}
-
-	if resp.Body != nil {
-		appSessionResp, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return appSessionResp, nil
-}
-
-// AFPatchPaAppSession delete an active application session at AF
-func AFDeletePaAppSession(appSessionID string) error {
-
-	url := getNgcAFPaServiceURL() + "/" + appSessionID + "/delete"
-
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("HTTP failure: %d", resp.StatusCode)
-	}
-	return nil
-}
-
-// AFPaEventSubscribe create or modify event subscription sub resource at AF
-func AFPaEventSubscribe(appSessionID string, evSubscReqData []byte) ([]byte, error) {
-	var appSession []byte
-	url := getNgcAFPaServiceURL() + "/" + appSessionID + "/" + "events-subscription"
-
-	req, err := http.NewRequest("PUT", url, bytes.NewReader(evSubscReqData))
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("HTTP failure: %d", resp.StatusCode)
-	}
-
-	if resp.Body != nil {
-		appSession, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return appSession, nil
-}
-
-//AFPaEventUnsubscribe deletes an active event subscription sub resource at AF
-func AFPaEventUnsubscribe(appSessionID string) error {
-
-	url := getNgcAFPaServiceURL() + "/" + appSessionID + "/events-subscription"
-
-	req, err := http.NewRequest("DELETE", url, nil)
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("HTTP failure: %d", resp.StatusCode)
-	}
 	return nil
 }

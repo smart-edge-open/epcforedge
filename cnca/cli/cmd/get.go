@@ -189,48 +189,6 @@ var pfdGetCmd = &cobra.Command{
 	},
 }
 
-//paGetCmd represents get command
-var paGetCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get an active NGC AF Application Session",
-	Args:  cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-
-		if len(args) < 1 {
-			fmt.Println(errors.New("Missing input"))
-			return
-		}
-
-		var appSessionID string
-		var appSession []byte
-		var err error
-
-		appSessionID = args[0]
-
-		if appSessionID != "" {
-			appSession, err = AFGetPaAppSession(appSessionID)
-			if err != nil {
-				klog.Info(err)
-				return
-			}
-
-			if string(appSession) == "[]" {
-				appSession = []byte("none")
-			}
-
-			appSession, err = y2j.JSONToYAML(appSession)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			fmt.Printf("App session context Data: %s\n%s", appSessionID, string(appSession))
-			return
-		}
-		fmt.Println(errors.New("Invalid input(s)"))
-	},
-}
-
 func init() {
 
 	const help = `Get active LTE CUPS userplane(s) or NGC AF TI subscription(s)
@@ -268,19 +226,6 @@ Example:
 Flags:
   -h, --help   help
 `
-
-	const paHelp = `Get an active NGC AF Application Session
-
-Usage:
-  cnca policy-authorization get <appSession-id>
-
-Example:
-  cnca policy-authorization get <appSession-id>
-
-Flags:
-  -h, --help   help
-`
-
 	// add `get` command
 	cncaCmd.AddCommand(getCmd)
 	getCmd.SetHelpTemplate(help)
@@ -288,8 +233,4 @@ Flags:
 	// add pfd `get` command
 	pfdCmd.AddCommand(pfdGetCmd)
 	pfdGetCmd.SetHelpTemplate(pfdHelp)
-
-	//add pa `get` command
-	paCmd.AddCommand(paGetCmd)
-	paGetCmd.SetHelpTemplate(paHelp)
 }

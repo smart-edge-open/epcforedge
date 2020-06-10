@@ -301,7 +301,7 @@ type PresenceInfo struct {
 // SpatialValidity Describes the spatial validity of an AF request for
 // influencing traffic routing
 type SpatialValidity struct {
-	PresenceInfoList map[string]PresenceInfo `json:"presenceInfoList"`
+	PresenceInfoList PresenceInfo `json:"presenceInfoList"`
 }
 
 // DateTime is in the date-time format

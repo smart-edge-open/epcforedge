@@ -1,9 +1,0 @@
-{
-	"notifUri": "www.example.com",
-	"usgThres": {
-		"duration": 100,
-		"totalVolume": 1000,
-		"downlinkVolume": 500,
-		"uplinkVolume": 200
-    }
-}

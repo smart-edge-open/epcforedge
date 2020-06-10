@@ -6,15 +6,21 @@ package af_test
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/otcshare/epcforedge/ngc/pkg/af"
-	config "github.com/otcshare/epcforedge/ngc/pkg/config"
 )
+
+func TestAf(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "AF Suite")
+}
 
 type KeyType string
 
@@ -34,87 +40,40 @@ func testingAFClient(fn RoundTripFunc) *http.Client {
 
 }
 
-func genTestConfig(protocol string, protocolVer string) af.GenericCliConfig {
-
-	var (
-		cfg     af.Config
-		testCfg af.GenericCliConfig
-	)
-
-	err := config.LoadJSONConfig(cfgPath+"/af.json", &cfg)
-	Expect(err).ShouldNot(HaveOccurred())
-
-	testCfg = *(cfg.CliPcfCfg)
-	testCfg.Protocol = protocol
-	testCfg.ProtocolVer = protocolVer
-
-	return testCfg
-}
-
 var _ = Describe("AF", func() {
 
-	Describe("Utility ", func() {
-		Context("HTTP Client generate", func() {
-			Specify("Generate http 1.1 client", func() {
-				cfg := genTestConfig("http", "1.1")
+	var (
+		ctx         context.Context
+		srvCancel   context.CancelFunc
+		afIsRunning bool
+	)
 
-				By("Create HTTP Client")
-				_, err := af.GenHTTPClient(&cfg)
+	Describe("Cnca client request methods to AF : ", func() {
+
+		Context("Subscription GET ALL", func() {
+
+			By("Starting AF server")
+			var err error
+			ctx, srvCancel = context.WithCancel(context.Background())
+			_ = srvCancel
+			afRunFail := make(chan bool)
+			go func() {
+
+				err = af.Run(ctx, "./testdata/testconfigs/af.json")
+
 				Expect(err).ShouldNot(HaveOccurred())
-			})
-
-			Specify("Generate https 1.1 client", func() {
-				cfg := genTestConfig("https", "1.1")
-
-				By("Create HTTP Client")
-				_, err := af.GenHTTPClient(&cfg)
-				Expect(err).ShouldNot(HaveOccurred())
-			})
-
-			Specify("Generate https 1.1 client", func() {
-				cfg := genTestConfig("https", "1.1")
-
-				By("Create HTTP Client")
-				_, err := af.GenHTTPClient(&cfg)
-				Expect(err).ShouldNot(HaveOccurred())
-			})
-
-			Specify("Generate http 2.0 client", func() {
-				cfg := genTestConfig("http", "2.0")
-
-				By("Create HTTP Client")
-				_, err := af.GenHTTPClient(&cfg)
-				Expect(err).ShouldNot(HaveOccurred())
-			})
-
-			Specify("Generate https 2.0 client", func() {
-				cfg := genTestConfig("https", "2.0")
-
-				By("Create HTTP Client")
-				_, err := af.GenHTTPClient(&cfg)
-				Expect(err).ShouldNot(HaveOccurred())
-			})
-
-			Specify("Generate http 3.0 client", func() {
-				cfg := genTestConfig("http", "3.0")
-
-				By("Create HTTP Client")
-				_, err := af.GenHTTPClient(&cfg)
-				Expect(err).Should(HaveOccurred())
-			})
-
-			Specify("Generate https 3.0 client", func() {
-				cfg := genTestConfig("https", "3.0")
-
-				By("Create HTTP Client")
-				_, err := af.GenHTTPClient(&cfg)
-				Expect(err).Should(HaveOccurred())
-			})
+				if err != nil {
+					fmt.Printf("Run() exited with error: %#v", err)
+					afIsRunning = false
+					afRunFail <- true
+				}
+			}()
+			_ = afIsRunning
 		})
-
 	})
 
 	Describe("Cnca client request methods to AF : ", func() {
+
 		Context("Subscription POST", func() {
 			Specify("Sending POST 001 request", func() {
 				By("Reading json file")
@@ -249,8 +208,17 @@ var _ = Describe("AF", func() {
 					"./testdata/100_AF_NB_SUB_POST006.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-				httpclient := createTestHTTPClient(201,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -284,8 +252,18 @@ var _ = Describe("AF", func() {
 				header := make(http.Header)
 				header.Set("Location",
 					"http://localhost:8080/af/v1/")
-				httpclient := createTestHTTPClient(201,
-					resBodyBytes, header)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: header,
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -366,9 +344,17 @@ var _ = Describe("AF", func() {
 					"./testdata/100_AF_NB_SUB_POST004.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				reqBodyBytes := bytes.NewReader(reqBody)
-
-				httpclient := createTestHTTPClient(400,
-					reqBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 400,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -423,8 +409,17 @@ var _ = Describe("AF", func() {
 				ctx := context.WithValue(req.Context(),
 					KeyType("af-ctx"), af.AfCtx)
 
-				httpclient := createTestHTTPClient(501,
-					bytes.NewBufferString(`OK`), make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 501,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -524,8 +519,17 @@ var _ = Describe("AF", func() {
 				ctx := context.WithValue(req.Context(),
 					KeyType("af-ctx"), af.AfCtx)
 
-				httpclient := createTestHTTPClient(501,
-					bytes.NewBufferString(`OK`), make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 501,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -672,8 +676,17 @@ var _ = Describe("AF", func() {
 				ctx := context.WithValue(req.Context(),
 					KeyType("af-ctx"), af.AfCtx)
 
-				httpclient := createTestHTTPClient(501,
-					bytes.NewBufferString(`OK`), make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 501,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -879,8 +892,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_GETALL.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				reqBodyBytes := bytes.NewReader(reqBody)
-				httpclient := createTestHTTPClient(400,
-					reqBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 400,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1020,8 +1042,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_POST001.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-				httpclient := createTestHTTPClient(201,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1058,8 +1089,18 @@ var _ = Describe("AF", func() {
 				header := make(http.Header)
 				header.Set("Location",
 					"http://localhost:8080/af/v1/pfd/transactions/10000")
-				httpclient := createTestHTTPClient(201,
-					resBodyBytes, header)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: header,
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1096,8 +1137,18 @@ var _ = Describe("AF", func() {
 				header := make(http.Header)
 				header.Set("Location",
 					"http://localhost:8080/af/v1/pfd/transactions/10000")
-				httpclient := createTestHTTPClient(201,
-					resBodyBytes, header)
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: header,
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1129,8 +1180,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_invalid.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-				httpclient := createTestHTTPClient(201,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 201,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1188,8 +1248,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_POST001.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				reqBodyBytes := bytes.NewReader(reqBody)
-				httpclient := createTestHTTPClient(200,
-					reqBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1214,8 +1283,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_GETALL.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				reqBodyBytes := bytes.NewReader(reqBody)
-				httpclient := createTestHTTPClient(200,
-					reqBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1240,8 +1318,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_GETALL_SELF.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				reqBodyBytes := bytes.NewReader(reqBody)
-				httpclient := createTestHTTPClient(200,
-					reqBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1284,8 +1371,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_POST001.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				reqBodyBytes := bytes.NewReader(reqBody)
-				httpclient := createTestHTTPClient(200,
-					reqBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1310,8 +1406,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_POST_SELF.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				reqBodyBytes := bytes.NewReader(reqBody)
-				httpclient := createTestHTTPClient(200,
-					reqBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1335,8 +1440,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_invalid.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				reqBodyBytes := bytes.NewReader(reqBody)
-				httpclient := createTestHTTPClient(200,
-					reqBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1409,8 +1523,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_POST001.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-				httpclient := createTestHTTPClient(200,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1441,8 +1564,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_POST_SELF.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-				httpclient := createTestHTTPClient(200,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1520,8 +1652,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_invalid.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-				httpclient := createTestHTTPClient(200,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1573,8 +1714,17 @@ var _ = Describe("AF", func() {
 				ctx := context.WithValue(req.Context(),
 					KeyType("af-ctx"), af.AfCtx)
 
-				httpclient := createTestHTTPClient(400,
-					bytes.NewBufferString(`OK`), make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 400,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1595,8 +1745,17 @@ var _ = Describe("AF", func() {
 				ctx := context.WithValue(req.Context(),
 					KeyType("af-ctx"), af.AfCtx)
 
-				httpclient := createTestHTTPClient(451,
-					bytes.NewBufferString(`OK`), make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 451,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1652,8 +1811,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_APP_PUT_01.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-				httpclient := createTestHTTPClient(200,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1678,8 +1846,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_invalid.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				reqBodyBytes := bytes.NewReader(reqBody)
-				httpclient := createTestHTTPClient(200,
-					reqBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(reqBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1786,8 +1963,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_APP_PUT_01.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-				httpclient := createTestHTTPClient(200,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1819,8 +2005,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_invalid.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-				httpclient := createTestHTTPClient(200,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1927,8 +2122,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_APP_PUT_01.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-				httpclient := createTestHTTPClient(200,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -1960,9 +2164,17 @@ var _ = Describe("AF", func() {
 					"./testdata/pfd/AF_NB_PFD_invalid.json")
 				Expect(err).ShouldNot(HaveOccurred())
 				resBodyBytes := bytes.NewReader(resBody)
-
-				httpclient := createTestHTTPClient(200,
-					resBodyBytes, make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 200,
+							// Send response to be tested
+							Body: ioutil.NopCloser(resBodyBytes),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -2017,8 +2229,17 @@ var _ = Describe("AF", func() {
 				ctx := context.WithValue(req.Context(),
 					KeyType("af-ctx"), af.AfCtx)
 
-				httpclient := createTestHTTPClient(451,
-					bytes.NewBufferString(`OK`), make(http.Header))
+				httpclient :=
+					testingAFClient(func(req *http.Request) *http.Response {
+						// Test request parameters
+						return &http.Response{
+							StatusCode: 451,
+							// Send response to be tested
+							Body: ioutil.NopCloser(bytes.NewBufferString(`OK`)),
+							// Must be set to non-nil value or it panics
+							Header: make(http.Header),
+						}
+					})
 
 				af.TestAf = true
 				af.SetHTTPClient(httpclient)
@@ -2030,5 +2251,11 @@ var _ = Describe("AF", func() {
 
 		})
 
+	})
+
+	Describe("Stop the AF Server", func() {
+		It("Disconnect AF Server", func() {
+			srvCancel()
+		})
 	})
 })
