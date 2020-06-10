@@ -1,14 +1,10 @@
 {
     "AfId": "1",
     "LocationPrefixPfd": "/af/v1/pfd/",
-    "LocationPrefixPA": "/af/v1/policy-authorization/app-sessions",
-    "NotifWebsocketURI": "/af/v1/af-notifications",
-    "UserAgent": "NGC-AF",
     "ServerConfig": {
         "CNCAEndpoint": ":8080",
         "Hostname": "localhost",
         "NotifPort": ":8081",
-        "NotifWebsocketPort": ":8082",
         "UIEndpoint": "http://localhost:3020",
         "ServerCertPath": "/etc/certs/server-cert.pem",
         "ServerKeyPath": "/etc/certs/server-key.pem"
@@ -16,23 +12,11 @@
     "CliConfig": {
         "Protocol": "https",
         "NEFHostname": "localhost",
-        "NEFPort": ":8070",
+        "NEFPort": ":8060",
         "NEFBasePath": "/3gpp-traffic-influence/v1",
         "NEFPFDBasePath": "/3gpp-pfd-management/v1",
         "UserAgent": "NGC-AF",
         "NEFCliCertPath": "/etc/certs/root-ca-cert.pem",
-        "NotifyClientCertPath": "/etc/certs/root-ca-cert.pem",
-        "OAuth2Support": true
-    },
-    "CliPAConfig": {
-        "Protocol": "https",
-        "ProtocolVer": "2.0",
-        "Hostname": "localhost",
-        "Port": "8095",
-        "BasePath": "/npcf-policyauthorization/v1",
-        "CliCertPath": "/etc/certs/root-ca-cert.pem",
-        "VerifyCerts": true,
-        "OAuth2Support": true,
-        "NotifURI": "/af/v1/policy-authorization"
+	"OAuth2Support": true
     }
 }

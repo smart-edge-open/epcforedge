@@ -33,41 +33,28 @@ var nefAccessToken string
 
 // ServerConfig struct
 type ServerConfig struct {
-	CNCAEndpoint       string `json:"CNCAEndpoint"`
-	Hostname           string `json:"Hostname"`
-	NotifPort          string `json:"NotifPort"`
-	NotifWebsocketPort string `json:"NotifWebsocketPort"`
-	UIEndpoint         string `json:"UIEndpoint"`
-	ServerCertPath     string `json:"ServerCertPath"`
-	ServerKeyPath      string `json:"ServerKeyPath"`
+	CNCAEndpoint   string `json:"CNCAEndpoint"`
+	Hostname       string `json:"Hostname"`
+	NotifPort      string `json:"NotifPort"`
+	UIEndpoint     string `json:"UIEndpoint"`
+	ServerCertPath string `json:"ServerCertPath"`
+	ServerKeyPath  string `json:"ServerKeyPath"`
 }
 
 //Config struct
 type Config struct {
-	AfID              string            `json:"AfId"`
-	AfAPIRoot         string            `json:"AfAPIRoot"`
-	LocationPrefixPfd string            `json:"LocationPrefixPfd"`
-	LocationPrefixPA  string            `json:"LocationPrefixPA"`
-	NotifWebsocketURI string            `json:"NotifWebsocketURI"`
-	UserAgent         string            `json:"UserAgent"`
-	SrvCfg            ServerConfig      `json:"ServerConfig"`
-	CliCfg            CliConfig         `json:"CliConfig"`
-	CliPcfCfg         *GenericCliConfig `json:"CliPAConfig"`
-}
-
-type afData struct {
-	policyAuthAPIClient pcfPolicyAuthAPI
-	// Websocket connections of all consumers, consumerID is the key
-	consumerConns ConsumerConns
+	AfID              string       `json:"AfId"`
+	AfAPIRoot         string       `json:"AfAPIRoot"`
+	LocationPrefixPfd string       `json:"LocationPrefixPfd"`
+	SrvCfg            ServerConfig `json:"ServerConfig"`
+	CliCfg            CliConfig    `json:"CliConfig"`
 }
 
 //Context struct
 type Context struct {
 	subscriptions NotifSubscryptions
 	transactions  TransactionIDs
-	appSessionsEv AppSessEv
 	cfg           Config
-	data          afData
 }
 
 var (
@@ -78,78 +65,26 @@ var (
 	AfRouter *mux.Router
 	//NotifRouter public var
 	NotifRouter *mux.Router
-	//NotifWSRouter Router for Notifications Websockets
-	NotifWSRouter *mux.Router
 )
 
-/* Go Routine Starting WS Server */
-func startWSServer(server *http.Server, afCtx *Context,
-	stopServerCh chan bool) {
-
-	if server != nil {
-		log.Infof("Serving AF WS Notifications on: %s",
-			afCtx.cfg.SrvCfg.NotifWebsocketPort)
-		if err := server.ListenAndServeTLS(
-			afCtx.cfg.SrvCfg.ServerCertPath,
-			afCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
-
-			log.Errf("AF Notifications WS server error: " + err.Error())
-		}
-	}
-
-	stopServerCh <- true
-}
-
-/* Go Routine Starting Notif Server */
-func startNotifyServer(server *http.Server, afCtx *Context,
-	stopServerCh chan bool) {
-
-	if server != nil {
-		log.Infof("Serving AF Notifications on: %s",
-			afCtx.cfg.SrvCfg.NotifPort)
-		if err := server.ListenAndServeTLS(
-			afCtx.cfg.SrvCfg.ServerCertPath,
-			afCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
-
-			log.Errf("AF Notifications server error: " + err.Error())
-		}
-	}
-
-	stopServerCh <- true
-}
-
-func runServer(ctx context.Context, afCtx *Context) error {
+func runServer(ctx context.Context, AfCtx *Context) error {
 
 	var err error
 
 	headersOK := handlers.AllowedHeaders([]string{"X-Requested-With",
 		"Content-Type", "Authorization"})
 	originsOK := handlers.AllowedOrigins(
-		[]string{afCtx.cfg.SrvCfg.UIEndpoint})
-	methodsOK := handlers.AllowedMethods([]string{"GET",
-		"POST", "PUT", "PATCH", "DELETE"})
+		[]string{AfCtx.cfg.SrvCfg.UIEndpoint})
+	methodsOK := handlers.AllowedMethods([]string{"GET", "HEAD",
+		"POST", "PUT", "PATCH", "OPTIONS", "DELETE"})
 
-	afCtx.transactions = make(TransactionIDs)
-	afCtx.subscriptions = make(NotifSubscryptions)
-
-	err = initAFData(afCtx)
-	if err != nil {
-		return err
-	}
-
-	AfRouter = NewAFRouter(afCtx)
-	NotifRouter = NewNotifRouter(afCtx)
-	NotifWSRouter = NewNotifWSRouter(afCtx)
-
-	serverNotifWS := &http.Server{
-		Addr:         afCtx.cfg.SrvCfg.NotifWebsocketPort,
-		Handler:      NotifWSRouter,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
+	AfCtx.transactions = make(TransactionIDs)
+	AfCtx.subscriptions = make(NotifSubscryptions)
+	AfRouter = NewAFRouter(AfCtx)
+	NotifRouter = NewNotifRouter(AfCtx)
 
 	serverCNCA := &http.Server{
-		Addr:         afCtx.cfg.SrvCfg.CNCAEndpoint,
+		Addr:         AfCtx.cfg.SrvCfg.CNCAEndpoint,
 		Handler:      handlers.CORS(headersOK, originsOK, methodsOK)(AfRouter),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -163,7 +98,7 @@ func runServer(ctx context.Context, afCtx *Context) error {
 		}
 	}
 	serverNotif := &http.Server{
-		Addr:         afCtx.cfg.SrvCfg.NotifPort,
+		Addr:         AfCtx.cfg.SrvCfg.NotifPort,
 		Handler:      NotifRouter,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -174,7 +109,7 @@ func runServer(ctx context.Context, afCtx *Context) error {
 		return err
 	}
 
-	if afCtx.cfg.CliCfg.OAuth2Support {
+	if AfCtx.cfg.CliCfg.OAuth2Support {
 		log.Infoln("Fetching NEF access token")
 		if fetchNEFAuthorizationToken() != nil {
 			log.Infoln("Failed to get access token")
@@ -184,7 +119,7 @@ func runServer(ctx context.Context, afCtx *Context) error {
 		log.Infoln("OAuth2 DISABLED")
 	}
 
-	stopServerCh := make(chan bool, 3)
+	stopServerCh := make(chan bool, 2)
 	go func(stopServerCh chan bool) {
 		<-ctx.Done()
 		log.Info("Executing graceful stop")
@@ -196,29 +131,29 @@ func runServer(ctx context.Context, afCtx *Context) error {
 			log.Errf("Could not close AF Notifications server: %#v", err)
 		}
 		log.Info("AF Notification server stopped")
-		if err = serverNotifWS.Close(); err != nil {
-			log.Errf("Could not close AF Notifications WS server: %#v", err)
-		}
-		log.Info("AF Notification WS server stopped")
 		stopServerCh <- true
 	}(stopServerCh)
 
-	/* Go Routine for starting AF Notify Server (HTTP2.0 with TLS) */
-	go startNotifyServer(serverNotif, afCtx, stopServerCh)
+	go func(stopServerCh chan bool) {
+		log.Infof("Serving AF Notifications on: %s",
+			AfCtx.cfg.SrvCfg.NotifPort)
+		if err = serverNotif.ListenAndServeTLS(
+			AfCtx.cfg.SrvCfg.ServerCertPath,
+			AfCtx.cfg.SrvCfg.ServerKeyPath); err != http.ErrServerClosed {
 
-	/* Go Routine for starting AF WS Server (HTTP1.1 with TLS)
-	Websockets not supported with HTTP2.0 -
-	 https://github.com/gorilla/websocket/issues/417 */
-	go startWSServer(serverNotifWS, afCtx, stopServerCh)
+			log.Errf("AF Notifications server error: " + err.Error())
+		}
+		stopServerCh <- true
+	}(stopServerCh)
 
 	if HTTP2Enabled == true {
 		log.Infof("Serving AF (CNCA HTTP2 Requests) on: %s",
-			afCtx.cfg.SrvCfg.CNCAEndpoint)
-		err = serverCNCA.ListenAndServeTLS(afCtx.cfg.SrvCfg.ServerCertPath,
-			afCtx.cfg.SrvCfg.ServerKeyPath)
+			AfCtx.cfg.SrvCfg.CNCAEndpoint)
+		err = serverCNCA.ListenAndServeTLS(AfCtx.cfg.SrvCfg.ServerCertPath,
+			AfCtx.cfg.SrvCfg.ServerKeyPath)
 	} else {
 		log.Infof("Serving AF (CNCA HTTP Requests) on: %s",
-			afCtx.cfg.SrvCfg.CNCAEndpoint)
+			AfCtx.cfg.SrvCfg.CNCAEndpoint)
 		err = serverCNCA.ListenAndServe()
 	}
 	if err != http.ErrServerClosed {
@@ -228,56 +163,7 @@ func runServer(ctx context.Context, afCtx *Context) error {
 
 	<-stopServerCh
 	<-stopServerCh
-	<-stopServerCh
 	return nil
-}
-
-func initAFData(afCtx *Context) (err error) {
-	initNotify(afCtx)
-	err = initPACfg(afCtx)
-	return err
-}
-
-/*
- * function to initialize different variable specific to Policy Authorization
- * - Initiate Policy auth api client which is reused for connecting to PCF
- * - Initiate Notification URI to be used while sending req to PCF
- */
-func initPACfg(afCtx *Context) (err error) {
-
-	paCfg := afCtx.cfg.CliPcfCfg
-	cfg := afCtx.cfg
-	err = validateCliPACfg(paCfg)
-	if err != nil {
-		log.Errf("Policy Auth client configuration invalid")
-		return err
-	}
-
-	afCtx.data.policyAuthAPIClient, err =
-		NewPolicyAuthAPIClient(&cfg)
-	if err != nil {
-		log.Errf("Unable to create policy auth api client")
-		return err
-	}
-
-	pcfPANotifURI = "https://" + cfg.SrvCfg.Hostname +
-		cfg.SrvCfg.NotifPort + paCfg.NotifURI
-
-	smfPANotifURI = "https://" + cfg.SrvCfg.Hostname +
-		cfg.SrvCfg.NotifPort + paCfg.NotifURI + "/smfnotify"
-
-	return nil
-}
-
-func printGenericClientConfig(cfg *GenericCliConfig) {
-	log.Infoln("Protocol: ", cfg.Protocol)
-	log.Infoln("ProtocolVer: ", cfg.ProtocolVer)
-	log.Infoln("Hostname: ", cfg.Hostname)
-	log.Infoln("Port: ", cfg.Port)
-	log.Infoln("BasePath: ", cfg.BasePath)
-	log.Infoln("CliCertPath: ", cfg.CliCertPath)
-	log.Infoln("OAuth2Support: ", cfg.OAuth2Support)
-	log.Infoln("NotifURI: ", cfg.NotifURI)
 }
 
 func printConfig(cfg Config) {
@@ -285,14 +171,11 @@ func printConfig(cfg Config) {
 	log.Infoln("********************* NGC AF CONFIGURATION ******************")
 	log.Infoln("AfID: ", cfg.AfID)
 	log.Infoln("LocationPrefixPfd ", cfg.LocationPrefixPfd)
-	log.Infoln("LocationPrefixPA ", cfg.LocationPrefixPA)
-	log.Infoln("NotifWebsocketURI ", cfg.NotifWebsocketURI)
 	log.Infoln("-------------------------- CNCA SERVER ----------------------")
 	log.Infoln("CNCAEndpoint: ", cfg.SrvCfg.CNCAEndpoint)
 	log.Infoln("-------------------- NEF NOTIFICATIONS SERVER ---------------")
 	log.Infoln("Hostname: ", cfg.SrvCfg.Hostname)
 	log.Infoln("NotifPort: ", cfg.SrvCfg.NotifPort)
-	log.Infoln("NotifWebsocketPort: ", cfg.SrvCfg.NotifWebsocketPort)
 	log.Infoln("ServerCertPath: ", cfg.SrvCfg.ServerCertPath)
 	log.Infoln("ServerKeyPath: ", cfg.SrvCfg.ServerKeyPath)
 	log.Infoln("UIEndpoint: ", cfg.SrvCfg.UIEndpoint)
@@ -303,29 +186,26 @@ func printConfig(cfg Config) {
 	log.Infoln("NEFPFDBasePath: ", cfg.CliCfg.NEFPFDBasePath)
 	log.Infoln("UserAgent: ", cfg.CliCfg.UserAgent)
 	log.Infoln("NEFCliCertPath: ", cfg.CliCfg.NEFCliCertPath)
-	log.Infoln("NotifyClientCertPath: ", cfg.CliCfg.NotifyClientCertPath)
 	log.Infoln("OAuth2Support: ", cfg.CliCfg.OAuth2Support)
-	log.Infoln("--------------- CLIENT TO PCF (Policy Auth)---------------")
-	printGenericClientConfig(cfg.CliPcfCfg)
-	log.Infoln("**********************************************************")
+	log.Infoln("*************************************************************")
 
 }
 
 // Run function
 func Run(parentCtx context.Context, cfgPath string) error {
 
-	var afCtx Context
+	var AfCtx Context
 
 	// load AF configuration from file
-	err := config.LoadJSONConfig(cfgPath, &afCtx.cfg)
+	err := config.LoadJSONConfig(cfgPath, &AfCtx.cfg)
 
 	if err != nil {
 		log.Errf("Failed to load AF configuration: %v", err)
 		return err
 	}
-	printConfig(afCtx.cfg)
+	printConfig(AfCtx.cfg)
 
-	return runServer(parentCtx, &afCtx)
+	return runServer(parentCtx, &AfCtx)
 }
 
 func fetchNEFAuthorizationToken() error {

@@ -4,8 +4,9 @@
 package main
 
 import (
-	"cnca"
 	"os"
+
+	cnca "github.com/otcshare/epcforedge/cnca/cli/cmd"
 )
 
 func main() {

@@ -18,7 +18,5 @@ const NefTIFApiPrefixHTTP2 = "https://localhost:8090/3gpp-traffic-influence/v1/"
 
 func TestNef(t *testing.T) {
 	RegisterFailHandler(Fail)
-	generateCerts()
 	RunSpecs(t, "Nef Suite")
-	removeCerts()
 }
