@@ -2,7 +2,7 @@
 
 PID_LIST=()
 
-# Build NGC executables. Executables of af, nef, cntf and oam created in 'dist' folder
+# Build NGC executables. Executables of af, nef and oam created in 'dist' folder
 make build
 
 # Change Directory to 'dist' folder
@@ -33,10 +33,6 @@ PID_LIST+=($!)
 ./nef &
 PID_LIST+=($!)
 
-# Execute cntf in backgroud mode and store pid
-./cntf &
-PID_LIST+=($!)
-
 function terminate()
 {
     for ((idx=${#PID_LIST[@]}-1;idx>=0;idx--)); do
@@ -46,7 +42,7 @@ function terminate()
 	sudo make clean
 }
 
-# Wait for the SIGINT. On SIGINT system event, terminate function will get triggered to kill af, nef, oam and cntf,
+# Wait for the SIGINT. On SIGINT system event, terminate function will get triggered to kill af, nef and oam,
 # if running
 
 trap terminate SIGINT
