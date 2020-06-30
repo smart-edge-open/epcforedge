@@ -1,15 +1,15 @@
 ```text
 SPDX-License-Identifier: Apache-2.0
-Copyright © 2019 Intel Corporation 
+Copyright © 2019 Intel Corporation
 ```
 # 1. Introduction
 ## Directory Structure
-- `/cmd` : Main applications inside. 
-- `/pkg` : Lib code used by applications. Perphaps common libs such as lib or utils in the folder. 
-- `/dist` : Built golang binaries inside. 
-- `/test` : Test apps and Test data inside. 
-- `/configs` : Configuration files inside. 
-- `/scripts` : Scripts files inside. 
+- `/cmd` : Main applications inside.
+- `/pkg` : Lib code used by applications. Perphaps common libs such as lib or utils in the folder.
+- `/dist` : Built golang binaries inside.
+- `/test` : Test apps and Test data inside.
+- `/configs` : Configuration files inside.
+- `/scripts` : Scripts files inside.
 
 # 2. Prerequisites
 ## OS
@@ -38,15 +38,15 @@ OAM Config Example File - `oam.json` locates at `ngc/configs`
 
 The configurable parameters list:
 
-| Param          | Description                                                                   |
-| -------------- | ----------------------------------------------------------------------------  |
-| TlsEndpoint    | HTTPS(TLS) EndPoint. (Not support for this release)                           |
-| OpenEndpoint   | HTTP2 EndPoint. Used by CNCA to access OAM via HTTP2                          |
-| NgcEndpoint    | NGC EndPoint. Used by OAM to access NGC                                       |
-| NgcType        | NGC Type. Now only support APISTUB test mode.                                 |
-| NgcTestData    | NGC TestData Path. Used by APISTUB testdata                                   |
-| ServerCertPath | Path to SSL certs used by OAM server for CNCA/UI HTTP2 Requests               |
-| ServerKeyPath  | Path to keys used by OAM server for HTTP2 connection between CNCA/UI and OAM  |
+| Param          | Description                                                                  |
+| -------------- | ---------------------------------------------------------------------------- |
+| TlsEndpoint    | HTTPS(TLS) EndPoint. (Not support for this release)                          |
+| OpenEndpoint   | HTTP2 EndPoint. Used by CNCA to access OAM via HTTP2                         |
+| NgcEndpoint    | NGC EndPoint. Used by OAM to access NGC                                      |
+| NgcType        | NGC Type. Now only support APISTUB test mode.                                |
+| NgcTestData    | NGC TestData Path. Used by APISTUB testdata                                  |
+| ServerCertPath | Path to SSL certs used by OAM server for CNCA/UI HTTP2 Requests              |
+| ServerKeyPath  | Path to keys used by OAM server for HTTP2 connection between CNCA/UI and OAM |
 
 To run oam, just execute as below:
 ```sh
@@ -57,7 +57,7 @@ To run oam, just execute as below:
 
 ### OAM Unit and API Testing
 
-The Unit and API Testing should be performed in a local development environment. 
+The Unit and API Testing should be performed in a local development environment.
 
 To run only unit tests and generate coverage report:
 ```sh
@@ -99,24 +99,24 @@ AF sample code, generated bin will be put under ngc/dist
 
 AF configurable parameters list:
 
-| Param               | Description                                                                         |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| AfID                | AF ID provided by OAM during AF registration                                        |
-| CNCAEndpoint        | HTTP2 EndPoint. Used by CNCA to access AF via HTTP2                                 |
-| Hostname            | Provided by AF to NEF. Part of URL used by  notifications                           |
-| NotifPort           | NGC EndPoint. Used by NEF to send notifications to AF                               |
-| UIEndpoint          | CNCA UI EndPoint Used by AF                                                         |
-| ServerCertPath      | Path to certs used by AF server for CNCA HTTP2 Requests and NEF HTTP2 notification  |
-| ServerKeyPath       | Path to keys used for HTTP2 connection between AF-CNCA and AF-NEF                   |
-| Protocol            | Protocol used between AF and NEF                                                    |
-| NEFHostname         | NEF Hostname used by AF                                                             |
-| NEFPort             | NEF Port used by AF for sending requests to NEF                                     |
-| NEFBasePath         | URL used by AF to access NEF Traffic Influence                                      |
-| UserAgent           | Used by AF client connecting to NEF                                                 |
-| NEFClientCertPath   | Path to certs used by AF client                                                     |
-| LocationPrefixPfd   | The API prefix for PFD management                                                   |
-| NEFPFDBasePath      | URL used by AF to access NEF PFD management                                         |
-| OAuth2Support       | OAuth2 support in AF                                                                |
+| Param             | Description                                                                        |
+| ----------------- | ---------------------------------------------------------------------------------- |
+| AfID              | AF ID provided by OAM during AF registration                                       |
+| CNCAEndpoint      | HTTP2 EndPoint. Used by CNCA to access AF via HTTP2                                |
+| Hostname          | Provided by AF to NEF. Part of URL used by  notifications                          |
+| NotifPort         | NGC EndPoint. Used by NEF to send notifications to AF                              |
+| UIEndpoint        | CNCA UI EndPoint Used by AF                                                        |
+| ServerCertPath    | Path to certs used by AF server for CNCA HTTP2 Requests and NEF HTTP2 notification |
+| ServerKeyPath     | Path to keys used for HTTP2 connection between AF-CNCA and AF-NEF                  |
+| Protocol          | Protocol used between AF and NEF                                                   |
+| NEFHostname       | NEF Hostname used by AF                                                            |
+| NEFPort           | NEF Port used by AF for sending requests to NEF                                    |
+| NEFBasePath       | URL used by AF to access NEF Traffic Influence                                     |
+| UserAgent         | Used by AF client connecting to NEF                                                |
+| NEFClientCertPath | Path to certs used by AF client                                                    |
+| LocationPrefixPfd | The API prefix for PFD management                                                  |
+| NEFPFDBasePath    | URL used by AF to access NEF PFD management                                        |
+| OAuth2Support     | OAuth2 support in AF                                                               |
 
 To run af, just execute as below:
 ```sh
@@ -140,7 +140,7 @@ To run af PFD functional tests, execute the test scripts in ngc/test/af/pfd_test
 ./af_pfd_all_tests.sh - This is a script which calls all the above tests
 ```
 
-> NOTE: The config file contains the url, hostname and port information for AF/NEF. 
+> NOTE: The config file contains the url, hostname and port information for AF/NEF.
 > The AF bin and NEF bin must be started prior to test execution with the same config as in config file
 
 
@@ -191,13 +191,13 @@ To run nef, just execute as below:
 ```sh
 ./nef
 ```
-> NOTE: 
+> NOTE:
 1. The NEF will load configuration from `/configs/nef.json`, so before execution please have nef configuration file in the configs folder
 2. The NEF certificates need to be available in the location mentioned in the configuration
 
 ### NEF Unit and API Testing
 
-The Unit and API Testing should be performed in a local development environment. 
+The Unit and API Testing should be performed in a local development environment.
 
 To run only unit tests and generate coverage report:
 ```sh
@@ -234,7 +234,7 @@ IMPORTANT: understand make options by this help command.
 
 ## Certifications Generation
 
-To generate certifications for TLS, can use shell script - `genCerts.sh` in `ngc/scripts`. 
+To generate certifications for TLS, can use shell script - `genCerts.sh` in `ngc/scripts`.
 Can get detail usage by executing the script as: `./genCerts.sh ?` .
 
 ## OAuth2
@@ -246,3 +246,33 @@ The OAuth2 is a go package used by NEF and AF for OAuth2 token generation and ve
 | ---------- | --------------------------------------------------------------------------------------------- |
 | SigningKey | The API root of the NEF i.e. ip address or domain name. The default signing key is "OPENNESS" |
 | expiration | OAuth2 token expiration time                                                                  |
+
+## RunNGC
+
+RunNGC (RunNGC.sh) is a executable shell script file which is for executing all the ngc components like AF, NEF and OAM. It is used for testing NGC CNCA commands using CNCA. RunNGC.sh when executed, it does following:
+
+- Builds AF, NEF, OAM and CNCA (cli) components
+- Copies configs file for AF, NEF and OAM
+- Create and copies SSL Certificates
+- Executes AF, NEF and OAM
+- When it is terminated, it stops AF, NEF and OAM execution and deletes the executables, configs and SSL certificates files and folder.
+
+To execute RunNGC, go to the path of RunNGC.sh file and execute following commands
+```sh
+chmod +x ./RunNGC.sh
+./RunNGC.sh
+```
+> NOTE: To stop RunNGC execution, press Ctrl+C
+
+When RunNGC is running, CNCA command line tool can be triggered as follows:
+
+Start another shell and execute following commands to run cnca
+```sh
+cd dist
+./cnca
+```
+Examples of CNCA Commands:
+```sh
+./cnca get subscriptions
+./cnca pfd get transactions
+```

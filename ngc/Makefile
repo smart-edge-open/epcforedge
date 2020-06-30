@@ -6,14 +6,14 @@
 
 export GO111MODULE = on
 
-.PHONY: build af oam nef lint test-unit-af test-unit-nef test-unit-oam
+.PHONY: build af oam nef cnca lint test-unit-af test-unit-nef test-unit-oam
 TMP_DIR:=$(shell mktemp -d)
 BUILD_DIR ?=dist
 CERTS_DIR ?=/etc/certs
 
 VER:=1.0
 
-build: af nef oam
+build: af nef oam cnca
 
 af:
 	mkdir -p "${BUILD_DIR}"
@@ -27,8 +27,12 @@ oam:
 	mkdir -p "${BUILD_DIR}"
 	GOOS=linux go build -o "${BUILD_DIR}/oam" ./cmd/oam
 
+cnca:
+	mkdir -p "${BUILD_DIR}"
+	GOOS=linux go build -o "${BUILD_DIR}/cnca" ../cnca/cli
+
 lint:
-	golangci-lint run ./pkg/oam ./pkg/nef ./pkg/af
+	golangci-lint run ./pkg/oam ./pkg/nef ./pkg/af ../cnca/cli/cmd
 
 # ./scripts/genCerts.sh -t DNS -h localhost
 # Replace the "localhost" in test-unit-af with hostname
@@ -62,6 +66,7 @@ help:
 	@echo "  af                     to build the AF"
 	@echo "  nef                    to build the NEF"
 	@echo "  oam                    to build the OAM"
+	@echo "  cnca                	to build the cnca"
 	@echo ""
 	@echo "Executing Test:"
 	@echo "  lint                   to run static code analysis with golangci-lint"
