@@ -13,7 +13,7 @@ RUN yum install -y wget\
         && yum clean all
 
 WORKDIR /root
-COPY ./af . 
+COPY ./af .
 COPY ./entrypoint.sh .
 
 RUN chmod +x ./af

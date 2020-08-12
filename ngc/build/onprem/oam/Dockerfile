@@ -14,7 +14,7 @@ RUN yum install -y wget\
 
 
 WORKDIR /root/
-COPY  ./oam . 
+COPY  ./oam .
 COPY ./entrypoint.sh .
 
 RUN chmod +x ./oam

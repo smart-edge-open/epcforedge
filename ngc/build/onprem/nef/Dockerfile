@@ -13,7 +13,7 @@ RUN yum install -y wget\
         && yum clean all
 
 WORKDIR /root
-COPY ./nef . 
+COPY ./nef .
 COPY ./entrypoint.sh .
 
 RUN chmod +x ./nef
