@@ -31,10 +31,12 @@ public:
      * @throw        Exception   Thrown on failure.
      * @return       void
      */
-    void dispatchRequest(const string &action, map<string, string> &params, Json::Value &response, map<string, string> &headers, map<string, string> &cookies);
+    void dispatchRequest(const string &action, map<string, string> &params, Json::Value &response,
+                         map<string, string> &headers, map<string, string> &cookies);
     /**
      * @brief        Links a handler to a URL.
-     * @param[in]    action      A designation to assign to a handler, so that requests may be dispatched to the handler using that designation as a part of requests' URL.
+     * @param[in]    action      A designation to assign to a handler, so that requests may be dispatched 
+                                 to the handler using that designation as a part of requests' URL.
      * @param[in]    handler     An handler to be linked to the action.
      * @return       void
      */

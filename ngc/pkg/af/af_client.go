@@ -91,7 +91,8 @@ func NewClient(cfg *CliConfig) *Client {
 			Timeout: 15 * time.Second,
 			Transport: &http2.Transport{
 				TLSClientConfig: &tls.Config{
-					RootCAs: CACertPool,
+					RootCAs:    CACertPool,
+					MinVersion: tls.VersionTLS12,
 				},
 			},
 		}

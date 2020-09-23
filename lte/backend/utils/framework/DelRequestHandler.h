@@ -28,7 +28,8 @@ public:
      * @throw        Exception   Thrown on failure.
      * @return       void
      */
-    virtual void execute(map<string, string> params, Json::Value &response, map<string, string> &headers, map<string, string> &cookies) = 0;
+    virtual void execute(map<string, string> params, Json::Value &response, map<string, string> &headers,
+                         map<string, string> &cookies) = 0;
 };
 
 #endif /* defined(__OAMAGNET__DELREQUESTHANDLER__) */

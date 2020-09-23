@@ -1,7 +1,7 @@
+#!/bin/bash
 #SPDX-License-Identifier: Apache-2.0
 #Copyright © 2020 Intel Corporation
 
-#!/bin/bash
 
 
 # Before running the scripts, the pre-requisite is to run the AF and NEF 
@@ -12,7 +12,9 @@
 # link of application. The individual test scenario files list the test cases
 
 count_pass=0
+echo "$count_pass"
 count_fail=0
+echo "$count_fail"
 
 # Sets the config  and includes all the lib functions
 source ../../auto-test/test_api.sh

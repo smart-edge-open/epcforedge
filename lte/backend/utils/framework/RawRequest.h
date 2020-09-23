@@ -23,13 +23,18 @@
 
 class RawRequest
 {
-    void postRequest(const string &action, FCGX_Request &request, map<string, string> &cookies, PostRequestDispatcher &dispatcher);
-    void getRequest(const string &action, FCGX_Request &request, map<string, string> &cookies, GetRequestDispatcher &dispatcher);
+    void postRequest(const string &action, FCGX_Request &request, map<string, string> &cookies,
+                     PostRequestDispatcher &dispatcher);
+    void getRequest(const string &action, FCGX_Request &request, map<string, string> &cookies,
+                    GetRequestDispatcher &dispatcher);
     #ifdef PUT_SUPPORT
-    void putRequest(const string &action, FCGX_Request &request, map<string, string> &cookies, PutRequestDispatcher &dispatcher);
+    void putRequest(const string &action, FCGX_Request &request, map<string, string> &cookies,
+                    PutRequestDispatcher &dispatcher);
     #endif
-    void delRequest(const string &action, FCGX_Request &request, map<string, string> &cookies, DelRequestDispatcher &dispatcher);
-    void patchRequest(const string &action, FCGX_Request &request, map<string, string> &cookies, PatchRequestDispatcher &dispatcher);	
+    void delRequest(const string &action, FCGX_Request &request, map<string, string> &cookies,
+                    DelRequestDispatcher &dispatcher);
+    void patchRequest(const string &action, FCGX_Request &request, map<string, string> &cookies,
+                      PatchRequestDispatcher &dispatcher);	
     void printHeaders(map<string, string> &headers);
     const string baseURI;
 public:
