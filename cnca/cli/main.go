@@ -6,7 +6,7 @@ package main
 import (
 	"os"
 
-	cnca "github.com/otcshare/epcforedge/cnca/cli/cmd"
+	cnca "github.com/open-ness/epcforedge/cnca/cli/cmd"
 )
 
 func main() {
