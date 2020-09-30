@@ -4,9 +4,10 @@
 #
 
 setup_dir=${PWD}
-
+echo "$setup_dir"
 set -e
 
-curl -X PATCH -H "Content-Type: application/json" --data @patch_userplanes.json http://epc.oam:8080/userplanes/2 | json_reformat
+curl -X PATCH -H "Content-Type: application/json" --data @patch_userplanes.json \
+http://epc.oam:8080/userplanes/2 | json_reformat
 
 exit 0

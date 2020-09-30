@@ -38,7 +38,7 @@ PID_LIST+=($!)
 function terminate()
 {
     for ((idx=${#PID_LIST[@]}-1;idx>=0;idx--)); do
-        kill -SIGKILL ${PID_LIST[$idx]}
+        kill -SIGKILL "${PID_LIST[$idx]}"
     done
 	cd ..
 	sudo make clean
@@ -48,4 +48,4 @@ function terminate()
 # if running
 
 trap terminate SIGINT
-wait ${PID_LIST}
+wait "${PID_LIST[@]}"

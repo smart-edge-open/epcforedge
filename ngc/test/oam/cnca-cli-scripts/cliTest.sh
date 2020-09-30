@@ -1,7 +1,7 @@
+#!/bin/bash
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2019 Intel Corporation
 
-#!/bin/bash
 
 helpPrint()
 {
@@ -33,10 +33,10 @@ echo "Running with input parameters:"
 echo "$method"
 echo "$resourceId"
 
-case $method in 
+case $method in
    "POST") curl -vvv -X POST -i "Content-Type: application/json" --data @./json/POST001.json http://localhost:8070/ngcoam/v1/af/services;;
-   "GET") curl -vvv http://localhost:8070/ngcoam/v1/af/services/$resourceId;;
-   "PATCH") curl -vvv -X PATCH -i "Content-Type: application/json" --data @./json/PATCH001.json http://localhost:8070/ngcoam/v1/af/services/$resourceId;;
-   "DEL") curl -vvv -X DELETE http://localhost:8070/ngcoam/v1/af/services/$resourceId;;
+   "GET") curl -vvv "http://localhost:8070/ngcoam/v1/af/services/$resourceId";;
+   "PATCH") curl -vvv -X PATCH -i "Content-Type: application/json" --data @./json/PATCH001.json "http://localhost:8070/ngcoam/v1/af/services/$resourceId";;
+   "DEL") curl -vvv -X DELETE "http://localhost:8070/ngcoam/v1/af/services/$resourceId";;
    *) echo "Wrong method!";;
 esac

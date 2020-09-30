@@ -1,8 +1,8 @@
+#!/bin/bash
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (c) 2019 Intel Corporation
 
 
-#!/bin/bash
 
 echo "Running all tests"
 ./cliTest.sh -m POST -i 0

@@ -4,7 +4,7 @@
 #
 
 setup_dir=${PWD}
-
+echo "$setup_dir"
 set -e
 
 curl -v http://epc.oam:8080/userplanes/2

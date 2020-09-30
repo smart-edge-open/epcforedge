@@ -1,58 +1,91 @@
+#!/bin/bash
 #SPDX-License-Identifier: Apache-2.0
 #Copyright © 2020 Intel Corporation
 
-#!/bin/bash
 
 		
 # Script to build & send http/https request to server for PFD applications and 
 # validate the resp nse.
 # Before calling any function of the script make sure appropriate values are set
 # in the config file.
+
 trans_id=0
+
+# Default configuration
+http_port=8091
+https_port=8090
+curl_path=/home/ahameed/workspace/curl-7.68.0/src/curl
+sub_url=3gpp-traffic-influence/v1/AF_01/subscriptions
+nef_host=localhost
+https=false
+cert_path=/etc/certs/root-ca-cert.pem
+
+# Import the configuration variable from config file.
+configure()
+{
+	source config
+}
+
+# Print current configuration.
+show_config()
+{
+	echo "HTTP Port: $http_port"
+	echo "HTTPS Port: $https_port"
+	echo "Curl Path: $curl_path"
+	echo "Subscriber URI: $sub_url"
+	echo "NEF Host: $nef_host"
+	echo "Using HTTPS: $https"
+    echo "Cert path: $cert_path"
+}
+
 # GET ALL - array of PFD trans, get trans ids from self
 get_all_trans()
 {
-	trans_arr=`echo $body | jq '.[] | .self' | awk -F "/" \
-        '{print $NF}' | sed 's/"//g'`
-	
+	trans_arr=$(echo "$body" | jq '.[] | .self' | awk -F "/" \
+        '{print $NF}' | sed 's/"//g')
+
 }
+echo "$trans_arr"
+
 
 # GET-  get trans id from self in a single PFD trans
 get_trans_id()
 {
-        trans_id=`echo $body | jq .self | awk -F "/" \
-        '{print $NF}' | sed 's/"//g'`
-        
+        trans_id=$(echo "$body" | jq .self | awk -F "/" \
+        '{print $NF}' | sed 's/"//g')
+
 }
 
 # GET ALL APP IDs -array of PFD trans, get all app ids from self in PFD Data
 get_all_app()
 {
- 	app_arr=`echo $body | jq '.[] | .pfdDatas[].self' | awk -F "/" \
-         '{print $NF}' | sed 's/"//g'`
-        
-	
+ 	app_arr=$(echo "$body" | jq '.[] | .pfdDatas[].self' | awk -F "/" \
+         '{print $NF}' | sed 's/"//g')
+
+
 }
+echo "$app_arr"
 
 # GET ALL APP IDs - get all app ids from self in a single PFD Data
 get_app_id_in_trans()
 {
-        app_arr_trans=`echo $body | jq .pfdDatas[].self | awk -F "/" \
-         '{print $NF}' | sed 's/"//g'`
-        
+        app_arr_trans=$(echo "$body" | jq .pfdDatas[].self | awk -F "/" \
+         '{print $NF}' | sed 's/"//g')
+
 }
+echo "$app_arr_trans"
 
 # Printing the pass in colored format
 passed()
 {
-       echo -e  "\e[1;32m PASSED \e[0m" $1
+       echo -e  "\e[1;32m PASSED \e[0m" "$1"
        count_pass=$((count_pass+1))
 }
 
 # Printing the fail in colored format
 failed()
 {
-       echo -e  "\e[1;31m FAILED \e[0m" $1
+       echo -e  "\e[1;31m FAILED \e[0m" "$1"
        count_fail=$((count_fail+1))
 }
 
@@ -74,17 +107,16 @@ get_app()
 	app_id=$2
 	if [[ $trans_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
-			-X GET https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id \
-			2>/dev/null`
+			out=$(curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path \
+            --http2 -X GET "https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id" \
+			2>/dev/null)
 		else
-			out=`$curl_path  -w '\nResponse Status=%{http_code}\n' -X GET \
-	http://$nef_host:$http_port/$sub_url/$trans_id/applications/$app_id \
-	2>/dev/null`
+			out=$(curl_path  -w '\nResponse Status=%{http_code}\n' -X GET \
+	"http://$nef_host:$http_port/$sub_url/$trans_id/applications/$app_id" 2>/dev/null)
 		fi
-		status_code=`echo $out | grep "Response Status"  | \
-		awk 'BEGIN { FS="=" } // {print $2}'`
-		body=`echo $out | sed 's/ Response Status.*//g'`
+		status_code=$(echo "$out" | grep "Response Status"  | awk \
+		'BEGIN { FS="=" } // {print $2}')
+		body=${out//Response Status*//}
 	else
 		echo "Invalid trans_id"
 		return 2
@@ -108,19 +140,19 @@ put_app()
 
 	if [[ $trans_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
-			-X PUT -H "Content-Type: application/json" --data @$1 \
-		https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id \
-			2>/dev/null`
+			out=$(curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path \
+            --http2 -X PUT -H "Content-Type: application/json" --data @"$1" \
+		"https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id" \
+			2>/dev/null)
 		else
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X PUT -H \
-			"Content-Type: application/json" --data @$1 \
-		http://$nef_host:$http_port/$sub_url/$trans_id/applications/$app_id \
-			2>/dev/null`
+			out=$(curl_path -w '\nResponse Status=%{http_code}\n' -X PUT -H \
+			"Content-Type: application/json" --data @"$1" \
+		"http://$nef_host:$http_port/$sub_url/$trans_id/applications/$app_id" \
+			2>/dev/null)
 		fi
-		status_code=`echo $out | grep "Response Status"  | awk \
-		'BEGIN { FS="=" } // {print $2}'`
-		body=`echo $out | sed 's/ Response Status.*//g'`
+		status_code=$(echo "$out" | grep "Response Status"  | awk \
+		'BEGIN { FS="=" } // {print $2}')
+		body=${out//Response Status*//}
 	else
 		echo "Invalid trans_id"
 		return 2
@@ -145,19 +177,19 @@ patch_app()
 	app_id=$3
 	if [[ $trans_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
-			-X PATCH -H "Content-Type: application/json" --data @$1 \
-		https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id \
-			2>/dev/null`
+			out=$(curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
+			-X PATCH -H "Content-Type: application/json" --data @"$1" \
+		"https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id" \
+			2>/dev/null)
 		else
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X PATCH -H \
-			"Content-Type: application/json" --data @$1 \
-		http://$nef_host:$http_port/$sub_url/$trans_id/applications/$app_id \
-		2>/dev/null`
+			out=$(curl_path -w '\nResponse Status=%{http_code}\n' -X PATCH -H \
+			"Content-Type: application/json" --data @"$1" \
+		"http://$nef_host:$http_port/$sub_url/$trans_id/applications/$app_id" \
+		2>/dev/null)
 		fi
-		status_code=`echo $out | grep "Response Status"  | \
-		awk 'BEGIN { FS="=" } // {print $2}'`
-		body=`echo $out | sed 's/ Response Status.*//g'`
+		status_code=$(echo "$out" | grep "Response Status"  | awk \
+		'BEGIN { FS="=" } // {print $2}')
+		body=${out//Response Status*//}
 	else
 		echo "Invalid trans_id"
 		return 2
@@ -175,18 +207,19 @@ delete_app()
 	app_id=$2
 	if [[ $trans_id =~ ^[0-9].+$ ]]; then
 		if [[ $https == "true" ]]; then
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
+			out=$(curl_path -w '\nResponse Status=%{http_code}\n' --cacert $cert_path --http2 \
 			-X DELETE \
-		https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id \
-			2>/dev/null`
+		"https://$nef_host:$https_port/$sub_url/$trans_id/applications/$app_id" \
+			2>/dev/null)
 		else
-			out=`$curl_path -w '\nResponse Status=%{http_code}\n' -X DELETE \
-		http://$nef_host:$http_port/$sub_url/$trans_id/applications/$app_id \
-			2>/dev/null`
+			out=$(curl_path -w '\nResponse Status=%{http_code}\n' -X DELETE \
+		"http://$nef_host:$http_port/$sub_url/$trans_id/applications/$app_id" \
+			2>/dev/null)
+            echo "$out"
 		fi
-		status_code=`echo $out | grep "Response Status"  | \
-		awk 'BEGIN { FS="=" } // {print $2}'`
-		body=`echo $out | sed 's/ Response Status.*//g'`
+		status_code=$(echo "$out" | grep "Response Status"  | awk \
+		'BEGIN { FS="=" } // {print $2}')
+		body=${out//Response Status*//}
 	else
 		echo "Invalid trans_id"
 		return 2
@@ -213,16 +246,16 @@ send_app_req()
 	ret_val=false
 	case "$method" in
 		"delete")
-			delete_app $trans_id $app_id
+			delete_app "$trans_id" "$app_id"
 			;;
 		"get")
-			get_app $trans_id $app_id
+			get_app "$trans_id" "$app_id"
 			;;
 		"patch")
-			patch_app $data $trans_id $app_id
+			patch_app "$data" "$trans_id" "$app_id"
 			;;
 		"put")
-			put_app $data $trans_id $app_id
+			put_app "$data" "$trans_id" "$app_id"
 			;;
 		*)
 			echo "Invalid Method"
@@ -237,7 +270,7 @@ send_app_req()
 		ret_val=true
 		return 0
 	fi
-
+    echo "$ret_val"
 }
 
 # Configure the framework variables.
