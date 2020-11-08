@@ -1,17 +1,19 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright © 2019 Intel Corporation
 
-FROM centos:7.6.1810
+FROM alpine:3.9
 
 ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
 ENV no_proxy=localhost,127.0.0.1,oamservice
 
-RUN yum install -y wget\
+RUN apk update && apk add bash
+RUN apk add --no-cache \
+        wget \
+        libc6-compat \
+        libstdc++ \
         net-tools \
-        nmap \
-        && yum clean all
-
+	      nmap
 
 WORKDIR /root/
 COPY  ./oam .
