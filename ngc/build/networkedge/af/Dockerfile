@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright © 2019 Intel Corporation
 
-FROM alpine:3.9
+FROM alpine:3.12.0
 
 ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
