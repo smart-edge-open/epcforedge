@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/gorilla/handlers"
-	logger "github.com/otcshare/common/log"
-	config "github.com/otcshare/epcforedge/ngc/pkg/config"
-	oam "github.com/otcshare/epcforedge/ngc/pkg/oam"
+	logger "github.com/open-ness/common/log"
+	config "github.com/open-ness/epcforedge/ngc/pkg/config"
+	oam "github.com/open-ness/epcforedge/ngc/pkg/oam"
 	"golang.org/x/net/http2"
 )
 

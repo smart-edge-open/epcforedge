@@ -9,8 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	logger "github.com/otcshare/common/log"
-	"github.com/otcshare/epcforedge/ngc/pkg/af"
+	logger "github.com/open-ness/common/log"
+	"github.com/open-ness/epcforedge/ngc/pkg/af"
 )
 
 var log = logger.DefaultLogger.WithField("main", nil)
