@@ -3,7 +3,7 @@ module github.com/open-ness/epcforedge
 go 1.12
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+  github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/ghodss/yaml v1.0.0
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3

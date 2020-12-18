@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go/v4"
 
 	logger "github.com/open-ness/common/log"
 )
@@ -96,6 +96,11 @@ func GetNEFAccessTokenFromNRF(accessTokenReq AccessTokenReq) (
 	expiration := time.Now().Add(
 		time.Second * time.Duration(oAuth2Cfg.Expiration)).Unix()
 
+	jwtexp,e:= jwt.ParseTime(expiration)
+	if e!=nil{
+		log.Errln("Failed to parse time",e.Error())
+	}
+
 	log.Infoln("Token expires in : ", oAuth2Cfg.Expiration, " seconds")
 
 	var mySigningKey = []byte(oAuth2Cfg.SigningKey)
@@ -108,7 +113,7 @@ func GetNEFAccessTokenFromNRF(accessTokenReq AccessTokenReq) (
 		"AF-NEF",               //Audience:
 		accessTokenReq.Scope,   //Scope:
 		oAuth2Cfg.Expiration,   //Expiration:
-		jwt.StandardClaims{ExpiresAt: expiration},
+		jwt.StandardClaims{ExpiresAt: jwtexp},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
@@ -185,9 +190,10 @@ func ValidateAccessToken(reqToken string) (status TokenVerificationResult,
 			return StatusInvalidToken, err
 		}
 		//Check for Validation error
-		validationErr, ok := err.(*jwt.ValidationError)
+		validationErr, ok := err.(*jwt.MalformedTokenError)
 
-		if !ok || validationErr.Errors == jwt.ValidationErrorExpired {
+		if !ok {
+			log.Info(validationErr.Message)
 			return StatusInvalidToken, err
 		}
 
